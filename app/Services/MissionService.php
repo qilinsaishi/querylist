@@ -5,13 +5,31 @@ use App\Models\MissionModel as MissionModel;
 
 class MissionService
 {
+    public function processMission()
+    {
+        $mission_list = $this->getMission(10);
+        foreach($mission_list as $mission)
+        {
+            $mission->detail = json_decode($mission->detail);
+            if(isset($mission->detail->source))
+            {
+                $root = 'App\Collect\\' . $mission->mission_type . '\\'.$mission->detail->source;
+                //$className = "o".$mission->detail->source;
+                $class = new $root;
+                $class->collect($mission);
+
+            }
+        }
+    }
     public function getMission($count = 3)
     {
         $asign = config('app.asign');
         $missionModel = new MissionModel();
-        //$mission_list = $missionModel->get()->toArray();
-        //print_R($mission_list);
         $mission_list = $missionModel->getMissionByMachine($asign,5);
-        print_R($mission_list);
+        return $mission_list;
+    }
+    public function insertMission($data)
+    {
+        return (new MissionModel())->insertMission($data);
     }
 }
