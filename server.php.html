@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>server.php</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #629755; font-style: italic;}
+.s3 { color: #629755; font-weight: bold; font-style: italic;}
+.s4 { color: #77b767; font-style: italic;}
+.s5 { color: #9876aa;}
+.s6 { color: #a9b7c6;}
+.s7 { color: #6a8759;}
+.s8 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+server.php</font>
+</center></td></tr></table>
+<pre><span class="s0">&lt;?php</span>
+
+<span class="s2">/**</span>
+ <span class="s2">* Laravel - A PHP Framework For Web Artisans</span>
+ <span class="s2">*</span>
+ <span class="s2">* </span><span class="s3">@package  </span><span class="s2">Laravel</span>
+ <span class="s2">* </span><span class="s3">@author   </span><span class="s2">Taylor Otwell </span><span class="s4">&lt;taylor</span><span class="s2">@laravel.com&gt;</span>
+ <span class="s2">*/</span>
+
+<span class="s5">$uri </span><span class="s1">= </span><span class="s6">urldecode</span><span class="s1">(</span>
+    <span class="s6">parse_url</span><span class="s1">(</span><span class="s5">$_SERVER</span><span class="s1">[</span><span class="s7">'REQUEST_URI'</span><span class="s1">]</span><span class="s0">, </span><span class="s6">PHP_URL_PATH</span><span class="s1">)</span>
+<span class="s1">)</span><span class="s0">;</span>
+
+<span class="s8">// This file allows us to emulate Apache's &quot;mod_rewrite&quot; functionality from the</span>
+<span class="s8">// built-in PHP web server. This provides a convenient way to test a Laravel</span>
+<span class="s8">// application without having installed a &quot;real&quot; web server software here.</span>
+<span class="s0">if </span><span class="s1">(</span><span class="s5">$uri </span><span class="s1">!== </span><span class="s7">'/' </span><span class="s1">&amp;&amp; </span><span class="s6">file_exists</span><span class="s1">(</span><span class="s6">__DIR__</span><span class="s1">.</span><span class="s7">'/public'</span><span class="s1">.</span><span class="s5">$uri</span><span class="s1">)) {</span>
+    <span class="s0">return </span><span class="s6">false</span><span class="s0">;</span>
+<span class="s1">}</span>
+
+<span class="s0">require_once </span><span class="s6">__DIR__</span><span class="s1">.</span><span class="s7">'/public/index.php'</span><span class="s0">;</span>
+</pre>
+</body>
+</html>

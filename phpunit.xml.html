@@ -1,0 +1,52 @@
+<html>
+<head>
+<title>phpunit.xml</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #e8bf6a;}
+.s1 { color: #bababa;}
+.s2 { color: #6a8759;}
+.s3 { color: #a9b7c6;}
+.s4 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+phpunit.xml</font>
+</center></td></tr></table>
+<pre><span class="s0">&lt;?</span><span class="s1">xml version</span><span class="s2">=&quot;1.0&quot; </span><span class="s1">encoding</span><span class="s2">=&quot;UTF-8&quot;</span><span class="s0">?&gt;</span>
+<span class="s0">&lt;phpunit </span><span class="s1">xmlns:xsi</span><span class="s2">=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>
+         <span class="s1">xsi:noNamespaceSchemaLocation</span><span class="s2">=&quot;./vendor/phpunit/phpunit/phpunit.xsd&quot;</span>
+         <span class="s1">bootstrap</span><span class="s2">=&quot;vendor/autoload.php&quot;</span>
+         <span class="s1">colors</span><span class="s2">=&quot;true&quot;</span>
+<span class="s0">&gt;</span>
+    <span class="s0">&lt;testsuites&gt;</span>
+        <span class="s0">&lt;testsuite </span><span class="s1">name</span><span class="s2">=&quot;Unit&quot;</span><span class="s0">&gt;</span>
+            <span class="s0">&lt;directory </span><span class="s1">suffix</span><span class="s2">=&quot;Test.php&quot;</span><span class="s0">&gt;</span><span class="s3">./tests/Unit</span><span class="s0">&lt;/directory&gt;</span>
+        <span class="s0">&lt;/testsuite&gt;</span>
+        <span class="s0">&lt;testsuite </span><span class="s1">name</span><span class="s2">=&quot;Feature&quot;</span><span class="s0">&gt;</span>
+            <span class="s0">&lt;directory </span><span class="s1">suffix</span><span class="s2">=&quot;Test.php&quot;</span><span class="s0">&gt;</span><span class="s3">./tests/Feature</span><span class="s0">&lt;/directory&gt;</span>
+        <span class="s0">&lt;/testsuite&gt;</span>
+    <span class="s0">&lt;/testsuites&gt;</span>
+    <span class="s0">&lt;coverage </span><span class="s1">processUncoveredFiles</span><span class="s2">=&quot;true&quot;</span><span class="s0">&gt;</span>
+        <span class="s0">&lt;include&gt;</span>
+            <span class="s0">&lt;directory </span><span class="s1">suffix</span><span class="s2">=&quot;.php&quot;</span><span class="s0">&gt;</span><span class="s3">./app</span><span class="s0">&lt;/directory&gt;</span>
+        <span class="s0">&lt;/include&gt;</span>
+    <span class="s0">&lt;/coverage&gt;</span>
+    <span class="s0">&lt;php&gt;</span>
+        <span class="s0">&lt;server </span><span class="s1">name</span><span class="s2">=&quot;APP_ENV&quot; </span><span class="s1">value</span><span class="s2">=&quot;testing&quot;</span><span class="s0">/&gt;</span>
+        <span class="s0">&lt;server </span><span class="s1">name</span><span class="s2">=&quot;BCRYPT_ROUNDS&quot; </span><span class="s1">value</span><span class="s2">=&quot;4&quot;</span><span class="s0">/&gt;</span>
+        <span class="s0">&lt;server </span><span class="s1">name</span><span class="s2">=&quot;CACHE_DRIVER&quot; </span><span class="s1">value</span><span class="s2">=&quot;array&quot;</span><span class="s0">/&gt;</span>
+        <span class="s4">&lt;!-- &lt;server name=&quot;DB_CONNECTION&quot; value=&quot;sqlite&quot;/&gt; --&gt;</span>
+        <span class="s4">&lt;!-- &lt;server name=&quot;DB_DATABASE&quot; value=&quot;:memory:&quot;/&gt; --&gt;</span>
+        <span class="s0">&lt;server </span><span class="s1">name</span><span class="s2">=&quot;MAIL_MAILER&quot; </span><span class="s1">value</span><span class="s2">=&quot;array&quot;</span><span class="s0">/&gt;</span>
+        <span class="s0">&lt;server </span><span class="s1">name</span><span class="s2">=&quot;QUEUE_CONNECTION&quot; </span><span class="s1">value</span><span class="s2">=&quot;sync&quot;</span><span class="s0">/&gt;</span>
+        <span class="s0">&lt;server </span><span class="s1">name</span><span class="s2">=&quot;SESSION_DRIVER&quot; </span><span class="s1">value</span><span class="s2">=&quot;array&quot;</span><span class="s0">/&gt;</span>
+        <span class="s0">&lt;server </span><span class="s1">name</span><span class="s2">=&quot;TELESCOPE_ENABLED&quot; </span><span class="s1">value</span><span class="s2">=&quot;false&quot;</span><span class="s0">/&gt;</span>
+    <span class="s0">&lt;/php&gt;</span>
+<span class="s0">&lt;/phpunit&gt;</span>
+</pre>
+</body>
+</html>
