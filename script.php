@@ -1,5 +1,5 @@
 <?php
-	$command = "git checkout master && git status  && git pull";
+	$command = "git checkout main && git status  && git pull";
 	(exec($command,$return));
 	echo implode("\n",$return)."\n";
 	unset($return);
@@ -8,5 +8,6 @@
 	echo implode("\n",$return)."\n";
 	unset($return);
 	$command = "php artisan config:cache";
+	(exec($command,$return));
 	echo implode("\n",$return)."\n";
 	unset($return);
