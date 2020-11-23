@@ -8,11 +8,17 @@ use QL\QueryList;
 class HomeController extends Controller
 {
     public function index(){
-        $url = 'https://apps.game.qq.com/cmc/zmMcnContentInfo?r0=jsonp&source=web_pc&type=0&docid=14961237808844876072&r1=jQuery19104658286916897647_1606099368113&_=1606100893850';
-// 定义采集规则
-        $detailData=curl_get1($url);
 
-        dd($detailData);
+        $ql = QueryList::get('https://baike.baidu.com/item/DYG王者荣耀分部/24274492?fr=aladdin');
+
+        $rt = [];
+// 采集文章标题
+        $rt['title'] = $ql->find('.main-content .lemmaWgt-lemmaTitle-title>h1')->text();
+// 采集文章作者
+
+        $rt['description'] = $ql->find('.main-content  .lemma-summary')->html();
+
+        dd($rt);
     }
 
 }

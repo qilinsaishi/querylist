@@ -34,16 +34,14 @@ class MissionModel extends Model
      *
      * @var array
      */
-    protected $casts = [
+  /*  protected $casts = [
         'create_time' => 'datetime',
         'update_time' => 'datetime',
-    ];
+    ];*/
 
     public function getMissionByMachine($asign,$count = 3)
     {
-        $mission_list =
-        DB::connection($this->connection)->table($this->table)
-            ->select("*")->where("asign_to",$asign)
+        $mission_list =$this->select("*")->where("asign_to",$asign)
             ->limit($count)
             ->get()->toArray();
         return $mission_list;
