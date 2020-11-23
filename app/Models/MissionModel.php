@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class MissionModel extends Model
 {
-    protected $table = "test_table";
+    protected $table = "mission_list";
     protected $primaryKey = "mission_id";
     public $timestamps = false;
     protected $connection = "query_list";
@@ -34,6 +36,16 @@ class MissionModel extends Model
      */
     protected $casts = [
         'create_time' => 'datetime',
-        'updat_time' => 'datetime',
+        'update_time' => 'datetime',
     ];
+
+    public function getMissionByMachine($asign,$count = 3)
+    {
+        $mission_list =
+        DB::connection($this->connection)->table($this->table)
+            ->select("*")->where("asign_to",$asign)
+            ->limit($count)
+            ->get()->toArray();
+        return $mission_list;
+    }
 }
