@@ -46,4 +46,18 @@ class MissionModel extends Model
             ->get()->toArray();
         return $mission_list;
     }
+
+    public function insertMission($data)
+    {
+        $currentTime = date("Y-m-d H:i:s");
+        if(!isset($data['create_time']))
+            {
+                $data['create_time'] = $currentTime;
+            }
+        if(!isset($data['update_time']))
+        {
+            $data['update_time'] = $currentTime;
+        }
+        return $this->insertGetId($data);
+    }
 }

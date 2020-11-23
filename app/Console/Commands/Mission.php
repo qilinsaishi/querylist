@@ -39,6 +39,22 @@ class Mission extends Command
      */
     public function handle()
     {
-        (new oMission())->getMission(3);
+        /*
+        $currentTime = date("Y-m-d H:i:s");
+        $data = [
+            "asign_to"=>1,
+            "mission_type"=>"page",
+            "mission_status"=>1,
+            "detail"=>json_encode(
+                [
+                    "url"=>"www.xxx.com?page=1",
+                    "source"=>"site1"
+                ]
+            ),
+        ];
+        $insert = (new oMission())->insertMission($data);
+        echo "insert:".$insert;
+        */
+        (new oMission())->processMission();
     }
 }
