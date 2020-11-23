@@ -14,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-
+    'asign' => env('ASIGN', 1),
     /*
     |--------------------------------------------------------------------------
     | Application Environment
