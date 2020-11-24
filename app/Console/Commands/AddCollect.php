@@ -11,6 +11,7 @@ class AddCollect extends GeneratorCommand
      *
      * @var string
      */
+    //php artisan make:collect page/site1
     protected $name = 'make:collect';
     /**
      * 控制台命令描述

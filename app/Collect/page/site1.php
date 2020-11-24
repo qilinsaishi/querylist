@@ -7,7 +7,7 @@ class site1
     public function collect($data)
     {
         echo "this is site1";
-        print_R($data);
-        echo "<br>";
+        //print_R($data);
+        echo "\n";
     }
 }
