@@ -40,21 +40,33 @@ class Mission extends Command
     public function handle()
     {
         /*
+        $game_list = ['lol','dota2','kog'];
+        $source_list = ['site1','site2','site3'];
         $currentTime = date("Y-m-d H:i:s");
-        $data = [
-            "asign_to"=>1,
-            "mission_type"=>"page",
-            "mission_status"=>1,
-            "detail"=>json_encode(
-                [
-                    "url"=>"www.xxx.com?page=1",
-                    "source"=>"site1"
-                ]
-            ),
-        ];
-        $insert = (new oMission())->insertMission($data);
-        echo "insert:".$insert;
+        for($i=1;$i<=10;$i++)
+        {
+            $game = $game_list[array_rand($game_list)];
+            $source = $source_list[array_rand($source_list)];
+            $data = [
+                "asign_to"=>1,
+                "mission_type"=>"page",
+                "mission_status"=>1,
+                "game"=>$game,
+                "source"=>$source,
+                "detail"=>json_encode(
+                    [
+                        "url"=>"www.xxx.com?page=1",
+                        "game"=>$game,
+                        "source"=>$source,
+                    ]
+                ),
+            ];
+            $insert = (new oMission())->insertMission($data);
+            echo "insert:".$insert;
+        }
         */
+
+
         (new oMission())->processMission();
     }
 }

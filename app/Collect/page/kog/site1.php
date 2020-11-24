@@ -1,8 +1,8 @@
 <?php
 
-namespace DummyNamespace;
+namespace App\Collect\page\kog;
 
-class DummyClass
+class site1
 {
     public function collect($arr)
     {

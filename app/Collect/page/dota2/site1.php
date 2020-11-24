@@ -1,8 +1,8 @@
 <?php
 
-namespace DummyNamespace;
+namespace App\Collect\page\dota2;
 
-class DummyClass
+class site1
 {
     public function collect($arr)
     {

@@ -11,10 +11,10 @@ class MissionService
         $mission_list = $this->getMission(10);
         $classList = [];
         foreach ($mission_list as $mission) {
-            $mission->detail = json_decode($mission->detail);
-            if (isset($mission->detail->source))
+            $mission['detail'] = json_decode($mission['detail'],true);
+            if (isset($mission['source']))
             {
-                $className = 'App\Collect\\' . $mission->mission_type . '\\' . $mission->detail->source;
+                $className = 'App\Collect\\' . $mission['mission_type'] . '\\' . $mission['game'] . '\\' . $mission['source'];
                 $exist = class_exists($className);
                 if (!$exist)
                 {

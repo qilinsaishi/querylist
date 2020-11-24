@@ -1,8 +1,8 @@
 <?php
 
-namespace DummyNamespace;
+namespace App\Collect\page\lol;
 
-class DummyClass
+class site2
 {
     public function collect($arr)
     {
