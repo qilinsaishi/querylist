@@ -10,29 +10,28 @@ class MissionService
     {
         $mission_list = $this->getMission(10);
         $classList = [];
-        foreach($mission_list as $mission)
-        {
+        foreach ($mission_list as $mission) {
             $mission->detail = json_decode($mission->detail);
-            if(isset($mission->detail->source))
+            if (isset($mission->detail->source))
             {
-                $className = 'App\Collect\\' . $mission->mission_type . '\\'.$mission->detail->source;
+                $className = 'App\Collect\\' . $mission->mission_type . '\\' . $mission->detail->source;
                 $exist = class_exists($className);
-                if(!$exist)
+                if (!$exist)
                 {
-                    echo $className ." not found\n";
+                    echo $className . " not found\n";
                 }
                 else
                 {
-                    if(!isset($classList[$className]))
-                    {
-                        $class = new $className;
-                        $classList[$className] = $class;
-                    }
-                    else
-                    {
-                        $class = $classList[$className];
-                    }
-                    $class->collect($mission);
+                    if (!isset($classList[$className]))
+                {
+                    $class = new $className;
+                    $classList[$className] = $class;
+                }
+                else
+                {
+                    $class = $classList[$className];
+                }
+                $class->collect($mission);
                 }
             }
         }
@@ -42,7 +41,7 @@ class MissionService
         $asign = config('app.asign');
         $missionModel = new MissionModel();
         $mission_list = $missionModel->getMissionByMachine($asign,5);
-        return $mission_list;
+         return ($mission_list) ;
     }
     public function insertMission($data)
     {
