@@ -33,8 +33,7 @@ class baidu_baike
             //处理战队采集数据
             $rt=$resultService->doCollect($cdata);
             if ($rt) {
-                $return=$arr['mission_id'];
-                return $return;
+                $return=$cdata;
             }else{
                 $return=false;
             }

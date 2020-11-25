@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+use App\Models\CollectResultModel;
 use App\Models\MissionModel as MissionModel;
 use function PHPUnit\Framework\fileExists;
 
@@ -9,6 +10,8 @@ class MissionService
     public function processMission($game,$source)
     {
         $mission_list = $this->getMission($game,$source,20);
+        $collectModel = new CollectResultModel();
+        $missionModel = new MissionModel();
         $classList = [];
             foreach ($mission_list as $key=>$mission) {
                 $mission['detail'] = json_decode($mission['detail'],true);
@@ -31,10 +34,21 @@ class MissionService
                         {
                             $class = $classList[$className];
                         }
-                        $rt=$class->collect($mission);
-                        if($rt){
-                            $missionModel = new MissionModel();
-                            $missionModel->updateMission($rt, ['mission_status' =>1]);
+                        $result=$class->collect($mission);
+                        if($result){
+                            try{
+                                $rt = $collectModel->insertCollect($result);
+                                if($rt){
+                                    $missionModel->updateMission($mission['id'], ['mission_status' =>1]);
+                                }else{
+                                    $return=false;
+                                }
+                                return  $return;
+                            }catch (\Exception $e){
+                                return  $e->getMessage();
+                            }
+
+
 
                         }else{
                             return false;
