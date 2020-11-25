@@ -6,9 +6,9 @@ use function PHPUnit\Framework\fileExists;
 
 class MissionService
 {
-    public function processMission()
+    public function processMission($game,$source)
     {
-        $mission_list = $this->getMission(10);
+        $mission_list = $this->getMission($game,$source,10);
         $classList = [];
         foreach ($mission_list as $mission) {
             $mission['detail'] = json_decode($mission['detail'],true);
@@ -36,11 +36,11 @@ class MissionService
             }
         }
     }
-    public function getMission($count = 3)
+    public function getMission($game,$source,$count = 3)
     {
         $asign = config('app.asign');
         $missionModel = new MissionModel();
-        $mission_list = $missionModel->getMissionByMachine($asign,5);
+        $mission_list = $missionModel->getMissionByMachine($asign,$count,$game,$source);
          return ($mission_list) ;
     }
     public function insertMission($data)

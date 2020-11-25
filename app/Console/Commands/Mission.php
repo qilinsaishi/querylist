@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 
+use App\Services\TeamCollectService;
 use Illuminate\Console\Command;
 use App\Services\CollectService as Collect;
 use App\Services\MissionService as oMission;
@@ -39,8 +40,10 @@ class Mission extends Command
      */
     public function handle()
     {
-        /*
-        $game_list = ['lol','dota2','kog'];
+        $model=new TeamCollectService();
+
+
+        $game_list = ['lol','dota2','kpl',];
         $source_list = ['site1','site2','site3'];
         $currentTime = date("Y-m-d H:i:s");
         for($i=1;$i<=10;$i++)
@@ -64,7 +67,7 @@ class Mission extends Command
             $insert = (new oMission())->insertMission($data);
             echo "insert:".$insert;
         }
-        */
+
 
 
         (new oMission())->processMission();

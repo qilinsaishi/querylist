@@ -39,9 +39,16 @@ class MissionModel extends Model
         'update_time' => 'datetime',
     ];*/
 
-    public function getMissionByMachine($asign,$count = 3)
+    public function getMissionByMachine($asign=1,$count = 3,$game='kpl',$source='baidu_baike')
     {
-        $mission_list =$this->select("*")->where("asign_to",$asign)
+        $mission_list =$this->select("*");
+        if($asign>0)
+        {
+            $mission_list = $mission_list->where("asign_to",$asign);
+        }
+
+        $mission_list = $mission_list
+            ->where(['game'=>$game,'source'=>$source,'mission_status'=>1])
             ->limit($count)
             ->get()->toArray();
         return $mission_list;
@@ -59,5 +66,9 @@ class MissionModel extends Model
             $data['update_time'] = $currentTime;
         }
         return $this->insertGetId($data);
+    }
+
+    public function updateMission($mission_id=0,$data=[]){
+        return $this->where('mission_id',$mission_id)->update($data);
     }
 }
