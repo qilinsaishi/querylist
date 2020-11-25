@@ -2,8 +2,11 @@
 
 namespace App\Console\Commands;
 
+
 use Illuminate\Console\Command;
 use App\Services\CollectService as Collect;
+use Illuminate\Support\Facades\DB;
+use QL\QueryList;
 
 class Collects extends Command
 {
@@ -38,10 +41,14 @@ class Collects extends Command
      */
     public function handle()
     {
-        $url = 'https://apps.game.qq.com/cmc/zmMcnContentInfo?r0=jsonp&source=web_pc&type=0&docid=14961237808844876072&r1=jQuery19104658286916897647_1606099368113&_=1606100893850';
-        // 定义采集规则
-        $detailData=curl_get1($url);
+        $url = 'https://www.dota2.com.cn/article/details/20201123/218611.html';
+        $ql = QueryList::get($url);
 
-        dd($detailData);
+        $content = $ql->find('.content')->html();//内容
+        $content=json_encode($content);
+       // $rt=(new MissionModel())->insertMission(['content'=>$content]);
+
+
+        dd($content);
     }
 }
