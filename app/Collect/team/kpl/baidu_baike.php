@@ -12,7 +12,7 @@ class baidu_baike
     public function collect($arr)
     {
         $model = new CollectResultService();
-        $collectModel = new CollectResultModel();
+
         $id = $arr['detail']['id'] ?? '';
         $url = $arr['detail']['url'] ?? '';
         $res = $model->getCollectData($url);
@@ -25,13 +25,12 @@ class baidu_baike
                 'mission_type'=>$arr['mission_type'],
                 'source'=>$arr['source'],
                 'status' => 1
-            ];
-            $rt = $collectModel->where('id', $id)->update($cdata);
-            if ($rt) {
-                $missionModel = new MissionModel();
-                $insert = $missionModel->updateMission($arr['mission_id'], ['mission_status' => 2]);
-                echo "insert:" . $insert;
 
+            ];
+            //处理战队采集数据
+            $rt=$model->doCollect($arr['mission_id'],$id,$cdata);
+            if ($rt) {
+                return true;
             }
         }
 

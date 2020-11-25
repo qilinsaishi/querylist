@@ -11,6 +11,7 @@ class CollectResultModel extends Model
 {
     protected $table = "collect_result";
     protected $connection = "query_list";
+    public $timestamps = false;
     /*const TYPE_WZRY               = 1; //王者荣耀
     const TYPE_YXLM               =2; //英雄联盟
     const TYPE_FKJY               =3; //反恐精英
@@ -41,10 +42,11 @@ class CollectResultModel extends Model
     public function insertAll($data){
         return DB::table('team_collect')->insert($data);
     }
-    //批量更新采集状态
-    public function updateStatus($ids){
-        return $this->whereIn('id',$ids)->update(['status'=>1]);
+    //更新数据
+    public function updateStatus($id,$data){
+        return $this->where('id',$id)->update($data);
     }
+    //
 
 
 

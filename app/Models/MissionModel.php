@@ -69,6 +69,6 @@ class MissionModel extends Model
     }
 
     public function updateMission($mission_id=0,$data=[]){
-        return $this->where('mission_id',$mission_id)->update($data);
+        return $this->where(['mission_id'=>$mission_id,'mission_status'=>1])->update($data);
     }
 }
