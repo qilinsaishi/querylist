@@ -39,11 +39,11 @@ class MissionService
                             try{
                                 $rt = $collectModel->insertCollect($result);
                                 if($rt){
-                                    $missionModel->updateMission($mission['id'], ['mission_status' =>1]);
+                                    $missionModel->updateMission($mission['mission_id'], ['mission_status' =>2]);
                                 }else{
                                     $return=false;
                                 }
-                                return  $return;
+
                             }catch (\Exception $e){
                                 return  $e->getMessage();
                             }

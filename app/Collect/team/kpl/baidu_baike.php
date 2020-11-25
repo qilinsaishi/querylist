@@ -2,8 +2,6 @@
 
 namespace App\Collect\team\kpl;
 
-use App\Models\CollectResultModel;
-use App\Models\MissionModel;
 use App\Services\CollectResultService;
 use QL\QueryList;
 
@@ -31,13 +29,8 @@ class baidu_baike
 
             ];
             //处理战队采集数据
-            $rt=$resultService->doCollect($cdata);
-            if ($rt) {
-                $return=$cdata;
-            }else{
-                $return=false;
-            }
-            return $return;
+
+            return $cdata;
         }
 
     }
