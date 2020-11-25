@@ -7,15 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use phpDocumentor\Reflection\Types\Self_;
 
-class CollectResultModel extends Model
+class CollectUrlModel extends Model
 {
-    protected $table = "collect_result";
+    protected $table = "collect_url";
     protected $connection = "query_list";
     public $timestamps = false;
-    /*const TYPE_WZRY               = 1; //王者荣耀
-    const TYPE_YXLM               =2; //英雄联盟
-    const TYPE_FKJY               =3; //反恐精英
-    const TYPE_DOTA              =4; //dota*/
+
 
     /**
      * The attributes that are mass assignable.
@@ -23,15 +20,6 @@ class CollectResultModel extends Model
      * @var array
      */
     protected $fillable = [
-        'mission_id',
-        'mission_type',
-        'game',
-        'source',
-        'title',
-        'source_link',
-        'content',
-        'status'
-
     ];
 
     /**
@@ -39,17 +27,17 @@ class CollectResultModel extends Model
      * @param int $limt
      * @return mixed
      */
-    public function getDataFromUrl($type='kpl',$limt=1){
-        return $this->where(['game'=>$type,'mission_id'=>0])
-            ->select('source_link','id')
+    public function getDataFromUrl($game='kpl',$limt=10,$mission_type='team',$source='baidu_baike'){
+        return $this->where(['game'=>$game,'mission_type'=>$mission_type,'source'=>$source])
+            ->select('url','id','game','mission_type','source','title')
             ->orderBy('id', 'ASC')
             ->limit($limt)
             ->get()
             ->toArray();
     }
     //保存采集数据批量插入到数据库
-    public function insertCollect($data){
-        return $this->create($data);
+    public function insertAll($data){
+        return DB::table('team_collect')->insert($data);
     }
     //更新数据
     public function updateStatus($id,$data){

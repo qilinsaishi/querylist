@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\CollectResultModel;
+use App\Models\CollectUrlModel;
 use App\Models\TeamCollectModel;
 use App\Services\MissionService as oMission;
 use App\Services\TeamCollectService;
@@ -41,22 +42,22 @@ class Team extends Command
      */
     public function handle()
     {
-        $collectModel=new CollectResultModel();
-        $cdata=$collectModel->getDataFromUrl('kpl',10);
-        /*if($cdata){
+        $collectModel=new CollectUrlModel();
+        /*$cdata=$collectModel->getDataFromUrl('kpl',20);
+       if($cdata){
             foreach ($cdata as $val){
                 $data = [
                     "asign_to"=>1,
-                    "mission_type"=>"team",
+                    "mission_type"=>$val['mission_type'],
                     "mission_status"=>1,
-                    "game"=>'kpl',
-                    "source"=>'baidu_baike',
+                    "game"=>$val['game'],
+                    "source"=>$val['source'],
                     "detail"=>json_encode(
                         [
-                            "url"=>$val['source_link'],
-                            "game"=>'kpl',//王者荣耀
-                            "source"=>'baidu_baike',
-                            "id"=>$val['id']
+                            "url"=>$val['url'],
+                            "game"=>$val['game'],//王者荣耀
+                            "source"=>$val['source'],
+                            "title"=>$val['title'],
                         ]
                     ),
                 ];
@@ -64,7 +65,6 @@ class Team extends Command
                 echo "insert:".$insert;
             }
         }*/
-
 
         (new oMission())->processMission('kpl','baidu_baike');
     }

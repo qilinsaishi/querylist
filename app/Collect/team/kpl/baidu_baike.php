@@ -14,7 +14,6 @@ class baidu_baike
     {
         $resultService = new CollectResultService();
 
-        $id = $arr['detail']['id'] ?? '';
         $url = $arr['detail']['url'] ?? '';
         $res = $this->getCollectData($url);
         $cdata = [];
@@ -23,16 +22,23 @@ class baidu_baike
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
                 'game' => $arr['game'],
+                'source_link'=>$url,
+                'title'=>$arr['detail']['title'] ?? '',
                 'mission_type'=>$arr['mission_type'],
                 'source'=>$arr['source'],
-                'status' => 1
+                'status' => 1,
+                'update_time'=>date("Y-m-d H:i:s")
 
             ];
             //处理战队采集数据
-            $rt=$resultService->doCollect($arr['mission_id'],$id,$cdata);
+            $rt=$resultService->doCollect($cdata);
             if ($rt) {
-                return true;
+                $return=$arr['mission_id'];
+                return $return;
+            }else{
+                $return=false;
             }
+            return $return;
         }
 
     }

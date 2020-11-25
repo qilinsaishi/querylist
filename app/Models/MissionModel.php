@@ -48,7 +48,7 @@ class MissionModel extends Model
         }
 
         $mission_list = $mission_list
-            ->where(['game'=>$game,'source'=>$source,'mission_status'=>1])
+            ->where(['game'=>$game,'source'=>$source])
             ->limit($count)
             ->get()->toArray();
         return $mission_list;

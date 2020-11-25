@@ -9,22 +9,16 @@ class CollectResultService
 {
 
     //处理采集数据并且同步到数据库
-    public function doCollect($mission_id,$id,$data){
+    public function doCollect($data){
         $collectModel = new CollectResultModel();
         try{
-            $rt = $collectModel->updateStatus($id,$data);
+            $rt = $collectModel->insertCollect($data);
             if($rt){
-                $missionModel = new MissionModel();
-                $insert = $missionModel->updateMission($mission_id, ['mission_status' => 2]);
-                if($insert){
-                    return true;
-                }else{
-                    return false;
-                }
-
+              $return=true;
             }else{
-                return false;
+                $return=false;
             }
+            return  $return;
         }catch (\Exception $e){
             return  $e->getMessage();
         }
