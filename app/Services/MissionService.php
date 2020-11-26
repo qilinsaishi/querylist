@@ -78,7 +78,7 @@ class MissionService
             }
     }
     //爬取数据
-    public function process($game="",$source="")
+    public function process($game="kpl",$source="")
     {
         //获取爬取任务列表
         $result_list = $this->getResult($game,$source,100);
@@ -118,9 +118,9 @@ class MissionService
                         $class = $classList[$className];
                     }
                     //执行爬取操作
-                    $result=$class->process($result);
+                    $processResult=$class->process($result);
                     echo "id:".$result['id']."\n";
-                    print($result);
+                    print_R($processResult);
                     continue;
                     //如果爬取成功
                     if($result)

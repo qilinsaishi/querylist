@@ -42,8 +42,7 @@
 		 "files":[
             "app/Helpers/function.php"
         ],
-		"classmap":["app/Libs"]
-		
+         "classmap":["app/Libs"]
     },
     "autoload-dev": {
         "psr-4": {
