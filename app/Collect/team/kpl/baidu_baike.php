@@ -78,8 +78,7 @@ class baidu_baike
                 foreach ($baseInfoValues as $key => $val) {
                     $name = preg_replace("/(\s|\&nbsp\;|　|\xc2\xa0)/", " ", strip_tags($baseInfoNames[$key]));
                     $name = preg_replace('# #', '', $name);
-                    if (!in_array($name, $tmp_arr)) {
-                        array_push($tmp_arr, $name);
+
                         if (strpos($val, '主要荣誉') !== false) {
                             $arrtemp = explode('主要荣誉', $val);
                             $val = $arrtemp[1] ?? '';
@@ -89,7 +88,6 @@ class baidu_baike
                             'name' => $name,
                             'value' => $val
                         ];
-                    }
                 }
             }
 
