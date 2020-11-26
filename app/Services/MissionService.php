@@ -1,65 +1,81 @@
 <?php
 
 namespace App\Services;
-use App\Models\CollectResultModel;
+use App\Models\CollectResultModel as CollectModel;
 use App\Models\MissionModel as MissionModel;
-use function PHPUnit\Framework\fileExists;
 
 class MissionService
 {
-    public function processMission($game,$source)
+    //爬取数据
+    public function collect($game="",$source="")
     {
+        //获取爬取任务列表
         $mission_list = $this->getMission($game,$source,20);
-        $collectModel = new CollectResultModel();
+        $collectModel = new CollectModel();
         $missionModel = new MissionModel();
+        //初始化空的类库列表
         $classList = [];
-            foreach ($mission_list as $key=>$mission) {
-                $mission['detail'] = json_decode($mission['detail'],true);
-                if (isset($mission['source']))
+        //循环任务列表
+        foreach ($mission_list as $key=>$mission)
+        {
+            //数据解包
+            $mission['detail'] = json_decode($mission['detail'],true);
+            //如果必要元素存在
+            if (isset($mission['source']))
                 {
+                    //生成类库路径
                     $className = 'App\Collect\\' . $mission['mission_type'] . '\\' . $mission['game'] . '\\' . $mission['source'];
+                    //判断类库存在
                     $exist = class_exists($className);
+                    //如果不存在
                     if (!$exist)
                     {
                         echo $className . " not found\n";
                     }
                     else
                     {
+                        //之前没有初始化过
                         if (!isset($classList[$className]))
                         {
+                            //初始化，存在列表中国呢
                             $class = new $className;
                             $classList[$className] = $class;
                         }
                         else
                         {
+                            //直接调用
                             $class = $classList[$className];
                         }
+                        //执行爬取操作
                         $result=$class->collect($mission);
-                        if($result){
+                        //如果爬取成功
+                        if($result)
+                        {
                             try{
-                                $rt = $collectModel->insertCollect($result);
+                                //保存结果
+                                $rt = $collectModel->insertCollectResult($result);
+                                //如果保存成功
                                 if($rt){
+                                    //更新任务状态，以后改成接口模式
                                     $missionModel->updateMission($mission['mission_id'], ['mission_status' =>2]);
                                 }else{
                                     $return=false;
                                 }
-
                             }catch (\Exception $e){
                                 return  $e->getMessage();
                             }
-
-
-
-                        }else{
+                        }
+                        else
+                        {
                             return false;
                         }
                     }
                 }
-                sleep(rand(10,20));
-                echo 222222;
-
+                //随机等待
+                $sleep = rand(10,20);
+                sleep($sleep);
+                echo $sleep."\n";
             }
-
     }
     public function getMission($game,$source,$count = 3)
     {

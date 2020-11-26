@@ -14,7 +14,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:info';
+    protected $signature = 'mission:collect {opetation}';
 
     /**
      * The console command description.
@@ -40,36 +40,20 @@ class Mission extends Command
      */
     public function handle()
     {
-        $model=new TeamCollectService();
-
-
-        $game_list = ['lol','dota2','kpl',];
-        $source_list = ['site1','site2','site3'];
-        $currentTime = date("Y-m-d H:i:s");
-        for($i=1;$i<=10;$i++)
-        {
-            $game = $game_list[array_rand($game_list)];
-            $source = $source_list[array_rand($source_list)];
-            $data = [
-                "asign_to"=>1,
-                "mission_type"=>"page",
-                "mission_status"=>1,
-                "game"=>$game,
-                "source"=>$source,
-                "detail"=>json_encode(
-                    [
-                        "url"=>"www.xxx.com?page=1",
-                        "game"=>$game,
-                        "source"=>$source,
-                    ]
-                ),
-            ];
-            $insert = (new oMission())->insertMission($data);
-            echo "insert:".$insert;
+        $operation = ($this->argument("operation")??"collect");
+        switch ($operation) {
+            case "collect":
+                (new oMission())->collect();
+                break;
+            case "process":
+                (new oMission())->process();
+                break;
+            default:
+                (new oMission())->collect();
+                break;
         }
 
 
 
-        (new oMission())->processMission();
     }
 }

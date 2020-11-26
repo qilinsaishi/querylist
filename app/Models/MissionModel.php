@@ -39,16 +39,26 @@ class MissionModel extends Model
         'update_time' => 'datetime',
     ];*/
 
-    public function getMissionByMachine($asign=1,$count = 3,$game='kpl',$source='baidu_baike')
+    public function getMissionByMachine($asign=1,$count = 3,$game='',$source='',$status = 1)
     {
         $mission_list =$this->select("*");
+        //接手客户端
         if($asign>0)
         {
             $mission_list = $mission_list->where("asign_to",$asign);
         }
-
+        //游戏
+        if($game!="")
+        {
+            $mission_list = $mission_list->where("game",$game);
+        }
+        //爬取数据源
+        if($source!="")
+        {
+            $mission_list = $mission_list->where("source",$source);
+        }
         $mission_list = $mission_list
-            ->where(['game'=>$game,'source'=>$source])
+            ->where("status",$status)
             ->limit($count)
             ->get()->toArray();
         return $mission_list;
@@ -58,9 +68,9 @@ class MissionModel extends Model
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['create_time']))
-            {
-                $data['create_time'] = $currentTime;
-            }
+        {
+            $data['create_time'] = $currentTime;
+        }
         if(!isset($data['update_time']))
         {
             $data['update_time'] = $currentTime;
@@ -68,7 +78,13 @@ class MissionModel extends Model
         return $this->insertGetId($data);
     }
 
-    public function updateMission($mission_id=0,$data=[]){
-        return $this->where(['mission_id'=>$mission_id,'mission_status'=>1])->update($data);
+    public function updateMission($mission_id=0,$data=[])
+    {
+        $currentTime = date("Y-m-d H:i:s");
+        if(!isset($data['update_time']))
+        {
+            $data['update_time'] = $currentTime;
+        }
+        return $this->where('mission_id',$mission_id)->update($data);
     }
 }
