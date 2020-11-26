@@ -1,12 +1,9 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\lol;
 
-use App\Models\CollectResultModel;
 use App\Models\CollectUrlModel;
-use App\Models\TeamCollectModel;
 use App\Services\MissionService as oMission;
-use App\Services\TeamCollectService;
 use Illuminate\Console\Command;
 
 class Team extends Command
@@ -16,7 +13,7 @@ class Team extends Command
      *
      * @var string
      */
-    protected $signature = 'command:team';
+    protected $signature = 'lol:team';
 
     /**
      * The console command description.
@@ -42,8 +39,8 @@ class Team extends Command
      */
     public function handle()
     {
-        $collectModel=new CollectUrlModel();
-        /*$cdata=$collectModel->getDataFromUrl('kpl',20);
+        /*$collectModel=new CollectUrlModel();
+        $cdata=$collectModel->getDataFromUrl($game='lol',$limt=10,$mission_type='team',$source='wanplus');
        if($cdata){
             foreach ($cdata as $val){
                 $data = [
@@ -66,6 +63,6 @@ class Team extends Command
             }
         }*/
 
-        (new oMission())->collect('kpl','baidu_baike');
+        (new oMission())->collect('lol','wanplus');
     }
 }
