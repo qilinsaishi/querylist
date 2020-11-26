@@ -9,6 +9,18 @@ use QL\QueryList;
 
 class wanplus
 {
+    protected $data_map =
+        [
+            "team_name"=>['path'=>"title",'default'=>""],
+            "en_name"=>['path'=>"",'default'=>""],
+            "aka"=>['path'=>"aka","default"=>"暂无"],
+            "location"=>['path'=>"country","default"=>"未知"],
+            "create_date"=>['path'=>"",'default'=>"未知"],
+            "coach"=>['path'=>"",'default'=>"未知"],
+            "logo"=>['path'=>"logo",'default'=>""],
+            "describe"=>['path'=>"",'default'=>"暂无"],
+            "raceStat"=>['path'=>"raceStat",'default'=>"暂无"]
+        ];
     public function collect($arr)
     {
 
@@ -33,6 +45,16 @@ class wanplus
             return $cdata;
         }
 
+    }
+    public function process($arr)
+    {
+        $className = 'App\Libs\CollectLib';
+        $lib = new $className;
+        //处理胜平负
+        $t = explode("/",$arr['content']['military_exploits']??'');
+        $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
+        $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
+        print_R($data);
     }
 
     /**

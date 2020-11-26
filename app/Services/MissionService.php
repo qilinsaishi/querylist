@@ -81,7 +81,7 @@ class MissionService
     public function process($game="",$source="")
     {
         //获取爬取任务列表
-        $result_list = $this->getResult($game,$source,20);
+        $result_list = $this->getResult($game,$source,100);
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         //初始化空的类库列表
@@ -119,6 +119,9 @@ class MissionService
                     }
                     //执行爬取操作
                     $result=$class->process($result);
+                    echo "id:".$result['id']."\n";
+                    print($result);
+                    continue;
                     //如果爬取成功
                     if($result)
                     {

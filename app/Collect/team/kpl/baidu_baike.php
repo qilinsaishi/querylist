@@ -57,7 +57,6 @@ class baidu_baike
         }
         $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
         print_R($data);
-        die();
     }
 
     /**
