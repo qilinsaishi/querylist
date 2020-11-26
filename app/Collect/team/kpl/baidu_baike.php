@@ -9,6 +9,7 @@ use QL\QueryList;
 
 class baidu_baike
 {
+    //数组映射
     protected $data_map =
     [
         "team_name"=>['path'=>"base_info.中文名",'default'=>""],
@@ -18,12 +19,13 @@ class baidu_baike
         "create_date"=>['path'=>"base_info.创办时间",'default'=>"未知"],
         "coach"=>['path'=>"base_info.现任教练",'default'=>"未知"],
         "logo"=>['path'=>"logo",'default'=>""],
-        "describe"=>['path'=>"describe",'default'=>"暂无"]
+        "describe"=>['path'=>"describe",'default'=>"暂无"],
+        "main_honor"=>['path'=>"base_info.主要荣誉",'default'=>""],
     ];
+    //爬取数据
     public function collect($arr)
     {
         $resultService = new CollectResultService();
-
         $url = $arr['detail']['url'] ?? '';
         $res = $this->getCollectData($url);
         $cdata = [];
@@ -45,22 +47,28 @@ class baidu_baike
             return $cdata;
         }
     }
+    /** 分拣从页面抓取数据
+     * @param string $arr   获取到的页面内容
+     * @return array $data
+     */
     public function process($arr)
     {
         $className = 'App\Libs\CollectLib';
         $lib = new $className;
+        $arr['content']['base_info'] = $lib->uniqueData($arr['content']['base_info'],"name");
         $arr['content']['base_info'] = array_combine(array_column($arr['content']['base_info'],"name"),array_column($arr['content']['base_info'],"value"));
         $pattern = "/(\[)(.*)(\])/i";
         foreach($arr['content']['base_info'] as $key => $value)
         {
             $arr['content']['base_info'][$key] = preg_replace($pattern,"",$value);
         }
+        $arr['content']['describe'] = preg_replace($pattern,"",$arr['content']['describe']);
         $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
-        print_R($data);
+        return $data;
     }
 
-    /**
-     * @param string $url
+    /** 从页面抓取数据
+     * @param string $url   要访问的url
      * @return array $res
      */
     public function getCollectData($url='')
