@@ -81,20 +81,20 @@ class MissionService
     public function process($game="",$source="")
     {
         //获取爬取任务列表
-        $mission_list = $this->getResult($game,$source,20);
+        $result_list = $this->getResult($game,$source,20);
         $collectModel = new CollectModel();
         //初始化空的类库列表
         $classList = [];
         //循环任务列表
-        foreach ($mission_list as $key=>$mission)
+        foreach ($result_list as $key=>$result)
         {
             //数据解包
-            $mission['detail'] = json_decode($mission['detail'],true);
-            //如果必要元素存在
-            if (isset($mission['source']))
+            $result['content'] = json_decode($result['content'],true);
+            //如果结果数组非空
+            if (count($result['content'])>0)
             {
                 //生成类库路径
-                $className = 'App\Collect\\' . $mission['mission_type'] . '\\' . $mission['game'] . '\\' . $mission['source'];
+                $className = 'App\Collect\\' . $result['mission_type'] . '\\' . $result['game'] . '\\' . $result['source'];
                 //判断类库存在
                 $exist = class_exists($className);
                 //如果不存在
@@ -117,7 +117,7 @@ class MissionService
                         $class = $classList[$className];
                     }
                     //执行爬取操作
-                    $result=$class->collect($mission);
+                    $result=$class->process($result);
                     //如果爬取成功
                     if($result)
                     {
