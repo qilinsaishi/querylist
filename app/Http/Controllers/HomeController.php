@@ -25,7 +25,7 @@ class HomeController extends Controller
             }
             $res['country']=trim($arr[2])??'';//国家
             if($res['country']){
-                $res['country']=str_replace('别名:','',$res['country']);
+                $res['country']=str_replace('国家：','',$res['country']);
             }
         }
         //战绩
@@ -35,6 +35,7 @@ class HomeController extends Controller
         $cur_imgs = $ql->find('.team_box  ul:eq(0) img')->attrs('src')->all();//队员图片
         $cur_position= $ql->find('.team_box  ul:eq(0) li>a strong')->texts()->all();//队员名称
         $cur_name = $ql->find('.team_box  ul:eq(0) li>a span')->texts()->all();//队员名称
+        $cur_link = $ql->find('.team_box  ul:eq(0) li>a ')->attrs('href')->all();//队员名称
         if($cur_name){
             foreach ($cur_name as $key=>$val){
                 $position=$cur_position[$key]??'';
@@ -45,6 +46,7 @@ class HomeController extends Controller
                     'name'=>$val,//队员名称
                     'main_img'=>(isset($cur_imgs[$key]) && $cur_imgs[$key]) ? str_replace('_mid','',$cur_imgs[$key]) :'',//队员主图
                     'position'=>$position,//位置
+                    'link_url'=>'https://www.wanplus.com/'.$cur_link[$key] ??''
                 ];
             }
         }
@@ -52,6 +54,7 @@ class HomeController extends Controller
         $old_imgs = $ql->find('.team_box  ul:eq(1) img')->attrs('src')->all();//队员图片
         $old_position= $ql->find('.team_box  ul:eq(1) li>a strong')->texts()->all();//队员名称
         $old_name = $ql->find('.team_box  ul:eq(1) li>a span')->texts()->all();//队员名称
+        $old_link = $ql->find('.team_box  ul:eq(1) li>a ')->attrs('href')->all();//队员名称
         if($old_name){
             foreach ($old_name as $key=>$val){
                 $position=$old_position[$key]??'';
@@ -59,12 +62,17 @@ class HomeController extends Controller
                 $res['old_team_members'][$key]=[
                     'name'=>$val,//队员名称
                     'main_img'=>(isset($old_imgs[$key]) && $old_imgs[$key]) ? str_replace('_mid','',$old_imgs[$key]) :'',//队员主图,
+                    'link_url'=>'https://www.wanplus.com'.$old_link[$key] ?? ''
                     //'position'=>$position,//位置
                 ];
             }
         }
-
+dd($res);
         return $res;
+    }
+
+    public function getTeamData($url){
+
     }
 
 }
