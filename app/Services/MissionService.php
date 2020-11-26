@@ -90,6 +90,7 @@ class MissionService
         {
             //数据解包
             $mission['detail'] = json_decode($mission['detail'],true);
+            $missionModel = new MissionModel();
             //如果必要元素存在
             if (isset($mission['source']))
             {
