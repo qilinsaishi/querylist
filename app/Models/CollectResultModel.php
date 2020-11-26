@@ -27,8 +27,26 @@ class CollectResultModel extends Model
         'source_link',
         'content',
         'status'
-
     ];
+    public function getResult($count = 3,$game='',$source='',$status = 1)
+    {
+        $result_list =$this->select("*");
+        //游戏
+        if($game!="")
+        {
+            $result_list = $result_list->where("game",$game);
+        }
+        //爬取数据源
+        if($source!="")
+        {
+            $result_list = $result_list->where("source",$source);
+        }
+        $result_list = $result_list
+            ->where("status",$status)
+            ->limit($count)
+            ->get()->toArray();
+        return $result_list;
+    }
     //保存采集数据插入到数据库
     public function insertCollectResult($data){
         return $this->create($data);

@@ -34,15 +34,11 @@ class MissionModel extends Model
      *
      * @var array
      */
-  /*  protected $casts = [
-        'create_time' => 'datetime',
-        'update_time' => 'datetime',
-    ];*/
 
     public function getMissionByMachine($asign=1,$count = 3,$game='',$source='',$status = 1)
     {
         $mission_list =$this->select("*");
-        //接手客户端
+        //接收客户端
         if($asign>0)
         {
             $mission_list = $mission_list->where("asign_to",$asign);
