@@ -83,6 +83,7 @@ class MissionService
         //获取爬取任务列表
         $result_list = $this->getResult($game,$source,20);
         $collectModel = new CollectModel();
+        $missionModel = new MissionModel();
         //初始化空的类库列表
         $classList = [];
         //循环任务列表
