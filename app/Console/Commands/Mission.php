@@ -3,9 +3,7 @@
 namespace App\Console\Commands;
 
 
-use App\Services\TeamCollectService;
 use Illuminate\Console\Command;
-use App\Services\CollectService as Collect;
 use App\Services\MissionService as oMission;
 class Mission extends Command
 {
@@ -14,7 +12,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {opetation}';
+    protected $signature = 'mission:collect {operation}';
 
     /**
      * The console command description.
