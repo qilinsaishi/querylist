@@ -95,7 +95,7 @@ class wanplus
                     $res['old_team_members'][$key]=[
                         'name'=>$val,//队员名称
                         'main_img'=>(isset($old_imgs[$key]) && $old_imgs[$key]) ? str_replace('_mid','',$old_imgs[$key]) :'',//队员主图,
-                        'link_url'=>'https://www.wanplus.com/'.$old_link[$key] ?? ''
+                        'link_url'=>'https://www.wanplus.com'.$old_link[$key] ?? ''
                         //'position'=>$position,//位置
                     ];
                 }

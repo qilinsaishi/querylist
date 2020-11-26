@@ -9,7 +9,7 @@ use QL\QueryList;
 class HomeController extends Controller
 {
     public function index(){
-        $ql = QueryList::get('https://www.wanplus.com/lol/team/6596');
+        $ql = QueryList::get('https://www.wanplus.com/lol/team/5147');
        // $res['describe'] = $ql->find('.main-content  .lemma-summary')->text();//百度百科抓取 战队简介
         $res['logo'] = $ql->find('#sharePic')->src;//战队logo
         $res['logo'] =str_replace('_mid','',$res['logo'] );
@@ -62,7 +62,7 @@ class HomeController extends Controller
                 $res['old_team_members'][$key]=[
                     'name'=>$val,//队员名称
                     'main_img'=>(isset($old_imgs[$key]) && $old_imgs[$key]) ? str_replace('_mid','',$old_imgs[$key]) :'',//队员主图,
-                    'link_url'=>'https://www.wanplus.com/'.$old_link[$key] ?? ''
+                    'link_url'=>'https://www.wanplus.com'.$old_link[$key] ?? ''
                     //'position'=>$position,//位置
                 ];
             }
@@ -71,6 +71,8 @@ dd($res);
         return $res;
     }
 
+    public function getTeamData($url){
 
+    }
 
 }
