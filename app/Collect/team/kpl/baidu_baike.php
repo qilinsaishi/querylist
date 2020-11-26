@@ -8,6 +8,17 @@ use QL\QueryList;
 
 class baidu_baike
 {
+    protected $data_map =
+    [
+        "team_name"=>['path'=>"base_info.中文名",'default'=>""],
+        "en_name"=>['path'=>"base_info.外文名",'default'=>""],
+        "aka"=>['path'=>"","default"=>"暂无"],
+        "location"=>['path'=>"","default"=>"未知"],
+        "create_date"=>['path'=>"base_info.创办时间",'default'=>"未知"],
+        "coach"=>['path'=>"base_info.现任教练",'default'=>"未知"],
+        "logo"=>['path'=>"logo",'default'=>""],
+        "describe"=>['path'=>"describe",'default'=>"暂无"]
+    ];
     public function collect($arr)
     {
         $resultService = new CollectResultService();
@@ -32,7 +43,19 @@ class baidu_baike
 
             return $cdata;
         }
-
+    }
+    public function process($arr)
+    {
+        print_R($arr);
+        $arr['content']['base_info'] = array_combine(array_column($arr['content']['base_info'],"name"),array_column($arr['content']['base_info'],"value"));
+        $pattern = "/(\[)(.*)(\])/i";
+        foreach($arr['content']['base_info'] as $key => $value)
+        {
+            $arr['content']['base_info'][$key] = preg_replace($pattern,"",$value);
+        }
+        $data = $this->getDataFromMapping($this->data_map,$arr['content']);
+        print_R($data);
+        die();
     }
 
     /**
@@ -72,5 +95,47 @@ class baidu_baike
             $res['base_info'] = $baseInfos;
         }
         return $res;
+    }
+    //从数组映射中整理数据
+    public function getDataFromMapping($data_map,$dataArr)
+    {
+        $return = [];
+        foreach($data_map as $key => $map_info)
+        {
+            if($map_info['path']!="")
+            {
+                $value = self::getDataFromPath($map_info['path'],$dataArr,$map_info['default']);
+                if(!$value)
+                {
+
+                }
+                else
+                {
+                    $return[$key] = $value;
+                }
+            }
+            else
+            {
+                $return[$key] = $map_info['default'];
+            }
+        }
+        return $return;
+    }
+    //从字符串路径中提取数据
+    public function getDataFromPath($path,$data,$default="")
+    {
+        $t = explode(".",$path);
+        foreach($t as $key)
+        {
+            if(isset($data[$key]))
+            {
+                $data = $data[$key];
+            }
+            else
+            {
+                $data = $default;
+            }
+        }
+        return $data;
     }
 }
