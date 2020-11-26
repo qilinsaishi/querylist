@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\GeneratorCommand;
 
-class AddCollect extends GeneratorCommand
+class AddLibs extends GeneratorCommand
 {
     /**
      * 控制台命令名称

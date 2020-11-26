@@ -16,7 +16,8 @@ class HomeController extends Controller
         $res['logo'] = $ql->find('.side-content img')->src;//战队logo
         $baseInfoNames = $ql->find('.basic-info .name')->texts();//基础信息名称
         $baseInfoValues = $ql->find('.basic-info .value')->texts();//名称对应值
-
+        $res['history'] = $ql->find('.main-content  div>.para")')->text();//百度百科抓取 战队历程
+        dd(preg_replace('/\[\d+\]/','',$res['history']));
         $baseInfos = [];
         $tmp_arr = array();
         $array=[];
