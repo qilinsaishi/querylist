@@ -128,7 +128,7 @@ class MissionService
                             //如果保存成功
                             if($rt){
                                 //更新任务状态，以后改成接口模式
-                                $missionModel->updateMission($mission['mission_id'], ['mission_status' =>2]);
+                                $missionModel->updateMission($result['mission_id'], ['mission_status' =>2]);
                             }else{
                                 $return=false;
                             }
