@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Models\CollectResultModel as CollectModel;
 use App\Models\MissionModel as MissionModel;
 use App\Models\TeamModel as TeamModel;
+use App\Models\HeroModel as HeroModel;
 
 class MissionService
 {
@@ -86,6 +87,7 @@ class MissionService
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         $teamModel = new TeamModel();
+        $heroModel = new HeroModel();
         //初始化空的类库列表
         $classList = [];
         //循环任务列表
@@ -122,9 +124,16 @@ class MissionService
                     //执行爬取操作
                     $processResult=$class->process($result);
                     echo "id:".$result['id']."\n";
-                    //print_R($processResult);
+                    echo "mission_type:".$result['mission_type']."\n";
                     echo "source:".$result['source']."\n";
-                    $save = $teamModel->saveTeam($result["game"],$processResult);
+                    if($result['mission_type']=="team")
+                    {
+                        $save = $teamModel->saveTeam($result["game"],$processResult);
+                    }
+                    elseif($result['mission_type']=="hero")
+                    {
+                        //$save = $heroModel->saveHero($result["game"],$processResult);
+                    }
                     echo "save:".$save."\n";
                 }
             }
