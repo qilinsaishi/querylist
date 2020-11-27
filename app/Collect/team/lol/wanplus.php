@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Collect\team\lol;
-
 use App\Models\CollectUrlModel;
 use App\Services\CollectResultService;
 use App\Services\MissionService as oMission;
@@ -15,19 +14,22 @@ class wanplus
             "en_name"=>['path'=>"",'default'=>""],
             "aka"=>['path'=>"aka","default"=>"暂无"],
             "location"=>['path'=>"country","default"=>"未知"],
-            "create_date"=>['path'=>"",'default'=>"未知"],
-            "coach"=>['path'=>"",'default'=>"未知"],
+            "established_date"=>['path'=>"",'default'=>"未知"],
+            "coach"=>['path'=>"",'default'=>0],
             "logo"=>['path'=>"logo",'default'=>""],
-            "describe"=>['path'=>"",'default'=>"暂无"],
-            "raceStat"=>['path'=>"raceStat",'default'=>"暂无"]
+            "description"=>['path'=>"",'default'=>"暂无"],
+            "race_stat"=>['path'=>"raceStat",'default'=>"暂无"],
+            "honor_list"=>['path'=>"",'default'=>""],
         ];
     public function collect($arr)
     {
-
+        $return = [];
         $url = $arr['detail']['url'] ?? '';
         $res = $this->getCollectData($url);
         $cdata = [];
-        if (!empty($res)) {
+        if (!empty($res))
+        {
+            //处理战队采集数据
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
@@ -37,24 +39,24 @@ class wanplus
                 'mission_type'=>$arr['mission_type'],
                 'source'=>$arr['source'],
                 'status' => 1,
-                'update_time'=>date("Y-m-d H:i:s")
-
             ];
             //处理战队采集数据
-
-            return $cdata;
+            $return = $cdata;
         }
+        return $return;
 
     }
     public function process($arr)
     {
         $className = 'App\Libs\CollectLib';
         $lib = new $className;
+
         //处理胜平负
         $t = explode("/",$arr['content']['military_exploits']??'');
         $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
+
         $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
-        print_R($data);
+        return $data;
     }
 
     /**

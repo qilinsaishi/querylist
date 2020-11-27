@@ -15,7 +15,7 @@ class CollectLib
                 $value = self::getDataFromPath($map_info['path'],$dataArr,$map_info['default']);
                 if(!$value)
                 {
-
+                    $return[$key] = $map_info['default'];
                 }
                 else
                 {

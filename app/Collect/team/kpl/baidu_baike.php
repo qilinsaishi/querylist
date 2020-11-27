@@ -16,11 +16,11 @@ class baidu_baike
         "en_name"=>['path'=>"base_info.外文名",'default'=>""],
         "aka"=>['path'=>"","default"=>"暂无"],
         "location"=>['path'=>"","default"=>"未知"],
-        "create_date"=>['path'=>"base_info.创办时间",'default'=>"未知"],
-        "coach"=>['path'=>"base_info.现任教练",'default'=>"未知"],
+        "established_date"=>['path'=>"base_info.创办时间",'default'=>"未知"],
+        "coach"=>['path'=>"base_info.现任教练",'default'=>"0"],
         "logo"=>['path'=>"logo",'default'=>""],
-        "describe"=>['path'=>"describe",'default'=>"暂无"],
-        "main_honor"=>['path'=>"base_info.主要荣誉",'default'=>""],
+        "description"=>['path'=>"describe",'default'=>"暂无"],
+        "honor_list"=>['path'=>"base_info.主要荣誉",'default'=>""],
     ];
     //爬取数据
     public function collect($arr)

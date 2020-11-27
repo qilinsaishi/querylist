@@ -54,7 +54,7 @@ class MissionModel extends Model
             $mission_list = $mission_list->where("source",$source);
         }
         $mission_list = $mission_list
-            ->where("mission_status",$status)
+            ->where("status",$status)
             ->limit($count)
             ->get()->toArray();
         return $mission_list;

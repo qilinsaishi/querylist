@@ -3,6 +3,7 @@
 namespace App\Services;
 use App\Models\CollectResultModel as CollectModel;
 use App\Models\MissionModel as MissionModel;
+use App\Models\TeamModel as TeamModel;
 
 class MissionService
 {
@@ -78,12 +79,13 @@ class MissionService
             }
     }
     //爬取数据
-    public function process($game="kpl",$source="")
+    public function process($mission_type = "team",$game="kpl",$source="")
     {
         //获取爬取任务列表
         $result_list = $this->getResult($game,$source,100);
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
+        $teamModel = new TeamModel();
         //初始化空的类库列表
         $classList = [];
         //循环任务列表
@@ -120,7 +122,9 @@ class MissionService
                     //执行爬取操作
                     $processResult=$class->process($result);
                     echo "id:".$result['id']."\n";
-                    print_R($processResult);
+                    //print_R($processResult);
+                    echo "source:".$result['source']."\n";
+                    $save = $teamModel->saveTeam($result["game"],$processResult);
                     continue;
                     //如果爬取成功
                     if($result)
