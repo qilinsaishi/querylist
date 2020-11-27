@@ -9,7 +9,7 @@ use QL\QueryList;
 class HomeController extends Controller
 {
     public function index(){
-        $data=curl_get('https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js');
+        $data=curl_get('//lol.qq.com/biz/hero/Akali.js');
 dd($data['hero']);
 
        /* $ql = QueryList::get('https://baike.baidu.com/item/eStar%20Gaming电子竞技俱乐部/22427996?fr=aladdin');

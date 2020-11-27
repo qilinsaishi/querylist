@@ -62,7 +62,7 @@ class MissionService
                                 }else{
                                     $return=false;
                                 }
-                            }catch (\Exception $e){
+                            }catch (\Exception $e){dd($e->getMessage());
                                 return  $e->getMessage();
                             }
                         }
