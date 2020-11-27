@@ -12,15 +12,15 @@ class baidu_baike
     //数组映射
     protected $data_map =
     [
-        "team_name"=>['path'=>"base_info.中文名",'default'=>""],
-        "en_name"=>['path'=>"base_info.外文名",'default'=>""],
+        "team_name"=>['path'=>"base_info.中文名",'default'=>''],
+        "en_name"=>['path'=>"base_info.外文名",'default'=>''],
         "aka"=>['path'=>"","default"=>""],
         "location"=>['path'=>"","default"=>"未知"],
         "established_date"=>['path'=>"base_info.创办时间",'default'=>"未知"],
         "coach"=>['path'=>"base_info.现任教练",'default'=>"暂无"],
-        "logo"=>['path'=>"logo",'default'=>""],
+        "logo"=>['path'=>"logo",'default'=>''],
         "description"=>['path'=>"describe",'default'=>"暂无"],
-        "honor_list"=>['path'=>"base_info.主要荣誉",'default'=>""],
+        "honor_list"=>['path'=>"base_info.主要荣誉",'default'=>''],
     ];
     //爬取数据
     public function collect($arr)

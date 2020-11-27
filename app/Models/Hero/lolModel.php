@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Hero;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Libs\CollectLib;
 
-class HeroModel extends Model
+class lolModel extends Model
 {
-    protected $table = "hero_info";
-    protected $primaryKey = "hero_info";
+    protected $table = "lol_hero_info";
+    protected $primaryKey = "hero_id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -37,60 +37,39 @@ class HeroModel extends Model
      * @var array
      */
     protected $attributes = [
-        "location"=>"",
-        "description"=>"",
-        "aka"=>[],
-        "honor_list"=>[],
-        "race_stat"=>[],
+        "aka"=>[]
     ];
     protected $toJson = [
-        "race_stat","honor_list","aka","race_stat"
+        "aka","ally_tips","enemy_tips","roles"
     ];
-    public function getTeamList($params)
+    public function getHeroList($params)
     {
-        $team_list =$this->select("*");
-        //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
-        {
-            $team_list = $team_list->where("game",$params['game']);
-        }
-        //战队名称
-        if(isset($params['team_name']) && strlen($params['team_name'])>=3)
-        {
-            $team_list = $team_list->where("team_name",$params['team_name']);
-        }
-        //战队名称
-        if(isset($params['en_name']) && strlen($params['en_name'])>=3)
-        {
-            $team_list = $team_list->where("en_name",$params['en_name']);
-        }
+        $hero_list =$this->select("*");
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
-        $team_list = $team_list
+        $hero_list = $hero_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
             ->orderBy("id")
             ->get()->toArray();
-        return $team_list;
+        return $hero_list;
     }
-    public function getTeamByName($team_name,$game)
+    public function getHeroByName($hero_name)
     {
-        echo $team_name."-".$game."\n";
-        $team_info =$this->select("*")
-                    ->where("team_name",$team_name)
-                    ->where("game",$game)
+        $hero_info =$this->select("*")
+                    ->where("hero_name",$hero_name)
                     ->get()->first();
-        if(isset($team_info->team_id))
+        if(isset($hero_info->hero_id))
         {
-            $team_info = $team_info->toArray();
+            $hero_info = $hero_info->toArray();
         }
         else
         {
-            $team_info = [];
+            $hero_info = [];
         }
-        return $team_info;
+        return $hero_info;
     }
-    public function insertTeam($data)
+    public function insertHero($data)
     {
         foreach($this->attributes as $key => $value)
         {
@@ -119,30 +98,30 @@ class HeroModel extends Model
         return $this->insertGetId($data);
     }
 
-    public function updateTeam($team_id=0,$data=[])
+    public function updateHero($hero_id=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
         {
             $data['update_time'] = $currentTime;
         }
-        return $this->where('team_id',$team_id)->update($data);
+        return $this->where('hero_id',$hero_id)->update($data);
     }
 
-    public function saveHero($game,$data)
+    public function saveHero($data)
     {
-        $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
-        $data['team_name'] = trim($data['team_name']);
+        $data['hero_name'] = preg_replace("/\s+/", "",$data['hero_name']);
+        $data['hero_name'] = trim($data['hero_name']);
         $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
-        $currentTeam = $this->getTeamByName($data['team_name'],$game);
-        if(!isset($currentTeam['team_id']))
+        $currentHero = $this->getHeroByName($data['hero_name']);
+        if(!isset($currentHero['hero_id']))
         {
             echo "toInsert:"."\n";
-            return $this->insertTeam(array_merge($data,["game"=>$game]));
+            return $this->insertHero($data);
         }
         else
         {
-            echo "toUpdate:".$currentTeam['team_id']."\n";
+            echo "toUpdate:".$currentHero['hero_id']."\n";
         }
     }
 }
