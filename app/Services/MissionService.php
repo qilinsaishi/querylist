@@ -11,7 +11,7 @@ class MissionService
     public function collect($game="",$source="")
     {
         //获取爬取任务列表
-        $mission_list = $this->getMission($game,$source,20);
+        $mission_list = $this->getMission($game,$source,10);
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         //初始化空的类库列表
