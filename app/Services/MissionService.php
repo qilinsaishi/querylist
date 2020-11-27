@@ -9,10 +9,10 @@ use App\Models\HeroModel as HeroModel;
 class MissionService
 {
     //爬取数据
-    public function collect($game="",$source="")
+    public function collect($game="",$source="",$mission_type='')
     {
         //获取爬取任务列表
-        $mission_list = $this->getMission($game,$source,10);
+        $mission_list = $this->getMission($game,$source,$mission_type,10);
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         //初始化空的类库列表
@@ -63,7 +63,7 @@ class MissionService
                                 }else{
                                     $return=false;
                                 }
-                            }catch (\Exception $e){dd($e->getMessage());
+                            }catch (\Exception $e){
                                 return  $e->getMessage();
                             }
                         }
@@ -143,11 +143,11 @@ class MissionService
             echo $sleep."\n";
         }
     }
-    public function getMission($game,$source,$count = 3)
+    public function getMission($game,$source,$mission_type,$count = 3)
     {
         $asign = config('app.asign');
         $missionModel = new MissionModel();
-        $mission_list = $missionModel->getMissionByMachine($asign,$count,$game,$source);
+        $mission_list = $missionModel->getMissionByMachine($asign,$count,$game,$source,$mission_type);
          return ($mission_list) ;
     }
     public function getResult($game,$source,$count = 3)

@@ -9,8 +9,8 @@ use QL\QueryList;
 class HomeController extends Controller
 {
     public function index(){
-        $data=curl_get('//lol.qq.com/biz/hero/Akali.js');
-dd($data['hero']);
+        $data=curl_get('http://lol.qq.com/biz/hero/summoner.js');
+dd($data);
 
        /* $ql = QueryList::get('https://baike.baidu.com/item/eStar%20Gaming电子竞技俱乐部/22427996?fr=aladdin');
        // $res['describe'] = $ql->find('.main-content  .lemma-summary')->text();//百度百科抓取 战队简介

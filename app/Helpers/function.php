@@ -23,6 +23,10 @@ function curl_get($url){
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     //执行命令
     $data = curl_exec($curl);
+    if(strpos($data,'if(!LOLsummonerjs)var LOLsummonerjs=') !==false){
+        $data=str_replace('if(!LOLsummonerjs)var LOLsummonerjs=','',$data);
+        $data=str_replace(';','',$data);
+    }
 
 
     // 显示错误信息
