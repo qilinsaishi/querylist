@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Collect\page\lol;
+namespace App\Collect\hero\lol;
 
 class lol_qq
 {
