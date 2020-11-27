@@ -10,13 +10,13 @@ class wanplus
 {
     protected $data_map =
         [
-            "team_name"=>['path'=>"title",'default'=>""],
-            "en_name"=>['path'=>"",'default'=>""],
+            "team_name"=>['path'=>"title",'default'=>''],
+            "en_name"=>['path'=>"",'default'=>''],
             "aka"=>['path'=>"aka","default"=>""],
             "location"=>['path'=>"country","default"=>"未知"],
             "established_date"=>['path'=>"",'default'=>"未知"],
             "coach"=>['path'=>"",'default'=>"暂无"],
-            "logo"=>['path'=>"logo",'default'=>""],
+            "logo"=>['path'=>"logo",'default'=>''],
             "description"=>['path'=>"",'default'=>"暂无"],
             "race_stat"=>['path'=>"raceStat",'default'=>[]],
         ];

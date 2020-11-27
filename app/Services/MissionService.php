@@ -4,7 +4,6 @@ namespace App\Services;
 use App\Models\CollectResultModel as CollectModel;
 use App\Models\MissionModel as MissionModel;
 use App\Models\TeamModel as TeamModel;
-use App\Models\HeroModel as HeroModel;
 
 class MissionService
 {
@@ -87,7 +86,6 @@ class MissionService
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         $teamModel = new TeamModel();
-        $heroModel = new HeroModel();
         //初始化空的类库列表
         $classList = [];
         //循环任务列表
@@ -132,7 +130,31 @@ class MissionService
                     }
                     elseif($result['mission_type']=="hero")
                     {
-                        //$save = $heroModel->saveHero($result["game"],$processResult);
+                        //生成类库路径
+                        $modelClassName = 'App\Models\Hero\\' . $result['game']."Model";
+                        echo $modelClassName."\n";
+                        //判断类库存在
+                        $exist = class_exists($modelClassName);
+                        if(!$exist)
+                        {
+
+                        }
+                        else
+                        {
+                            //之前没有初始化过
+                            if (!isset($classList[$modelClassName]))
+                            {
+                                //初始化，存在列表中国呢
+                                $modelClass = new $modelClassName;
+                                $classList[$modelClassName] = $modelClass;
+                            }
+                            else
+                            {
+                                //直接调用
+                                $modelClass = $classList[$modelClassName];
+                            }
+                            $save = $modelClass->saveHero($processResult);
+                        }
                     }
                     echo "save:".$save."\n";
                 }
