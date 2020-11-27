@@ -9,7 +9,7 @@ class Hero extends Command
 {
     /**
      * The name and signature of the console command.
-     *英雄
+     *
      * @var string
      */
     protected $signature = 'lol:hero';
@@ -38,25 +38,30 @@ class Hero extends Command
      */
     public function handle()
     {   //英雄联盟官网-英雄数据
+        /*$cdata=curl_get('https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js');
+        $cdata=$cdata['hero'] ?? [];
+        if($cdata){
+            foreach ($cdata as $val){
+                $url='https://game.gtimg.cn/images/lol/act/img/js/hero/'.$val['heroId'].'.js';
+                $data = [
+                    "asign_to"=>1,
+                    "mission_type"=>'page',
+                    "mission_status"=>1,
+                    "game"=>'lol',
+                    "source"=>'lol_qq',
+                    "detail"=>json_encode(
+                        [
+                            "url"=>$url,
+                            "game"=>'lol',//英雄联盟
+                            "source"=>'lol_qq',
+                        ]
+                    ),
+                ];
+                $insert = (new oMission())->insertMission($data);
+                echo "insert:".$insert;
+            }
+        }*/
 
-        $url='https://game.gtimg.cn/images/lol/act/img/js/items/items.js';
-        $data = [
-            "asign_to"=>1,
-            "mission_type"=>'lol_qq',
-            "mission_status"=>1,
-            "game"=>'lol',
-            "source"=>'hero',
-            "detail"=>json_encode(
-                [
-                    "url"=>$url,
-                    "game"=>'lol',//英雄联盟
-                    "source"=>'item',
-                ]
-            ),
-        ];
-        $insert = (new oMission())->insertMission($data);
-        echo "insert:".$insert;
-
-        //(new oMission())->collect('lol','item');
+       (new oMission())->collect('lol','lol_qq');
     }
 }

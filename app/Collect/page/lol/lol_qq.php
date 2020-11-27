@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Collect\lol_qq\lol;
+namespace App\Collect\page\lol;
 
-class hero
+class lol_qq
 {
     protected $data_map =
         [
