@@ -12,14 +12,13 @@ class wanplus
         [
             "team_name"=>['path'=>"title",'default'=>""],
             "en_name"=>['path'=>"",'default'=>""],
-            "aka"=>['path'=>"aka","default"=>"暂无"],
+            "aka"=>['path'=>"aka","default"=>""],
             "location"=>['path'=>"country","default"=>"未知"],
             "established_date"=>['path'=>"",'default'=>"未知"],
-            "coach"=>['path'=>"",'default'=>0],
+            "coach"=>['path'=>"",'default'=>"暂无"],
             "logo"=>['path'=>"logo",'default'=>""],
             "description"=>['path'=>"",'default'=>"暂无"],
-            "race_stat"=>['path'=>"raceStat",'default'=>"暂无"],
-            "honor_list"=>['path'=>"",'default'=>""],
+            "race_stat"=>['path'=>"raceStat",'default'=>[]],
         ];
     public function collect($arr)
     {
@@ -54,7 +53,6 @@ class wanplus
         //处理胜平负
         $t = explode("/",$arr['content']['military_exploits']??'');
         $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
-
         $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }

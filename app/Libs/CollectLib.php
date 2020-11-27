@@ -110,4 +110,19 @@ class CollectLib
         }
         return $array;
     }
+    public function cleanArr($arr = [],$toClean = [])
+    {
+        foreach($arr as $key => $value)
+        {
+            if(in_array(trim($value),$toClean) || strlen(trim($value))<=2)
+            {
+                unset($arr[$key]);
+            }
+            else
+            {
+                //echo "value:".$value."\n";
+            }
+        }
+        return array_values($arr);
+    }
 }

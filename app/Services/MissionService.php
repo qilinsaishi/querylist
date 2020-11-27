@@ -125,33 +125,12 @@ class MissionService
                     //print_R($processResult);
                     echo "source:".$result['source']."\n";
                     $save = $teamModel->saveTeam($result["game"],$processResult);
-                    continue;
-                    //如果爬取成功
-                    if($result)
-                    {
-                        try{
-                            //保存结果
-                            $rt = $collectModel->insertCollectResult($result);
-                            //如果保存成功
-                            if($rt){
-                                //更新任务状态，以后改成接口模式
-                                $missionModel->updateMission($result['mission_id'], ['mission_status' =>2]);
-                            }else{
-                                $return=false;
-                            }
-                        }catch (\Exception $e){
-                            return  $e->getMessage();
-                        }
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    echo "save:".$save."\n";
                 }
             }
             //随机等待
-            $sleep = rand(10,20);
-            sleep($sleep);
+            $sleep = rand(1,2);
+            //sleep($sleep);
             echo $sleep."\n";
         }
     }

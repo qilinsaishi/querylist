@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use App\Libs\CollectLib;
 
 class TeamModel extends Model
 {
@@ -38,10 +39,12 @@ class TeamModel extends Model
     protected $attributes = [
         "location"=>"",
         "description"=>"",
-        "aka"=>"[]",
+        "aka"=>[],
+        "honor_list"=>[],
+        "race_stat"=>[],
     ];
     protected $toJson = [
-        "race_stat"
+        "race_stat","honor_list","aka","race_stat"
     ];
     public function getTeamList($params)
     {
@@ -72,11 +75,12 @@ class TeamModel extends Model
     }
     public function getTeamByName($team_name,$game)
     {
+        echo $team_name."-".$game."\n";
         $team_info =$this->select("*")
                     ->where("team_name",$team_name)
                     ->where("game",$game)
                     ->get()->first();
-        if($team_info)
+        if(isset($team_info->team_id))
         {
             $team_info = $team_info->toArray();
         }
@@ -103,7 +107,6 @@ class TeamModel extends Model
                 $data[$key] = json_encode($data[$key]);
             }
         }
-        $data['team_name'] = trim(preg_replace("/\s+/", " ",$data['team_name']));
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['create_time']))
         {
@@ -128,11 +131,13 @@ class TeamModel extends Model
 
     public function saveTeam($game,$data)
     {
-        $data['team_name'] = trim(preg_replace("/\s+/", " ",$data['team_name']));
+        $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
+        $data['team_name'] = trim($data['team_name']);
+        $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
         $currentTeam = $this->getTeamByName($data['team_name'],$game);
-        print_R($currentTeam);
         if(!isset($currentTeam['team_id']))
         {
+            echo "toInsert:"."\n";
             return $this->insertTeam(array_merge($data,["game"=>$game]));
         }
         else

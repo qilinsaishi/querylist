@@ -14,10 +14,10 @@ class baidu_baike
     [
         "team_name"=>['path'=>"base_info.中文名",'default'=>""],
         "en_name"=>['path'=>"base_info.外文名",'default'=>""],
-        "aka"=>['path'=>"","default"=>"暂无"],
+        "aka"=>['path'=>"","default"=>""],
         "location"=>['path'=>"","default"=>"未知"],
         "established_date"=>['path'=>"base_info.创办时间",'default'=>"未知"],
-        "coach"=>['path'=>"base_info.现任教练",'default'=>"0"],
+        "coach"=>['path'=>"base_info.现任教练",'default'=>"暂无"],
         "logo"=>['path'=>"logo",'default'=>""],
         "description"=>['path'=>"describe",'default'=>"暂无"],
         "honor_list"=>['path'=>"base_info.主要荣誉",'default'=>""],
@@ -64,6 +64,8 @@ class baidu_baike
         }
         $arr['content']['describe'] = preg_replace($pattern,"",$arr['content']['describe']);
         $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
+        //$data['honor_list'] = preg_replace("/\s+/", "---n---",$data['honor_list']);
+        $data['honor_list'] = $lib->cleanArr(explode("\n",$data['honor_list']),["","收起"]);
         return $data;
     }
 
