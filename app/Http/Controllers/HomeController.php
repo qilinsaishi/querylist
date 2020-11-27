@@ -9,7 +9,10 @@ use QL\QueryList;
 class HomeController extends Controller
 {
     public function index(){
-        $ql = QueryList::get('https://baike.baidu.com/item/eStar%20Gaming电子竞技俱乐部/22427996?fr=aladdin');
+        $data=curl_get('https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js');
+
+
+       /* $ql = QueryList::get('https://baike.baidu.com/item/eStar%20Gaming电子竞技俱乐部/22427996?fr=aladdin');
        // $res['describe'] = $ql->find('.main-content  .lemma-summary')->text();//百度百科抓取 战队简介
        // $ql = QueryList::get($url);
         $title=$ql->find('.main-content  .lemmaWgt-lemmaTitle-title h1')->text();
@@ -68,7 +71,7 @@ class HomeController extends Controller
 
         $res['base_info'] = $baseInfos;
 dd($res);
-        return $res;
+        return $res;*/
     }
 
 
