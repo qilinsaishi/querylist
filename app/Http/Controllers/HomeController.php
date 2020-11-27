@@ -10,7 +10,7 @@ class HomeController extends Controller
 {
     public function index(){
         $data=curl_get('https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js');
-
+dd($data['hero']);
 
        /* $ql = QueryList::get('https://baike.baidu.com/item/eStar%20Gaming电子竞技俱乐部/22427996?fr=aladdin');
        // $res['describe'] = $ql->find('.main-content  .lemma-summary')->text();//百度百科抓取 战队简介
