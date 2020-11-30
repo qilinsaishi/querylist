@@ -1,8 +1,10 @@
 <?php
-function curl_get($url){
+function curl_get($url,$referer=''){
 
     $header = array(
         'Accept: application/json',
+        'Referer: '.$referer,
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'
     );
     $curl = curl_init();
     //设置抓取的url
@@ -31,15 +33,9 @@ function curl_get($url){
         $data=str_replace('callback(','',$data);
         $data=str_replace(');','',$data);
     }
-    if(strpos($data,'[{') !==false){
-        $data=explode('[{',$data);
-        $data=trim($data);
-        $data=str_replace(');','',$data);
-    }
 
 
-
-    // 显示错误信息
+        // 显示错误信息
     if (curl_error($curl)) {
         print "Error: " . curl_error($curl);
     } else {
