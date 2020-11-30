@@ -9,7 +9,7 @@ use QL\QueryList;
 class HomeController extends Controller
 {
     public function index(){
-        $init_url='https://apps.game.qq.com/cmc/zmMcnContentInfo?r0=jsonp&source=web_pc&type=0&docid=14961237808844876072&_='.msectime();
+        $init_url='https://pvp.qq.com/ingame/all/src/data.json';
         $data=curl_get($init_url);dd($data);
 
         $resultTotal=$data['data']['resultTotal'] ?? '';
