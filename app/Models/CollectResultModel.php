@@ -54,8 +54,11 @@ class CollectResultModel extends Model
     }
     //保存采集数据插入到数据库
     public function insertCollectResult($data){
-        return $this->create($data);
+        $res=[];
+        $res=$this->insert($data);
+        return $res;
     }
+
     //更新爬取结果的状态
     public function updateStatus($id,$data){
         return $this->where('id',$id)->update($data);
