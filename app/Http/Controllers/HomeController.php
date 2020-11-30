@@ -9,8 +9,21 @@ use QL\QueryList;
 class HomeController extends Controller
 {
     public function index(){
-        $data=curl_get('//lol.qq.com/biz/hero/Akali.js');
-dd($data['hero']);
+        $init_url='https://apps.game.qq.com/cmc/zmMcnContentInfo?r0=jsonp&source=web_pc&type=0&docid=14961237808844876072&_='.msectime();
+        $data=curl_get($init_url);dd($data);
+
+        $resultTotal=$data['data']['resultTotal'] ?? '';
+        $resultNum=$data['data']['resultNum'] ?? '';
+
+        //$data=curl_get('');
+        $page=getLastPage($resultTotal,$resultNum);
+        for ($i=0;$i<=$page;$i++){
+            $m=$i+1;
+            $url='https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page='.$m.'&num=16&target=24&source=web_pc&_='.msectime();
+            //echo $url.'<br/>';
+            $data[$i]=$url;
+        }
+dd($data);
 
        /* $ql = QueryList::get('https://baike.baidu.com/item/eStar%20Gaming电子竞技俱乐部/22427996?fr=aladdin');
        // $res['describe'] = $ql->find('.main-content  .lemma-summary')->text();//百度百科抓取 战队简介

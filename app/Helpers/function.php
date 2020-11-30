@@ -23,6 +23,14 @@ function curl_get($url){
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     //执行命令
     $data = curl_exec($curl);
+    if(strpos($data,'if(!LOLsummonerjs)var LOLsummonerjs=') !==false){
+        $data=str_replace('if(!LOLsummonerjs)var LOLsummonerjs=','',$data);
+        $data=str_replace(';','',$data);
+    }
+    if(strpos($data,'callback(') !==false){
+        $data=str_replace('callback(','',$data);
+        $data=str_replace(');','',$data);
+    }
 
 
     // 显示错误信息
@@ -88,6 +96,23 @@ function msectime(){
     list($msec, $sec) = explode(' ', microtime());
     $msectime = (float)sprintf('%.0f', (floatval($msec) + floatval($sec)) * 1000);
     return intval($msectime);
+
+}
+//计算分页数
+function getLastPage($a,$c){
+    $n=1;
+    if(is_float($a/$c)) //判断符点型
+    {
+        $n=$a/$c;
+        $n++;
+        return (int)($n); //强制转换整型
+    }else{
+        $n=$a/$c;
+
+      return  ++$n;
+    }
+
+
 
 }
 
