@@ -59,7 +59,6 @@ class lol_qq
                 'source' => $arr['source'],
                 'status' => 1,
                 'update_time' => date("Y-m-d H:i:s")
-
             ];
 
             return $cdata;
@@ -75,8 +74,6 @@ class lol_qq
         {
             $arr['content']['roles'][$key] = $this->role_list[$value]??"未知";
         }
-        echo "speed:".$arr['content']['attackspeed']."\n";
-
         ksort($arr['content']);
         $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
         return $data;
