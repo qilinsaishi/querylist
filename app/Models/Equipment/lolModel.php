@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Hero;
+namespace App\Models\Equipment;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
@@ -10,8 +10,8 @@ use App\Libs\CollectLib;
 
 class lolModel extends Model
 {
-    protected $table = "lol_hero_info";
-    protected $primaryKey = "hero_id";
+    protected $table = "lol_equipment_info";
+    protected $primaryKey = "equipment_id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -40,36 +40,36 @@ class lolModel extends Model
         "aka"=>[]
     ];
     protected $toJson = [
-        "aka","ally_tips","enemy_tips","roles"
+        "aka","from_list","into_list","maps"
     ];
-    public function getHeroList($params)
+    public function getEquipmentList($params)
     {
-        $hero_list =$this->select("*");
+        $equipment_list =$this->select("*");
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
-        $hero_list = $hero_list
+        $equipment_list = $equipment_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
             ->orderBy("id")
             ->get()->toArray();
-        return $hero_list;
+        return $equipment_list;
     }
-    public function getHeroByName($hero_name)
+    public function getEquipmentByName($equipment_name)
     {
-        $hero_info =$this->select("*")
-                    ->where("hero_name",$hero_name)
+        $equipment_info =$this->select("*")
+                    ->where("equipment_name",$equipment_name)
                     ->get()->first();
-        if(isset($hero_info->hero_id))
+        if(isset($equipment_info->equipment_id))
         {
-            $hero_info = $hero_info->toArray();
+            $equipment_info = $equipment_info->toArray();
         }
         else
         {
-            $hero_info = [];
+            $equipment_info = [];
         }
-        return $hero_info;
+        return $equipment_info;
     }
-    public function insertHero($data)
+    public function insertEquipment($data)
     {
         foreach($this->attributes as $key => $value)
         {
@@ -98,30 +98,30 @@ class lolModel extends Model
         return $this->insertGetId($data);
     }
 
-    public function updateHero($hero_id=0,$data=[])
+    public function updateEquipment($equipment_id=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
         {
             $data['update_time'] = $currentTime;
         }
-        return $this->where('hero_id',$hero_id)->update($data);
+        return $this->where('equipment_id',$equipment_id)->update($data);
     }
 
-    public function saveHero($data)
+    public function saveEquipment($data)
     {
-        $data['hero_name'] = preg_replace("/\s+/", "",$data['hero_name']);
-        $data['hero_name'] = trim($data['hero_name']);
+        $data['equipment_name'] = preg_replace("/\s+/", "",$data['equipment_name']);
+        $data['equipment_name'] = trim($data['equipment_name']);
         $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
-        $currentHero = $this->getHeroByName($data['hero_name']);
-        if(!isset($currentHero['hero_id']))
+        $currentEquipment = $this->getEquipmentByName($data['equipment_name']);
+        if(!isset($currentEquipment['equipment_id']))
         {
-            echo "toInsertHero:"."\n";
-            return $this->insertHero($data);
+            echo "toInsertEquip:"."\n";
+            return $this->insertEquipment($data);
         }
         else
         {
-            echo "toUpdateHero:".$currentHero['hero_id']."\n";
+            echo "toUpdateEquip:".$currentEquipment['equipment_id']."\n";
         }
     }
 }

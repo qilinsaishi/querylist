@@ -137,12 +137,12 @@ class TeamModel extends Model
         $currentTeam = $this->getTeamByName($data['team_name'],$game);
         if(!isset($currentTeam['team_id']))
         {
-            echo "toInsert:"."\n";
+            echo "toInsertTeam:"."\n";
             return $this->insertTeam(array_merge($data,["game"=>$game]));
         }
         else
         {
-            echo "toUpdate:".$currentTeam['team_id']."\n";
+            echo "toUpdateTeam:".$currentTeam['team_id']."\n";
         }
     }
 }

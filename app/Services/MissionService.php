@@ -132,7 +132,6 @@ class MissionService
                     {
                         //生成类库路径
                         $modelClassName = 'App\Models\Hero\\' . $result['game']."Model";
-                        echo $modelClassName."\n";
                         //判断类库存在
                         $exist = class_exists($modelClassName);
                         if(!$exist)
@@ -154,6 +153,36 @@ class MissionService
                                 $modelClass = $classList[$modelClassName];
                             }
                             $save = $modelClass->saveHero($processResult);
+                        }
+                    }
+                    elseif($result['mission_type']=="equipment")
+                    {
+                        //生成类库路径
+                        $modelClassName = 'App\Models\Equipment\\' . $result['game']."Model";
+                        //判断类库存在
+                        $exist = class_exists($modelClassName);
+                        if(!$exist)
+                        {
+
+                        }
+                        else
+                        {
+                            //之前没有初始化过
+                            if (!isset($classList[$modelClassName]))
+                            {
+                                //初始化，存在列表中国呢
+                                $modelClass = new $modelClassName;
+                                $classList[$modelClassName] = $modelClass;
+                            }
+                            else
+                            {
+                                //直接调用
+                                $modelClass = $classList[$modelClassName];
+                            }
+                            foreach($processResult as $equipment)
+                            {
+                                $save = $modelClass->saveEquipment($equipment);
+                            }
                         }
                     }
                     echo "save:".$save."\n";
