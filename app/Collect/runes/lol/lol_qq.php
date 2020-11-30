@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Collect\summoner\lol;
+namespace App\Collect\runes\lol;
 
 class lol_qq
 {
-    /*
-     * 召唤师技能
+    /**
+     * 符文
      */
     protected $data_map =
         [
@@ -15,9 +15,8 @@ class lol_qq
         $cdata = [];
         $url = $arr['detail']['url'] ?? '';
         $res = curl_get($url);
-        $res = $res['data'] ?? [];
+        $res = $res['styles'] ?? [];
         if (!empty($res)) {
-            $res=$this->doData($res);
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
@@ -37,17 +36,5 @@ class lol_qq
     public function process($arr)
     {
         var_dump($arr);
-    }
-
-    //处理数据
-    public function doData($data){
-        foreach ($data as &$val){
-            $val['thumb_img']='https://ossweb-img.qq.com/images/lol/img/spell/'.$val['id'].'.png';
-            $val['big_img']='https://ossweb-img.qq.com/images/lol/web201310/summoner/'.$val['key'].'.jpg';
-        }
-
-        return $data;
-
-
     }
 }

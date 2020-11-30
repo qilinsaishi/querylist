@@ -5,21 +5,21 @@ namespace App\Console\Commands\lol;
 use App\Services\MissionService as oMission;
 use Illuminate\Console\Command;
 
-class Summoner extends Command
+class Runes extends Command
 {
     /**
      * The name and signature of the console command.
-     *召唤师技能
+     *符文
      * @var string
      */
-    protected $signature = 'command:summoner';
+    protected $signature = 'command:runes';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = '召唤师技能';
+    protected $description = '符文';
 
     /**
      * Create a new command instance.
@@ -38,24 +38,24 @@ class Summoner extends Command
      */
     public function handle()
     {
-        /*$url='http://lol.qq.com/biz/hero/summoner.js';
+        /*$url='https://lol.qq.com/act/a20170926preseason/data/cn/runes.json';
         $data = [
             "asign_to"=>1,
-            "mission_type"=>'summoner',//召唤师
+            "mission_type"=>'runes',//符文
             "mission_status"=>1,
             "game"=>'lol',
-            "source"=>'lol_qq',//召唤师
+            "source"=>'lol_qq',//
             "detail"=>json_encode(
                 [
                     "url"=>$url,
                     "game"=>'lol',//英雄联盟
-                    "source"=>'lol_qq',//召唤师
+                    "source"=>'lol_qq',//符文
                 ]
             ),
         ];
         $insert = (new oMission())->insertMission($data);
         echo "insert:".$insert;*/
 
-        (new oMission())->collect('lol','lol_qq','summoner');
+        (new oMission())->collect('lol','lol_qq','runes');
     }
 }
