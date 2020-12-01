@@ -2,25 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\TeamCollectService;
 use Illuminate\Http\Request;
 use QL\QueryList;
+use GuzzleHttp\Client;
 
 class HomeController extends Controller
 {
-    public function index(){$list=posturl($url='',$data='');dd($list);
+    public function index(){
+
+        $url = "https://www.wanplus.com/ajax/statelist/player";
+        $headers = [
+            'x-requested-with'  => 'XMLHttpRequest',
+            'x-csrf-token' => '1368290349',
+            'Accept'=>'application/json'
+        ];
+        $client = new Client(['verify' =>false]);
+        $param = [
+            'playerid'=>'15263',
+            'gametype'=>'2',
+            'istime'=>0,
+            '_gtk'=>'1368290349'
+        ];
+        $response = $client->request('POST', $url,['form_params'=>$param,'headers'=>$headers]);
+
+        $data = json_decode($response->getBody(), true);dd($data);
        /* $refeerer='http://lol.qq.com/biz/hero/summoner.js';
         $data=curl_get($refeerer);dd($data);*/
 
         $ql = QueryList::get('https://www.wanplus.com/lol/player/15263');
-
-
         $infos= $ql->find('#shareTitle')->text();
         $infos=trim($infos,'【');
         $infos=trim($infos,'】');
         $arr=explode('，',$infos);
         if($arr){
-
             $res['country']=trim($arr[1])??'';//国家
             if($res['country']){
                 $res['country']=str_replace('国家：','',$res['country']);
@@ -40,7 +54,7 @@ class HomeController extends Controller
             'x-csrf-token:1368290349'
         ];
         $list=[];
-        $list=posturl($play_url,$postdata);
+        $list=curl_post( $play_url='', $postdata='' );
         dd($list);
         //$ql = QueryList::get('https://www.wanplus.com/lol/player/15263');
      //   $res['military_exploits']=$ql->find('.team_tbb dt:eq(0)')->text();//胜/平/负(历史总战绩)

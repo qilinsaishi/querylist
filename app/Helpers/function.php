@@ -49,32 +49,7 @@ function curl_get($url,$referer=''){
     }
 }
 
-function posturl($url='',$data=''){
-    $data=[
-        'playerid'=>'15263',
-        'gametype'=>'2',
-        '_gtk'=>'1368290349'
-    ];
-   // $data  = json_encode($data);
-    $url='https://www.wanplus.com/ajax/statelist/player';
-    $headerArray =array(
-        "x-requested-with:XMLHttpRequest",
-        "x-csrf-token:1368290349",
-        "Accept:application/json"
-    );
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST,FALSE);
-    curl_setopt($curl, CURLOPT_POST, 1);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($curl,CURLOPT_HTTPHEADER,$headerArray);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    $output = curl_exec($curl);
-    curl_close($curl);
-    return json_decode($output,true);
-}
 
 // $url 是请求的链接
 // $postdata 是传输的数据，数组格式
@@ -84,17 +59,12 @@ function curl_post( $url='', $postdata='' ) {
         'gametype'=>'2',
         '_gtk'=>'1368290349'
     ];
-    //$data  = json_encode($data);
     $url='https://www.wanplus.com/ajax/statelist/player';
-
-
-
     $header = array(
-        //'Accept: application/json',
+        'Accept: application/json',
         "x-requested-with:XMLHttpRequest",
         "x-csrf-token:1368290349",
     );
-
     //初始化
     $curl = curl_init();
     //设置抓取的url
@@ -126,8 +96,9 @@ function curl_post( $url='', $postdata='' ) {
         print "Error: " . curl_error($curl);
     } else {
         // 打印返回的内容
-        var_dump($data);
+        $res=json_decode($data,true);
         curl_close($curl);
+        return $res;
     }
 }
 
