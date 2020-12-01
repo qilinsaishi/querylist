@@ -38,7 +38,7 @@ class MissionService
                         //之前没有初始化过
                         if (!isset($classList[$className]))
                         {
-                            //初始化，存在列表中国呢
+                            //初始化，存在列表中
                             $class = new $className;
                             $classList[$className] = $class;
                         }
@@ -104,14 +104,14 @@ class MissionService
                 if (!$exist)
                 {
                     echo $className . " not found\n";
-                    die();
+                    //die();
                 }
                 else
                 {
                     //之前没有初始化过
                     if (!isset($classList[$className]))
                     {
-                        //初始化，存在列表中国呢
+                        //初始化，存在列表中
                         $class = new $className;
                         $classList[$className] = $class;
                     }
@@ -127,7 +127,7 @@ class MissionService
                         echo "id:".$result['id']."\n";
                         echo "mission_type:".$result['mission_type']."\n";
                         echo "source:".$result['source']."\n";
-                        die();
+                        //die();
                     }
                     if($result['mission_type']=="team")
                     {
@@ -148,7 +148,7 @@ class MissionService
                             //之前没有初始化过
                             if (!isset($classList[$modelClassName]))
                             {
-                                //初始化，存在列表中国呢
+                                //初始化，存在列表中
                                 $modelClass = new $modelClassName;
                                 $classList[$modelClassName] = $modelClass;
                             }
@@ -175,7 +175,7 @@ class MissionService
                             //之前没有初始化过
                             if (!isset($classList[$modelClassName]))
                             {
-                                //初始化，存在列表中国呢
+                                //初始化，存在列表中
                                 $modelClass = new $modelClassName;
                                 $classList[$modelClassName] = $modelClass;
                             }
@@ -205,7 +205,7 @@ class MissionService
                             //之前没有初始化过
                             if (!isset($classList[$modelClassName]))
                             {
-                                //初始化，存在列表中国呢
+                                //初始化，存在列表中
                                 $modelClass = new $modelClassName;
                                 $classList[$modelClassName] = $modelClass;
                             }
@@ -218,6 +218,54 @@ class MissionService
                             {
                                 $save = $modelClass->saveSkill($equipment);
                             }
+                        }
+                    }
+                    elseif($result['mission_type']=="runes")
+                    {
+                        //生成类库路径
+                        $modelClassName = 'App\Models\Rune\\' . $result['game']."Model";
+                        //判断类库存在
+                        $exist = class_exists($modelClassName);
+                        if(!$exist)
+                        {
+
+                        }
+                        else
+                        {
+                            //之前没有初始化过
+                            if (!isset($classList[$modelClassName]))
+                            {
+                                //初始化，存在列表中
+                                $modelClass = new $modelClassName;
+                                $classList[$modelClassName] = $modelClass;
+                            }
+                            else
+                            {
+                                //直接调用
+                                $modelClass = $classList[$modelClassName];
+                            }
+                            if(isset($processResult['runeDetail']))
+                            {
+                                foreach($processResult['rune'] as $equipment)
+                                {
+                                    $save = $modelClass->saveRune($equipment);
+                                }
+                                $detailModelClassName = 'App\Models\Rune\\' . $result['game']."DetailModel";
+                                $detailModelClass = new $detailModelClassName;
+                                $classList[$detailModelClassName] = $modelClass;
+                                foreach($processResult['runeDetail'] as $equipment)
+                                {
+                                    $save = $detailModelClass->saveRuneDetail($equipment);
+                                }
+                            }
+                            else
+                            {
+                                foreach($processResult as $rune)
+                                {
+                                    $save = $modelClass->saveRune($rune);
+                                }
+                            }
+
                         }
                     }
                     echo "save:".$save."\n";
