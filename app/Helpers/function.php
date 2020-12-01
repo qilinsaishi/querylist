@@ -1,8 +1,10 @@
 <?php
-function curl_get($url){
+function curl_get($url,$referer=''){
 
     $header = array(
         'Accept: application/json',
+        'Referer: '.$referer,
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'
     );
     $curl = curl_init();
     //设置抓取的url
@@ -33,7 +35,7 @@ function curl_get($url){
     }
 
 
-    // 显示错误信息
+        // 显示错误信息
     if (curl_error($curl)) {
         print "Error: " . curl_error($curl);
     } else {
@@ -112,8 +114,28 @@ function getLastPage($a,$c){
       return  ++$n;
     }
 
-
-
+}
+/**
+ * 安全过滤函数
+ *
+ * @param $string
+ * @return string
+ */
+function safe_replace($string) {
+    $string = str_replace('%20','',$string);
+    $string = str_replace('%27','',$string);
+    $string = str_replace('%2527','',$string);
+    $string = str_replace('*','',$string);
+    $string = str_replace('"','&quot;',$string);
+    $string = str_replace("'",'',$string);
+    $string = str_replace('"','',$string);
+    $string = str_replace(';','',$string);
+    $string = str_replace('<','&lt;',$string);
+    $string = str_replace('>','&gt;',$string);
+    $string = str_replace("{",'',$string);
+    $string = str_replace('}','',$string);
+    $string = str_replace('\\','',$string);
+    return $string;
 }
 
 

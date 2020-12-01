@@ -9,8 +9,12 @@ use QL\QueryList;
 class HomeController extends Controller
 {
     public function index(){
-        $init_url='https://apps.game.qq.com/cmc/zmMcnContentInfo?r0=jsonp&source=web_pc&type=0&docid=14961237808844876072&_='.msectime();
-        $data=curl_get($init_url);dd($data);
+        $iSubType='330';//330=>活动,329=>赛事，
+        //$url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=1&pagesize=15&order=sIdxTime&r0=script&type=iSubType&id=330&_='.msectime();
+        $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=100&pagesize=15&_='.msectime();
+
+        $refeerer='https://pvp.qq.com/web201605/searchResult.shtml';
+        $data=curl_get($url,$refeerer);dd($data);
 
         $resultTotal=$data['data']['resultTotal'] ?? '';
         $resultNum=$data['data']['resultNum'] ?? '';
