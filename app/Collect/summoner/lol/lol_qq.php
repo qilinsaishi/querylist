@@ -9,6 +9,13 @@ class lol_qq
      */
     protected $data_map =
         [
+            "skill_name"=>['path'=>"name",'default'=>''],
+            "cn_name"=>['path'=>"name",'default'=>''],
+            "en_name"=>['path'=>"id",'default'=>''],
+            "aka"=>['path'=>"",'default'=>""],//别名
+            "description"=>['path'=>"description",'default'=>'暂无'],
+            "logo"=>['path'=>"big_img",'default'=>''],
+            "rank"=>['path'=>"maxrank",'default'=>''],
         ];
     public function collect($arr)
     {
@@ -36,7 +43,18 @@ class lol_qq
     }
     public function process($arr)
     {
-        var_dump($arr);
+        $className = 'App\Libs\CollectLib';
+        $lib = new $className;
+        foreach($arr['content'] as $key => $value)
+        {
+            $arr['content'][$key]["id"] = str_replace("Summoner","",$value["id"]);
+        }
+        $data = [];
+        foreach($arr['content'] as $key => $value)
+        {
+            $data[$key] = $lib->getDataFromMapping($this->data_map,$arr['content'][$key]);
+        }
+        return $data;
     }
 
     //处理数据

@@ -43,6 +43,6 @@ class lol_qq
     }
     public function process($arr)
     {
-        var_dump($arr);
+        //var_dump($arr);
     }
 }
