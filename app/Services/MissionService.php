@@ -79,7 +79,7 @@ class MissionService
             }
     }
     //爬取数据
-    public function process($mission_type = "team",$game="kpl",$source="")
+    public function process($game="kpl",$source="")
     {
         //获取爬取任务列表
         $result_list = $this->getResult($game,$source,100);
@@ -104,6 +104,7 @@ class MissionService
                 if (!$exist)
                 {
                     echo $className . " not found\n";
+                    die();
                 }
                 else
                 {
