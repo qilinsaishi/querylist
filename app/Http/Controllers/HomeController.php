@@ -8,9 +8,105 @@ use QL\QueryList;
 
 class HomeController extends Controller
 {
-    public function index(){
+    public function index(){$list=posturl($url='',$data='');dd($list);
+       /* $refeerer='http://lol.qq.com/biz/hero/summoner.js';
+        $data=curl_get($refeerer);dd($data);*/
+
+        $ql = QueryList::get('https://www.wanplus.com/lol/player/15263');
+
+
+        $infos= $ql->find('#shareTitle')->text();
+        $infos=trim($infos,'【');
+        $infos=trim($infos,'】');
+        $arr=explode('，',$infos);
+        if($arr){
+
+            $res['country']=trim($arr[1])??'';//国家
+            if($res['country']){
+                $res['country']=str_replace('国家：','',$res['country']);
+            }
+        }
+        $playerid=$ql->find('#recent #id')->attr('value');//id
+        $gametype=$ql->find('#recent #gametype')->attr('value');
+        $play_url='https://www.wanplus.com/ajax/statelist/player';
+        $postdata=[
+            'playerid'=>'15263',
+            'gametype'=>'2',
+            '_gtk'=>'1368290349'
+        ];
+        $header=[
+            'Accept:application/json',
+            'x-requested-with:XMLHttpRequest',
+            'x-csrf-token:1368290349'
+        ];
+        $list=[];
+        $list=posturl($play_url,$postdata);
+        dd($list);
+        //$ql = QueryList::get('https://www.wanplus.com/lol/player/15263');
+     //   $res['military_exploits']=$ql->find('.team_tbb dt:eq(0)')->text();//胜/平/负(历史总战绩)
+     //   dd($res['military_exploits']);
+        //历史事件
+        $history_times = $ql->find('.team-history  li .history-time')->texts()->all();//队员名称
+        $history_teams = $ql->find('.team-history  li span')->texts()->all();//队员名称
+        $historys=[];
+
+        foreach ($history_times as $k=>$val){
+            $temps=preg_replace("/(\s|\&nbsp\;|　|\xc2\xa0)/", " ", strip_tags( $val));
+            $history_time=preg_replace('# #', '', $temps);
+            $historys[$k]['history_time']=$history_time ?? '';
+            $historys[$k]['history_team']=$history_teams[$k] ?? '';
+            //$array=explode('- ',$temps);dd(trim($array[1]));
+        }
+
+
+        //战绩
+        $res['military_exploits']=$ql->find('.team_tbb tr:eq(0) dt')->text();//胜/平/负(历史总战绩)
+        dd( $res['military_exploits']);
+        dd( $res['military_exploits']);
+        $res['military_exploits']= preg_replace("/(\s|\&nbsp\;|　|\xc2\xa0)/", " ", strip_tags( $res['military_exploits']));
+        //现役队员
+        $cur_imgs = $ql->find('.team_box  ul:eq(0) img')->attrs('src')->all();//队员图片
+        $cur_position= $ql->find('.team_box  ul:eq(0) li>a strong')->texts()->all();//队员名称
+        $cur_name = $ql->find('.team_box  ul:eq(0) li>a span')->texts()->all();//队员名称
+        $cur_link = $ql->find('.team_box  ul:eq(0) li>a ')->attrs('href')->all();//队员名称
+        if($cur_name){
+            foreach ($cur_name as $key=>$val){
+                $position=$cur_position[$key]??'';
+                if($position){
+                    $position=str_replace('位置:','',$cur_position[$key]);
+                }
+                $res['cur_team_members'][$key]=[
+                    'name'=>$val,//队员名称
+                    'main_img'=>(isset($cur_imgs[$key]) && $cur_imgs[$key]) ? str_replace('_mid','',$cur_imgs[$key]) :'',//队员主图
+                    'position'=>$position,//位置
+                    'link_url'=>'https://www.wanplus.com/'.$cur_link[$key] ??''
+                ];
+            }
+        }
+        //历史队员
+        $old_imgs = $ql->find('.team_box  ul:eq(1) img')->attrs('src')->all();//队员图片
+        $old_position= $ql->find('.team_box  ul:eq(1) li>a strong')->texts()->all();//队员名称
+        $old_name = $ql->find('.team_box  ul:eq(1) li>a span')->texts()->all();//队员名称
+        $old_link = $ql->find('.team_box  ul:eq(1) li>a ')->attrs('href')->all();//队员名称
+        if($old_name){
+            foreach ($old_name as $key=>$val){
+                $position=$old_position[$key]??'';
+
+                $res['old_team_members'][$key]=[
+                    'name'=>$val,//队员名称
+                    'main_img'=>(isset($old_imgs[$key]) && $old_imgs[$key]) ? str_replace('_mid','',$old_imgs[$key]) :'',//队员主图,
+                    'link_url'=>'https://www.wanplus.com'.$old_link[$key] ?? ''
+                    //'position'=>$position,//位置
+                ];
+            }
+        }
+
+        return $res;
+    }
+
+    public function kplInfo(){
         $iSubType='330';//330=>活动,329=>赛事，
-        //$url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=1&pagesize=15&order=sIdxTime&r0=script&type=iSubType&id=330&_='.msectime();
+
         $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=100&pagesize=15&_='.msectime();
 
         $refeerer='https://pvp.qq.com/web201605/searchResult.shtml';
@@ -27,68 +123,7 @@ class HomeController extends Controller
             //echo $url.'<br/>';
             $data[$i]=$url;
         }
-dd($data);
-
-       /* $ql = QueryList::get('https://baike.baidu.com/item/eStar%20Gaming电子竞技俱乐部/22427996?fr=aladdin');
-       // $res['describe'] = $ql->find('.main-content  .lemma-summary')->text();//百度百科抓取 战队简介
-       // $ql = QueryList::get($url);
-        $title=$ql->find('.main-content  .lemmaWgt-lemmaTitle-title h1')->text();
-        $res['describe'] = $ql->find('.main-content  .lemma-summary')->text();//百度百科抓取 战队简介
-        $res['logo'] = $ql->find('.side-content img')->src;//战队logo
-        $baseInfoNames = $ql->find('.basic-info .name')->texts();//基础信息名称
-        $baseInfoValues = $ql->find('.basic-info .value')->texts();//名称对应值
-        $history_title= $ql->find('.main-content  .title-text:eq(0)")')->text();
-        $history_title=str_replace($title,'',$history_title);
-        $list = [];
-        //战队历史
-        $data =  $ql->find('.main-content  .title-text:eq(0)")')->parent()->next();
-        $list=$this->getList($data);
-        //战队成绩
-        $data =  $ql->find('.main-content  .title-text:eq(1)")')->parent()->next();
-        $list1=$this->getList($data);
-
-        $performance_title= $ql->find('.main-content  .title-text:eq(1)")')->text();
-        $performance_title=str_replace($title,'',$performance_title);
-
-        $historys=[
-            'title'=>$history_title,
-            'content' => $list
-        ];
-        $team_performance = [
-            'title' => $performance_title,
-            'content' => $list
-        ];
-
-        $res['team_historys'] = $historys ?? [];
-        $res['team_performance'] = $team_performance ?? [];
-
-
-        $baseInfos = [];
-        $tmp_arr = array();
-        $array = [];
-        if ($baseInfoValues) {
-            foreach ($baseInfoValues as $key => $val) {
-                $name = preg_replace("/(\s|\&nbsp\;|　|\xc2\xa0)/", " ", strip_tags($baseInfoNames[$key]));
-                $name = preg_replace('# #', '', $name);
-                // if (!in_array($name, $tmp_arr)) {
-
-                if (strpos($val, '主要荣誉') !== false) {
-                    $arrtemp = explode('主要荣誉', $val);
-                    $val = $arrtemp[1] ?? '';
-                    $val = trim(trim($val, '收起'));
-                }
-                $baseInfos[$key] = [
-                    'name' => $name,
-                    'value' => $val
-                ];
-                // }
-            }
-        }
-
-
-        $res['base_info'] = $baseInfos;
-dd($res);
-        return $res;*/
+        dd($data);
     }
 
 
