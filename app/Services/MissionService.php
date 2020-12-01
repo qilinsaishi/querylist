@@ -79,7 +79,7 @@ class MissionService
             }
     }
     //爬取数据
-    public function process($mission_type = "team",$game="kpl",$source="")
+    public function process($game="kpl",$source="")
     {
         //获取爬取任务列表
         $result_list = $this->getResult($game,$source,100);
@@ -104,6 +104,7 @@ class MissionService
                 if (!$exist)
                 {
                     echo $className . " not found\n";
+                    die();
                 }
                 else
                 {
@@ -121,9 +122,13 @@ class MissionService
                     }
                     //执行爬取操作
                     $processResult=$class->process($result);
-                    echo "id:".$result['id']."\n";
-                    echo "mission_type:".$result['mission_type']."\n";
-                    echo "source:".$result['source']."\n";
+                    if(!is_array($processResult))
+                    {
+                        echo "id:".$result['id']."\n";
+                        echo "mission_type:".$result['mission_type']."\n";
+                        echo "source:".$result['source']."\n";
+                        die();
+                    }
                     if($result['mission_type']=="team")
                     {
                         $save = $teamModel->saveTeam($result["game"],$processResult);
@@ -182,6 +187,36 @@ class MissionService
                             foreach($processResult as $equipment)
                             {
                                 $save = $modelClass->saveEquipment($equipment);
+                            }
+                        }
+                    }
+                    elseif($result['mission_type']=="summoner")
+                    {
+                        //生成类库路径
+                        $modelClassName = 'App\Models\Summoner\\' . $result['game']."Model";
+                        //判断类库存在
+                        $exist = class_exists($modelClassName);
+                        if(!$exist)
+                        {
+
+                        }
+                        else
+                        {
+                            //之前没有初始化过
+                            if (!isset($classList[$modelClassName]))
+                            {
+                                //初始化，存在列表中国呢
+                                $modelClass = new $modelClassName;
+                                $classList[$modelClassName] = $modelClass;
+                            }
+                            else
+                            {
+                                //直接调用
+                                $modelClass = $classList[$modelClassName];
+                            }
+                            foreach($processResult as $equipment)
+                            {
+                                $save = $modelClass->saveSkill($equipment);
                             }
                         }
                     }

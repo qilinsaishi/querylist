@@ -28,14 +28,9 @@ class CollectResultModel extends Model
         'content',
         'status'
     ];
-    public function getResult($count = 3,$mission_type = '',$game='',$source='',$status = 1)
+    public function getResult($count = 3,$game='',$source='',$status = 1)
     {
         $result_list =$this->select("*");
-        //任务类型
-        if($game!="")
-        {
-            $result_list = $result_list->where("mission_type",$mission_type);
-        }
         //游戏
         if($game!="")
         {
