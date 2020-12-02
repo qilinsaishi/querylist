@@ -43,8 +43,7 @@ class lol_qq
     }
     public function process($arr)
     {
-        $className = 'App\Libs\CollectLib';
-        $lib = new $className;
+
         $data = ['rune'=>[],'runeDetail'=>[]];
         $rune_detail_list = [];
         foreach($arr['content']  as $key => $value)
@@ -74,7 +73,7 @@ class lol_qq
         }
         foreach($arr['content']  as $key => $value)
         {
-            $data['rune'][$key] = $lib->getDataFromMapping($this->data_map,$arr['content'][$key]);
+            $data['rune'][$key] = getDataFromMapping($this->data_map,$arr['content'][$key]);
         }
         return $data;
     }

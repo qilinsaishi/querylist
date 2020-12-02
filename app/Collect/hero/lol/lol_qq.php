@@ -68,14 +68,13 @@ class lol_qq
 
     public function process($arr)
     {
-        $className = 'App\Libs\CollectLib';
-        $lib = new $className;
+
         foreach($arr['content']['roles'] as $key => $value)
         {
             $arr['content']['roles'][$key] = $this->role_list[$value]??"未知";
         }
         ksort($arr['content']);
-        $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
+        $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }
 }

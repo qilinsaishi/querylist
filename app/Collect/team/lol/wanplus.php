@@ -47,13 +47,12 @@ class wanplus
     }
     public function process($arr)
     {
-        $className = 'App\Libs\CollectLib';
-        $lib = new $className;
+
 
         //处理胜平负
         $t = explode("/",$arr['content']['military_exploits']??'');
         $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
-        $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
+        $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }
 

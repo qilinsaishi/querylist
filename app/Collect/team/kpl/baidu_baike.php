@@ -53,9 +53,8 @@ class baidu_baike
      */
     public function process($arr)
     {
-        $className = 'App\Libs\CollectLib';
-        $lib = new $className;
-        $arr['content']['base_info'] = $lib->uniqueData($arr['content']['base_info'],"name");
+
+        $arr['content']['base_info'] = uniqueData($arr['content']['base_info'],"name");
         $arr['content']['base_info'] = array_combine(array_column($arr['content']['base_info'],"name"),array_column($arr['content']['base_info'],"value"));
         $pattern = "/(\[)(.*)(\])/i";
         foreach($arr['content']['base_info'] as $key => $value)
@@ -63,9 +62,9 @@ class baidu_baike
             $arr['content']['base_info'][$key] = preg_replace($pattern,"",$value);
         }
         $arr['content']['describe'] = preg_replace($pattern,"",$arr['content']['describe']);
-        $data = $lib->getDataFromMapping($this->data_map,$arr['content']);
+        $data = getDataFromMapping($this->data_map,$arr['content']);
         //$data['honor_list'] = preg_replace("/\s+/", "---n---",$data['honor_list']);
-        $data['honor_list'] = $lib->cleanArr(explode("\n",$data['honor_list']),["","收起"]);
+        $data['honor_list'] = cleanArr(explode("\n",$data['honor_list']),["","收起"]);
         return $data;
     }
 

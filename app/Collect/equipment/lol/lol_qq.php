@@ -86,8 +86,7 @@ class lol_qq
     }
     public function process($arr)
     {
-        $className = 'App\Libs\CollectLib';
-        $lib = new $className;
+
         $data = [];
         $arr['content'] = array_combine(array_column($arr['content'],"itemId"),array_values($arr['content']));
         ksort($arr['content']);
@@ -125,7 +124,7 @@ class lol_qq
             }
             $arr['content'][$key]['stats'] = $this->getStats($value['description']);
             $arr['content'][$key]['from_list'] = $trees[$key]??[];
-            $data[$key] = $lib->getDataFromMapping($this->data_map,$arr['content'][$key]);
+            $data[$key] = getDataFromMapping($this->data_map,$arr['content'][$key]);
         }
         return $data;
     }

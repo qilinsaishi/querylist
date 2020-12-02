@@ -43,8 +43,7 @@ class lol_qq
     }
     public function process($arr)
     {
-        $className = 'App\Libs\CollectLib';
-        $lib = new $className;
+
         foreach($arr['content'] as $key => $value)
         {
             $arr['content'][$key]["id"] = str_replace("Summoner","",$value["id"]);
@@ -52,7 +51,7 @@ class lol_qq
         $data = [];
         foreach($arr['content'] as $key => $value)
         {
-            $data[$key] = $lib->getDataFromMapping($this->data_map,$arr['content'][$key]);
+            $data[$key] = getDataFromMapping($this->data_map,$arr['content'][$key]);
         }
         return $data;
     }
