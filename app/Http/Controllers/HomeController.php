@@ -9,27 +9,114 @@ use GuzzleHttp\Client;
 class HomeController extends Controller
 {
     public function index(){
+        $client=new Client(['verify' =>false]);
+        $headers=[
+            'user-agent'=>' Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36'
+        ];
+        $response = $client->request('GET', 'https://www.wanplus.com//lol/player/1246',['headers'=>$headers]);
+        $headerData=$response->getHeaders();
+        $arrToken=$arr1=$arrStorage=$arrSid=$arrCsrf=$arrGameType=[];
+        $cookieStr='';
+
+        if(isset($headerData['Set-Cookie']) && $headerData['Set-Cookie']){
+            foreach ($headerData['Set-Cookie'] as $val){
+                if(strpos($val,'wanplus_token') !==false){
+                    $arrToken=explode('expires',$val);
+                    $cookieStr.=$arrToken[0] ??'';
+                }
+                if(strpos($val,'wanplus_storage') !==false){
+                    $arrStorage=explode('expires',$val);
+                    $cookieStr.=$arrStorage[0] ??'';
+                }
+                if(strpos($val,'wanplus_sid') !==false){
+                    $arrCsrf=explode('expires',$val);
+                    $cookieStr.=$arrCsrf[0] ??'';
+                }
+                if(strpos($val,'wanplus_csrf') !==false){
+                    $arrCsrf=explode('Path',$val);
+                    $cookieStr.=$arrCsrf[0] ??'';
+                }
+                if(strpos($val,'gameType') !==false){
+                    $arrGameType=explode('expires',$val);
+                    $cookieStr.=$arrGameType[0] ??'';
+                }
+            }
+        }
+
+      //  $cookieStr=' wanplus_token=536b0fa2abf0b093601c5b95b746410f;wanplus_storage=lf4m67eka3o;wanplus_sid=401ec9c3cc8eda979a17978fd167da61;wanplus_csrf=_csrf_tk_1787628412;gameType=2; ';
 
         $url = "https://www.wanplus.com/ajax/statelist/player";
         $headers = [
             'x-requested-with'  => 'XMLHttpRequest',
-            'x-csrf-token' => '1368290349',
-            'Accept'=>'application/json'
+            'x-csrf-token' => '1854737276',
+            'cookie'=>$cookieStr
+
         ];
         $client = new Client(['verify' =>false]);
         $param = [
-            'playerid'=>'15263',
+            'playerid'=>'1246',
             'gametype'=>'2',
-            'istime'=>0,
-            '_gtk'=>'1368290349'
+            'eid'=>-1,
+            '_gtk'=>'1292691799'
         ];
+
         $response = $client->request('POST', $url,['form_params'=>$param,'headers'=>$headers]);
 
         $data = json_decode($response->getBody(), true);dd($data);
+
+        exit;
+
+       /* $url = "https://www.wanplus.com/lol/player/15263";
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+
+        $response = curl_exec($ch);
+
+
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $headers = $response;
+        $body = substr($response, $header_size);
+
+        curl_close($ch);
+
+
+        print($headers);exit;*/
+
+/*$test_url='https://www.wanplus.com/lol/player/25177';
+        $data=curl_get($test_url);dd($data);*/
+
+       $url = "https://www.wanplus.com/ajax/statelist/player";
+        $headers = [
+            'x-requested-with'  => 'XMLHttpRequest',
+            'x-csrf-token' => '1368290349',
+            'origin'=>'https://www.wanplus.com',
+            'cookie'=>'wanplus_token=265cf4c19f0b1e5e1720f9774d969388; wanplus_storage=lf4m67eka3o; gameType=2; wanplus_sid=9fb2db2244783e9483fc52d5a5f4012c;'
+
+        ];
+        $client = new Client(['verify' =>false]);
+        $param = [
+            'playerid'=>'25177',
+            'gametype'=>'2',
+            'eid'=>'1003',
+            '_gtk'=>'1368290349'
+        ];
+
+        $response = $client->request('POST', $url,['form_params'=>$param,'headers'=>$headers]);
+
+        $data = json_decode($response->getBody(), true);dd($data);
+       dd($url);
        /* $refeerer='http://lol.qq.com/biz/hero/summoner.js';
         $data=curl_get($refeerer);dd($data);*/
 
         $ql = QueryList::get('https://www.wanplus.com/lol/player/15263');
+        dd($ql);
         $infos= $ql->find('#shareTitle')->text();
         $infos=trim($infos,'【');
         $infos=trim($infos,'】');
@@ -42,6 +129,9 @@ class HomeController extends Controller
         }
         $playerid=$ql->find('#recent #id')->attr('value');//id
         $gametype=$ql->find('#recent #gametype')->attr('value');
+
+        $eid=$ql->find("select[name='matchName']")->find("option:selected")->attr("data-eid");
+        dd($eid);
         $play_url='https://www.wanplus.com/ajax/statelist/player';
         $postdata=[
             'playerid'=>'15263',

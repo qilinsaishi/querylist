@@ -3,9 +3,11 @@ function curl_get($url,$referer=''){
 
     $header = array(
         'Accept: application/json',
-        'Referer: '.$referer,
-        'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'
+        //'Referer: '.$referer,        'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'
     );
+    if($referer){
+        array_push($header,$referer);
+    }
     $curl = curl_init();
     //设置抓取的url
     curl_setopt($curl, CURLOPT_URL, $url);
@@ -18,13 +20,20 @@ function curl_get($url,$referer=''){
     // curl_setopt($curl, CURLOPT_TIMEOUT_MS, 500);
 
     // 设置请求头
-    curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+   // curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
     //设置获取的信息以文件流的形式返回，而不是直接输出。
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     //执行命令
     $data = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $headers = substr($data, 0, $header_size);
+    $body = substr($data, $header_size);
+
+   dd($data);
+
     if(strpos($data,'if(!LOLsummonerjs)var LOLsummonerjs=') !==false){
         $data=str_replace('if(!LOLsummonerjs)var LOLsummonerjs=','',$data);
         $data=str_replace(';','',$data);
