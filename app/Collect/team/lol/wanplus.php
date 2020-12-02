@@ -68,21 +68,25 @@ class wanplus
             $ql = QueryList::get($url);
             $res['logo'] = $ql->find('#sharePic')->src;//战队logo
             $res['logo'] =str_replace('_mid','',$res['logo'] );
-            $infos= $ql->find('#shareTitle')->text();
-            $infos=trim($infos,'【');
-            $infos=trim($infos,'】');
-            $arr=explode('，',$infos);
-            if($arr){
-                $res['title']=$arr[0]??'';//战队名称
-                $res['aka']=trim($arr[1])??'';//别名
-                if($res['aka']){
-                    $res['aka']=str_replace('别名:','',$res['aka']);
-                }
-                $res['country']=trim($arr[2])??'';//国家
-                if($res['country']){
-                    $res['country']=str_replace('国家：','',$res['country']);
+            $infos=$ql->find('.f15')->texts()->all();//胜/平/负(历史总战绩)
+            $country=$aka=$title='';
+            if(!empty($infos)){
+                foreach ($infos as $val){
+                    if(strpos($val,'名称')!==false) {
+                        $title=str_replace('名称：','',$val);
+                    }
+                    if(strpos($val,'别名')!==false) {
+                        $aka=str_replace('别名：','',$val);
+                    }
+                    if(strpos($val,'地区')!==false) {
+                        $country=str_replace('地区：','',$val);
+                    }
+
                 }
             }
+            $res['country']=$country;
+            $res['aka']=$aka;
+            $res['title']=$title;
             //战绩
             $res['military_exploits']=$ql->find('.team_tbb dt:eq(0)')->text();//胜/平/负(历史总战绩)
             $res['military_exploits']= preg_replace("/(\s|\&nbsp\;|　|\xc2\xa0)/", " ", strip_tags( $res['military_exploits']));

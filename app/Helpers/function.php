@@ -157,6 +157,28 @@ function safe_replace($string) {
 }
 
 
+function time33($a)
+{
+    $a = substr($a, 0, 7);
+
+    for ($b = 0, $c = strlen($a), $d = 5381; $c > $b; ++$b) {
+
+        $d += ($d << 5) + hexdec(bin2hex($a[$b]));
+    }
+
+    return 2147483647 & $d;
+}
+
+function getToken($wanplus_token){
+    $token=time33($wanplus_token);
+
+    return $token;
+}
+
+
+
+
+
 
 
 

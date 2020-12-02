@@ -52,7 +52,7 @@ class Team extends Command
                     "detail"=>json_encode(
                         [
                             "url"=>$val['url'],
-                            "game"=>$val['game'],//王者荣耀
+                            "game"=>$val['game'],//lol
                             "source"=>$val['source'],
                             "title"=>$val['title'],
                         ]
@@ -63,6 +63,6 @@ class Team extends Command
             }
         }*/
 
-        (new oMission())->collect('lol','wanplus');
+        (new oMission())->collect('lol','wanplus','team');
     }
 }
