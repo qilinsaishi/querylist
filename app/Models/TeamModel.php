@@ -131,18 +131,22 @@ class TeamModel extends Model
 
     public function saveTeam($game,$data)
     {
+        $return  = ['team_id'=>0,"result"=>0];
         $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
         $data['team_name'] = trim($data['team_name']);
         $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
         $currentTeam = $this->getTeamByName($data['team_name'],$game);
         if(!isset($currentTeam['team_id']))
         {
-            echo "toInsertTeam:"."\n";
-            return $this->insertTeam(array_merge($data,["game"=>$game]));
+            $return['team_id'] = $this->insertTeam(array_merge($data,["game"=>$game]));
+            $return['result'] =  $return['team_id']?1:0;
         }
         else
         {
+            $return['team_id'] = $currentTeam['team_id'];
+            $return['result'] = 1;
             echo "toUpdateTeam:".$currentTeam['team_id']."\n";
         }
+        return $return;
     }
 }

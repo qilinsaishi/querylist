@@ -132,6 +132,22 @@ class MissionService
                     if($result['mission_type']=="team")
                     {
                         $save = $teamModel->saveTeam($result["game"],$processResult);
+                        if(method_exists($class,"processMemberList"))
+                        {
+                            $missionList = $class->processMemberList($save['team_id'],$result);
+                            foreach($missionList as $mission)
+                            {
+                                $mission = array_merge($mission,['game'=>$result['game'],'connect_mission_id'=>$result['mission_id'],'source'=>$result['source'],'asign_to'=>1]);
+                                $insert = $missionModel->insertMission($mission);
+                                echo "insertMisson4Member:".$insert."\n";
+                            }
+                            //die();
+                        }
+                        else
+                            {
+                            echo "there";
+                        }
+                        die();
                     }
                     elseif($result['mission_type']=="hero")
                     {

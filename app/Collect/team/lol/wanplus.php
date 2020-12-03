@@ -47,13 +47,44 @@ class wanplus
     }
     public function process($arr)
     {
-
-
         //处理胜平负
         $t = explode("/",$arr['content']['military_exploits']??'');
         $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
+    }
+    public function processMemberList($team_id,$arr)
+    {
+        $missionList = [];
+        foreach($arr['content']['cur_team_members'] as $member)
+        {
+            $mission = ['mission_type'=>"player",
+                        'mission_status'=>0,
+                        'detail'=>json_encode(['url'=>$member['link_url'],
+                            'name'=>$member['name'],
+                            'position'=>$member['position'],
+                            'logo'=>$member['main_img'],
+                            'team_id'=>$team_id,
+                            'current'=>1
+                            ]),
+                ];
+            $missionList[] = $mission;
+            foreach($arr['content']['cur_team_members'] as $member)
+            {
+                $mission = ['mission_type' => "player",
+                    'mission_status' => 0,
+                    'detail' => json_encode(['url' => $member['link_url'],
+                        'name' => $member['name'],
+                        'position' => $member['position'],
+                        'logo' => $member['main_img'],
+                        'team_id' => $team_id,
+                        'current' => 0
+                    ]),
+                ];
+                $missionList[] = $mission;
+            }
+        }
+        return $missionList;
     }
 
     /**
