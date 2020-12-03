@@ -16,7 +16,6 @@ class HomeController extends Controller
 
         $client = new ClientServices();
         $data = $client->curlGet($url);
-dd($data);
 
 
         $url = 'https://www.wanplus.com/lol/player/14504';//队员链接

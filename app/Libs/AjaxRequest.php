@@ -72,10 +72,9 @@ class AjaxRequest
             'x-csrf-token' => $paramHeaderData['token'] ?? '',
             'cookie' => $paramHeaderData['cookieStr'] ?? ''
         ];
-        $client = new Client(['verify' => false]);
-        $response = $client->request('POST', $play_url, ['form_params' => $param, 'headers' => $headers]);
+        $client = new ClientServices();
+        $data = $client->curlPost($play_url, $param,$headers);
 
-        $data = json_decode($response->getBody(), true);
         //$data=siz
         if ($data['ret'] == 0) {
             $list = $data['data'] ?? [];
