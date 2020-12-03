@@ -12,10 +12,10 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $url = 'https://pvp.qq.com/web201605/js/item.json';
+        $url = 'https://pvp.qq.com/web201605/js/summoner.json';
 
         $client = new ClientServices();
-        $data = $client->curlGet($url);
+        $data = $client->curlGet($url);dd($data);
 
 
         $url = 'https://www.wanplus.com/lol/player/14504';//队员链接
@@ -78,7 +78,6 @@ class HomeController extends Controller
         $refeerer = 'https://pvp.qq.com/web201605/searchResult.shtml';
         $data = curl_get($url, $refeerer);
         dd($data);
-
         $resultTotal = $data['data']['resultTotal'] ?? '';
         $resultNum = $data['data']['resultNum'] ?? '';
 
