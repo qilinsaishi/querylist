@@ -68,7 +68,6 @@ class lol_qq
 
     public function process($arr)
     {
-
         foreach($arr['content']['roles'] as $key => $value)
         {
             $arr['content']['roles'][$key] = $this->role_list[$value]??"未知";
