@@ -79,10 +79,12 @@ class MissionService
             }
     }
     //爬取数据
-    public function process($game="kpl",$source="")
+    public function process($game="kpl",$source="",$mission_type)
     {
         //获取爬取任务列表
-        $result_list = $this->getResult($game,$source,100);
+        $result_list = $this->getResult($game,$source,$mission_type,100);
+        print_R($result_list);
+        die();
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         $teamModel = new TeamModel();
@@ -147,7 +149,6 @@ class MissionService
                             {
                             echo "there";
                         }
-                        die();
                     }
                     elseif($result['mission_type']=="hero")
                     {
@@ -284,7 +285,15 @@ class MissionService
 
                         }
                     }
-                    echo "save:".$save."\n";
+                    if(is_array($save))
+                    {
+                        echo "save:".$save['result']."\n";
+                    }
+                    else
+                    {
+                        echo "save:".$save."\n";
+
+                    }
                 }
             }
             //随机等待
@@ -300,10 +309,10 @@ class MissionService
         $mission_list = $missionModel->getMissionByMachine($asign,$count,$game,$source,$mission_type);
          return ($mission_list) ;
     }
-    public function getResult($game,$source,$count = 3)
+    public function getResult($game,$source,$mission_type,$count = 3)
     {
         $collectModel = new CollectModel();
-        $mission_list = $collectModel->getResult($count,$game,$source);
+        $mission_list = $collectModel->getResult($count,$game,$source,$mission_type);
         return ($mission_list) ;
     }
     public function insertMission($data)

@@ -28,7 +28,7 @@ class CollectResultModel extends Model
         'content',
         'status'
     ];
-    public function getResult($count = 3,$game='',$source='',$status = 1)
+    public function getResult($count = 3,$game='',$source='',$mission_type='',$status = 1)
     {
         $result_list =$this->select("*");
         //游戏
@@ -40,6 +40,11 @@ class CollectResultModel extends Model
         if($source!="")
         {
             $result_list = $result_list->where("source",$source);
+        }
+        //爬取数据源
+        if($mission_type!="")
+        {
+            $result_list = $result_list->where("mission_type",$mission_type);
         }
         $result_list = $result_list
             ->where("status",$status)

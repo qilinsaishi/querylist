@@ -12,7 +12,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {operation} {game}';
+    protected $signature = 'mission:collect {operation} {game} {mission_type}';
 
     /**
      * The console command description.
@@ -40,12 +40,13 @@ class Mission extends Command
     {
         $operation = ($this->argument("operation")??"collect");
         $game = ($this->argument("game")??"");
+        $mission_type = ($this->argument("mission_type")??"");
         switch ($operation) {
             case "collect":
                 (new oMission())->collect();
                 break;
             case "process":
-                (new oMission())->process($game);
+                (new oMission())->process($game,"",$mission_type);
                 break;
             default:
                 (new oMission())->collect();

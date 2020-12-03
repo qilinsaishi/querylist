@@ -62,7 +62,8 @@ class wanplus
 
     public function process($arr)
     {
-        var_dump($arr);
+        var_dump($arr['content']);
+        die();
     }
 
     /**
