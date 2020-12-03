@@ -183,7 +183,7 @@ function getDataFromMapping($data_map,$dataArr)
     {
         if($map_info['path']!="")
         {
-            $value = self::getDataFromPath($map_info['path'],$dataArr,$map_info['default']);
+            $value = getDataFromPath($map_info['path'],$dataArr,$map_info['default']);
             if(!$value)
             {
                 $return[$key] = $map_info['default'];

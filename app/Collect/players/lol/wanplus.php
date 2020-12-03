@@ -105,10 +105,11 @@ class wanplus
 
         }
         $res['historys'] = $historys;
+        $eid=-1;//表示该队员的所有赛事
         $param = [
             'playerid' => $playerid,//队员id
             'gametype' => $gametype,//游戏类型
-            'eid' => -1
+            'eid' => $eid//表示该队员的所有赛事
         ];
         //该队员相关赛事$playData['eventList'],该队员相关的胜平负以及常用英雄$playData['stateList']
         $AjaxModel = new AjaxRequest();
