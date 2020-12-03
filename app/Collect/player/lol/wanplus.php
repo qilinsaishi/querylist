@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Collect\players\lol;
+namespace App\Collect\player\lol;
 
 use App\Libs\AjaxRequest;
 use QL\QueryList;
@@ -34,12 +34,16 @@ class wanplus
         $cdata = [];
         $url = $arr['detail']['url'] ?? '';
         $position = $arr['detail']['position'] ?? '';
-        $main_img = $arr['detail']['main_img'] ?? '';
+        $logo = $arr['detail']['logo'] ?? '';
+        $team_id = $arr['detail']['team_id'] ?? '';
+        $current = $arr['detail']['current'] ?? '';
         $res = $this->getCollectData($url);
 
         if (!empty($res)) {
-            $res['main_img'] = $main_img;
+            $res['logo'] = $logo;
             $res['position'] = $position;
+            $res['team_id'] = $team_id;
+            $res['current'] = $current;
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),

@@ -56,6 +56,6 @@ class Equipment extends Command
         $insert = (new oMission())->insertMission($data);
         echo "insert:".$insert;*/
 
-        (new oMission())->collect('lol','lol_qq');
+        (new oMission())->collect('lol','lol_qq','equipment');
     }
 }

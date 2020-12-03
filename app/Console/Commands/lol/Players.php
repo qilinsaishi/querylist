@@ -40,7 +40,7 @@ class Players extends Command
     {
        /* $data = [
             "asign_to"=>1,
-            "mission_type"=>'players',
+            "mission_type"=>'player',
             "mission_status"=>1,
             "game"=>'lol',
             "source"=>'wanplus',
@@ -57,6 +57,6 @@ class Players extends Command
         ];
         $insert = (new oMission())->insertMission($data);
         echo "insert:".$insert;*/
-        (new oMission())->collect('lol','wanplus','players');
+        (new oMission())->collect('lol','wanplus','player');
     }
 }

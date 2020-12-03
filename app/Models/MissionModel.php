@@ -35,7 +35,7 @@ class MissionModel extends Model
      * @var array
      */
 
-    public function getMissionByMachine($asign=1,$count = 3,$game='',$source='',$mission_type='',$status = 1)
+    public function getMissionByMachine($asign=1,$count = 3,$game='',$source='',$mission_type='',$status=[0,1])
     {
         $mission_list =$this->select("*");
         //接收客户端
@@ -57,7 +57,7 @@ class MissionModel extends Model
             $mission_list = $mission_list->where("mission_type",$mission_type);
         }
         $mission_list = $mission_list
-            ->where("mission_status",$status)
+            ->whereIn("mission_status",$status)
             ->limit($count)
             ->get()->toArray();
         return $mission_list;

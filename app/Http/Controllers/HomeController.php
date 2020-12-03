@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Libs\AjaxRequest;
+use App\Libs\ClientServices;
 use Illuminate\Http\Request;
 use QL\QueryList;
 use GuzzleHttp\Client;
@@ -11,14 +12,11 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $url = 'https://pvp.qq.com/web201605/js/herolist.json';
+        $url = 'https://pvp.qq.com/web201605/js/item.json';
 
-        $client = new Client(['verify' => false]);
-        $response = $client->request('GET', $url);
-
-        $data = json_decode($response->getBody(), true);dd($data);
-
-
+        $client = new ClientServices();
+        $data = $client->curlGet($url);
+dd($data);
 
 
         $url = 'https://www.wanplus.com/lol/player/14504';//队员链接
