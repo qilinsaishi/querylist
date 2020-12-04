@@ -46,6 +46,9 @@ class TeamModel extends Model
     protected $toJson = [
         "race_stat","honor_list","aka","race_stat"
     ];
+    protected $toAppend = [
+        "aka"
+    ];
     public function getTeamList($params)
     {
         $team_list =$this->select("*");
@@ -144,9 +147,45 @@ class TeamModel extends Model
         else
         {
             $return['team_id'] = $currentTeam['team_id'];
-            $return['result'] = 1;
             echo "toUpdateTeam:".$currentTeam['team_id']."\n";
+            //校验原有数据
+            foreach($data as $key => $value)
+            {
+                if(in_array($key,$this->toAppend))
+                {
+                    $t = json_decode($currentTeam[$key],true);
+                    foreach($value as $k => $v)
+                    {
+                        if(!in_array($v,$t))
+                        {
+                            $t[] = $v;
+                        }
+                    }
+                    $data[$key] = $t;
+                }
+                if(in_array($key,$this->toJson))
+                {
+                    $value = json_encode($value);
+                }
+                if(isset($currentTeam[$key]) && ($currentTeam[$key] == $value))
+                {
+                    //echo $currentTeam[$key]."-".$value."\n";
+                    echo $key.":passed\n";
+                    unset($data[$key]);
+                }
+                else
+                {
+                    echo $key.":difference:\n";
+                }
+            }
+            if(count($data))
+            {
+                $return['result'] = $this->updateTeam($currentTeam['team_id'],$data);
+            }
+            else
+            {
+                return true;
+            }
         }
-        return $return;
     }
 }

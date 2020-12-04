@@ -157,12 +157,7 @@ class PlayerModel extends Model
                     $t = json_decode($currentPlayer[$key],true);
                     foreach($value as $k => $v)
                     {
-                        echo $v;
-                        if(in_array($v,$t))
-                        {
-
-                        }
-                        else
+                        if(!in_array($v,$t))
                         {
                             $t[] = $v;
                         }
