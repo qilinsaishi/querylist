@@ -116,6 +116,13 @@ class PlayerModel extends Model
 
     public function updatePlayer($player_id=0,$data=[])
     {
+        foreach($this->toJson as $key)
+        {
+            if(isset($data[$key]))
+            {
+                $data[$key] = json_encode($data[$key]);
+            }
+        }
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
         {
@@ -139,7 +146,30 @@ class PlayerModel extends Model
         else
         {
             echo "toUpdatePlayer:".$currentPlayer['player_id']."\n";
-            return false;
+            //校验原有数据
+            foreach($data as $key => $value)
+            {
+                if(in_array($key,$this->toJson))
+                {
+                    $value = json_encode($value);
+                }
+                if(isset($currentPlayer[$key]) && ($currentPlayer[$key] == $value))
+                {
+                    unset($data[$key]);
+                }
+                else
+                {
+                    echo $key.":difference:\n";
+                }
+            }
+            if(count($data))
+            {
+                return $this->updatePlayer($currentPlayer['player_id'],$data);
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

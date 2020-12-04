@@ -73,9 +73,6 @@ class wanplus
 
     public function process($arr)
     {
-        print_R($arr);
-        //die($arr['id']);
-        die("here");
         foreach($arr['content']['historys'] as $key => $value)
         {
             //起始时间格式化
