@@ -41,6 +41,9 @@ class PlayerModel extends Model
     protected $toJson = [
         "team_history","event_history","aka","stat"
     ];
+    protected $toAppend = [
+        "aka"
+    ];
     public function getPlayerList($params)
     {
         $player_list =$this->select("*");
@@ -149,12 +152,31 @@ class PlayerModel extends Model
             //校验原有数据
             foreach($data as $key => $value)
             {
+                if(in_array($key,$this->toAppend))
+                {
+                    $t = json_decode($currentPlayer[$key],true);
+                    foreach($value as $k => $v)
+                    {
+                        echo $v;
+                        if(in_array($v,$t))
+                        {
+
+                        }
+                        else
+                        {
+                            $t[] = $v;
+                        }
+                    }
+                    $data[$key] = $t;
+                }
                 if(in_array($key,$this->toJson))
                 {
                     $value = json_encode($value);
                 }
                 if(isset($currentPlayer[$key]) && ($currentPlayer[$key] == $value))
                 {
+                    //echo $currentPlayer[$key]."-".$value."\n";
+                    echo $key.":passed\n";
                     unset($data[$key]);
                 }
                 else
