@@ -10,61 +10,71 @@ use GuzzleHttp\Client;
 
 class HomeController extends Controller
 {
+
     public function index()
     {
-        $url = 'https://pvp.qq.com/web201605/js/summoner.json';
+        $html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/105.shtml'));
 
-        $client = new ClientServices();
-        $data = $client->curlGet($url);dd($data);
-
-
-        $url = 'https://www.wanplus.com/lol/player/14504';//队员链接
-        $ql = QueryList::get($url);
-        $infos = $ql->find('.f15')->texts();//胜/平/负(历史总战绩)
-        $country = $aka = $title = '';
-        if (!empty($infos->all())) {
-            foreach ($infos->all() as $val) {
-                if (strpos($val, '名称') !== false) {
-                    $title = str_replace('名称：', '', $val);
-                }
-                if (strpos($val, '别名') !== false) {
-                    $aka = str_replace('别名：', '', $val);
-                }
-                if (strpos($val, '地区') !== false) {
-                    $country = str_replace('地区：', '', $val);
-                }
-
+        $ql = QueryList::html($html);
+        $item_id='105';
+        //皮肤
+        $skinImg = $ql->find('.pic-pf-list3 ')->attr('data-imgname');
+        $skiArr=explode('|',$skinImg);
+        $tempSkiArr=[];
+        $skinData=[];
+        if($skiArr) {
+           foreach ($skiArr as $key=>&$val){
+               $tempSkiArr=explode('&',$val);
+               $smallImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/105/105-smallskin-'.($key+1).'.jpg';
+               $bigImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/105/105-bigskin-'.($key+1).'.jpg';
+               $skinData[$key]['small_img']=$smallImg;//小图
+               $skinData[$key]['big_img']=$bigImg;//大图
+               $skinData[$key]['name']=$tempSkiArr[0] ?? '';//皮肤名称
+           }
+        }
+        $baseText= $ql->find('.cover-list-text')->texts()->all();
+        $baseBars= $ql->find('.cover-list-bar .ibar')->attrs('style');
+        $baseInfo=[];
+        if($baseText){
+            foreach ($baseText as $key=>$val){
+                $baseInfo[$key]['name']=$val;
+                $baseBar=str_replace(['width:','%'],'',$baseBars[$key]);
+                $baseInfo[$key]['value']=$baseBar ?? 0;
             }
         }
-        $res['country'] = $country;
-        $res['aka'] = $aka;
-        $res['title'] = $title;
+        //背景故事
+        $heroStory= $ql->find('#hero-story .pop-bd')->html();
+        //英雄介绍
+        $history=$ql->find('#history .pop-bd')->html();
 
-        $playerid = $ql->find('#recent #id')->attr('value');//id
-        $gametype = $ql->find('#recent #gametype')->attr('value');
+        //技能介绍
+        $baseText= $ql->find('.cover-list-text')->texts()->all();
+        $skillInfo=[];
+        $skillImg=$ql->find('.skill-u1 img')->attrs('src')->all();//dd($skillImg);
+        //http://game.gtimg.cn/images/yxzj/img201606/heroimg/105/10500.png
+        //game.gtimg.cn/images/yxzj/img201606/heroimg/105/10500.png
+        $skillName=$ql->find('.skill-show .show-list .skill-name')->texts()->all();
+        $skillDesc=$ql->find('.skill-show .show-list .skill-desc')->htmls()->all();
+        $skillBaseInfo=[];
 
-        //曾役战队
-        $history_times = $ql->find('.team-history  li .history-time')->texts()->all();//队员名称
-        $history_teams = $ql->find('.team-history  li span')->texts()->all();//队员名称
-        $historys = [];
-
-        foreach ($history_times as $k => $val) {
-            $temps = preg_replace("/(\s|\&nbsp\;|　|\xc2\xa0)/", " ", strip_tags($val));
-            $history_time = preg_replace('# #', '', $temps);
-            $historys[$k]['history_time'] = $history_time ?? '';
-            $historys[$k]['history_team'] = $history_teams[$k] ?? '';
-
+        if($skillImg){
+            foreach ($skillImg as $key=>$val){
+                if($val!='###'){
+                    $skillBaseInfo[$key]['kill_img']='http:'.$val;//技能图片
+                    if($skillName[$key]) {
+                        $names=explode('冷却值',$skillName[$key]);
+                        $skillBaseInfo[$key]['name']=$names[0] ??'';
+                        $times=explode('消耗',$names[1]);
+                        $skillBaseInfo[$key]['cooling']='冷却值'.$times[0] ??'';
+                        $skillBaseInfo[$key]['consume']='消耗'.$times[1] ??'';
+                    }
+                    $skillBaseInfo[$key]['skillDesc']=$skillDesc[$key];
+                }
+            }
         }
-        $res['historys'] = $historys;
-        $param = [
-            'playerid' => $playerid,//队员id
-            'gametype' => $gametype,//游戏类型
-            'eid' => -1
-        ];
-        //该队员相关赛事$playData['eventList'],该队员相关的胜平负以及常用英雄$playData['stateList']
-        $AjaxModel=new AjaxRequest();
-        $playData = $AjaxModel->getMemberMatch($url, $param);
-        $res['playData'] = $playData;//赛事相关信息
+dd($skillBaseInfo);
+
+
         return $res;
     }
 
