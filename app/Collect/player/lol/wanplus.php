@@ -31,10 +31,13 @@ class wanplus
             "cn_name"=>['path'=>"name",'default'=>''],
             "en_name"=>['path'=>"name",'default'=>''],
             "aka"=>['path'=>"aka",'default'=>''],
+            "country"=>['path'=>"country",'default'=>''],
             "position"=>['path'=>"position",'default'=>''],
             "team_history"=>['path'=>'historys','default'=>[]],
             "event_history"=>['path'=>'playData.eventList','default'=>[]],
             "stat"=>['path'=>'playData.stateList','default'=>[]],
+            "team_id"=>['path'=>'team_id','default'=>0],
+            "logo"=>['path'=>'logo','default'=>0],
         ];
 
     public function collect($arr)
@@ -70,6 +73,9 @@ class wanplus
 
     public function process($arr)
     {
+        print_R($arr);
+        //die($arr['id']);
+        die("here");
         foreach($arr['content']['historys'] as $key => $value)
         {
             //起始时间格式化
@@ -85,22 +91,20 @@ class wanplus
             $end_date = date("Y.m",strtotime(str_replace(".","-",$t[1].".01")));
             $start_date = ($start_date==$t[0])?$start_date:"~";
             $end_date = ($end_date==$t[1])?$end_date:"~";
-            $arr['content']['historys'][$key] = $start_date."-".$end_date;
+            $arr['content']['historys'][$key]['history_time'] = $start_date."-".$end_date;
         }
         foreach($arr['content']['playData']['eventList'] as $key => $value)
         {
-            print_R($value);
             $arr['content']['playData']['eventList'][$key]['start_date'] = date("Y-m-d",$value['starttime']);
             unset($arr['content']['playData']['eventList'][$key]['starttime']);
         }
-        print_R($arr['content']['playData']['eventList']);
-        die();
-        print_R($arr['id']);
-        die();
+        foreach($arr['content']['playData']['stateList']['usedheroes'] as $key => $value)
+        {
+            $arr['content']['playData']['stateList']['usedheroes'][$key]['kda'] = sprintf("%.4f",$value['kda']);
+            $arr['content']['playData']['stateList']['usedheroes'][$key]['winrate'] = sprintf("%.4f",$value['winrate']);
+        }
         $data = getDataFromMapping($this->data_map,$arr['content']);
-
-        var_dump($data['team_history']);
-        die();
+        return $data;
     }
 
     /**
