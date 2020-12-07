@@ -25,13 +25,14 @@ class HomeController extends Controller
         if($skiArr) {
            foreach ($skiArr as $key=>&$val){
                $tempSkiArr=explode('&',$val);
-               $smallImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/105/105-smallskin-'.($key+1).'.jpg';
-               $bigImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/105/105-bigskin-'.($key+1).'.jpg';
+               $smallImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/'.$item_id.'/'.$item_id.'-smallskin-'.($key+1).'.jpg';
+               $bigImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/'.$item_id.'/'.$item_id.'-bigskin-'.($key+1).'.jpg';
                $skinData[$key]['small_img']=$smallImg;//小图
                $skinData[$key]['big_img']=$bigImg;//大图
                $skinData[$key]['name']=$tempSkiArr[0] ?? '';//皮肤名称
            }
         }
+        //评分能力
         $baseText= $ql->find('.cover-list-text')->texts()->all();
         $baseBars= $ql->find('.cover-list-bar .ibar')->attrs('style');
         $baseInfo=[];
@@ -72,7 +73,12 @@ class HomeController extends Controller
                 }
             }
         }
-dd($skillBaseInfo);
+        //铭文搭配建议
+        //铭文id,这个关联必须先执行inscription 这个铭文脚本，而且必须保证ming_id 与下面的保存一致
+        $sugglist = $ql->find('.sugg-u1')->attr('data-ming');
+        $sugg_tips = $ql->find('.sugg-tips')->text();//铭文描述
+
+dd($sugglist);
 
 
         return $res;
