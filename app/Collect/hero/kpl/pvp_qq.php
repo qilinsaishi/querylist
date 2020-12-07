@@ -23,6 +23,7 @@ class pvp_qq
         $res['hero_type'] = $arr['detail']['hero_type'] ?? '';
         $res['hero_type2'] = $arr['detail']['hero_type2'] ?? '';
         $res['logo"'] = $arr['detail']['logo'] ?? '';
+        $res['item_id"'] = $itemId;
 
         if (!empty($res)) {
             $cdata = [
@@ -80,8 +81,8 @@ class pvp_qq
                 $tempSkiArr = explode('&', $val);
                 $smallImg = 'https://game.gtimg.cn/images/yxzj/img201606/heroimg/' . $itemId . '/' . $itemId . '-smallskin-' . ($key + 1) . '.jpg';
                 $bigImg = 'https://game.gtimg.cn/images/yxzj/img201606/heroimg/' . $itemId . '/' . $itemId . '-bigskin-' . ($key + 1) . '.jpg';
-                $skinData[$key]['small_img'] = $smallImg;//小图
-                $skinData[$key]['big_img'] = $bigImg;//大图
+                $skinData[$key]['smallImg'] = $smallImg;//小图
+                $skinData[$key]['bigImg'] = $bigImg;//大图
                 $skinData[$key]['name'] = $tempSkiArr[0] ?? '';//皮肤名称
             }
         }
@@ -114,7 +115,7 @@ class pvp_qq
         if ($skillImg) {
             foreach ($skillImg as $key => $val) {
                 if ($val != '###') {
-                    $skillBaseInfo[$key]['kill_img'] = 'http:' . $val;//技能图片
+                    $skillBaseInfo[$key]['killImg'] = 'http:' . $val;//技能图片
                     if ($skillName[$key]) {
                         $names = explode('冷却值', $skillName[$key]);
                         $skillBaseInfo[$key]['name'] = $names[0] ?? '';
@@ -132,7 +133,7 @@ class pvp_qq
         $suggTips = $ql->find('.sugg-tips')->text();//铭文描述
         $suggList = [
             'sugglistIds' => $suggListIds,
-            'sugg_tips' => $suggTips,
+            'suggTips' => $suggTips,
         ];
 
 
@@ -143,11 +144,11 @@ class pvp_qq
         $tempSuggInfos = [];
         if ($suggInfo2Imgs) {
             foreach ($suggInfo2Imgs as $key => $val) {
-                $addSkills[$key]['kill_img'] = 'http:' . $val;//技能图片;
+                $addSkills[$key]['killImg'] = 'http:' . $val;//技能图片;
                 $tempSuggInfos = explode('</b><span>', $suggInfo2Names[$key]);
                 $addSkills[$key]['name'] = str_replace('<b>', '', $tempSuggInfos[0]);
                 foreach ($skillBaseInfo as $v) {
-                    if ($v['kill_img'] == 'http:' . $val) {
+                    if ($v['killImg'] == 'http:' . $val) {
                         $addSkills[$key]['desc'] = $v['name'];
                     }
                 }

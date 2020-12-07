@@ -13,7 +13,7 @@ class HomeController extends Controller
 
     public function index()
     {
-        $html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/105.shtml'));
+        $html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/109.shtml'));
         $ql = QueryList::html($html);
         $item_id='105';
         //皮肤
@@ -26,8 +26,8 @@ class HomeController extends Controller
                $tempSkiArr=explode('&',$val);
                $smallImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/'.$item_id.'/'.$item_id.'-smallskin-'.($key+1).'.jpg';
                $bigImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/'.$item_id.'/'.$item_id.'-bigskin-'.($key+1).'.jpg';
-               $skinData[$key]['small_img']=$smallImg;//小图
-               $skinData[$key]['big_img']=$bigImg;//大图
+               $skinData[$key]['smallImg']=$smallImg;//小图
+               $skinData[$key]['bigImg']=$bigImg;//大图
                $skinData[$key]['name']=$tempSkiArr[0] ?? '';//皮肤名称
            }
         }
@@ -60,7 +60,7 @@ class HomeController extends Controller
         if($skillImg){
             foreach ($skillImg as $key=>$val){
                 if($val!='###'){
-                    $skillBaseInfo[$key]['kill_img']='http:'.$val;//技能图片
+                    $skillBaseInfo[$key]['killImg']='http:'.$val;//技能图片
                     if($skillName[$key]) {
                         $names=explode('冷却值',$skillName[$key]);
                         $skillBaseInfo[$key]['name']=$names[0] ??'';
@@ -78,7 +78,7 @@ class HomeController extends Controller
         $suggTips = $ql->find('.sugg-tips')->text();//铭文描述
         $suggList =[
             'sugglistIds'=>$suggListIds,
-            'sugg_tips'=>$suggTips,
+            'suggTips'=>$suggTips,
         ];
 
 
@@ -89,11 +89,11 @@ class HomeController extends Controller
         $tempSuggInfos=[];
         if($suggInfo2Imgs){
             foreach ($suggInfo2Imgs as $key=>$val){
-                $addSkills[$key]['kill_img']='http:'.$val;//技能图片;
+                $addSkills[$key]['killImg']='http:'.$val;//技能图片;
                 $tempSuggInfos=explode('</b><span>',$suggInfo2Names[$key]);
                 $addSkills[$key]['name']=str_replace('<b>','',$tempSuggInfos[0]);
                 foreach ($skillBaseInfo as $v){
-                    if($v['kill_img']=='http:'.$val) {
+                    if($v['killImg']=='http:'.$val) {
                         $addSkills[$key]['desc']=$v['name'];
                     }
                 }
@@ -146,7 +146,7 @@ class HomeController extends Controller
         $res['addSkills']=$addSkills ?? [];//技能加点建议
         $res['heroInfoBox']=$heroInfoBox ?? [];//英雄关系
         $res['equipBox']=$equipBox ?? [];//出装建议
-
+dd($res);
         return $res;
     }
 
