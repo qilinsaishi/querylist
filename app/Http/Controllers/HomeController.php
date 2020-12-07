@@ -13,9 +13,9 @@ class HomeController extends Controller
 
     public function index()
     {
-        $html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/109.shtml'));
+        $html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
         $ql = QueryList::html($html);
-        $item_id='105';
+        $item_id='153';
         //皮肤
         $skinImg = $ql->find('.pic-pf-list3 ')->attr('data-imgname');
         $skiArr=explode('|',$skinImg);
@@ -50,13 +50,24 @@ class HomeController extends Controller
         //技能介绍
         $baseText= $ql->find('.cover-list-text')->texts()->all();
         $skillInfo=[];
-        $skillImg=$ql->find('.skill-u1 img')->attrs('src')->all();//dd($skillImg);
+        $skillImg=$ql->find('.skill-info  .skill-u1 li img')->attrs('src')->all();
+
+           // $(".skill-show .show-list").eq(4).find(".skill-name b").html();
         //http://game.gtimg.cn/images/yxzj/img201606/heroimg/105/10500.png
         //game.gtimg.cn/images/yxzj/img201606/heroimg/105/10500.png
         $skillName=$ql->find('.skill-show .show-list .skill-name')->texts()->all();
         $skillDesc=$ql->find('.skill-show .show-list .skill-desc')->htmls()->all();
-        $skillBaseInfo=[];
+        //第五个技能时
+        $skillNo5Name = $ql->find('.skill-show .show-list:eq(4) .skill-name')->text();
+        $skillNo5Desc= $ql->find('.skill-show .show-list:eq(4) .skill-desc')->text();
+        if($skillNo5Name !=''){//超过五张图片特殊处理
+            $skillNo5=$ql->find('.no5')->attr('data-img');
+            array_push($skillImg,$skillNo5);
+            array_push($skillName,$skillNo5Name);
+            array_push($skillDesc,$skillNo5Desc);
+        }
 
+        $skillBaseInfo=[];
         if($skillImg){
             foreach ($skillImg as $key=>$val){
                 if($val!='###'){
@@ -72,6 +83,7 @@ class HomeController extends Controller
                 }
             }
         }
+        $skillBaseInfo=array_values($skillBaseInfo);
         //铭文搭配建议
         //铭文id,这个关联必须先执行inscription 这个铭文脚本，而且必须保证ming_id 与下面的保存一致
         $suggListIds = $ql->find('.sugg-u1')->attr('data-ming');

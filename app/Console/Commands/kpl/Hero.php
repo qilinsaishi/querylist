@@ -73,6 +73,6 @@ class Hero extends Command
               }*/
 
 
-        (new oMission())->collect('kpl','pvp_qq','hero');
+        (new oMission())->collect('kpl', 'pvp_qq', 'hero');
     }
 }
