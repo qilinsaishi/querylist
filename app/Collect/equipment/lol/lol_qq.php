@@ -88,7 +88,6 @@ class lol_qq
 
     public function process($arr)
     {
-
         $data = [];
         $arr['content'] = array_combine(array_column($arr['content'], "itemId"), array_values($arr['content']));
         ksort($arr['content']);

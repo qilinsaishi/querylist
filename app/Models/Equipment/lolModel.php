@@ -6,13 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use App\Libs\CollectLib;
 
 class lolModel extends Model
 {
     protected $table = "lol_equipment_info";
     protected $primaryKey = "equipment_id";
-    public $timestamps = false;
     protected $connection = "query_list";
 
     /**

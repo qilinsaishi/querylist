@@ -100,28 +100,14 @@ class MissionService
             {
                 //生成类库路径
                 $className = 'App\Collect\\' . $result['mission_type'] . '\\' . $result['game'] . '\\' . $result['source'];
-                //判断类库存在
-                $exist = class_exists($className);
-                //如果不存在
-                if (!$exist)
+                $classList = $this->getClass($classList,$className);
+                if(!isset($classList[$className]))
                 {
                     echo $className . " not found\n";
-                    //die();
                 }
                 else
                 {
-                    //之前没有初始化过
-                    if (!isset($classList[$className]))
-                    {
-                        //初始化，存在列表中
-                        $class = new $className;
-                        $classList[$className] = $class;
-                    }
-                    else
-                    {
-                        //直接调用
-                        $class = $classList[$className];
-                    }
+                    $class = $classList[$className];
                     //执行爬取操作
                     $processResult=$class->process($result);
                     if(!is_array($processResult))
@@ -158,26 +144,10 @@ class MissionService
                     {
                         //生成类库路径
                         $modelClassName = 'App\Models\Hero\\' . $result['game']."Model";
-                        //判断类库存在
-                        $exist = class_exists($modelClassName);
-                        if(!$exist)
+                        $classList = $this->getClass($classList,$modelClassName);
+                        if(isset($classList[$modelClassName]))
                         {
-
-                        }
-                        else
-                        {
-                            //之前没有初始化过
-                            if (!isset($classList[$modelClassName]))
-                            {
-                                //初始化，存在列表中
-                                $modelClass = new $modelClassName;
-                                $classList[$modelClassName] = $modelClass;
-                            }
-                            else
-                            {
-                                //直接调用
-                                $modelClass = $classList[$modelClassName];
-                            }
+                            $modelClass = $classList[$modelClassName];
                             $save = $modelClass->saveHero($processResult);
                         }
                     }
@@ -185,26 +155,10 @@ class MissionService
                     {
                         //生成类库路径
                         $modelClassName = 'App\Models\Equipment\\' . $result['game']."Model";
-                        //判断类库存在
-                        $exist = class_exists($modelClassName);
-                        if(!$exist)
+                        $classList = $this->getClass($classList,$modelClassName);
+                        if(isset($classList[$modelClassName]))
                         {
-
-                        }
-                        else
-                        {
-                            //之前没有初始化过
-                            if (!isset($classList[$modelClassName]))
-                            {
-                                //初始化，存在列表中
-                                $modelClass = new $modelClassName;
-                                $classList[$modelClassName] = $modelClass;
-                            }
-                            else
-                            {
-                                //直接调用
-                                $modelClass = $classList[$modelClassName];
-                            }
+                            $modelClass = $classList[$modelClassName];
                             foreach($processResult as $equipment)
                             {
                                 $save = $modelClass->saveEquipment($equipment);
@@ -215,29 +169,13 @@ class MissionService
                     {
                         //生成类库路径
                         $modelClassName = 'App\Models\Summoner\\' . $result['game']."Model";
-                        //判断类库存在
-                        $exist = class_exists($modelClassName);
-                        if(!$exist)
+                        $classList = $this->getClass($classList,$modelClassName);
+                        if(isset($classList[$modelClassName]))
                         {
-
-                        }
-                        else
-                        {
-                            //之前没有初始化过
-                            if (!isset($classList[$modelClassName]))
+                            $modelClass = $classList[$modelClassName];
+                            foreach($processResult as $summomer)
                             {
-                                //初始化，存在列表中
-                                $modelClass = new $modelClassName;
-                                $classList[$modelClassName] = $modelClass;
-                            }
-                            else
-                            {
-                                //直接调用
-                                $modelClass = $classList[$modelClassName];
-                            }
-                            foreach($processResult as $equipment)
-                            {
-                                $save = $modelClass->saveSkill($equipment);
+                                $save = $modelClass->saveSkill($summomer);
                             }
                         }
                     }
@@ -245,26 +183,10 @@ class MissionService
                     {
                         //生成类库路径
                         $modelClassName = 'App\Models\Rune\\' . $result['game']."Model";
-                        //判断类库存在
-                        $exist = class_exists($modelClassName);
-                        if(!$exist)
+                        $classList = $this->getClass($classList,$modelClassName);
+                        if(isset($classList[$modelClassName]))
                         {
-
-                        }
-                        else
-                        {
-                            //之前没有初始化过
-                            if (!isset($classList[$modelClassName]))
-                            {
-                                //初始化，存在列表中
-                                $modelClass = new $modelClassName;
-                                $classList[$modelClassName] = $modelClass;
-                            }
-                            else
-                            {
-                                //直接调用
-                                $modelClass = $classList[$modelClassName];
-                            }
+                            $modelClass = $classList[$modelClassName];
                             if(isset($processResult['runeDetail']))
                             {
                                 foreach($processResult['rune'] as $equipment)
@@ -272,8 +194,8 @@ class MissionService
                                     $save = $modelClass->saveRune($equipment);
                                 }
                                 $detailModelClassName = 'App\Models\Rune\\' . $result['game']."DetailModel";
-                                $detailModelClass = new $detailModelClassName;
-                                $classList[$detailModelClassName] = $modelClass;
+                                $classList = $this->getClass($classList,$detailModelClassName);
+                                $detailModelClass = $classList[$detailModelClassName];
                                 foreach($processResult['runeDetail'] as $equipment)
                                 {
                                     $save = $detailModelClass->saveRuneDetail($equipment);
@@ -286,7 +208,6 @@ class MissionService
                                     $save = $modelClass->saveRune($rune);
                                 }
                             }
-
                         }
                     }
                     if(is_array($save))
@@ -296,7 +217,6 @@ class MissionService
                     else
                     {
                         echo "save:".$save."\n";
-
                     }
                 }
             }
@@ -322,5 +242,30 @@ class MissionService
     public function insertMission($data)
     {
         return (new MissionModel())->insertMission($data);
+    }
+    public function getClass($classList,$modelClassName)
+    {
+        //判断类库存在
+        $exist = class_exists($modelClassName);
+        if(!$exist)
+        {
+
+        }
+        else
+        {
+            //之前没有初始化过
+            if (!isset($classList[$modelClassName]))
+            {
+                //初始化，存在列表中
+                $modelClass = new $modelClassName;
+                $classList[$modelClassName] = $modelClass;
+            }
+            else
+            {
+                ////直接调用
+                //$modelClass = $classList[$modelClassName];
+            }
+        }
+        return $classList;
     }
 }

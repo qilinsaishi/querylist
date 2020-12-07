@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Models\Summoner;
+namespace App\Models\Equipment;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class lolModel extends Model
+class kplModel extends Model
 {
-    protected $table = "lol_summoner_info";
-    protected $primaryKey = "skill_id";
-    public $timestamps = false;
+    protected $table = "kpl_equipment_info";
+    protected $primaryKey = "equipment_id";
     protected $connection = "query_list";
 
     /**
@@ -41,34 +40,35 @@ class lolModel extends Model
     protected $toJson = [
         "aka"
     ];
-    public function getSkillList($params)
+    public function getEquipmentList($params)
     {
-        $skill_list =$this->select("*");
+        $equipment_list =$this->select("*");
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
-        $skill_list = $skill_list
+        $equipment_list = $equipment_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
             ->orderBy("id")
             ->get()->toArray();
-        return $skill_list;
+        return $equipment_list;
     }
-    public function getSkillByName($skill_name)
+    public function getEquipmentByName($equipment_name,$type)
     {
-        $skill_info =$this->select("*")
-                    ->where("skill_name",$skill_name)
-                    ->get()->first();
-        if(isset($skill_info->skill_id))
+        $equipment_info =$this->select("*")
+                    ->where("equipment_name",$equipment_name)
+                    ->where("type",$type)
+            ->get()->first();
+        if(isset($equipment_info->equipment_id))
         {
-            $skill_info = $skill_info->toArray();
+            $equipment_info = $equipment_info->toArray();
         }
         else
         {
-            $skill_info = [];
+            $equipment_info = [];
         }
-        return $skill_info;
+        return $equipment_info;
     }
-    public function insertSkill($data)
+    public function insertEquipment($data)
     {
         foreach($this->attributes as $key => $value)
         {
@@ -97,30 +97,30 @@ class lolModel extends Model
         return $this->insertGetId($data);
     }
 
-    public function updateSkill($skill_id=0,$data=[])
+    public function updateEquipment($equipment_id=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
         {
             $data['update_time'] = $currentTime;
         }
-        return $this->where('skill_id',$skill_id)->update($data);
+        return $this->where('equipment_id',$equipment_id)->update($data);
     }
 
-    public function saveSkill($data)
+    public function saveEquipment($data)
     {
-        $data['skill_name'] = preg_replace("/\s+/", "",$data['skill_name']);
-        $data['skill_name'] = trim($data['skill_name']);
+        $data['equipment_name'] = preg_replace("/\s+/", "",$data['equipment_name']);
+        $data['equipment_name'] = trim($data['equipment_name']);
         $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
-        $currentSkill = $this->getSkillByName($data['skill_name']);
-        if(!isset($currentSkill['skill_id']))
+        $currentEquipment = $this->getEquipmentByName($data['equipment_name'],$data['type']);
+        if(!isset($currentEquipment['equipment_id']))
         {
-            echo "toInsertSkill:"."\n";
-            return $this->insertSkill($data);
+            echo "toInsertEquip:"."\n";
+            return $this->insertEquipment($data);
         }
         else
         {
-            echo "toUpdateSkill:".$currentSkill['skill_id']."\n";
+            echo "toUpdateEquip:".$currentEquipment['equipment_id']."\n";
         }
     }
 }

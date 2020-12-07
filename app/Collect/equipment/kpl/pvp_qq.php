@@ -8,6 +8,42 @@ class pvp_qq
 {
     protected $data_map =
         [
+            1=>[
+                "equipment_name" => ['path' => "item_name", 'default' => ''],
+                "description" => ['path' => "description", 'default' => '暂无'],
+                "cn_name" => ['path' => "item_name", 'default' => ''],//中文名
+                "en_name" => ['path' => "", 'default' => ''],//英文名
+                "type" => ['path' => "", 'default' => 1],
+                "logo" => ['path' => "logo", 'default' => ""],
+                "price" => ['path' => "price", 'default' => 0],//价格
+                "aka" => ['path' => "", 'default' => ""],//别名
+                "id" => ['path' => "item_id", 'default' => 0],//对应站点ID
+                "sub_type" => ['path' => "item_type", 'default' => 1],
+                "level" => ['path' => "", 'default' => 0],
+                ],
+            2=>[
+                "equipment_name" => ['path' => "itemname", 'default' => ''],
+                "description" => ['path' => "description", 'default' => '暂无'],
+                "cn_name" => ['path' => "itemname", 'default' => ''],//中文名
+                "en_name" => ['path' => "", 'default' => ''],//英文名
+                "type" => ['path' => "", 'default' => 2],
+                "logo" => ['path' => "logo", 'default' => ""],
+                "price" => ['path' => "", 'default' => 0],//价格
+                "aka" => ['path' => "", 'default' => ""],//别名
+                "id" => ['path' => "itemid", 'default' => 0],//对应站点ID
+                "sub_type" => ['path' => "itemtype", 'default' => 1],
+                "level" => ['path' => "itemlv", 'default' => 0],
+            ],
+        ];
+    protected $sub_type_list =
+        [
+            1=>[
+                1=>'攻击',2=>'法术',3=>'防御',4=>'移动',5=>'打野',6=>'游走'
+                ],
+
+            2=>[
+                1=>'装备',2=>'道具',3=>'额外技能'
+            ],
         ];
 
     public function collect($arr)
@@ -56,8 +92,70 @@ class pvp_qq
          * }
          * 装备logo：例如https://game.gtimg.cn/images/yxzj/img201606/itemimg/2003.jpg（2003表示装备id）
          */
-
-        var_dump($arr);
+        $data = [];
+        if($arr['content']['type']==1)
+        {
+            foreach($arr['content']['items']  as $key => $value)
+            {
+                $value['description'] = $value['des1']."。".($value['des2']??"");
+                $value['description'] = preg_replace("/<([a-zA-Z]+)[^>]*>/", "",$value['description']);
+                $value['description'] = preg_replace("{</([a-zA-Z]+)[^>]*>}", "",$value['description']);
+                $value['logo'] = "https://game.gtimg.cn/images/yxzj/img201606/itemimg/".$value['item_id'].".jpg";
+                $data[$key] = getDataFromMapping($this->data_map[1], $value);
+            }
+        }
+        elseif($arr['content']['type']==2)
+        {
+            foreach($arr['content'] as $key => $value)
+            {
+                if(substr($key,0,4)=="bjtw")
+                {
+                    $data_key = $key;
+                }
+            }
+            foreach($arr['content'][$data_key]  as $key => $value)
+            {
+                foreach($value as $k2 => $v2)
+                {
+                    if(substr($k2,0,8)=="itemname")
+                    {
+                        $value['itemname'] = $v2;
+                        unset($value[$k2]);
+                    }
+                    elseif(substr($k2,0,6)=="itemid")
+                    {
+                        $value['itemid'] = $v2;
+                        unset($value[$k2]);
+                    }
+                    elseif(substr($k2,0,6)=="itemlv")
+                    {
+                        $value['itemlv'] = str_replace("级","",$v2);
+                        unset($value[$k2]);
+                    }
+                    elseif(substr($k2,0,4)=="des1")
+                    {
+                        $value['des1'] = $v2;
+                        unset($value[$k2]);
+                    }
+                    elseif(substr($k2,0,4)=="des2")
+                    {
+                        $value['des2'] = $v2;
+                        unset($value[$k2]);
+                    }
+                    elseif(substr($k2,0,8)=="itemtype")
+                    {
+                        $value['itemtype'] = $v2;
+                        unset($value[$k2]);
+                    }
+                }
+                $value['description'] = $value['des1']."。".($value['des2']??"");
+                $value['description'] = preg_replace("/<([a-zA-Z]+)[^>]*>/", "",$value['description']);
+                $value['description'] = preg_replace("{</([a-zA-Z]+)[^>]*>}", "",$value['description']);
+                $value['logo'] = "https://game.gtimg.cn/images/yxzj/img201606/itemimg/".$value['itemid'].".jpg";
+                $data[$key] = getDataFromMapping($this->data_map[2], $value);
+            }
+        }
+        return $data;
     }
 
 }
