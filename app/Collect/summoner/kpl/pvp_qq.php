@@ -9,6 +9,14 @@ class pvp_qq
     //召唤师技能
     protected $data_map =
         [
+            "skill_name" => ['path' => "summoner_name", 'default' => ''],
+            "description" => ['path' => "description", 'default' => '暂无'],
+            "cn_name" => ['path' => "summoner_name", 'default' => ''],//中文名
+            "en_name" => ['path' => "", 'default' => ''],//英文名
+            "logo" => ['path' => "logo", 'default' => ""],
+            "rank" => ['path' => "summoner_rank", 'default' => 0],//解锁等级
+            "aka" => ['path' => "", 'default' => ""],//别名
+            "id" => ['path' => "summoner_id", 'default' => 0],//对应站点ID
         ];
 
     public function collect($arr)
@@ -40,7 +48,12 @@ class pvp_qq
          * https://game.gtimg.cn/images/yxzj/img201606/summoner/80104-big.jpg  召唤师技能大图
          * summoner_id=>召唤师id,summoner_name=>召唤师名称,summoner_rank=>召唤师技能解锁，summoner_description=>描述
          */
-
-        var_dump($arr);
+        foreach($arr['content']  as $key => $value)
+        {
+            $value['summoner_rank'] = str_replace("LV.","",str_replace("解锁","",$value['summoner_rank']));
+            $value['logo'] = "https://game.gtimg.cn/images/yxzj/img201606/summoner/".$value['summoner_id']."-big.jpg";
+            $data[$key] = getDataFromMapping($this->data_map, $value);
+        }
+        return $data;
     }
 }

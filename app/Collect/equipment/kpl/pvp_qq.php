@@ -90,6 +90,7 @@ class pvp_qq
          * itemnamezwm_cd=>名称，itemidzbid_4a=>装备id,itemlvzbdj_96=>等级，itemtypezbfl_30装备分类（1=>装备,2=>道具,3=>额外技能）
          * des1zbsx_a6=>属性1，属性2
          * }
+         * 以上字段名都需要截取头部有实际意义的部分
          * 装备logo：例如https://game.gtimg.cn/images/yxzj/img201606/itemimg/2003.jpg（2003表示装备id）
          */
         $data = [];

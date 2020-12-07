@@ -7,9 +7,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class lolModel extends Model
+class kplModel extends Model
 {
-    protected $table = "lol_summoner_info";
+    protected $table = "kpl_summoner_info";
     protected $primaryKey = "skill_id";
     protected $connection = "query_list";
 
