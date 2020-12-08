@@ -22,29 +22,10 @@ class pvp_qq
             "stat"=>['path'=>"scoreInfo",'default'=>[]],//评分
             "skin_list"=>['path'=>"skinData",'default'=>[]],//皮肤
             "skill_list"=>['path'=>"skillBaseInfo",'default'=>[]],//技能
-            "inscription_suggest"=>['path'=>"suggList",'default'=>[]],//铭文建议
-            "skill_suggest"=>['path'=>"addSkills",'default'=>[]],//技能点建议
-            "hero_suggest"=>['path'=>"heroInfo",'default'=>[]],//英雄建议
-            "equipment_suggest"=>['path'=>"equipBox",'default'=>[]],//道具建议
-            /*
-            "roles"=>['path'=>"roles",'default'=>[]],//职业
-            "difficulty"=>['path'=>"difficulty",'default'=>0],//上手难度
-            "physical_attack"=>['path'=>"attack",'default'=>0],//物理攻击
-            "magic_attack"=>['path'=>"magic",'default'=>0],//魔法攻击
-            "defense"=>['path'=>"defense",'default'=>0],//防御
-            "hp"=>['path'=>"hp",'default'=>0],
-            "mp"=>['path'=>"mp",'default'=>0],
-            "hp_regen"=>['path'=>"hpregen",'default'=>0],//生命回复
-            "mp_regen"=>['path'=>"mpregen",'default'=>0],//魔法回复
-            "attack_speed"=>['path'=>"attackspeed",'default'=>0],//攻击速度
-            "attack_range"=>['path'=>"attackrange",'default'=>0],//攻击范围
-            "attack_damage"=>['path'=>"attackdamage",'default'=>0],//攻击
-            "price"=>['path'=>"goldPrice",'default'=>0],//攻击
-            "move_speed"=>['path'=>"movespeed",'default'=>0],//移动速度
-            "magic_defense"=>['path'=>"spellblock",'default'=>0],//魔法抗性
-            "ally_tips"=>['path'=>"allytips",'default'=>[]],//使用技巧
-            "enemy_tips"=>['path'=>"enemytips",'default'=>[]],//对手技巧
-            */
+            "inscription_tips"=>['path'=>"suggList",'default'=>[]],//铭文建议
+            "skill_tips"=>['path'=>"addSkills",'default'=>[]],//技能点建议
+            "hero_tips"=>['path'=>"heroInfo",'default'=>[]],//英雄建议
+            "equipment_tips"=>['path'=>"equipBox",'default'=>[]],//道具建议
         ];
     public $hero_type = [
         1=>'战士',
@@ -87,7 +68,22 @@ class pvp_qq
 
     public function process($arr)
     {
-        //print_R(($arr['content']['scoreInfo']));die();
+        /**
+         * 对应数组hero_type，hero_type2
+         * var typeMap = {3: '坦克',1: '战士',2: '法师',4: '刺客',5: '射手',6: '辅助',10: '限免',11: '新手'}
+         * 'skinData';//皮肤
+         * 'scoreInfo'//评分
+         * 'heroStory'//背景故事
+         * 'history']=$history; //英雄介绍
+         * 'skillBaseInfo'//技能介绍
+         * 'suggList'//铭文搭配建议
+         * 'addSkills'//技能加点建议
+         * 'heroInfoBox'//英雄关系
+         * 'equipBox'//出装建议
+         * "cname" => "廉颇"
+         * "title" => "正义爆轰"
+         * "hero_type" => 3
+         * "hero_type2" => ""*/
         foreach($arr['content']['skinData'] as $key => $value)
         {
             unset($arr['content']['skinData'][$key]['smallImg']);
@@ -124,29 +120,7 @@ class pvp_qq
             }
         }
         $data = getDataFromMapping($this->data_map,$arr['content']);
-        print_R($data);
-        die();
-
-
-        /**
-         * 对应数组hero_type，hero_type2
-         * var typeMap = {3: '坦克',1: '战士',2: '法师',4: '刺客',5: '射手',6: '辅助',10: '限免',11: '新手'}
-         * 'skinData';//皮肤
-         * 'scoreInfo'//评分
-         * 'heroStory'//背景故事
-         * 'history']=$history; //英雄介绍
-         * 'skillBaseInfo'//技能介绍
-         * 'suggList'//铭文搭配建议
-         * 'addSkills'//技能加点建议
-         * 'heroInfoBox'//英雄关系
-         * 'equipBox'//出装建议
-         * "cname" => "廉颇"
-         * "title" => "正义爆轰"
-         * "hero_type" => 3
-         * "hero_type2" => ""*/
-
-
-        var_dump($arr);
+        return $data;
     }
 
     public function getData($url, $itemId)
