@@ -41,6 +41,9 @@ class lolModel extends Model
     protected $toJson = [
         "aka","slots","bonuses"
     ];
+    protected $toAppend = [
+        "aka"
+    ];
     public function getRuneList($params)
     {
         $rune_list =$this->select("*");
@@ -121,6 +124,44 @@ class lolModel extends Model
         else
         {
             echo "toUpdateRune:".$currentRune['rune_id']."\n";
+            //校验原有数据
+            foreach($data as $key => $value)
+            {
+                if(in_array($key,$this->toAppend))
+                {
+                    $t = json_decode($currentRune[$key],true);
+                    foreach($value as $k => $v)
+                    {
+                        if(!in_array($v,$t))
+                        {
+                            $t[] = $v;
+                        }
+                    }
+                    $data[$key] = $t;
+                }
+                if(in_array($key,$this->toJson))
+                {
+                    $value = json_encode($value);
+                }
+                if(isset($currentRune[$key]) && ($currentRune[$key] == $value))
+                {
+                    //echo $currentRune[$key]."-".$value."\n";
+                    echo $key.":passed\n";
+                    unset($data[$key]);
+                }
+                else
+                {
+                    echo $key.":difference:\n";
+                }
+            }
+            if(count($data))
+            {
+                return $this->updateRune($currentRune['rune_id'],$data);
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

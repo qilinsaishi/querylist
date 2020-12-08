@@ -41,6 +41,9 @@ class kplModel extends Model
     protected $toJson = [
         "aka"
     ];
+    protected $toAppend = [
+        "aka"
+    ];
     public function getSkillList($params)
     {
         $skill_list =$this->select("*");
@@ -121,6 +124,44 @@ class kplModel extends Model
         else
         {
             echo "toUpdateSkill:".$currentSkill['skill_id']."\n";
+            //校验原有数据
+            foreach($data as $key => $value)
+            {
+                if(in_array($key,$this->toAppend))
+                {
+                    $t = json_decode($currentSkill[$key],true);
+                    foreach($value as $k => $v)
+                    {
+                        if(!in_array($v,$t))
+                        {
+                            $t[] = $v;
+                        }
+                    }
+                    $data[$key] = $t;
+                }
+                if(in_array($key,$this->toJson))
+                {
+                    $value = json_encode($value);
+                }
+                if(isset($currentSkill[$key]) && ($currentSkill[$key] == $value))
+                {
+                    //echo $currentSkill[$key]."-".$value."\n";
+                    echo $key.":passed\n";
+                    unset($data[$key]);
+                }
+                else
+                {
+                    echo $key.":difference:\n";
+                }
+            }
+            if(count($data))
+            {
+                return $this->updateSkill($currentSkill['skill_id'],$data);
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

@@ -41,6 +41,9 @@ class lolModel extends Model
     protected $toJson = [
         "aka","from_list","into_list","maps"
     ];
+    protected $toAppend = [
+        "aka"
+    ];
     public function getEquipmentList($params)
     {
         $equipment_list =$this->select("*");
@@ -121,6 +124,44 @@ class lolModel extends Model
         else
         {
             echo "toUpdateEquip:".$currentEquipment['equipment_id']."\n";
+            //校验原有数据
+            foreach($data as $key => $value)
+            {
+                if(in_array($key,$this->toAppend))
+                {
+                    $t = json_decode($currentEquipment[$key],true);
+                    foreach($value as $k => $v)
+                    {
+                        if(!in_array($v,$t))
+                        {
+                            $t[] = $v;
+                        }
+                    }
+                    $data[$key] = $t;
+                }
+                if(in_array($key,$this->toJson))
+                {
+                    $value = json_encode($value);
+                }
+                if(isset($currentEquipment[$key]) && ($currentEquipment[$key] == $value))
+                {
+                    //echo $currentEquipment[$key]."-".$value."\n";
+                    echo $key.":passed\n";
+                    unset($data[$key]);
+                }
+                else
+                {
+                    echo $key.":difference:\n";
+                }
+            }
+            if(count($data))
+            {
+                return $this->updateEquipment($currentEquipment['equipment_id'],$data);
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

@@ -41,6 +41,9 @@ class lolModel extends Model
     protected $toJson = [
         "aka","ally_tips","enemy_tips","roles"
     ];
+    protected $toAppend = [
+        "aka"
+    ];
     public function getHeroList($params)
     {
         $hero_list =$this->select("*");
@@ -121,6 +124,44 @@ class lolModel extends Model
         else
         {
             echo "toUpdateHero:".$currentHero['hero_id']."\n";
+            //校验原有数据
+            foreach($data as $key => $value)
+            {
+                if(in_array($key,$this->toAppend))
+                {
+                    $t = json_decode($currentHero[$key],true);
+                    foreach($value as $k => $v)
+                    {
+                        if(!in_array($v,$t))
+                        {
+                            $t[] = $v;
+                        }
+                    }
+                    $data[$key] = $t;
+                }
+                if(in_array($key,$this->toJson))
+                {
+                    $value = json_encode($value);
+                }
+                if(isset($currentHero[$key]) && ($currentHero[$key] == $value))
+                {
+                    //echo $currentHero[$key]."-".$value."\n";
+                    echo $key.":passed\n";
+                    unset($data[$key]);
+                }
+                else
+                {
+                    echo $key.":difference:\n";
+                }
+            }
+            if(count($data))
+            {
+                return $this->updateHero($currentHero['hero_id'],$data);
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

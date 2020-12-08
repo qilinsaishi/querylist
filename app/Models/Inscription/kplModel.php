@@ -156,7 +156,6 @@ class kplModel extends Model
             }
             if(count($data))
             {
-                print_R($currentInscription);
                 return $this->updateInscription($currentInscription['inscription_id'],$data);
             }
             else
