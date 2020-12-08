@@ -24,7 +24,6 @@ class pvp_qq
         $res['hero_type2'] = $arr['detail']['hero_type2'] ?? '';
         $res['logo"'] = $arr['detail']['logo'] ?? '';
         $res['item_id"'] = $itemId;
-
         if (!empty($res)) {
             $cdata = [
                 'mission_id' => $arr['mission_id'],
@@ -110,23 +109,33 @@ class pvp_qq
         //game.gtimg.cn/images/yxzj/img201606/heroimg/105/10500.png
         $skillName = $ql->find('.skill-show .show-list .skill-name')->texts()->all();
         $skillDesc = $ql->find('.skill-show .show-list .skill-desc')->htmls()->all();
-        $skillBaseInfo = [];
+        //第五个技能时
+        $skillNo5Name = $ql->find('.skill-show .show-list:eq(4) .skill-name')->text();
+        $skillNo5Desc= $ql->find('.skill-show .show-list:eq(4) .skill-desc')->text();
+        if($skillNo5Name !=''){//超过五张图片特殊处理
+            $skillNo5=$ql->find('.no5')->attr('data-img');
+            array_push($skillImg,$skillNo5);
+            array_push($skillName,$skillNo5Name);
+            array_push($skillDesc,$skillNo5Desc);
+        }
 
-        if ($skillImg) {
-            foreach ($skillImg as $key => $val) {
-                if ($val != '###') {
-                    $skillBaseInfo[$key]['killImg'] = 'http:' . $val;//技能图片
-                    if ($skillName[$key]) {
-                        $names = explode('冷却值', $skillName[$key]);
-                        $skillBaseInfo[$key]['name'] = $names[0] ?? '';
-                        $times = explode('消耗', $names[1]);
-                        $skillBaseInfo[$key]['cooling'] = '冷却值' . $times[0] ?? '';
-                        $skillBaseInfo[$key]['consume'] = '消耗' . $times[1] ?? '';
+        $skillBaseInfo=[];
+        if($skillImg){
+            foreach ($skillImg as $key=>$val){
+                if($val!='###'){
+                    $skillBaseInfo[$key]['killImg']='http:'.$val;//技能图片
+                    if($skillName[$key]) {
+                        $names=explode('冷却值',$skillName[$key]);
+                        $skillBaseInfo[$key]['name']=$names[0] ??'';
+                        $times=explode('消耗',$names[1]);
+                        $skillBaseInfo[$key]['cooling']='冷却值'.$times[0] ??'';
+                        $skillBaseInfo[$key]['consume']='消耗'.$times[1] ??'';
                     }
-                    $skillBaseInfo[$key]['skillDesc'] = $skillDesc[$key];
+                    $skillBaseInfo[$key]['skillDesc']=$skillDesc[$key];
                 }
             }
         }
+        $skillBaseInfo=array_values($skillBaseInfo);
         //铭文搭配建议
         //铭文id,这个关联必须先执行inscription 这个铭文脚本，而且必须保证ming_id 与下面的保存一致
         $suggListIds = $ql->find('.sugg-u1')->attr('data-ming');
