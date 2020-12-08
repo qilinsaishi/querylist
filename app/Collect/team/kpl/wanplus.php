@@ -9,6 +9,15 @@ class wanplus
 {
     protected $data_map =
         [
+            "team_name"=>['path'=>"title",'default'=>''],
+            "en_name"=>['path'=>"",'default'=>''],
+            "aka"=>['path'=>"aka","default"=>""],
+            "location"=>['path'=>"country","default"=>"未知"],
+            "established_date"=>['path'=>"",'default'=>"未知"],
+            "coach"=>['path'=>"",'default'=>"暂无"],
+            "logo"=>['path'=>"logo",'default'=>''],
+            "description"=>['path'=>"",'default'=>"暂无"],
+            "race_stat"=>['path'=>"raceStat",'default'=>[]],
         ];
     public function collect($arr)
     {
@@ -42,7 +51,44 @@ class wanplus
     }
     public function process($arr)
     {
-        var_dump($arr);
+        //处理胜平负
+        $t = explode("/",$arr['content']['military_exploits']??'');
+        $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
+    }
+    public function processMemberList($team_id,$arr)
+    {
+        $missionList = [];
+        foreach($arr['content']['cur_team_members'] as $member)
+        {
+            $mission = ['mission_type'=>"player",
+                'mission_status'=>0,
+                'detail'=>json_encode(['url'=>$member['link_url'],
+                    'name'=>$member['name'],
+                    'position'=>$member['position'],
+                    'logo'=>$member['main_img'],
+                    'team_id'=>$team_id,
+                    'current'=>1
+                ]),
+            ];
+            $missionList[] = $mission;
+            foreach($arr['content']['cur_team_members'] as $member)
+            {
+                $mission = ['mission_type' => "player",
+                    'mission_status' => 0,
+                    'detail' => json_encode(['url' => $member['link_url'],
+                        'name' => $member['name'],
+                        'position' => $member['position'],
+                        'logo' => $member['main_img'],
+                        'team_id' => $team_id,
+                        'current' => 0
+                    ]),
+                ];
+                $missionList[] = $mission;
+            }
+        }
+        return $missionList;
     }
 
 }

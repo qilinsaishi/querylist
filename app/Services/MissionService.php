@@ -133,7 +133,7 @@ class MissionService
                         }
                         else
                             {
-                            echo "there";
+                            echo "no member\n";
                         }
                     }
                     elseif($result['mission_type']=="player")
