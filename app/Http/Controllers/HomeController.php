@@ -13,9 +13,11 @@ class HomeController extends Controller
 
     public function index()
     {
+
         $html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
-        $ql = QueryList::html($html);
-        $item_id='153';
+        $url='https://www.sogou.com/sogou?query=DYG&ie=utf8&insite=baike.sogou.com';
+        $ql = QueryList::get($url)->find('.img-flex .img-height>a')->attr('href');
+dd($ql);
         //皮肤
         $skinImg = $ql->find('.pic-pf-list3 ')->attr('data-imgname');
         $skiArr=explode('|',$skinImg);

@@ -35,83 +35,76 @@ class MissionModel extends Model
      * @var array
      */
 
-    public function getMissionByMachine($asign=1,$count = 3,$game='',$source='',$mission_type='',$status=[0,1])
+    public function getMissionByMachine($asign = 1, $count = 3, $game = '', $source = '', $mission_type = '', $status = [0, 1])
     {
-        $mission_list =$this->select("*");
+        $mission_list = $this->select("*");
         //接收客户端
-        if($asign>0)
-        {
-            $mission_list = $mission_list->where("asign_to",$asign);
+        if ($asign > 0) {
+            $mission_list = $mission_list->where("asign_to", $asign);
         }
         //游戏
-        if($game!="")
-        {
-            $mission_list = $mission_list->where("game",$game);
+        if ($game != "") {
+            $mission_list = $mission_list->where("game", $game);
         }
         //爬取数据源
-        if($source!="")
-        {
-            $mission_list = $mission_list->where("source",$source);
+        if ($source != "") {
+            $mission_list = $mission_list->where("source", $source);
         }
-        if($mission_type !=""){
-            $mission_list = $mission_list->where("mission_type",$mission_type);
+        if ($mission_type != "") {
+            $mission_list = $mission_list->where("mission_type", $mission_type);
         }
         $mission_list = $mission_list
-            ->whereIn("mission_status",$status)
+            ->whereIn("mission_status", $status)
             ->limit($count)
             ->get()->toArray();
         return $mission_list;
     }
-    public function getMissionByTitle($title,$mission_type,$game,$source,$asign_to)
+
+    public function getMissionByTitle($title = '', $mission_type, $game, $source, $asign_to)
     {
-        echo $title."-".$mission_type."-".$game."-".$source."\n";
-        $mission_info =$this->select("*")
-            ->where("title",$title)
-            ->where("mission_type",$mission_type)
-            ->where("game",$game)
-            ->where("source",$source)
-            ->where("asign_to",$asign_to)
-            ->where("mission_status",[0,1])
-            ->get()->first();
-        if(isset($mission_info->mission_id))
-        {
-            $mission_info = $mission_info->toArray();
+        echo $title . "-" . $mission_type . "-" . $game . "-" . $source . "\n";
+        $mission_obj = $this->select("*");
+        if (!empty($title)) {
+            $mission_obj->where("title", $title);
         }
-        else
-        {
+        $mission_info = $mission_obj->where("mission_type", $mission_type)
+            ->where("game", $game)
+            ->where("source", $source)
+            ->where("asign_to", $asign_to)
+            ->where("mission_status", [0, 1])
+            ->get()->first();
+        if (isset($mission_info->mission_id)) {
+            $mission_info = $mission_info->toArray();
+        } else {
             $mission_info = [];
         }
         return $mission_info;
     }
+
     public function insertMission($data)
     {
-        $currentMission = $this->getMissionByTitle($data['title'],$data['mission_type'],$data['game'],$data['source'],$data['asign_to']);
-        if(isset($currentMission))
-        {
+        $currentMission = $this->getMissionByTitle($data['title'], $data['mission_type'], $data['game'], $data['source'], $data['asign_to']);
+        if (isset($currentMission)) {
             return 1;
-        }
-        else
-        {
+        } else {
             $currentTime = date("Y-m-d H:i:s");
-            if(!isset($data['create_time']))
-            {
+            if (!isset($data['create_time'])) {
                 $data['create_time'] = $currentTime;
             }
-            if(!isset($data['update_time']))
-            {
+            if (!isset($data['update_time'])) {
                 $data['update_time'] = $currentTime;
             }
             return $this->insertGetId($data);
         }
 
     }
-    public function updateMission($mission_id=0,$data=[])
+
+    public function updateMission($mission_id = 0, $data = [])
     {
         $currentTime = date("Y-m-d H:i:s");
-        if(!isset($data['update_time']))
-        {
+        if (!isset($data['update_time'])) {
             $data['update_time'] = $currentTime;
         }
-        return $this->where('mission_id',$mission_id)->update($data);
+        return $this->where('mission_id', $mission_id)->update($data);
     }
 }
