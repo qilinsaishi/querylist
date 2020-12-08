@@ -11,7 +11,7 @@ class MissionModel extends Model
 {
     protected $table = "mission_list";
     protected $primaryKey = "mission_id";
-    public $timestamps = false;
+    public $timestamps = true;
     protected $connection = "query_list";
     /**
      * The attributes that are mass assignable.

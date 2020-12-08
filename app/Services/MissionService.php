@@ -179,6 +179,20 @@ class MissionService
                             }
                         }
                     }
+                    elseif($result['mission_type']=="inscription")
+                    {
+                        //生成类库路径
+                        $modelClassName = 'App\Models\Inscription\\' . $result['game']."Model";
+                        $classList = $this->getClass($classList,$modelClassName);
+                        if(isset($classList[$modelClassName]))
+                        {
+                            $modelClass = $classList[$modelClassName];
+                            foreach($processResult as $inscription)
+                            {
+                                $save = $modelClass->saveInscription($inscription);
+                            }
+                        }
+                    }
                     elseif($result['mission_type']=="runes")
                     {
                         //生成类库路径

@@ -11,6 +11,7 @@ class lolModel extends Model
 {
     protected $table = "lol_summoner_info";
     protected $primaryKey = "skill_id";
+    public $timestamps = true;
     protected $connection = "query_list";
 
     /**

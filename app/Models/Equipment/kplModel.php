@@ -11,6 +11,7 @@ class kplModel extends Model
 {
     protected $table = "kpl_equipment_info";
     protected $primaryKey = "equipment_id";
+    public $timestamps = true;
     protected $connection = "query_list";
 
     /**

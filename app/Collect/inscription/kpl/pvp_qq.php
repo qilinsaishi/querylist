@@ -8,6 +8,15 @@ class pvp_qq
 {
     protected $data_map =
         [
+            "inscription_name" => ['path' => "ming_name", 'default' => ''],
+            "description" => ['path' => "ming_des", 'default' => '暂无'],
+            "cn_name" => ['path' => "ming_name", 'default' => ''],//中文名
+            "en_name" => ['path' => "", 'default' => ''],//英文名
+            "type" => ['path' => "ming_type", 'default' => ""],
+            "logo" => ['path' => "logo", 'default' => ""],
+            "aka" => ['path' => "", 'default' => ""],//别名
+            "id" => ['path' => "ming_id", 'default' => 0],//对应站点ID
+            "grade" => ['path' => "ming_grade", 'default' => 0],
         ];
 
     public function collect($arr)
@@ -44,6 +53,14 @@ class pvp_qq
          * "ming_des" => "<p>物理攻击力+2</p><p>物理穿透+3.6</p>"
          * 'ming_img'=>'https://game.gtimg.cn/images/yxzj/img201606/mingwen/1504.png'
          */
-        var_dump($arr);
+        $data = [];
+        foreach($arr['content'] as $key => $value)
+        {
+            $value['ming_des'] = preg_replace("/<([a-zA-Z]+)[^>]*>/", "",$value['ming_des']);
+            $value['ming_des'] = preg_replace("{</([a-zA-Z]+)[^>]*>}", "",$value['ming_des']);
+            $value['logo'] = "https://game.gtimg.cn/images/yxzj/img201606/mingwen/".$value['ming_id'].".png";
+            $data[$key] = getDataFromMapping($this->data_map, $value);
+        }
+        return $data;
     }
 }

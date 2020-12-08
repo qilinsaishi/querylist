@@ -11,7 +11,7 @@ class lolModel extends Model
 {
     protected $table = "lol_hero_info";
     protected $primaryKey = "hero_id";
-    public $timestamps = false;
+    public $timestamps = true;
     protected $connection = "query_list";
 
     /**

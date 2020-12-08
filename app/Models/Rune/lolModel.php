@@ -11,7 +11,7 @@ class lolModel extends Model
 {
     protected $table = "lol_rune_info";
     protected $primaryKey = "rune_id";
-    public $timestamps = false;
+    public $timestamps = true;
     protected $connection = "query_list";
 
     /**

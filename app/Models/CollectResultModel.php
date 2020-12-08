@@ -11,7 +11,7 @@ class CollectResultModel extends Model
 {
     protected $table = "collect_result";
     protected $connection = "query_list";
-    public $timestamps = false;
+    public $timestamps = true;
 
     /**
      * The attributes that are mass assignable.

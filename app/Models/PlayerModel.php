@@ -11,7 +11,6 @@ class PlayerModel extends Model
 {
     protected $table = "player_info";
     protected $primaryKey = "player_id";
-    public $timestamps = false;
     protected $connection = "query_list";
 
     /**
