@@ -22,8 +22,8 @@ class pvp_qq
         //一个英雄可以对应多个选择类型
         $res['hero_type'] = $arr['detail']['hero_type'] ?? '';
         $res['hero_type2'] = $arr['detail']['hero_type2'] ?? '';
-        $res['logo"'] = $arr['detail']['logo'] ?? '';
-        $res['item_id"'] = $itemId;
+        $res['logo'] = $arr['detail']['logo'] ?? '';
+        $res['item_id'] = $itemId;
         if (!empty($res)) {
             $cdata = [
                 'mission_id' => $arr['mission_id'],
