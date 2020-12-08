@@ -11,7 +11,7 @@ class TeamModel extends Model
 {
     protected $table = "team_info";
     protected $primaryKey = "team_id";
-    public $timestamps = true;
+    public $timestamps = false;
     protected $connection = "query_list";
 
     /**

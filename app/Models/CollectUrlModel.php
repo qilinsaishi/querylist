@@ -11,7 +11,7 @@ class CollectUrlModel extends Model
 {
     protected $table = "collect_url";
     protected $connection = "query_list";
-    public $timestamps = true;
+    public $timestamps = false;
 
 
     /**

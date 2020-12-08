@@ -11,7 +11,7 @@ class kplModel extends Model
 {
     protected $table = "kpl_summoner_info";
     protected $primaryKey = "skill_id";
-    public $timestamps = true;
+    public $timestamps = false;
     protected $connection = "query_list";
 
     /**

@@ -11,7 +11,7 @@ class kplModel extends Model
 {
     protected $table = "kpl_inscription_info";
     protected $primaryKey = "inscription_id";
-    public $timestamps = true;
+    public $timestamps = false;
     protected $connection = "query_list";
 
     /**
