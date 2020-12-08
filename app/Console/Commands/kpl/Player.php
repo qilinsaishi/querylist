@@ -38,11 +38,12 @@ class Player extends Command
      */
     public function handle()
     {
-        $data = [
+        /*$data = [
             "asign_to"=>1,
             "mission_type"=>'player',
             "mission_status"=>1,
             "game"=>'kpl',
+            'title'=>'',
             "source"=>'wanplus',
             "detail"=>json_encode(
                 [
@@ -56,7 +57,7 @@ class Player extends Command
             ),
         ];
         $insert = (new oMission())->insertMission($data);
-        echo "insert:".$insert;
-        //(new oMission())->collect('kpl','wanplus','player');
+        echo "insert:".$insert;*/
+        (new oMission())->collect('kpl','wanplus','player');
     }
 }
