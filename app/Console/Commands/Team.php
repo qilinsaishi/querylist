@@ -42,8 +42,12 @@ class Team extends Command
      */
     public function handle()
     {
-        $collectModel=new CollectUrlModel();
-        /*$cdata=$collectModel->getDataFromUrl('kpl',20);
+        $game='kpl';
+        $source='wanplus';
+        $mission_type='team';
+        /*$collectModel=new CollectUrlModel();
+        $cdata=$collectModel->getDataFromUrl($game,20,$mission_type,$source);
+
        if($cdata){
             foreach ($cdata as $val){
                 $data = [
@@ -66,6 +70,6 @@ class Team extends Command
             }
         }*/
 
-        (new oMission())->collect('kpl','baidu_baike');
+        (new oMission())->collect($game, $source, $mission_type);
     }
 }
