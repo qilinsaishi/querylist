@@ -62,21 +62,49 @@ class MissionModel extends Model
             ->get()->toArray();
         return $mission_list;
     }
-
+    public function getMissionByTitle($title,$mission_type,$game,$source,$asign_to)
+    {
+        echo $title."-".$mission_type."-".$game."-".$source."\n";
+        $mission_info =$this->select("*")
+            ->where("title",$title)
+            ->where("mission_type",$mission_type)
+            ->where("game",$game)
+            ->where("source",$source)
+            ->where("asign_to",$asign_to)
+            ->where("mission_status",[0,1])
+            ->get()->first();
+        if(isset($mission_info->mission_id))
+        {
+            $mission_info = $mission_info->toArray();
+        }
+        else
+        {
+            $mission_info = [];
+        }
+        return $mission_info;
+    }
     public function insertMission($data)
     {
-        $currentTime = date("Y-m-d H:i:s");
-        if(!isset($data['create_time']))
+        $currentMission = $this->getMissionByTitle($data['title'],$data['mission_type'],$data['game'],$data['source'],$data['asign_to']);
+        if(isset($currentMission))
         {
-            $data['create_time'] = $currentTime;
+            return 1;
         }
-        if(!isset($data['update_time']))
+        else
         {
-            $data['update_time'] = $currentTime;
+            $currentTime = date("Y-m-d H:i:s");
+            if(!isset($data['create_time']))
+            {
+                $data['create_time'] = $currentTime;
+            }
+            if(!isset($data['update_time']))
+            {
+                $data['update_time'] = $currentTime;
+            }
+            return $this->insertGetId($data);
         }
-        return $this->insertGetId($data);
-    }
 
+    }
     public function updateMission($mission_id=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");

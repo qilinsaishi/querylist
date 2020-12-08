@@ -169,7 +169,7 @@ class TeamModel extends Model
                 if(isset($currentTeam[$key]) && ($currentTeam[$key] == $value))
                 {
                     //echo $currentTeam[$key]."-".$value."\n";
-                    echo $key.":passed\n";
+                    //echo $key.":passed\n";
                     unset($data[$key]);
                 }
                 else

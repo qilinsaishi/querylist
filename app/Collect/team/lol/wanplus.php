@@ -62,6 +62,7 @@ class wanplus
         {
             $mission = ['mission_type'=>"player",
                         'mission_status'=>0,
+                        'title'=>$member['name'],
                         'detail'=>json_encode(['url'=>$member['link_url'],
                             'name'=>$member['name'],
                             'position'=>$member['position'],
@@ -75,6 +76,7 @@ class wanplus
             {
                 $mission = ['mission_type' => "player",
                     'mission_status' => 0,
+                    'title'=>$member['name'],
                     'detail' => json_encode(['url' => $member['link_url'],
                         'name' => $member['name'],
                         'position' => $member['position'],
@@ -88,6 +90,4 @@ class wanplus
         }
         return $missionList;
     }
-
-
 }

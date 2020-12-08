@@ -125,14 +125,14 @@ class MissionService
                             $missionList = $class->processMemberList($save['team_id'],$result);
                             foreach($missionList as $mission)
                             {
-                                $mission = array_merge($mission,['game'=>$result['game'],'connect_mission_id'=>$result['mission_id'],'source'=>$result['source'],'asign_to'=>1]);
+                                $mission = array_merge($mission,['title'=>$mission['title'],'game'=>$result['game'],'connect_mission_id'=>$result['mission_id'],'source'=>$result['source'],'asign_to'=>1]);
                                 $insert = $missionModel->insertMission($mission);
                                 echo "insertMisson4Member:".$insert."\n";
                             }
                             //die();
                         }
                         else
-                            {
+                        {
                             echo "no member\n";
                         }
                     }
