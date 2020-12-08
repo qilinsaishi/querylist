@@ -9,8 +9,53 @@ class pvp_qq
 {
     protected $data_map =
         [
+            "hero_name"=>['path'=>"cname",'default'=>''],
+            "cn_name"=>['path'=>"cname",'default'=>''],
+            "en_name"=>['path'=>"",'default'=>''],
+            "aka"=>['path'=>"title",'default'=>""],//别名
+            "description"=>['path'=>"history",'default'=>'暂无'],
+            "story"=>['path'=>"heroStory",'default'=>'暂无'],
+            "logo"=>['path'=>"logo",'default'=>''],
+            "id"=>['path'=>"item_id",'default'=>0],
+            "type"=>['path'=>"hero_type",'default'=>0],
+            "sub_type"=>['path'=>"hero_type2",'default'=>0],
+            "stat"=>['path'=>"scoreInfo",'default'=>[]],//评分
+            "skin_list"=>['path'=>"skinData",'default'=>[]],//皮肤
+            "skill_list"=>['path'=>"skillBaseInfo",'default'=>[]],//技能
+            "inscription_suggest"=>['path'=>"suggList",'default'=>[]],//铭文建议
+            "skill_suggest"=>['path'=>"addSkills",'default'=>[]],//技能点建议
+            "hero_suggest"=>['path'=>"heroInfo",'default'=>[]],//英雄建议
+            "equipment_suggest"=>['path'=>"equipBox",'default'=>[]],//道具建议
+            /*
+            "roles"=>['path'=>"roles",'default'=>[]],//职业
+            "difficulty"=>['path'=>"difficulty",'default'=>0],//上手难度
+            "physical_attack"=>['path'=>"attack",'default'=>0],//物理攻击
+            "magic_attack"=>['path'=>"magic",'default'=>0],//魔法攻击
+            "defense"=>['path'=>"defense",'default'=>0],//防御
+            "hp"=>['path'=>"hp",'default'=>0],
+            "mp"=>['path'=>"mp",'default'=>0],
+            "hp_regen"=>['path'=>"hpregen",'default'=>0],//生命回复
+            "mp_regen"=>['path'=>"mpregen",'default'=>0],//魔法回复
+            "attack_speed"=>['path'=>"attackspeed",'default'=>0],//攻击速度
+            "attack_range"=>['path'=>"attackrange",'default'=>0],//攻击范围
+            "attack_damage"=>['path'=>"attackdamage",'default'=>0],//攻击
+            "price"=>['path'=>"goldPrice",'default'=>0],//攻击
+            "move_speed"=>['path'=>"movespeed",'default'=>0],//移动速度
+            "magic_defense"=>['path'=>"spellblock",'default'=>0],//魔法抗性
+            "ally_tips"=>['path'=>"allytips",'default'=>[]],//使用技巧
+            "enemy_tips"=>['path'=>"enemytips",'default'=>[]],//对手技巧
+            */
         ];
-
+    public $hero_type = [
+        1=>'战士',
+        2=>'法师',
+        3=>'坦克',
+        4=>'刺客',
+        5=>'射手',
+        6=>'辅助',
+        10=>'限免',
+        11=>'新手'
+    ];
     public function collect($arr)
     {
         $res = [];
@@ -42,6 +87,46 @@ class pvp_qq
 
     public function process($arr)
     {
+        //print_R(($arr['content']['scoreInfo']));die();
+        foreach($arr['content']['skinData'] as $key => $value)
+        {
+            unset($arr['content']['skinData'][$key]['smallImg']);
+        }
+        foreach($arr['content']['skillBaseInfo'] as $key => $value)
+        {
+            if(trim($value['name'])=="")
+            {
+                unset($arr['content']['skillBaseInfo'][$key]);
+            }
+            else
+            {
+                $t = explode("：",$value['cooling']);
+                $arr['content']['skillBaseInfo'][$key]['cooling'] = $t[1];
+                $t = explode("：",$value['consume']);
+                $arr['content']['skillBaseInfo'][$key]['consume'] = $t[1];
+            }
+        }
+        $arr['content']['history'] = preg_replace("/<([a-zA-Z]+)[^>]*>/", "",$arr['content']['history']);
+        $arr['content']['history'] = preg_replace("{</([a-zA-Z]+)[^>]*>}", "",$arr['content']['history']);
+        $arr['content']['heroStory'] = preg_replace("/<([a-zA-Z]+)[^>]*>/", "",$arr['content']['heroStory']);
+        $arr['content']['heroStory'] = preg_replace("{</([a-zA-Z]+)[^>]*>}", "",$arr['content']['heroStory']);
+        $arr['content']['heroInfo'] = ["mate"=>$arr['content']['heroInfoBox']['最佳搭档']??[],
+            "suppress"=>$arr['content']['heroInfoBox']['被压制英雄']??[],
+            "suppressed"=>$arr['content']['heroInfoBox']['压制英雄']??[]];
+        foreach($arr['content']['heroInfo'] as $type => $hero_list)
+        {
+            foreach($hero_list as $key => $hero)
+            {
+                $t = explode("/",$hero['logo']);
+                $arr['content']['heroInfo'][$type][$key]['id'] = $t[count($t)-2];
+                unset($arr['content']['heroInfo'][$type][$key]['logo']);
+                unset($arr['content']['heroInfo'][$type][$key]['link']);
+            }
+        }
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        print_R($data);
+        die();
+
 
         /**
          * 对应数组hero_type，hero_type2
@@ -212,7 +297,5 @@ class pvp_qq
         $res['equipBox'] = $equipBox ?? [];//出装建议
 
         return $res;
-
-        return $data;
     }
 }
