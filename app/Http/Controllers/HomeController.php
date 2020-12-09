@@ -13,13 +13,29 @@ class HomeController extends Controller
 
     public function index()
     {
+        $client = new ClientServices();
+        $res = $client->curlGet('https://api-pc.chaofan.com/api/v1/match/list?game_id=1');//curl获取json数据
+        dd($res);
+        //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
+        $url='https://baike.baidu.com/item/TS豚首电子竞技俱乐部/22867298?fr=aladdin';
+        $ql = QueryList::get($url);
+        $baseInfoNamesa = $ql->find('.score-match .child .clearfix-row')->htmls();//基础信息名称
 
-        $html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
-        $url='https://www.sogou.com/sogou?query=DYG&ie=utf8&insite=baike.sogou.com';
-        $ql = QueryList::get($url)->find('.img-flex .img-height>a')->attr('href');
-dd($ql);
+
+        $logo=$ql->find('.lemma_pic img')->attr('src');
+        $desc = $ql->find('.abstract ')->text();
+        $baseInfosNames=$ql->find('.abstract_tbl tr .base-info-card-title')->texts()->all();
+        $baseInfosValues=$ql->find('.abstract_tbl tr td .base-info-card-value')->texts()->all();
+        $baseInfos=[];
+        if($baseInfosNames){
+            foreach ($baseInfosNames as $key=>$val){
+                $baseInfos[$key]['name']=$val;
+                $baseInfos[$key]['value']=delZzts($baseInfosValues[$key],$replace='展开');//去除特殊符号
+            }
+        }
+dd($baseInfos);
         //皮肤
-        $skinImg = $ql->find('.pic-pf-list3 ')->attr('data-imgname');
+        $skinImg = $ql->find('.catalog_wrap')->htmls();
         $skiArr=explode('|',$skinImg);
         $tempSkiArr=[];
         $skinData=[];

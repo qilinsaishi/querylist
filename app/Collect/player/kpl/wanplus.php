@@ -24,7 +24,7 @@ class wanplus
             $res['logo'] = $logo;
             $res['position'] = $position;
             $res['team_id'] = $team_id;
-            $res['current'] = $current;dd($res);
+            $res['current'] = $current;
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
