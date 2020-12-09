@@ -180,6 +180,7 @@ class TeamModel extends Model
             if(count($data))
             {
                 $return['result'] = $this->updateTeam($currentTeam['team_id'],$data);
+                return $return;
             }
             else
             {
