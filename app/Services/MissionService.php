@@ -230,7 +230,7 @@ class MissionService
                         echo "save:".$save['result']."\n";
                         if($save['result']>0)
                         {
-                            $collectModel->updateStatus($result['id'],['status'=>2]);
+                            //$collectModel->updateStatus($result['id'],['status'=>2]);
                         }
                     }
                     else
@@ -238,7 +238,7 @@ class MissionService
                         echo "save:".$save."\n";
                         if($save>0)
                         {
-                            $collectModel->updateStatus($result['id'],['status'=>2]);
+                            //$collectModel->updateStatus($result['id'],['status'=>2]);
                         }
                     }
                 }

@@ -138,6 +138,7 @@ class PlayerModel extends Model
         $return  = ['player_id'=>0,"result"=>0];
         $data['player_name'] = preg_replace("/\s+/", "",$data['player_name']);
         $data['player_name'] = trim($data['player_name']);
+        $data['aka'] = $data['aka']??"";
         $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
         $currentPlayer = $this->getPlayerByName($data['player_name'],$game);
         if(!isset($currentPlayer['player_id']))

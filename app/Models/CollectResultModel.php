@@ -47,7 +47,7 @@ class CollectResultModel extends Model
             $result_list = $result_list->where("mission_type",$mission_type);
         }
         $result_list = $result_list
-            ->where("status",$status)
+            //->where("status",$status)
             ->limit($count)
             ->get()->toArray();
         return $result_list;
