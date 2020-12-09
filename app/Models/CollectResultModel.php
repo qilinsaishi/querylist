@@ -61,6 +61,7 @@ class CollectResultModel extends Model
 
     //更新爬取结果的状态
     public function updateStatus($id,$data){
+        $data['update_time'] = date("Y-m-d H:i:s");
         return $this->where('id',$id)->update($data);
     }
     //

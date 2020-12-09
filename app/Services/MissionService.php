@@ -83,11 +83,12 @@ class MissionService
     public function process($game="kpl",$source="",$mission_type)
     {
         //获取爬取任务列表
-        $result_list = $this->getResult($game,$source,$mission_type,100);
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         $teamModel = new TeamModel();
         $playerModel = new PlayerModel();
+        $result_list = $collectModel->getResult(100,$game,$source,$mission_type);
+
         //初始化空的类库列表
         $classList = [];
         //循环任务列表
@@ -227,10 +228,18 @@ class MissionService
                     if(is_array($save))
                     {
                         echo "save:".$save['result']."\n";
+                        if($save['result']>0)
+                        {
+                            $collectModel->updateStatus($result['id'],['status'=>2]);
+                        }
                     }
                     else
                     {
                         echo "save:".$save."\n";
+                        if($save>0)
+                        {
+                            $collectModel->updateStatus($result['id'],['status'=>2]);
+                        }
                     }
                 }
             }
@@ -246,12 +255,6 @@ class MissionService
         $missionModel = new MissionModel();
         $mission_list = $missionModel->getMissionByMachine($asign,$count,$game,$source,$mission_type);
          return ($mission_list) ;
-    }
-    public function getResult($game,$source,$mission_type,$count = 3)
-    {
-        $collectModel = new CollectModel();
-        $mission_list = $collectModel->getResult($count,$game,$source,$mission_type);
-        return ($mission_list) ;
     }
     public function insertMission($data)
     {
