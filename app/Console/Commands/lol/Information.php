@@ -55,6 +55,7 @@ class Information extends Command
                 "mission_status"=>1,
                 "game"=>'lol',
                 "source"=>'lol_qq',//
+                'title'=>'',
                 "detail"=>json_encode(
                     [
                         "url"=>$url,
@@ -67,8 +68,6 @@ class Information extends Command
             $insert = (new oMission())->insertMission($data);
             echo "insert:".$insert;
         }
-
-
         //(new oMission())->collect('lol','lol_qq','information');
     }
 }

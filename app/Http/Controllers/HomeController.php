@@ -15,7 +15,11 @@ class HomeController extends Controller
     {
 
         //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
-        $url='https://www.chaofan.com/event/lol?status=3';
+        $url='https://api-pc.chaofan.com/api/v1/match/list?game_id=1';
+        $client=new ClientServices();
+        $data=$client->curlGet($url);
+        dd($data);
+
         $ql = QueryList::get($url);
         $logos=$ql->find('.list-box .img-view')->attrs('style')->all();//获取图片
         $matchInfo = $ql->rules([
@@ -29,19 +33,10 @@ class HomeController extends Controller
                 $imgUrl=str_replace(array("background-image: url('","');background-size: cover;"),'',$logos[$key]);
                 $val['img_url']=$imgUrl?? '';
                 $arrData=explode('--',$val['dtime']);
-                $curTime=date("Y.m.d");
+                $curTime=date("Y.m.d");dd($curTime);
                 $val['start_time']=trim($arrData[0]) ?? '';
                 $val['end_time']=trim($arrData[1]) ?? '';
-                if($curTime>$val['start_time']){
-                    $status=3;//已结束
-                }
-                if(($val['start_time']>=$curTime) && ($curTime<=$val['end_time']) ){
-                    $status=2;//正在进行
-                }
-                if($curTime<$val['end_time']){
-                    $status=1;//即将开始
-                }
-                $val['status']=$status;
+
             }
         }
 
