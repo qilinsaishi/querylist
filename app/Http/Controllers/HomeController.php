@@ -13,15 +13,39 @@ class HomeController extends Controller
 
     public function index()
     {
-        $client = new ClientServices();
-        $url='https://api-pc.chaofan.com/api/v1/match/list?game_id=1';
-        $res = $client->curlGet($url);//curl获取json数据
-        dd($res);
-        //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
-        $url='https://baike.baidu.com/item/TS豚首电子竞技俱乐部/22867298?fr=aladdin';
-        $ql = QueryList::get($url);
-        $baseInfoNamesa = $ql->find('.score-match .child .clearfix-row')->htmls();//基础信息名称
 
+        //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
+        $url='https://www.chaofan.com/event/lol?status=3';
+        $ql = QueryList::get($url);
+        $logos=$ql->find('.list-box .img-view')->attrs('style')->all();//获取图片
+        $matchInfo = $ql->rules([
+                'title' => ['.mask>.t2', 'text'],
+                'dtime' => ['.bottom-box>.t2', 'text']
+            ])->range('.list-box>li')->queryData();
+        $arrData=[];
+        $status=0;
+        if($matchInfo) {
+            foreach ($matchInfo as $key=>&$val){
+                $imgUrl=str_replace(array("background-image: url('","');background-size: cover;"),'',$logos[$key]);
+                $val['img_url']=$imgUrl?? '';
+                $arrData=explode('--',$val['dtime']);
+                $curTime=date("Y.m.d");
+                $val['start_time']=trim($arrData[0]) ?? '';
+                $val['end_time']=trim($arrData[1]) ?? '';
+                if($curTime>$val['start_time']){
+                    $status=3;//已结束
+                }
+                if(($val['start_time']>=$curTime) && ($curTime<=$val['end_time']) ){
+                    $status=2;//正在进行
+                }
+                if($curTime<$val['end_time']){
+                    $status=1;//即将开始
+                }
+                $val['status']=$status;
+            }
+        }
+
+dd($matchInfo);
 
         $logo=$ql->find('.lemma_pic img')->attr('src');
         $desc = $ql->find('.abstract ')->text();

@@ -42,9 +42,9 @@ class Team extends Command
      */
     public function handle()
     {
-        $game='';
-        $source='';
-        $mission_type='';
+        $game='kpl';
+        $source='wanplus';
+        $mission_type='team';
         /*$collectModel=new CollectUrlModel();
         $cdata=$collectModel->getDataFromUrl($game,$mission_type,$source);
 

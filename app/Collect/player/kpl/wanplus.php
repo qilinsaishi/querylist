@@ -37,8 +37,8 @@ class wanplus
                 'update_time' => date("Y-m-d H:i:s")
             ];
 
-            return $cdata;
         }
+        return $cdata;
     }
     public function process($arr)
     {
