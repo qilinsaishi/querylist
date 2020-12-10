@@ -135,6 +135,8 @@ class PlayerModel extends Model
 
     public function savePlayer($game,$data)
     {
+        echo "player_name:".$data['player_name']."\n";
+        echo "player_name:".$data['name']."\n";
         $return  = ['player_id'=>0,"result"=>0];
         $data['player_name'] = preg_replace("/\s+/", "",$data['player_name']);
         $data['player_name'] = trim($data['player_name']);
