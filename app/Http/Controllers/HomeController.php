@@ -14,7 +14,8 @@ class HomeController extends Controller
     public function index()
     {
         $client = new ClientServices();
-        $res = $client->curlGet('https://api-pc.chaofan.com/api/v1/match/list?game_id=1');//curl获取json数据
+        $url='https://api-pc.chaofan.com/api/v1/match/list?game_id=1';
+        $res = $client->curlGet($url);//curl获取json数据
         dd($res);
         //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
         $url='https://baike.baidu.com/item/TS豚首电子竞技俱乐部/22867298?fr=aladdin';
