@@ -58,20 +58,23 @@ class wanplus
     public function processMemberList($team_id,$arr)
     {
         $missionList = [];
-        foreach($arr['content']['cur_team_members'] as $member)
+        if(isset($arr['content']['cur_team_members']))
         {
-            $mission = ['mission_type'=>"player",
-                'mission_status'=>0,
-                'title'=>$member['name'],
-                'detail'=>json_encode(['url'=>$member['link_url'],
-                    'name'=>$member['name'],
-                    'position'=>$member['position']??"",
-                    'logo'=>$member['main_img'],
-                    'team_id'=>$team_id,
-                    'current'=>1
-                ]),
-            ];
-            $missionList[] = $mission;
+            foreach($arr['content']['cur_team_members'] as $member)
+            {
+                $mission = ['mission_type'=>"player",
+                    'mission_status'=>0,
+                    'title'=>$member['name'],
+                    'detail'=>json_encode(['url'=>$member['link_url'],
+                        'name'=>$member['name'],
+                        'position'=>$member['position']??"",
+                        'logo'=>$member['main_img'],
+                        'team_id'=>$team_id,
+                        'current'=>1
+                    ]),
+                ];
+                $missionList[] = $mission;
+            }
         }
         if(isset($arr['content']['old_team_members']))
         {
@@ -91,7 +94,6 @@ class wanplus
                 $missionList[] = $mission;
             }
         }
-
         return $missionList;
     }
 }

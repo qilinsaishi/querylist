@@ -232,6 +232,10 @@ class MissionService
                         {
                             //$collectModel->updateStatus($result['id'],['status'=>2]);
                         }
+                        else
+                        {
+                            $collectModel->updateStatus($result['id'],['status'=>3]);
+                        }
                     }
                     else
                     {
@@ -239,6 +243,10 @@ class MissionService
                         if($save>0)
                         {
                             //$collectModel->updateStatus($result['id'],['status'=>2]);
+                        }
+                        else
+                        {
+                            $collectModel->updateStatus($result['id'],['status'=>3]);
                         }
                     }
                 }
