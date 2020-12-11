@@ -191,12 +191,7 @@ class MissionService
                         }
                     }
                     elseif ($result['mission_type'] == "match") {
-                        //生成类库路径
-                        $modelClassName = 'App\Models\Rune\\' . $result['game'] . "Model";
-                        $classList = $this->getClass($classList, $modelClassName);
-                        if (isset($classList[$modelClassName])) {
-                            $modelClass = $classList[$modelClassName];
-                            if (isset($processResult['match_list'])) {
+                         if (isset($processResult['match_list'])) {
                                 $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\matchListModel';
                                 $classList = $this->getClass($classList, $ModelClassName);
                                 $ModelClass = $classList[$ModelClassName];
@@ -236,6 +231,25 @@ class MissionService
                                     echo "saveEvent:".$saveEvent."\n";
                                 }
                             }
+
+                    }
+                    elseif ($result['mission_type'] == "event")
+                    {
+                        $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentNoIdModel';
+                        $classList = $this->getClass($classList, $ModelClassName);
+                        $ModelClass = $classList[$ModelClassName];
+
+                        $tModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
+                        $classList = $this->getClass($classList, $tModelClassName);
+                        $tModelClass = $classList[$tModelClassName];
+                        $currentTournament = $tModelClass->getTournamentByName($processResult['tournament_name'],$processResult['game']);
+                        if(!isset($currentTournament['tournament_id']))
+                        {
+                            $save = $ModelClass->saveTournament($processResult);
+                            echo "saveEvent:".$save."\n";
+                        }
+                        else
+                        {
                         }
                     }
                     if (is_array($save)) {

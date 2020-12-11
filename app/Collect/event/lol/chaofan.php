@@ -8,7 +8,12 @@ class chaofan
 {
     protected $data_map =
         [
-        ];
+            'game'=>['path'=>"",'default'=>"lol"],//游戏
+            'tournament_name'=>['path'=>"title",'default'=>''],//赛事名称
+            'start_time'=>['path'=>"start_time",'default'=>0],//开始时间
+            'end_time'=>['path'=>"end_time",'default'=>0],//开始时间
+            'logo'=>['path'=>"img_url",'default'=>''],//logo
+            ];
     public function collect($arr)
     {
         $cdata = [];
@@ -34,7 +39,11 @@ class chaofan
     public function process($arr)
     {
         //$status=0;//0:全部，1：即将开始，2：正在进行，3：已经结束
-        var_dump($arr);
+        $arr['content']['img_url'] = getImage($arr['content']['img_url']);
+        $arr['content']['start_time'] = strtotime(str_replace(".","-",$arr['content']['start_time']));
+        $arr['content']['end_time'] = strtotime(str_replace(".","-",$arr['content']['end_time']));
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
 
     /**
