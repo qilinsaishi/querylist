@@ -190,6 +190,35 @@ class MissionService
                             }
                         }
                     }
+                    elseif ($result['mission_type'] == "match") {
+                        //生成类库路径
+                        $modelClassName = 'App\Models\Rune\\' . $result['game'] . "Model";
+                        $classList = $this->getClass($classList, $modelClassName);
+                        if (isset($classList[$modelClassName])) {
+                            $modelClass = $classList[$modelClassName];
+                            if (isset($processResult['match_list'])) {
+                                $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\matchListModel';
+                                $classList = $this->getClass($classList, $ModelClassName);
+                                $ModelClass = $classList[$ModelClassName];
+                                foreach($processResult['match_list'] as $key => $value)
+                                {
+                                    $saveMatch = $ModelClass->saveMatch($value);
+                                    echo "saveMatch:".$saveMatch."\n";
+                                }
+                            }
+                            die();
+                            if (isset($processResult['team'])) {
+                                $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\teamModel';
+                                $classList = $this->getClass($classList, $ModelClassName);
+                                $ModelClass = $classList[$ModelClassName];
+                                foreach($processResult['team'] as $key => $value)
+                                {
+                                    $saveTeam = $ModelClass->saveTeam($value);
+                                    echo "saveTeam:".$saveTeam."\n";
+                                }
+                            }
+                        }
+                    }
                     if (is_array($save)) {
                         echo "save:" . $save['result'] . "\n";
                         if ($save['result'] > 0) {

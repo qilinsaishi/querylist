@@ -9,11 +9,11 @@ class chaofan
     protected $data_map =
         [
             'list'=>[
+                'game'=>['path'=>"",'default'=>"lol"],//游戏
                 'home_score'=>['path'=>"home.score",'default'=>0],//主队得分
                 'away_score'=>['path'=>"away.score",'default'=>0],//客队得分
                 'home_id'=>['path'=>"home.team_id",'default'=>0],//主队id
                 'away_id'=>['path'=>"away.team_id",'default'=>0],//客队id
-                'match_name'=>['path'=>"title",'default'=>""],//比赛名称
                 'logo'=>['path'=>"game_icon",'default'=>""],//logo
                 "match_id"=>['path'=>"id",'default'=>""],//比赛唯一ID
                 "tournament_id"=>['path'=>"tournament_id",'default'=>""],//赛事唯一ID
@@ -22,6 +22,7 @@ class chaofan
 
             ],
             'team'=>[
+                'game'=>['path'=>"",'default'=>"lol"],//游戏
                 'team_id'=>['path'=>"team_id",'default'=>0],//队伍ID
                 'team_name'=>['path'=>"name",'default'=>0],//队伍名称
                 'logo'=>['path'=>"logo",'default'=>''],//logo
@@ -101,7 +102,7 @@ class chaofan
         {
             $start_time = date("Y-m-d H:i:s",$value['start_time']);
             $end_time = date("Y-m-d H:i:s",$value['end_time']);
-            echo "name:".$value['title']."\n"."start_time:".$start_time."\n"."end_time:".$end_time."\n";
+            //echo "name:".$value['title']."\n"."start_time:".$start_time."\n"."end_time:".$end_time."\n";
         }
         foreach($data['event_list'] as $key => $value)
         {
@@ -113,12 +114,6 @@ class chaofan
                 }
             }
         }
-        print_R($data['match_list']);
-        print_R($data['team']);
-        die();
-        print_R($arr['content']['tournament_info']);
-        die();
-        //print_R($arr['content']['hot_schedules']);
-        die();
+        return $data;
     }
 }
