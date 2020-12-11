@@ -15,17 +15,75 @@ class HomeController extends Controller
     {
 
         //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
-        $url='https://api-pc.chaofan.com/api/v1/match/list?game_id=1';
-        $client=new ClientServices();
-        $data=$client->curlGet($url);
-        dd($data);
 
+        /*$client=new ClientServices();
+        $data=$client->curlGet($url);
+        dd($data);*/
+        //$url='http://www.2cpseo.com/teams/lol/p-1';//分页
+       /* $url='http://www.2cpseo.com/teams/lol/p-1';//分页
         $ql = QueryList::get($url);
-        $logos=$ql->find('.list-box .img-view')->attrs('style')->all();//获取图片
+        $links=$ql->find('.hot-teams-container a')->attrs('href')->all();//分页
+        dd($links);*/
+      /*  $res=$this->cpseoTeam();
+        dd($res);*/
+        /*$url='http://www.2cpseo.com/teams/lol/p-4';//分页
+        $ql = QueryList::get($url);
+        $links=$ql->find('.hot-teams-container a')->attrs('href')->all();//分页
+        dd(count($links));*/
+        $url='http://www.2cpseo.com/player/365';
+        $infos=$this->cpseoTeam('http://www.2cpseo.com/teams/lol/p-1');
+dd($infos);
+        $ql = QueryList::get($url);
+        $logo=$ql->find('.kf_roster_dec:eq(0) img')->attr('src');
+        $wraps=$ql->find('.text_wrap:eq(0) .text_2 p')->text();
+        $wraps=explode("\n",$wraps);
+        if($wraps){
+            foreach ($wraps as $key=>$val){
+                if(strpos($val,'昵称') !==false) {
+                    $nickname=trim($val,'昵称：');
+                }
+                if(strpos($val,'真名') !==false) {
+                    $realname=str_replace('真名：','',$val);
+
+                }
+                if(strpos($val,'位置') !==false) {
+                    $position=str_replace('位置：','',$val);
+                }
+                if(strpos($val,'地区') !==false) {
+                    $area=trim($val,'地区：');
+                }
+                if(strpos($val,'简介') !==false) {
+                    $intro=$wraps[$key+1];
+                }
+                if(strpos($val,'擅长英雄') !==false) {
+                    $goodAtHeroes=trim($val,'擅长英雄：');
+                }
+                if(strpos($val,'生日') !==false) {
+                    $birthday=trim($val,'生日：');
+                }
+                if(strpos($val,'曾用ID') !==false) {
+                    $usedId=trim($val,'曾用ID：');
+                }
+
+            }
+        }
+        $baseInfo=[
+            'logo'=>'http://www.2cpseo.com'.$logo,
+            'nickname'=>$nickname ?? '',
+            'real_name'=>$realname ?? '',
+            'position'=>$position ?? '',
+            'area'=>$area ?? '',
+            'goodAtHeroes'=>$goodAtHeroes ?? '',
+            'birthday'=>$birthday ?? '',
+            'usedId'=>$usedId ?? '',
+            'intro'=>$intro ?? ''
+        ];
+dd($baseInfo);
+
         $matchInfo = $ql->rules([
-                'title' => ['.mask>.t2', 'text'],
-                'dtime' => ['.bottom-box>.t2', 'text']
-            ])->range('.list-box>li')->queryData();
+                'title' => ['.recommend-item', 'text'],
+                'imgs' => ['a', 'href']
+            ])->range('.recommend-list')->queryData();
         $arrData=[];
         $status=0;
         if($matchInfo) {
@@ -224,9 +282,53 @@ dd($res);
         dd($data);
     }
 
+    public function cpseoTeam($url='http://www.2cpseo.com/teams/lol/p-1'){
+        $ql = QueryList::get($url);
+        $links=$ql->find('.hot-teams-container a')->attrs('href')->all();
+        $res=[];
+        if($links){
+            foreach ($links as $key=>$val){
+                $ql = QueryList::get($val);
+                $logo=$ql->find('.kf_roster_dec img')->attr('src');
+                $aka=$ql->find('.kf_roster_dec .text span:eq(0)')->text();
+                $wraps=$ql->find('.text_wrap .text_2 p')->text();
+                $wraps=explode("\n",$wraps);
+                foreach ($wraps as $val){
+                    if(strpos($val,'地区') !==false) {
+                        $area=str_replace('地区：','',$val);
+                    }
+                    if(strpos($val,'中文名称') !==false) {
+                        $cname=str_replace('中文名称：','',$val);
+                    }
+                    if(strpos($val,'英文名称') !==false) {
+                        $ename=str_replace('英文名称：','',$val);
+                    }
+                    if(strpos($val,'建队时间') !==false) {
+                        $createTime=str_replace('建队时间：','',$val);
+                    }
+                }
 
+                $intro=(isset($wraps[6]) && $wraps[6]) ? trim($wraps[6]):'';
+                $baseInfo=[
+                    'logo'=>'http://www.2cpseo.com'.$logo,
+                    'aka'=>$aka,
+                    'area'=>$area,
+                    'cname'=>$cname,
+                    'ename'=>$ename,
+                    'create_time'=>$createTime,
+                    'intro'=>$intro
+                ];
+                $teamListLink=$ql->find('.versus a')->attrs('href')->all();
 
+                $res[$key]=[
+                    'baseInfo'=>$baseInfo,
+                    'teamListLink'=>$teamListLink
+                ];
 
+            }
+        }
 
+        return $res;
+    }
 
 }
