@@ -5,10 +5,10 @@ namespace App\Models\Match\chaofan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class teamModel extends Model
+class eventModel extends Model
 {
-    protected $table = "chaofan_team_info";
-    //protected $primaryKey = "team_id";
+    protected $table = "chaofan_event_list";
+    //protected $primaryKey = "event_id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -36,53 +36,38 @@ class teamModel extends Model
     protected $attributes = [
     ];
     protected $toJson = [
+        "pics"
     ];
     protected $toAppend = [
     ];
-    public function getTeamList($params)
+    public function getEventList($params)
     {
-        $team_list =$this->select("*");
+        $event_list =$this->select("*");
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
-        $team_list = $team_list
+        $event_list = $event_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("team_id")
+            ->orderBy("event_id")
             ->get()->toArray();
-        return $team_list;
+        return $event_list;
     }
-    public function getTeamByName($team_name,$game)
+    public function getEventById($event_id)
     {
-        $team_info =$this->select("*")
-            ->where("team_name",$team_name)
-            ->where("game",$game)
+        $event_info =$this->select("*")
+            ->where("event_id",$event_id)
             ->get()->first();
-        if(isset($team_info->team_id))
+        if(isset($event_info->event_id))
         {
-            $team_info = $team_info->toArray();
+            $event_info = $event_info->toArray();
         }
         else
         {
-            $team_info = [];
+            $event_info = [];
         }
-        return $team_info;
+        return $event_info;
     }
-    public function getTeamById($team_id)
-    {
-        $team_info =$this->select("*")
-            ->where("team_id",$team_id)
-            ->get()->first();
-        if(isset($team_info->team_id))
-        {
-            $team_info = $team_info->toArray();
-        }
-        else
-        {
-            $team_info = [];
-        }
-        return $team_info;
-    }
-    public function insertTeam($data)
+    public function insertEvent($data)
     {
         foreach($this->attributes as $key => $value)
         {
@@ -111,35 +96,35 @@ class teamModel extends Model
         return $this->insertGetId($data);
     }
 
-    public function updateTeam($team_id=0,$data=[])
+    public function updateEvent($event_id=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
         {
             $data['update_time'] = $currentTime;
         }
-        return $this->where('team_id',$team_id)->update($data);
+        return $this->where('event_id',$event_id)->update($data);
     }
 
-    public function saveTeam($data)
+    public function saveEvent($data)
     {
-        $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
-        $data['team_name'] = trim($data['team_name']);
-        $currentTeam = $this->getTeamById($data['team_id']);
-        if(!isset($currentTeam['team_id']))
+        $data['event_title'] = preg_replace("/\s+/", "",$data['event_title']);
+        $data['event_title'] = trim($data['event_title']);
+        $currentEvent = $this->getEventById($data['event_id']);
+        if(!isset($currentEvent['event_id']))
         {
-            echo "toInsertTeam:"."\n";
-            return $this->insertTeam($data);
+            echo "toInsertEvent:"."\n";
+            return $this->insertEvent($data);
         }
         else
         {
-            echo "toUpdateTeam:".$currentTeam['team_id']."\n";
+            echo "toUpdateEvent:".$currentEvent['event_id']."\n";
             //校验原有数据
             foreach($data as $key => $value)
             {
                 if(in_array($key,$this->toAppend))
                 {
-                    $t = json_decode($currentTeam[$key],true);
+                    $t = json_decode($currentEvent[$key],true);
                     foreach($value as $k => $v)
                     {
                         if(!in_array($v,$t))
@@ -153,9 +138,9 @@ class teamModel extends Model
                 {
                     $value = json_encode($value);
                 }
-                if(isset($currentTeam[$key]) && ($currentTeam[$key] == $value))
+                if(isset($currentEvent[$key]) && ($currentEvent[$key] == $value))
                 {
-                    //echo $currentTeam[$key]."-".$value."\n";
+                    //echo $currentEvent[$key]."-".$value."\n";
                     echo $key.":passed\n";
                     unset($data[$key]);
                 }
@@ -166,7 +151,7 @@ class teamModel extends Model
             }
             if(count($data))
             {
-                return $this->updateTeam($currentTeam['team_id'],$data);
+                return $this->updateEvent($currentEvent['event_id'],$data);
             }
             else
             {
@@ -175,4 +160,3 @@ class teamModel extends Model
         }
     }
 }
-
