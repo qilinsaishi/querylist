@@ -315,6 +315,83 @@ if (!function_exists('randStr')) {
         return $password;
     }
 }
+//获取远程图片，并以文件的hash作为文件名保存
+function getImage($url,$save_dir='storage/downloads',$filename='',$type=0)
+{
+    $redis = app("redis.connection");
+    $fileKey = "file_get_".$url;
+    $currentFile = $redis->get($fileKey);
+    if($currentFile && strlen($currentFile)>5)
+    {
+        return $currentFile;
+    }
+    if (trim($url) == '')
+    {
+        return $url;
+    }
+    if (trim($save_dir) == '')
+    {
+        $save_dir = './';
+    }
+    if (trim($filename) == '') {//保存文件名
+        $ext = strrchr($url, '.');
+        $length = strlen($ext);
+        if($length>6)//拆不开有效的扩展明，如无扩展名
+        {
+            $filename = substr(strrchr($url, '/').'.jpg',1);
+            $ext = '.jpg';
+        }
+        else
+        {
+            if ($ext != '.gif' && $ext != '.jpg')
+            {
+                return $url;
+            }
+            else
+            {
+                $filename = substr(strrchr($url, '/'),1);
+            }
+        }
+    }
+    if (0 !== strrpos($save_dir, '/'))
+    {
+        $save_dir .= '/';
+    }
+    //创建保存目录
+    if(!file_exists($save_dir)&&!mkdir($save_dir,0777,true)){
+        return $url;
+    }
+    //获取远程文件所采用的方法
+    if($type)
+    {
+        $ch=curl_init();
+        $timeout=5;
+        curl_setopt($ch,CURLOPT_URL,$url);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,$timeout);
+        $img=curl_exec($ch);
+        curl_close($ch);
+    }else{
+        ob_start();
+        readfile($url);
+        $img=ob_get_contents();
+        ob_end_clean();
+    }
+    //文件大小
+    $fp2=@fopen($save_dir.$filename,'a');
+    fwrite($fp2,$img);
+    fclose($fp2);
+    {
+        //生成文件内容hash作为文件名
+        $new_name =  md5_file($save_dir.$filename).$ext;
+        rename($save_dir.$filename,$save_dir.$new_name);
+        //存储到redis,一天内不再重新获取
+        $redis->set($fileKey,$save_dir.$new_name);
+        $redis->expire($fileKey,86400);
+    }
+    unset($img,$url);
+    return $save_dir.$new_name;
+}
 
 
 
