@@ -33,25 +33,25 @@ function curl_get($url, $referer = '')
     $headers = substr($data, 0, $header_size);
     $body = substr($data, $header_size);
 
-    dd($data);
+   dd($data);
 
-    if (strpos($data, 'if(!LOLsummonerjs)var LOLsummonerjs=') !== false) {
-        $data = str_replace('if(!LOLsummonerjs)var LOLsummonerjs=', '', $data);
-        $data = str_replace(';', '', $data);
+    if(strpos($data,'if(!LOLsummonerjs)var LOLsummonerjs=') !==false){
+        $data=str_replace('if(!LOLsummonerjs)var LOLsummonerjs=','',$data);
+        $data=str_replace(';','',$data);
     }
-    if (strpos($data, 'callback(') !== false) {
-        $data = str_replace('callback(', '', $data);
-        $data = str_replace(');', '', $data);
+    if(strpos($data,'callback(') !==false){
+        $data=str_replace('callback(','',$data);
+        $data=str_replace(');','',$data);
     }
 
 
-    // 显示错误信息
+        // 显示错误信息
     if (curl_error($curl)) {
         print "Error: " . curl_error($curl);
     } else {
         // 打印返回的内容
 
-        $res = json_decode($data, true);
+        $res=json_decode($data,true);
         curl_close($curl);
 
         return $res;

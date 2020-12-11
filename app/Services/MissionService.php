@@ -191,15 +191,63 @@ class MissionService
                             }
                         }
                     }
+                    elseif ($result['mission_type'] == "match") {
+                        //生成类库路径
+                        $modelClassName = 'App\Models\Rune\\' . $result['game'] . "Model";
+                        $classList = $this->getClass($classList, $modelClassName);
+                        if (isset($classList[$modelClassName])) {
+                            $modelClass = $classList[$modelClassName];
+                            if (isset($processResult['match_list'])) {
+                                $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\matchListModel';
+                                $classList = $this->getClass($classList, $ModelClassName);
+                                $ModelClass = $classList[$ModelClassName];
+                                foreach($processResult['match_list'] as $key => $value)
+                                {
+                                    $save = $ModelClass->saveMatch($value);
+                                    echo "saveMatch:".$save."\n";
+                                }
+                            }
+                            if (isset($processResult['team'])) {
+                                $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\teamModel';
+                                $classList = $this->getClass($classList, $ModelClassName);
+                                $ModelClass = $classList[$ModelClassName];
+                                foreach($processResult['team'] as $key => $value)
+                                {
+                                    $saveTeam = $ModelClass->saveTeam($value);
+                                    echo "saveTeam:".$saveTeam."\n";
+                                }
+                            }
+                            if (isset($processResult['tournament'])) {
+                                $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
+                                $classList = $this->getClass($classList, $ModelClassName);
+                                $ModelClass = $classList[$ModelClassName];
+                                foreach($processResult['tournament'] as $key => $value)
+                                {
+                                    $saveTournament = $ModelClass->saveTournament($value);
+                                    echo "saveTournament:".$saveTournament."\n";
+                                }
+                            }
+                            if (isset($processResult['event'])) {
+                                $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\eventModel';
+                                $classList = $this->getClass($classList, $ModelClassName);
+                                $ModelClass = $classList[$ModelClassName];
+                                foreach($processResult['event'] as $key => $value)
+                                {
+                                    $saveEvent = $ModelClass->saveEvent($value);
+                                    echo "saveEvent:".$saveEvent."\n";
+                                }
+                            }
+                        }
+                    }
                     if (is_array($save)) {
                         echo "save:" . $save['result'] . "\n";
                         if ($save['result'] > 0) {
-                            $collectModel->updateStatus($result['id'], ['status' => 2]);
+                            //$collectModel->updateStatus($result['id'], ['status' => 2]);
                         }
                     } else {
                         echo "save:" . $save . "\n";
                         if ($save > 0) {
-                            $collectModel->updateStatus($result['id'], ['status' => 2]);
+                            //$collectModel->updateStatus($result['id'], ['status' => 2]);
                         }
                     }
                 }
