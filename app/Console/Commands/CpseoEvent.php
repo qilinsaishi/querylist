@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\MissionService as oMission;
 use Illuminate\Console\Command;
+use QL\QueryList;
 
 class CpseoEvent extends Command
 {
@@ -12,7 +13,7 @@ class CpseoEvent extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'command:seo_event';
 
     /**
      * The console command description.
@@ -38,15 +39,15 @@ class CpseoEvent extends Command
      */
     public function handle()
     {
-        $mission_type='team';
+        $mission_type='event';
         $game='lol';
         $source='cpseo';
         /*$count=3;
          for ($i=0;$i<=$count;$i++){
              $m=$i+1;
-             $url='http://www.2cpseo.com/teams/lol/p-'.$m;
+             $url='http://www.2cpseo.com/events/lol/p-'.$m;
              $ql = QueryList::get($url);
-             $links=$ql->find('.hot-teams-container a')->attrs('href')->all();
+             $links=$ql->find('.versus a')->attrs('href')->all();
              if($links){
                  foreach ($links as $v){
                      $data = [
