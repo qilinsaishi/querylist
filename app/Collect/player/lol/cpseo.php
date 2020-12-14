@@ -9,8 +9,8 @@ class cpseo
     protected $data_map =
         [
             "player_name"=>['path'=>"nickname",'default'=>''],
-            "cn_name"=>['path'=>"",'default'=>''],
-            "en_name"=>['path'=>"",'default'=>''],
+            "cn_name"=>['path'=>"cn_name",'default'=>''],
+            "en_name"=>['path'=>"en_name",'default'=>''],
             "aka"=>['path'=>"aka",'default'=>''],
             "country"=>['path'=>"area",'default'=>''],
             "position"=>['path'=>"position",'default'=>''],
@@ -63,6 +63,11 @@ class cpseo
          * }
          */
         $arr['content']['aka'] = explode(",",$arr['content']['real_name']);
+        if(preg_match('/[\x7f-\xff]/', $arr['content']['nickname'])){
+            $arr['content']['cn_name'] = $arr['content']['nickname'];
+        }else{
+            $arr['content']['en_name'] = $arr['content']['nickname'];
+        }
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }
