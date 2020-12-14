@@ -39,37 +39,45 @@ class CpseoTeam extends Command
      */
     public function handle()
     {
-        $mission_type='team';
-        $game='lol';
-        $source='cpseo';
-       /*$count=3;
-        for ($i=0;$i<=$count;$i++){
-            $m=$i+1;
-            $url='http://www.2cpseo.com/teams/lol/p-'.$m;
+        /**
+         * 英雄联盟
+         * $mission_type='team';
+         * $game='lol';
+         * $source='cpseo';
+         * $count=3;*/
+
+          //王者荣耀kpl
+          $mission_type='team';
+          $game='kpl';
+          $source='cpseo';
+          $count=1;
+        for ($i = 0; $i <= $count; $i++) {
+            $m = $i + 1;
+            $url = 'http://www.2cpseo.com/teams/lol/p-' . $m;
             $ql = QueryList::get($url);
-            $links=$ql->find('.hot-teams-container a')->attrs('href')->all();
-            if($links){
-                foreach ($links as $v){
+            $links = $ql->find('.hot-teams-container a')->attrs('href')->all();
+            if ($links) {
+                foreach ($links as $v) {
                     $data = [
-                        "asign_to"=>1,
-                        "mission_type"=>$mission_type,//赛事
-                        "mission_status"=>1,
-                        "game"=>$game,
-                        "source"=>$source,//
-                        "detail"=>json_encode(
+                        "asign_to" => 1,
+                        "mission_type" => $mission_type,//赛事
+                        "mission_status" => 1,
+                        "game" => $game,
+                        "source" => $source,//
+                        "detail" => json_encode(
                             [
-                                "url"=>$v,
-                                "game"=>$game,
-                                "source"=>$source,
+                                "url" => $v,
+                                "game" => $game,
+                                "source" => $source,
                             ]
                         ),
                     ];
                     $insert = (new oMission())->insertMission($data);
-                    echo "insert:".$insert;
+                    echo "insert:" . $insert;
                 }
             }
 
-        }*/
-        (new oMission())->collect($game,$source,$mission_type);
+        }
+        //(new oMission())->collect($game, $source, $mission_type);
     }
 }
