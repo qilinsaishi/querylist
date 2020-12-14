@@ -63,7 +63,9 @@ class cpseo
          * }
          */
         $arr['content']['aka'] = explode(",",$arr['content']['real_name']);
-        if(preg_match('/[\x7f-\xff]/', $arr['content']['nickname'])){
+        //     '/^[\x7f-\xff]+$/' 全是中文
+        if(preg_match('/[\x7f-\xff]/', $arr['content']['nickname']))
+        {
             $arr['content']['cn_name'] = $arr['content']['nickname'];
         }else{
             $arr['content']['en_name'] = $arr['content']['nickname'];

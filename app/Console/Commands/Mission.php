@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 
+use App\Services\AliyunSercies;
+use App\Services\AliyunService;
 use Illuminate\Console\Command;
 use App\Services\MissionService as oMission;
 class Mission extends Command
@@ -48,8 +50,14 @@ class Mission extends Command
             case "process":
                 (new oMission())->process($game,"",$mission_type);
                 break;
+            case "upload":
+                $fileArr = ['storage/downloads/385e744509da80c73bbab5542daaab1f.jpg',
+                    'storage/downloads/5f3e9aba60b9131755123e3bc4470d19.png',
+                    'storage/downloads/ebddfdb2f9e8286450ecffdea5c7e4c8.jpg'];
+                (new AliyunService())->upload2Oss($fileArr);
+                break;
             default:
-                (new oMission())->collect();
+
                 break;
         }
 

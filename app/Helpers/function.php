@@ -1,4 +1,7 @@
 <?php
+
+use App\Services\AliyunService;
+
 function curl_get($url, $referer = '')
 {
 
@@ -360,7 +363,9 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         $redis->expire($fileKey, 86400);
     }
     unset($img, $url);
-    return $save_dir . $new_name;
+    $root =  $save_dir . $new_name;
+    $upload = (new AliyunService())->upload2Oss([$root]);
+    return $upload[0];
 }
 
 
