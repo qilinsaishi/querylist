@@ -99,7 +99,7 @@ class MissionService
             //数据解包
             $result['content'] = json_decode($result['content'], true);
             //如果结果数组非空
-            if (count($result['content']) > 0) {
+            if (is_array($result['content']) && count($result['content']) > 0) {
                 //生成类库路径
                 $className = 'App\Collect\\' . $result['mission_type'] . '\\' . $result['game'] . '\\' . $result['source'];
                 $classList = $this->getClass($classList, $className);
@@ -117,6 +117,9 @@ class MissionService
                     }
                     if ($result['mission_type'] == "team") {
                         $save = $teamModel->saveTeam($result["game"], $processResult);
+                        echo "-----save:\n";
+                        print_r($save);
+                        echo "-----save:\n";
                         if (method_exists($class, "processMemberList")) {
                             $missionList = $class->processMemberList($save['team_id'], $result);
                             foreach ($missionList as $mission) {
