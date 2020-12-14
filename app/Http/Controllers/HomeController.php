@@ -40,30 +40,28 @@ dd($infos);*/
         $wraps=explode("\n",$wraps);
         if($wraps){
             foreach ($wraps as $key=>$val){
-                if(strpos($val,'英雄联盟') !==false) {
-                    $title=trim($val,'英雄联盟：');
+                if(strpos($val,'英雄联盟：') !==false) {
+                    $title=str_replace('英雄联盟：','',$val);
                 }
-                if(strpos($val,'开始时间') !==false) {
+                if(strpos($val,'开始时间：') !==false) {
                     $startTime=str_replace('开始时间：','',$val);
 
                 }
-                if(strpos($val,'结束时间') !==false) {
+                if(strpos($val,'结束时间：') !==false) {
                     $endTime=str_replace('结束时间：','',$val);
                 }
 
             }
         }
+
         $baseInfo=[
             'logo'=>$logo,
             'title'=>$title ?? '',
             'start_time'=>$startTime ?? '',
             'end_time'=>$endTime ?? '',
-
+            'game_id'=>1,//game: 1表示lol
         ];
-        $ql->rules([
-            'title' => ['.recommend-item', 'text'],
-            'imgs' => ['a', 'href']
-        ])->range('.recommend-list')->queryData();
+
         $tapType=$ql->find('.tranding_tab .nav-tabs li')->texts()->all();
         $pkTeam=[];
         if(!empty($tapType)){
@@ -76,7 +74,9 @@ dd($infos);*/
                 ])->range('#home'.($key+1).' li')->queryData();
             }
         }
-        dd($pkTeam);
+        $res['baseInfo']=$baseInfo ?? [];//赛事基本
+        $res['pkTeam']=$pkTeam ?? [];//pk战队
+        dd($res);
 
 
         $arrData=[];

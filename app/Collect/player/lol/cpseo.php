@@ -15,7 +15,11 @@ class cpseo
         $cdata = [];
         $url = $arr['detail']['url'] ?? '';
         $res = $this->cpSeoPlayer($url);
+        $team_id = $arr['detail']['team_id'] ?? '';
+        $current = $arr['detail']['current'] ?? '';
         if (!empty($res)) {
+            $res['team_id'] = $team_id;
+            $res['current'] = $current;
             $cdata = [
                 'mission_id' => $arr['mission_id'],//任务id
                 'content' => json_encode($res),

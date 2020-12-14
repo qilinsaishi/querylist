@@ -76,7 +76,7 @@ class cpseo
             if (strpos($val, '中文名称：') !== false) {
                 $cname = str_replace('中文名称：', '', $val);
             }
-            if (strpos($val, '英文名称') !== false) {
+            if (strpos($val, '英文名称：') !== false) {
                 $ename = str_replace('英文名称：', '', $val);
             }
             if (strpos($val, '建队时间：') !== false) {
