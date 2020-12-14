@@ -8,6 +8,15 @@ class cpseo
 {
     protected $data_map =
         [
+            "team_name"=>['path'=>"baseInfo.cname",'default'=>''],
+            "en_name"=>['path'=>"baseInfo.ename",'default'=>''],
+            "aka"=>['path'=>"aka","default"=>""],
+            "location"=>['path'=>"baseInfo.area","default"=>"未知"],
+            "established_date"=>['path'=>"baseInfo.create_time",'default'=>"未知"],
+            "coach"=>['path'=>"",'default'=>"暂无"],
+            "logo"=>['path'=>"logo",'default'=>''],
+            "description"=>['path'=>"baseInfo.intro",'default'=>"暂无"],
+            "race_stat"=>['path'=>"",'default'=>[]],
         ];
 
     public function collect($arr)
@@ -54,6 +63,12 @@ class cpseo
          * }
          */
         var_dump($arr);
+        if(strlen($arr['content']['baseInfo']['area'])>10)
+        {
+            unset($arr['content']['baseInfo']['area']);
+        }
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
 
     /**
@@ -97,12 +112,31 @@ class cpseo
             'intro' => $intro ?? ''
         ];
         $teamListLink = $ql->find('.versus a')->attrs('href')->all();
-
         $res = [
             'baseInfo' => $baseInfo,
             'teamListLink' => $teamListLink
         ];
-
         return $res;
+    }
+    public function processMemberList($team_id,$arr)
+    {
+        $missionList = [];
+        foreach($arr['content']['teamListLink'] as $member)
+        {
+            $t = explode("/",$member);
+            $mission = ['mission_type'=>"player",
+                'mission_status'=>0,
+                'title'=>$t[count($t)-1],
+                'detail'=>json_encode(['url'=>$member,
+                    'name'=>$t[count($t)-1],
+                    'position'=>"",
+                    'logo'=>"",
+                    'team_id'=>$team_id,
+                    'current'=>1
+                ]),
+            ];
+            $missionList[] = $mission;
+        }
+        return $missionList;
     }
 }

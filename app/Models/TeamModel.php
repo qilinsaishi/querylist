@@ -184,7 +184,7 @@ class TeamModel extends Model
             }
             else
             {
-                return true;
+                return $return;
             }
         }
     }
