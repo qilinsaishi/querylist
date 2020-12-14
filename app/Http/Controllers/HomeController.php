@@ -26,64 +26,59 @@ class HomeController extends Controller
         dd($links);*/
       /*  $res=$this->cpseoTeam();
         dd($res);*/
-        /*$url='http://www.2cpseo.com/teams/lol/p-4';//分页
+        /*$url='http://www.2cpseo.com/events/lol/p-1';//分页
         $ql = QueryList::get($url);
-        $links=$ql->find('.hot-teams-container a')->attrs('href')->all();//分页
-        dd(count($links));*/
-        $url='http://www.2cpseo.com/player/365';
-        $infos=$this->cpseoTeam('http://www.2cpseo.com/teams/lol/p-1');
-dd($infos);
+        $links=$ql->find('.versus a')->attrs('href')->all();//分页
+        dd($links);*/
+        $url='http://www.2cpseo.com/event/439';
+        /*$infos=$this->cpseoTeam('http://www.2cpseo.com/teams/lol/p-1');
+dd($infos);*/
         $ql = QueryList::get($url);
-        $logo=$ql->find('.kf_roster_dec:eq(0) img')->attr('src');
+        $logo=$ql->find('.kf_roster_dec img')->attr('src');
+        $logo='http://www.2cpseo.com'.$logo;
         $wraps=$ql->find('.text_wrap:eq(0) .text_2 p')->text();
         $wraps=explode("\n",$wraps);
         if($wraps){
             foreach ($wraps as $key=>$val){
-                if(strpos($val,'昵称') !==false) {
-                    $nickname=trim($val,'昵称：');
+                if(strpos($val,'英雄联盟') !==false) {
+                    $title=trim($val,'英雄联盟：');
                 }
-                if(strpos($val,'真名') !==false) {
-                    $realname=str_replace('真名：','',$val);
+                if(strpos($val,'开始时间') !==false) {
+                    $startTime=str_replace('开始时间：','',$val);
 
                 }
-                if(strpos($val,'位置') !==false) {
-                    $position=str_replace('位置：','',$val);
-                }
-                if(strpos($val,'地区') !==false) {
-                    $area=trim($val,'地区：');
-                }
-                if(strpos($val,'简介') !==false) {
-                    $intro=$wraps[$key+1];
-                }
-                if(strpos($val,'擅长英雄') !==false) {
-                    $goodAtHeroes=trim($val,'擅长英雄：');
-                }
-                if(strpos($val,'生日') !==false) {
-                    $birthday=trim($val,'生日：');
-                }
-                if(strpos($val,'曾用ID') !==false) {
-                    $usedId=trim($val,'曾用ID：');
+                if(strpos($val,'结束时间') !==false) {
+                    $endTime=str_replace('结束时间：','',$val);
                 }
 
             }
         }
         $baseInfo=[
-            'logo'=>'http://www.2cpseo.com'.$logo,
-            'nickname'=>$nickname ?? '',
-            'real_name'=>$realname ?? '',
-            'position'=>$position ?? '',
-            'area'=>$area ?? '',
-            'goodAtHeroes'=>$goodAtHeroes ?? '',
-            'birthday'=>$birthday ?? '',
-            'usedId'=>$usedId ?? '',
-            'intro'=>$intro ?? ''
-        ];
-dd($baseInfo);
+            'logo'=>$logo,
+            'title'=>$title ?? '',
+            'start_time'=>$startTime ?? '',
+            'end_time'=>$endTime ?? '',
 
-        $matchInfo = $ql->rules([
-                'title' => ['.recommend-item', 'text'],
-                'imgs' => ['a', 'href']
-            ])->range('.recommend-list')->queryData();
+        ];
+        $ql->rules([
+            'title' => ['.recommend-item', 'text'],
+            'imgs' => ['a', 'href']
+        ])->range('.recommend-list')->queryData();
+        $tapType=$ql->find('.tranding_tab .nav-tabs li')->texts()->all();
+        $pkTeam=[];
+        if(!empty($tapType)){
+            foreach ($tapType as $key=>&$val){
+                $pkTeam[$key]['type']=$val;
+                $pkTeam[$key]['teamInfo'] = $ql->rules([
+                    'date_2' => ['.date_2', 'text'],
+                    'opponents_dec' => ['.kf_opponents_dec  h6', 'texts'],
+                    'dtime' => ['.kf_opponents_gols  p', 'text']
+                ])->range('#home'.($key+1).' li')->queryData();
+            }
+        }
+        dd($pkTeam);
+
+
         $arrData=[];
         $status=0;
         if($matchInfo) {

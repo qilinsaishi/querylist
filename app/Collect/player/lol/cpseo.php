@@ -58,29 +58,29 @@ class cpseo
         $wraps = explode("\n", $wraps);
         if ($wraps) {
             foreach ($wraps as $key => $val) {
-                if (strpos($val, '昵称') !== false) {
+                if (strpos($val, '昵称：') !== false) {
                     $nickname = trim($val, '昵称：');
                 }
-                if (strpos($val, '真名') !== false) {
+                if (strpos($val, '真名：') !== false) {
                     $realname = str_replace('真名：', '', $val);
 
                 }
-                if (strpos($val, '位置') !== false) {
+                if (strpos($val, '位置：') !== false) {
                     $position = str_replace('位置：', '', $val);
                 }
-                if (strpos($val, '地区') !== false) {
+                if (strpos($val, '地区：') !== false) {
                     $area = trim($val, '地区：');
                 }
-                if (strpos($val, '简介') !== false) {
+                if (strpos($val, '简介：') !== false) {
                     $intro = $wraps[$key + 1];
                 }
-                if (strpos($val, '擅长英雄') !== false) {
+                if (strpos($val, '擅长英雄：') !== false) {
                     $goodAtHeroes = trim($val, '擅长英雄：');
                 }
-                if (strpos($val, '生日') !== false) {
+                if (strpos($val, '生日：') !== false) {
                     $birthday = trim($val, '生日：');
                 }
-                if (strpos($val, '曾用ID') !== false) {
+                if (strpos($val, '曾用ID：') !== false) {
                     $usedId = trim($val, '曾用ID：');
                 }
 

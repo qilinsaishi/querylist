@@ -70,19 +70,19 @@ class cpseo
         $wraps = $ql->find('.text_wrap .text_2 p')->text();
         $wraps = explode("\n", $wraps);
         foreach ($wraps as $key=>$val) {
-            if (strpos($val, '地区') !== false) {
+            if (strpos($val, '地区：') !== false) {
                 $area = str_replace('地区：', '', $val);
             }
-            if (strpos($val, '中文名称') !== false) {
+            if (strpos($val, '中文名称：') !== false) {
                 $cname = str_replace('中文名称：', '', $val);
             }
             if (strpos($val, '英文名称') !== false) {
                 $ename = str_replace('英文名称：', '', $val);
             }
-            if (strpos($val, '建队时间') !== false) {
+            if (strpos($val, '建队时间：') !== false) {
                 $createTime = str_replace('建队时间：', '', $val);
             }
-            if(strpos($val,'简介') !==false) {
+            if(strpos($val,'简介：') !==false) {
                 $intro=$wraps[$key+1];
             }
         }
