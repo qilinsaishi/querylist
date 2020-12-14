@@ -81,7 +81,6 @@ class cpseo
                 }
                 if (strpos($val, '真名：') !== false) {
                     $realname = str_replace('真名：', '', $val);
-
                 }
                 if (strpos($val, '位置：') !== false) {
                     $position = str_replace('位置：', '', $val);
