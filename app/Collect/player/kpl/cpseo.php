@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Collect\player\lol;
+namespace App\Collect\player\kpl;
 
 use QL\QueryList;
 
@@ -8,19 +8,7 @@ class cpseo
 {
     protected $data_map =
         [
-            "player_name"=>['path'=>"nickname",'default'=>''],
-            "cn_name"=>['path'=>"cn_name",'default'=>''],
-            "en_name"=>['path'=>"en_name",'default'=>''],
-            "aka"=>['path'=>"aka",'default'=>''],
-            "country"=>['path'=>"area",'default'=>''],
-            "position"=>['path'=>"position",'default'=>''],
-            "team_history"=>['path'=>'','default'=>[]],
-            "event_history"=>['path'=>'','default'=>[]],
-            "stat"=>['path'=>'','default'=>[]],
-            "team_id"=>['path'=>'team_id','default'=>0],
-            "logo"=>['path'=>'logo','default'=>0],
-            ];
-
+        ];
     public function collect($arr)
     {
         $cdata = [];
@@ -46,7 +34,6 @@ class cpseo
         }
         return $cdata;
     }
-
     public function process($arr)
     {
         /**
@@ -62,18 +49,9 @@ class cpseo
          * "intro":"2020-11-17，由韩国明星金希澈投资的LCK联赛战队hyFresh Blade今日官宣两名选手加入。" //简介
          * }
          */
-        $arr['content']['aka'] = explode(",",$arr['content']['real_name']);
-        //     '/^[\x7f-\xff]+$/' 全是中文
-        if(preg_match('/[\x7f-\xff]/', $arr['content']['nickname']))
-        {
-            $arr['content']['cn_name'] = $arr['content']['nickname'];
-        }else{
-            $arr['content']['en_name'] = $arr['content']['nickname'];
-        }
-        $data = getDataFromMapping($this->data_map,$arr['content']);
-        return $data;
+        var_dump($arr);
     }
-    //王者荣耀
+    //王者荣耀队员信息
     public function cpSeoPlayer($url)
     {
         $baseInfo = [];
@@ -84,10 +62,11 @@ class cpseo
         if ($wraps) {
             foreach ($wraps as $key => $val) {
                 if (strpos($val, '昵称：') !== false) {
-                    $nickname = trim($val, '昵称：');
+                    $nickname = str_replace('昵称：', '', $val);
                 }
                 if (strpos($val, '真名：') !== false) {
                     $realname = str_replace('真名：', '', $val);
+                    $realname=ltrim($realname);
                 }
                 if (strpos($val, '位置：') !== false) {
                     $position = str_replace('位置：', '', $val);
@@ -116,6 +95,7 @@ class cpseo
             'real_name' => $realname ?? '',
             'position' => $position ?? '',
             'area' => $area ?? '',
+            'game_id'=>2,//王者荣耀
             'goodAtHeroes' => $goodAtHeroes ?? '',
             'birthday' => $birthday ?? '',
             'usedId' => $usedId ?? '',

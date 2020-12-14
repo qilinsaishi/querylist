@@ -38,10 +38,16 @@ class CpseoPlayer extends Command
      */
     public function handle()
     {
-        $mission_type='player';
+        /*
+         * 英雄联盟队员信息
+         * $mission_type='player';
         $game='lol';
+        $source='cpseo';*/
+        //王者荣耀信息
+        $mission_type='player';
+        $game='kpl';
         $source='cpseo';
-        /*$data = [
+       /*$data = [
             "asign_to"=>1,
             "mission_type"=>$mission_type,
             "mission_status"=>1,
@@ -49,7 +55,7 @@ class CpseoPlayer extends Command
             "source"=>$source,
             "detail"=>json_encode(
                 [
-                    "url"=>'http://www.2cpseo.com/player/1947',
+                    "url"=>'http://www.2cpseo.com/player/594',
                     "game"=>$game,//lol
                     "source"=>$source,
 
