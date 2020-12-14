@@ -51,7 +51,7 @@ class CpseoTeam extends Command
           $game='kpl';
           $source='cpseo';
           $count=1;
-        for ($i = 0; $i <= $count; $i++) {
+        /*for ($i = 0; $i <= $count; $i++) {
             $m = $i + 1;
             $url = 'http://www.2cpseo.com/teams/lol/p-' . $m;
             $ql = QueryList::get($url);
@@ -77,7 +77,7 @@ class CpseoTeam extends Command
                 }
             }
 
-        }
-        //(new oMission())->collect($game, $source, $mission_type);
+        }*/
+        (new oMission())->collect($game, $source, $mission_type);
     }
 }
