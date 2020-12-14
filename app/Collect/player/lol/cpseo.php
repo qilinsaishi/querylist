@@ -17,12 +17,13 @@ class cpseo
         $res = $this->cpSeoPlayer($url);
         $team_id = $arr['detail']['team_id'] ?? '';
         $current = $arr['detail']['current'] ?? '';
+
         if (!empty($res)) {
             $res['team_id'] = $team_id;
             $res['current'] = $current;
             $cdata = [
                 'mission_id' => $arr['mission_id'],//任务id
-                'content' => json_encode($res),
+                'content' =>is_array($res) ? json_encode($res):[],
                 'game' => $arr['game'],//游戏类型
                 'source_link' => $url,
                 'title' => $arr['detail']['title'] ?? '',
@@ -73,19 +74,19 @@ class cpseo
                     $position = str_replace('位置：', '', $val);
                 }
                 if (strpos($val, '地区：') !== false) {
-                    $area = trim($val, '地区：');
+                    $area = str_replace('地区：', '', $val);
                 }
                 if (strpos($val, '简介：') !== false) {
                     $intro = $wraps[$key + 1];
                 }
                 if (strpos($val, '擅长英雄：') !== false) {
-                    $goodAtHeroes = trim($val, '擅长英雄：');
+                    $goodAtHeroes = str_replace('擅长英雄：', '', $val);
                 }
                 if (strpos($val, '生日：') !== false) {
-                    $birthday = trim($val, '生日：');
+                    $birthday = str_replace('生日：', '', $val);
                 }
                 if (strpos($val, '曾用ID：') !== false) {
-                    $usedId = trim($val, '曾用ID：');
+                    $usedId = str_replace('曾用ID：', '', $val);
                 }
 
             }
