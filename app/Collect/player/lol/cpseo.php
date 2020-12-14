@@ -8,7 +8,18 @@ class cpseo
 {
     protected $data_map =
         [
-        ];
+            "player_name"=>['path'=>"nickname",'default'=>''],
+            "cn_name"=>['path'=>"",'default'=>''],
+            "en_name"=>['path'=>"",'default'=>''],
+            "aka"=>['path'=>"aka",'default'=>''],
+            "country"=>['path'=>"area",'default'=>''],
+            "position"=>['path'=>"position",'default'=>''],
+            "team_history"=>['path'=>'','default'=>[]],
+            "event_history"=>['path'=>'','default'=>[]],
+            "stat"=>['path'=>'','default'=>[]],
+            "team_id"=>['path'=>'team_id','default'=>0],
+            "logo"=>['path'=>'logo','default'=>0],
+            ];
 
     public function collect($arr)
     {
@@ -51,7 +62,9 @@ class cpseo
          * "intro":"2020-11-17，由韩国明星金希澈投资的LCK联赛战队hyFresh Blade今日官宣两名选手加入。" //简介
          * }
          */
-        var_dump($arr);
+        $arr['content']['aka'] = explode(",",$arr['content']['real_name']);
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
 
     public function cpSeoPlayer($url)
