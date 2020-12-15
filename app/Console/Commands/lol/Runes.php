@@ -38,7 +38,7 @@ class Runes extends Command
      */
     public function handle()
     {
-        /*$url='https://lol.qq.com/act/a20170926preseason/data/cn/runes.json';
+        $url='https://lol.qq.com/act/a20170926preseason/data/cn/runes.json';
         $data = [
             "asign_to"=>1,
             "mission_type"=>'runes',//符文
@@ -54,8 +54,8 @@ class Runes extends Command
             ),
         ];
         $insert = (new oMission())->insertMission($data);
-        echo "insert:".$insert;*/
+        echo "insert:".$insert;
 
-        (new oMission())->collect('lol','lol_qq','runes');
+        //(new oMission())->collect('lol','lol_qq','runes');
     }
 }
