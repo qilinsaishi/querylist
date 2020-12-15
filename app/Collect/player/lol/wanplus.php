@@ -92,15 +92,21 @@ class wanplus
             $end_date = ($end_date==$t[1])?$end_date:"~";
             $arr['content']['historys'][$key]['history_time'] = $start_date."-".$end_date;
         }
-        foreach($arr['content']['playData']['eventList'] as $key => $value)
+        if(isset($arr['content']['playData']['eventList']))
         {
-            $arr['content']['playData']['eventList'][$key]['start_date'] = date("Y-m-d",$value['starttime']);
-            unset($arr['content']['playData']['eventList'][$key]['starttime']);
+            foreach($arr['content']['playData']['eventList'] as $key => $value)
+            {
+                $arr['content']['playData']['eventList'][$key]['start_date'] = date("Y-m-d",$value['starttime']);
+                unset($arr['content']['playData']['eventList'][$key]['starttime']);
+            }
         }
-        foreach($arr['content']['playData']['stateList']['usedheroes'] as $key => $value)
+        if(isset($arr['content']['playData']['stateList']['usedheroes']))
         {
-            $arr['content']['playData']['stateList']['usedheroes'][$key]['kda'] = sprintf("%.4f",$value['kda']);
-            $arr['content']['playData']['stateList']['usedheroes'][$key]['winrate'] = sprintf("%.4f",$value['winrate']);
+            foreach($arr['content']['playData']['stateList']['usedheroes'] as $key => $value)
+            {
+                $arr['content']['playData']['stateList']['usedheroes'][$key]['kda'] = sprintf("%.4f",$value['kda']);
+                $arr['content']['playData']['stateList']['usedheroes'][$key]['winrate'] = sprintf("%.4f",$value['winrate']);
+            }
         }
         $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);

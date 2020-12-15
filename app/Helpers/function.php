@@ -336,37 +336,44 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
     if (!file_exists($save_dir) && !mkdir($save_dir, 0777, true)) {
         return $url;
     }
-    //获取远程文件所采用的方法
-    if ($type) {
-        $ch = curl_init();
-        $timeout = 5;
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-        $img = curl_exec($ch);
-        curl_close($ch);
-    } else {
-        ob_start();
-        readfile($url);
-        $img = ob_get_contents();
-        ob_end_clean();
+    try{
+        //获取远程文件所采用的方法
+        if ($type) {
+            $ch = curl_init();
+            $timeout = 5;
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+            $img = curl_exec($ch);
+            curl_close($ch);
+        } else {
+            ob_start();
+            readfile($url);
+            $img = ob_get_contents();
+            ob_end_clean();
+        }
+        //文件大小
+        $fp2 = @fopen($save_dir . $filename, 'a');
+        fwrite($fp2, $img);
+        fclose($fp2);
+        {
+            //生成文件内容hash作为文件名
+            $new_name = md5_file($save_dir . $filename) . $ext;
+            rename($save_dir . $filename, $save_dir . $new_name);
+            //存储到redis,一天内不再重新获取
+            $redis->set($fileKey, $save_dir . $new_name);
+            $redis->expire($fileKey, 86400);
+        }
+        unset($img, $url);
+        $root =  $save_dir . $new_name;
+        $upload = (new AliyunService())->upload2Oss([$root]);
+        return $upload[0];
     }
-    //文件大小
-    $fp2 = @fopen($save_dir . $filename, 'a');
-    fwrite($fp2, $img);
-    fclose($fp2);
+    catch (\Exception $e)
     {
-        //生成文件内容hash作为文件名
-        $new_name = md5_file($save_dir . $filename) . $ext;
-        rename($save_dir . $filename, $save_dir . $new_name);
-        //存储到redis,一天内不再重新获取
-        $redis->set($fileKey, $save_dir . $new_name);
-        $redis->expire($fileKey, 86400);
+        return $url;
     }
-    unset($img, $url);
-    $root =  $save_dir . $new_name;
-    $upload = (new AliyunService())->upload2Oss([$root]);
-    return $upload[0];
+
 }
 
 
