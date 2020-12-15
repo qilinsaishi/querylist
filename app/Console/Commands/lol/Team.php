@@ -39,8 +39,11 @@ class Team extends Command
      */
     public function handle()
     {
-        /*$collectModel=new CollectUrlModel();
-        $cdata=$collectModel->getDataFromUrl($game='lol',$limt=10,$mission_type='team',$source='wanplus');
+        $game='lol';
+        $mission_type='team';
+        $source='wanplus';
+        $collectModel=new CollectUrlModel();
+        $cdata=$collectModel->getDataFromUrl($game,$mission_type,$source);
        if($cdata){
             foreach ($cdata as $val){
                 $data = [
@@ -61,8 +64,8 @@ class Team extends Command
                 $insert = (new oMission())->insertMission($data);
                 echo "insert:".$insert;
             }
-        }*/
+        }
 
-        (new oMission())->collect('lol','wanplus','team');
+        (new oMission())->collect($game,$source,$mission_type);
     }
 }

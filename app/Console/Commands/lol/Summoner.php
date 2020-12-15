@@ -38,7 +38,7 @@ class Summoner extends Command
      */
     public function handle()
     {
-        /*$url='http://lol.qq.com/biz/hero/summoner.js';
+        $url='http://lol.qq.com/biz/hero/summoner.js';
         $data = [
             "asign_to"=>1,
             "mission_type"=>'summoner',//召唤师
@@ -54,7 +54,7 @@ class Summoner extends Command
             ),
         ];
         $insert = (new oMission())->insertMission($data);
-        echo "insert:".$insert;*/
+        echo "insert:".$insert;
 
         (new oMission())->collect('lol','lol_qq','summoner');
     }
