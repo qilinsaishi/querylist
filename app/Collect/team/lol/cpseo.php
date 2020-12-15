@@ -10,7 +10,7 @@ class cpseo
         [
             "team_name"=>['path'=>"baseInfo.cname",'default'=>''],
             "en_name"=>['path'=>"baseInfo.ename",'default'=>''],
-            "aka"=>['path'=>"aka","default"=>""],
+            "aka"=>['path'=>"baseInfo.aka","default"=>""],
             "location"=>['path'=>"baseInfo.area","default"=>"未知"],
             "established_date"=>['path'=>"baseInfo.create_time",'default'=>"未知"],
             "coach"=>['path'=>"",'default'=>"暂无"],
@@ -66,7 +66,7 @@ class cpseo
         {
             unset($arr['content']['baseInfo']['area']);
         }
-        $arr['content']['logo'] = getImage($arr['content']['logo']);
+        $arr['content']['baseInfo']['logo'] = getImage($arr['content']['baseInfo']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }

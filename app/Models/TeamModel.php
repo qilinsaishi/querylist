@@ -195,6 +195,7 @@ class TeamModel extends Model
             }
             else
             {
+                $return['result'] = 1;
                 return $return;
             }
         }
