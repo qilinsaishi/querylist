@@ -84,7 +84,7 @@ class cpseo
         if ($wraps) {
             foreach ($wraps as $key => $val) {
                 if (strpos($val, '昵称：') !== false) {
-                    $nickname = trim($val, '昵称：');
+                    $nickname = str_replace('昵称：', '', $val);
                 }
                 if (strpos($val, '真名：') !== false) {
                     $realname = str_replace('真名：', '', $val);
@@ -96,7 +96,7 @@ class cpseo
                     $area = str_replace('地区：', '', $val);
                 }
                 if (strpos($val, '简介：') !== false) {
-                    $intro = $wraps[$key + 1];
+                    $intro = $wraps[$key + 1] ?? '';
                 }
                 if (strpos($val, '擅长英雄：') !== false) {
                     $goodAtHeroes = str_replace('擅长英雄：', '', $val);

@@ -98,7 +98,7 @@ class cpseo
                 $createTime = str_replace('建队时间：', '', $val);
             }
             if(strpos($val,'简介：') !==false) {
-                $intro=$wraps[$key+1];
+                $intro=$wraps[$key+1] ?? '';
             }
         }
 
