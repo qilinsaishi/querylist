@@ -70,6 +70,7 @@ class cpseo
         }else{
             $arr['content']['en_name'] = $arr['content']['nickname'];
         }
+        $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }

@@ -137,6 +137,17 @@ class TeamModel extends Model
         $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
         $data['team_name'] = trim($data['team_name']);
         $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
+        if(trim($data['team_name'])=="")
+        {
+            if(is_array($data['aka']))
+            {
+                $data['team_name'] = $data['aka'][0];
+            }
+            else
+            {
+                return $return;
+            }
+        }
         $currentTeam = $this->getTeamByName($data['team_name'],$game);
         if(!isset($currentTeam['team_id']))
         {
@@ -184,6 +195,7 @@ class TeamModel extends Model
             }
             else
             {
+                $return['result'] = 1;
                 return $return;
             }
         }

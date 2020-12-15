@@ -97,6 +97,7 @@ class MissionService
         $classList = [];
         //循环任务列表
         foreach ($result_list as $key => $result) {
+            echo "start to process result:".$result['id']."\n";
             //数据解包
             $result['content'] = json_decode($result['content'], true);
             //如果结果数组非空
@@ -260,12 +261,12 @@ class MissionService
                     if (is_array($save)) {
                         echo "save:" . $save['result'] . "\n";
                         if ($save['result'] > 0) {
-                            //$collectModel->updateStatus($result['id'], ['status' => 2]);
+                            $collectModel->updateStatus($result['id'], ['status' => 2]);
                         }
                     } else {
                         echo "save:" . $save . "\n";
                         if ($save > 0) {
-                            //$collectModel->updateStatus($result['id'], ['status' => 2]);
+                            $collectModel->updateStatus($result['id'], ['status' => 2]);
                         }
                     }
                 }

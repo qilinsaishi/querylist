@@ -53,6 +53,7 @@ class wanplus
         //处理胜平负
         $t = explode("/",$arr['content']['military_exploits']??'');
         $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
+        $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }
