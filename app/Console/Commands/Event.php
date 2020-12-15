@@ -12,7 +12,7 @@ class Event extends Command
      *
      * @var string
      */
-    protected $signature = 'command:event';
+    protected $signature = 'command:event {operation}';
 
     /**
      * The console command description.
@@ -38,26 +38,30 @@ class Event extends Command
      */
     public function handle()
     {
-        /*for ($i=0;$i<=10;$i++){
-            $m=$i+1;
-            $url='https://www.chaofan.com/event/lol?status=0&page='.$m;
-            $data = [
-                "asign_to"=>1,
-                "mission_type"=>'event',//赛事
-                "mission_status"=>1,
-                "game"=>'lol',
-                "source"=>'chaofan',//
-                "detail"=>json_encode(
-                    [
-                        "url"=>$url,
-                        "game"=>'lol',
-                        "source"=>'chaofan',
-                    ]
-                ),
-            ];
-            $insert = (new oMission())->insertMission($data);
-            echo "insert:".$insert;
-        }*/
-        (new oMission())->collect('lol','chaofan','event');
+        $operation = ($this->argument("operation") ?? "insert");
+        if($operation=='insert'){
+            for ($i=0;$i<=10;$i++){
+                $m=$i+1;
+                $url='https://www.chaofan.com/event/lol?status=0&page='.$m;
+                $data = [
+                    "asign_to"=>1,
+                    "mission_type"=>'event',//赛事
+                    "mission_status"=>1,
+                    "game"=>'lol',
+                    "source"=>'chaofan',//
+                    "detail"=>json_encode(
+                        [
+                            "url"=>$url,
+                            "game"=>'lol',
+                            "source"=>'chaofan',
+                        ]
+                    ),
+                ];
+                $insert = (new oMission())->insertMission($data);
+                echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+            }
+        }else{
+            (new oMission())->collect('lol','chaofan','event');
+        }
     }
 }

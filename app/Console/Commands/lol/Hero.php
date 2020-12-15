@@ -60,7 +60,7 @@ class Hero extends Command
                         ),
                     ];
                     $insert = (new oMission())->insertMission($data);
-                    echo "insert:".$insert;
+                    echo "insert:".$insert.' lenth:'.strlen($data['detail']);
                 }
             }
         }else{

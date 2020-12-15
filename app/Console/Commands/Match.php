@@ -12,7 +12,7 @@ class Match extends Command
      *
      * @var string
      */
-    protected $signature = 'command:match';
+    protected $signature = 'command:match {operation}';
 
     /**
      * The console command description.
@@ -38,24 +38,29 @@ class Match extends Command
      */
     public function handle()
     {
-        /*$data = [
-            "asign_to"=>1,
-            "mission_type"=>'match',
-            "mission_status"=>1,
-            "game"=>'lol',
-            'title'=>'',
-            "source"=>'chaofan',
-            "detail"=>json_encode(
-                [
-                    "url"=>'https://api-pc.chaofan.com/api/v1/match/list?game_id=1',
-                    "game"=>'lol',//lol
-                    "source"=>'chaofan',
+        $operation = ($this->argument("operation") ?? "insert");
+        if($operation=='insert'){
+            $data = [
+                "asign_to"=>1,
+                "mission_type"=>'match',
+                "mission_status"=>1,
+                "game"=>'lol',
+                'title'=>'',
+                "source"=>'chaofan',
+                "detail"=>json_encode(
+                    [
+                        "url"=>'https://api-pc.chaofan.com/api/v1/match/list?game_id=1',
+                        "game"=>'lol',//lol
+                        "source"=>'chaofan',
 
-                ]
-            ),
-        ];
-        $insert = (new oMission())->insertMission($data);
-        echo "insert:".$insert;*/
-        (new oMission())->collect('lol','chaofan','match');
+                    ]
+                ),
+            ];
+            $insert = (new oMission())->insertMission($data);
+            echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+        }else{
+            (new oMission())->collect('lol','chaofan','match');
+        }
+
     }
 }
