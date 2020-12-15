@@ -66,8 +66,11 @@ class CpseoEvent extends Command
                                 ]
                             ),
                         ];
-                        $insert = (new oMission())->insertMission($data);
-                        echo "insert:".$insert.' lenth:'.strlen($data['detail']);
+                        if($data){
+                            $insert = (new oMission())->insertMission($data);
+                            echo "insert:".$insert.' lenth:'.strlen($data['detail']);
+                        }
+
                     }
                 }
 
