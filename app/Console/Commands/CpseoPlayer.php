@@ -12,7 +12,7 @@ class CpseoPlayer extends Command
      *
      * @var string
      */
-    protected $signature = 'command:seo_player';
+    protected $signature = 'command:seo_player  {operation}';
 
     /**
      * The console command description.
@@ -47,7 +47,7 @@ class CpseoPlayer extends Command
         $mission_type='player';
         $game='kpl';
         $source='cpseo';
-       /*$data = [
+      /* $data = [
             "asign_to"=>1,
             "mission_type"=>$mission_type,
             "mission_status"=>1,
