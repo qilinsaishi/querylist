@@ -27,11 +27,21 @@ class CollectUrlModel extends Model
      * @param int $limt
      * @return mixed
      */
-    public function getDataFromUrl($game='kpl',$limt=10,$mission_type='team',$source='baidu_baike'){
-        return $this->where(['game'=>$game,'mission_type'=>$mission_type,'source'=>$source])
-            ->select('url','id','game','mission_type','source','title')
-            ->orderBy('id', 'ASC')
-            ->limit($limt)
+    public function getDataFromUrl($game='',$mission_type='',$source=''){
+        $collerObj=$this->select('url','id','game','mission_type','source','title');
+        if($game !=''){
+            $collerObj->where('game',$game);
+        }
+        if($mission_type !=''){
+            $collerObj->where('mission_type',$mission_type);
+        }
+        if($source !=''){
+            $collerObj->where('source',$source);
+        }
+
+
+        return $this->orderBy('id', 'ASC')
+            //->limit($limt)
             ->get()
             ->toArray();
     }

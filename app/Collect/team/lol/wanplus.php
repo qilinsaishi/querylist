@@ -85,7 +85,8 @@ class wanplus
                     'title'=>$member['name'],
                     'detail' => json_encode(['url' => $member['link_url'],
                         'name' => $member['name'],
-                        'position'=>$member['position']??"",
+                        'position' => $member['position']??"",
+
                         'logo' => $member['main_img'],
                         'team_id' => $team_id,
                         'current' => 0

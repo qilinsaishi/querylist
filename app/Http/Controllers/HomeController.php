@@ -14,12 +14,101 @@ class HomeController extends Controller
     public function index()
     {
 
-        $html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
-        $url='https://www.sogou.com/sogou?query=DYG&ie=utf8&insite=baike.sogou.com';
-        $ql = QueryList::get($url)->find('.img-flex .img-height>a')->attr('href');
-dd($ql);
+        //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
+
+        /*$client=new ClientServices();
+        $data=$client->curlGet($url);
+        dd($data);*/
+        //$url='http://www.2cpseo.com/teams/lol/p-1';//分页
+       /* $url='http://www.2cpseo.com/teams/lol/p-1';//分页
+        $ql = QueryList::get($url);
+        $links=$ql->find('.hot-teams-container a')->attrs('href')->all();//分页
+        dd($links);*/
+      /*  $res=$this->cpseoTeam();
+        dd($res);*/
+        /*$url='http://www.2cpseo.com/events/lol/p-1';//分页
+        $ql = QueryList::get($url);
+        $links=$ql->find('.versus a')->attrs('href')->all();//分页
+        dd($links);*/
+        $url='http://www.2cpseo.com/event/439';
+        /*$infos=$this->cpseoTeam('http://www.2cpseo.com/teams/lol/p-1');
+dd($infos);*/
+        $ql = QueryList::get($url);
+        $logo=$ql->find('.kf_roster_dec img')->attr('src');
+        $logo='http://www.2cpseo.com'.$logo;
+        $wraps=$ql->find('.text_wrap:eq(0) .text_2 p')->text();
+        $wraps=explode("\n",$wraps);
+        if($wraps){
+            foreach ($wraps as $key=>$val){
+                if(strpos($val,'英雄联盟：') !==false) {
+                    $title=str_replace('英雄联盟：','',$val);
+                }
+                if(strpos($val,'开始时间：') !==false) {
+                    $startTime=str_replace('开始时间：','',$val);
+
+                }
+                if(strpos($val,'结束时间：') !==false) {
+                    $endTime=str_replace('结束时间：','',$val);
+                }
+
+            }
+        }
+
+        $baseInfo=[
+            'logo'=>$logo,
+            'title'=>$title ?? '',
+            'start_time'=>$startTime ?? '',
+            'end_time'=>$endTime ?? '',
+            'game_id'=>1,//game: 1表示lol
+        ];
+
+        $tapType=$ql->find('.tranding_tab .nav-tabs li')->texts()->all();
+        $pkTeam=[];
+        if(!empty($tapType)){
+            foreach ($tapType as $key=>&$val){
+                $pkTeam[$key]['type']=$val;
+                $pkTeam[$key]['teamInfo'] = $ql->rules([
+                    'date_2' => ['.date_2', 'text'],
+                    'opponents_dec' => ['.kf_opponents_dec  h6', 'texts'],
+                    'dtime' => ['.kf_opponents_gols  p', 'text']
+                ])->range('#home'.($key+1).' li')->queryData();
+            }
+        }
+        $res['baseInfo']=$baseInfo ?? [];//赛事基本
+        $res['pkTeam']=$pkTeam ?? [];//pk战队
+        dd($res);
+
+
+        $arrData=[];
+        $status=0;
+        if($matchInfo) {
+            foreach ($matchInfo as $key=>&$val){
+                $imgUrl=str_replace(array("background-image: url('","');background-size: cover;"),'',$logos[$key]);
+                $val['img_url']=$imgUrl?? '';
+                $arrData=explode('--',$val['dtime']);
+                $curTime=date("Y.m.d");dd($curTime);
+                $val['start_time']=trim($arrData[0]) ?? '';
+                $val['end_time']=trim($arrData[1]) ?? '';
+
+            }
+        }
+
+dd($matchInfo);
+
+        $logo=$ql->find('.lemma_pic img')->attr('src');
+        $desc = $ql->find('.abstract ')->text();
+        $baseInfosNames=$ql->find('.abstract_tbl tr .base-info-card-title')->texts()->all();
+        $baseInfosValues=$ql->find('.abstract_tbl tr td .base-info-card-value')->texts()->all();
+        $baseInfos=[];
+        if($baseInfosNames){
+            foreach ($baseInfosNames as $key=>$val){
+                $baseInfos[$key]['name']=$val;
+                $baseInfos[$key]['value']=delZzts($baseInfosValues[$key],$replace='展开');//去除特殊符号
+            }
+        }
+dd($baseInfos);
         //皮肤
-        $skinImg = $ql->find('.pic-pf-list3 ')->attr('data-imgname');
+        $skinImg = $ql->find('.catalog_wrap')->htmls();
         $skiArr=explode('|',$skinImg);
         $tempSkiArr=[];
         $skinData=[];
@@ -188,9 +277,53 @@ dd($res);
         dd($data);
     }
 
+    public function cpseoTeam($url='http://www.2cpseo.com/teams/lol/p-1'){
+        $ql = QueryList::get($url);
+        $links=$ql->find('.hot-teams-container a')->attrs('href')->all();
+        $res=[];
+        if($links){
+            foreach ($links as $key=>$val){
+                $ql = QueryList::get($val);
+                $logo=$ql->find('.kf_roster_dec img')->attr('src');
+                $aka=$ql->find('.kf_roster_dec .text span:eq(0)')->text();
+                $wraps=$ql->find('.text_wrap .text_2 p')->text();
+                $wraps=explode("\n",$wraps);
+                foreach ($wraps as $val){
+                    if(strpos($val,'地区') !==false) {
+                        $area=str_replace('地区：','',$val);
+                    }
+                    if(strpos($val,'中文名称') !==false) {
+                        $cname=str_replace('中文名称：','',$val);
+                    }
+                    if(strpos($val,'英文名称') !==false) {
+                        $ename=str_replace('英文名称：','',$val);
+                    }
+                    if(strpos($val,'建队时间') !==false) {
+                        $createTime=str_replace('建队时间：','',$val);
+                    }
+                }
 
+                $intro=(isset($wraps[6]) && $wraps[6]) ? trim($wraps[6]):'';
+                $baseInfo=[
+                    'logo'=>'http://www.2cpseo.com'.$logo,
+                    'aka'=>$aka,
+                    'area'=>$area,
+                    'cname'=>$cname,
+                    'ename'=>$ename,
+                    'create_time'=>$createTime,
+                    'intro'=>$intro
+                ];
+                $teamListLink=$ql->find('.versus a')->attrs('href')->all();
 
+                $res[$key]=[
+                    'baseInfo'=>$baseInfo,
+                    'teamListLink'=>$teamListLink
+                ];
 
+            }
+        }
 
+        return $res;
+    }
 
 }

@@ -46,7 +46,7 @@ class Team extends Command
         $source='wanplus';
         $mission_type='team';
         /*$collectModel=new CollectUrlModel();
-        $cdata=$collectModel->getDataFromUrl($game,20,$mission_type,$source);
+        $cdata=$collectModel->getDataFromUrl($game,$mission_type,$source);
 
        if($cdata){
             foreach ($cdata as $val){
@@ -56,12 +56,13 @@ class Team extends Command
                     "mission_status"=>1,
                     "game"=>$val['game'],
                     "source"=>$val['source'],
+                    'title'=>$val['title'] ?? '',
                     "detail"=>json_encode(
                         [
                             "url"=>$val['url'],
                             "game"=>$val['game'],//王者荣耀
                             "source"=>$val['source'],
-                            "title"=>$val['title'],
+                            "title"=>$val['title'] ?? '',
                         ]
                     ),
                 ];

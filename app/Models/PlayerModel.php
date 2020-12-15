@@ -145,8 +145,14 @@ class PlayerModel extends Model
         }
         $data['player_name'] = preg_replace("/\s+/", "",$data['player_name']);
         $data['player_name'] = trim($data['player_name']);
-        $data['aka'] = $data['aka']??"";
-        $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
+        if($data['aka']=="")
+        {
+            $data['aka'] = [];
+        }
+        else
+        {
+            $data['aka'] = is_array($data['aka'])?$data['aka']:[$data['aka']];
+        }
         $currentPlayer = $this->getPlayerByName($data['player_name'],$game);
         if(!isset($currentPlayer['player_id']))
         {
@@ -162,6 +168,7 @@ class PlayerModel extends Model
                 if(in_array($key,$this->toAppend))
                 {
                     $t = json_decode($currentPlayer[$key],true);
+
                     foreach($value as $k => $v)
                     {
                         if(!in_array($v,$t))
