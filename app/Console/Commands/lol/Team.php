@@ -13,7 +13,7 @@ class Team extends Command
      *
      * @var string
      */
-    protected $signature = 'lol:team';
+    protected $signature = 'lol:team  {operation}';
 
     /**
      * The console command description.
@@ -42,30 +42,34 @@ class Team extends Command
         $game='lol';
         $mission_type='team';
         $source='wanplus';
-        $collectModel=new CollectUrlModel();
-        $cdata=$collectModel->getDataFromUrl($game,$mission_type,$source);
-       if($cdata){
-            foreach ($cdata as $val){
-                $data = [
-                    "asign_to"=>1,
-                    "mission_type"=>$val['mission_type'],
-                    "mission_status"=>1,
-                    "game"=>$val['game'],
-                    "source"=>$val['source'],
-                    "detail"=>json_encode(
-                        [
-                            "url"=>$val['url'],
-                            "game"=>$val['game'],//lol
-                            "source"=>$val['source'],
-                            "title"=>$val['title'],
-                        ]
-                    ),
-                ];
-                $insert = (new oMission())->insertMission($data);
-                echo "insert:".$insert;
+        $operation = ($this->argument("operation")??"insert");
+        if($operation=='insert'){
+            $collectModel=new CollectUrlModel();
+            $cdata=$collectModel->getDataFromUrl($game,$mission_type,$source);
+            if($cdata){
+                foreach ($cdata as $val){
+                    $data = [
+                        "asign_to"=>1,
+                        "mission_type"=>$val['mission_type'],
+                        "mission_status"=>1,
+                        "game"=>$val['game'],
+                        "source"=>$val['source'],
+                        "detail"=>json_encode(
+                            [
+                                "url"=>$val['url'],
+                                "game"=>$val['game'],//lol
+                                "source"=>$val['source'],
+                                "title"=>$val['title'],
+                            ]
+                        ),
+                    ];
+                    $insert = (new oMission())->insertMission($data);
+                    echo "insert:".$insert.' lenth:'.strlen($data['detail']);
+                }
             }
+        }else{
+            (new oMission())->collect($game,$source,$mission_type);
         }
 
-        (new oMission())->collect($game,$source,$mission_type);
     }
 }

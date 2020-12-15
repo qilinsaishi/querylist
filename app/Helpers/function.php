@@ -36,7 +36,6 @@ function curl_get($url, $referer = '')
     $headers = substr($data, 0, $header_size);
     $body = substr($data, $header_size);
 
-   dd($data);
 
     if(strpos($data,'if(!LOLsummonerjs)var LOLsummonerjs=') !==false){
         $data=str_replace('if(!LOLsummonerjs)var LOLsummonerjs=','',$data);

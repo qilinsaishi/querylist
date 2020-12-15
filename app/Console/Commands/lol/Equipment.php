@@ -12,14 +12,14 @@ class Equipment extends Command
      *英雄联盟-装备
      * @var string
      */
-    protected $signature = 'command:equipment';
+    protected $signature = 'command:equipment {operation}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Command description ';
 
     /**
      * Create a new command instance.
@@ -38,24 +38,30 @@ class Equipment extends Command
      */
     public function handle()
     {
-        /*$url='https://game.gtimg.cn/images/lol/act/img/js/items/items.js';
-        $data = [
-            "asign_to"=>1,
-            "mission_type"=>'equipment',//装备
-            "mission_status"=>1,
-            "game"=>'lol',
-            "source"=>'lol_qq',//装备
-            "detail"=>json_encode(
-                [
-                    "url"=>$url,
-                    "game"=>'lol',//英雄联盟
-                    "source"=>'lol_qq',//装备
-                ]
-            ),
-        ];
-        $insert = (new oMission())->insertMission($data);
-        echo "insert:".$insert;*/
+        $operation = ($this->argument("operation")??"insert");
+        if($operation=='insert'){
+            $url = 'https://game.gtimg.cn/images/lol/act/img/js/items/items.js';
+            $insert_act = 1;
+            $data = [
+                "asign_to" => 1,
+                "mission_type" => 'equipment',//装备
+                "mission_status" => 1,
+                "game" => 'lol',
+                "source" => 'lol_qq',//装备
+                "detail" => json_encode(
+                    [
+                        "url" => $url,
+                        "game" => 'lol',//英雄联盟
+                        "source" => 'lol_qq',//装备
+                    ]
+                ),
+            ];
+            $insert = (new oMission())->insertMission($data);
 
-        (new oMission())->collect('lol','lol_qq','equipment');
+            echo "insert:" . $insert;
+        }else{
+            (new oMission())->collect('lol', 'lol_qq', 'equipment');
+        }
+
     }
 }
