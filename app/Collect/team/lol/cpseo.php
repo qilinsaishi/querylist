@@ -62,11 +62,11 @@ class cpseo
          * ]
          * }
          */
-        var_dump($arr);
         if(strlen($arr['content']['baseInfo']['area'])>10)
         {
             unset($arr['content']['baseInfo']['area']);
         }
+        $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }

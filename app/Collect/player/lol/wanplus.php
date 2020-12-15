@@ -100,6 +100,7 @@ class wanplus
             $arr['content']['playData']['stateList']['usedheroes'][$key]['kda'] = sprintf("%.4f",$value['kda']);
             $arr['content']['playData']['stateList']['usedheroes'][$key]['winrate'] = sprintf("%.4f",$value['winrate']);
         }
+        $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }

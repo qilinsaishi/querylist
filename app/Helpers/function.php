@@ -303,9 +303,11 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
     $redis = app("redis.connection");
     $fileKey = "file_get_" . $url;
     $currentFile = $redis->get($fileKey);
+    /*
     if ($currentFile && strlen($currentFile) > 5) {
         return $currentFile;
     }
+    */
     if (trim($url) == '') {
         return $url;
     }
@@ -320,7 +322,7 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             $filename = substr(strrchr($url, '/') . '.jpg', 1);
             $ext = '.jpg';
         } else {
-            if ($ext != '.gif' && $ext != '.jpg') {
+            if (!in_array($ext, ['.gif','.jpg','.png'])) {
                 return $url;
             } else {
                 $filename = substr(strrchr($url, '/'), 1);
