@@ -49,12 +49,14 @@ class wanplus
         $team_id = $arr['detail']['team_id'] ?? '';
         $current = $arr['detail']['current'] ?? '';
         $res = $this->getCollectData($url);
+        $title= $arr['title'] ?? '';
 
         if (!empty($res)) {
             $res['logo'] = $logo;
             $res['position'] = $position;
             $res['team_id'] = $team_id;
             $res['current'] = $current;
+            $res['title'] = $title;
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),

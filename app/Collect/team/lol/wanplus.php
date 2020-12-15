@@ -27,9 +27,10 @@ class wanplus
         $url = $arr['detail']['url'] ?? '';
         $ajaxRequest=new AjaxRequest();
         $res = $ajaxRequest->getCollectWanplusTeam($url);
+        $title= $arr['detail']['title'] ?? '';
         $cdata = [];
         if (!empty($res))
-        {
+        {   $res['title']=$title;
             //处理战队采集数据
             $cdata = [
                 'mission_id' => $arr['mission_id'],
