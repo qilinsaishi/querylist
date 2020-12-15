@@ -371,6 +371,7 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
     }
     catch (\Exception $e)
     {
+        echo "get img error:".$url."\n";
         return $url;
     }
 

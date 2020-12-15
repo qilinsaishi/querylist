@@ -43,15 +43,12 @@ class lol_qq
     }
     public function process($arr)
     {
-
-        foreach($arr['content'] as $key => $value)
-        {
-            $arr['content'][$key]["id"] = str_replace("Summoner","",$value["id"]);
-        }
         $data = [];
         foreach($arr['content'] as $key => $value)
         {
-            $data[$key] = getDataFromMapping($this->data_map,$arr['content'][$key]);
+            $value["id"] = str_replace("Summoner","",$value["id"]);
+            $value['big_img'] = getImage($value['big_img']);
+            $data[$key] = getDataFromMapping($this->data_map,$value);
         }
         return $data;
     }
