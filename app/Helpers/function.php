@@ -45,6 +45,10 @@ function curl_get($url, $referer = '')
         $data=str_replace('callback(','',$data);
         $data=str_replace(');','',$data);
     }
+    if(strpos($data,'searchObj=') !==false){
+        $data=str_replace('var searchObj=','',$data);
+        $data=str_replace(';','',$data);
+    }
 
 
         // 显示错误信息

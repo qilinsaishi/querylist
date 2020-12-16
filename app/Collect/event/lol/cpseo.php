@@ -45,6 +45,7 @@ class cpseo
          * type:类型
          * date_2:日期
          * opponents_dec:战队信息
+         * opponents_img:http://www.2cpseo.com/storage/match/December2020/e9d75350c7c557aea20d69823dc5cb58.png  //战队图片
          * pk时间：dtime
          * }
          */
@@ -91,6 +92,7 @@ class cpseo
                 $pkTeam[$key]['teamInfo'] = $ql->rules([
                     'date_2' => ['.date_2', 'text'],
                     'opponents_dec' => ['.kf_opponents_dec  h6', 'texts'],
+                    'opponents_img' => ['.kf_opponents_dec  span ', 'htmls'],
                     'dtime' => ['.kf_opponents_gols  p', 'text']
                 ])->range('#home' . ($key + 1) . ' li')->queryData();
             }

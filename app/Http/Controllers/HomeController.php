@@ -260,21 +260,20 @@ dd($res);
     {
         $iSubType = '330';//330=>活动,329=>赛事，
 
-        $url = 'https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=1&pagesize=15&type=iType&id=587';
+        $url = 'https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=1&pagesize=15';
         $refeerer = 'Referer: https://pvp.qq.com/web201605/searchResult.shtml';
-        $data = curl_get($url, $refeerer);
-        dd($data);
-        $resultTotal = $data['msg']['resultTotal'] ?? '';
-        $resultNum = $data['msg']['resultNum'] ?? '';
-
-        //$data=curl_get('');
-        $page = getLastPage($resultTotal, $resultNum);
-        for ($i = 0; $i <= $page; $i++) {
-            $m = $i + 1;
-            $url = 'https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page=' . $m . '&num=16&target=24&source=web_pc&_=' . msectime();
-            //echo $url.'<br/>';
-            $data[$i] = $url;
+        $pageData = curl_get($url, $refeerer);
+        $cdata=$pageData['msg']['result'] ?? [];
+        $data=[];
+        foreach ($cdata as $key=>$val){
+            $refeerer_detail ='Referer: https://pvp.qq.com/web201605/newsDetail.shtml?G_Biz='.$val['iBiz'].'&tid='.$val['iNewsId'];
+            $detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0='.$val['iBiz'].'&id='.$val['iNewsId'];
+           /* $detail_data = curl_get($detail_url, $refeerer_detail);
+            if($detail_data['status']==0) {
+                $data[$key]=$detail_data['msg'] ?? [];
+            }*/
         }
+
        return $data;
     }
 
