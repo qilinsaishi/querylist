@@ -197,7 +197,7 @@ class MissionService
                         }
                     }
                     elseif ($result['mission_type'] == "match") {
-                         if (isset($processResult['match_list'])) {
+                        if (isset($processResult['match_list'])) {
                                 $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\matchListModel';
                                 $classList = $this->getClass($classList, $ModelClassName);
                                 $ModelClass = $classList[$ModelClassName];
@@ -206,6 +206,10 @@ class MissionService
                                     $save = $ModelClass->saveMatch($value);
                                     echo "saveMatch:".$save."\n";
                                 }
+                            }
+                            if(!isset($save))
+                            {
+                                $save = true;
                             }
                             if (isset($processResult['team'])) {
                                 $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\teamModel';
@@ -237,7 +241,6 @@ class MissionService
                                     echo "saveEvent:".$saveEvent."\n";
                                 }
                             }
-
                     }
                     elseif ($result['mission_type'] == "event")
                     {
@@ -256,6 +259,7 @@ class MissionService
                         }
                         else
                         {
+
                         }
                     }
                     if (is_array($save)) {

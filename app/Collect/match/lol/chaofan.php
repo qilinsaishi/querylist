@@ -99,8 +99,7 @@ class chaofan
          * hot_schedules:热点赛事
          * game_id：游戏id(1:lol;)
          */
-
-
+        
         $data = ['match_list'=>[],'team'=>[],'event'=>[],'tournament'=>[]];
         foreach($arr['content']['list'] as $key => $value)
         {
