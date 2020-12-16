@@ -19,7 +19,6 @@ class chaofan
                 "tournament_id"=>['path'=>"tournament_id",'default'=>""],//赛事唯一ID
                 "extra"=>['path'=>"extra_data",'default'=>[]],//额外信息
                 "start_time"=>['path'=>"start_time",'default'=>[]],//开始时间
-
             ],
             'tournament'=>[
                 'game'=>['path'=>"",'default'=>"lol"],//游戏
@@ -99,7 +98,7 @@ class chaofan
          * hot_schedules:热点赛事
          * game_id：游戏id(1:lol;)
          */
-        
+
         $data = ['match_list'=>[],'team'=>[],'event'=>[],'tournament'=>[]];
         foreach($arr['content']['list'] as $key => $value)
         {
