@@ -13,7 +13,7 @@ class MissionService
     public function collect($game = "", $source = "", $mission_type = '')
     {
         //获取爬取任务列表
-        $mission_list = $this->getMission($game, $source, $mission_type, 20);
+        $mission_list = $this->getMission($game, $source, $mission_type, 100);
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         //初始化空的类库列表
@@ -49,6 +49,7 @@ class MissionService
                             try {
                                 //保存结果
                                 $rt = $collectModel->insertCollectResult($result);
+                                echo 'act:insert,id='.$rt.' lenth:'.strlen(json_encode($result));
                                 //如果保存成功
                                 if ($rt) {
                                     //更新任务状态，以后改成接口模式
@@ -96,6 +97,7 @@ class MissionService
         $classList = [];
         //循环任务列表
         foreach ($result_list as $key => $result) {
+            echo "start to process result:".$result['id']."\n";
             //数据解包
             $result['content'] = json_decode($result['content'], true);
             //如果结果数组非空
@@ -120,7 +122,7 @@ class MissionService
                         echo "-----save:\n";
                         print_r($save);
                         echo "-----save:\n";
-                        if (method_exists($class, "processMemberList")) {
+                        if (method_exists($class, "processMemberList") && isset($save['team_id']) && intval($save['team_id'])>0) {
                             $missionList = $class->processMemberList($save['team_id'], $result);
                             foreach ($missionList as $mission) {
                                 $mission = array_merge($mission, ['title' => $mission['title'], 'game' => $result['game'], 'connect_mission_id' => $result['mission_id'], 'source' => $result['source'], 'asign_to' => 1]);
@@ -195,7 +197,7 @@ class MissionService
                         }
                     }
                     elseif ($result['mission_type'] == "match") {
-                         if (isset($processResult['match_list'])) {
+                        if (isset($processResult['match_list'])) {
                                 $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\matchListModel';
                                 $classList = $this->getClass($classList, $ModelClassName);
                                 $ModelClass = $classList[$ModelClassName];
@@ -204,6 +206,10 @@ class MissionService
                                     $save = $ModelClass->saveMatch($value);
                                     echo "saveMatch:".$save."\n";
                                 }
+                            }
+                            if(!isset($save))
+                            {
+                                $save = true;
                             }
                             if (isset($processResult['team'])) {
                                 $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\teamModel';
@@ -235,7 +241,6 @@ class MissionService
                                     echo "saveEvent:".$saveEvent."\n";
                                 }
                             }
-
                     }
                     elseif ($result['mission_type'] == "event")
                     {

@@ -39,7 +39,6 @@ class CollectUrlModel extends Model
             $collerObj->where('source',$source);
         }
 
-
         return $this->orderBy('id', 'ASC')
             //->limit($limt)
             ->get()

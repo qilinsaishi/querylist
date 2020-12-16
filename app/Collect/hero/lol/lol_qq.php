@@ -73,6 +73,7 @@ class lol_qq
             $arr['content']['roles'][$key] = $this->role_list[$value]??"未知";
         }
         ksort($arr['content']);
+        $arr['content']['show_list_img'] = getImage($arr['content']['show_list_img']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }

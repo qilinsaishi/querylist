@@ -13,7 +13,7 @@ class CpseoEvent extends Command
      *
      * @var string
      */
-    protected $signature = 'command:seo_event';
+    protected $signature = 'command:seo_event {operation}';
 
     /**
      * The console command description.
@@ -42,34 +42,42 @@ class CpseoEvent extends Command
         $mission_type='event';
         $game='lol';
         $source='cpseo';
-        /*$count=3;
-         for ($i=0;$i<=$count;$i++){
-             $m=$i+1;
-             $url='http://www.2cpseo.com/events/lol/p-'.$m;
-             $ql = QueryList::get($url);
-             $links=$ql->find('.versus a')->attrs('href')->all();
-             if($links){
-                 foreach ($links as $v){
-                     $data = [
-                         "asign_to"=>1,
-                         "mission_type"=>$mission_type,//赛事
-                         "mission_status"=>1,
-                         "game"=>$game,
-                         "source"=>$source,//
-                         "detail"=>json_encode(
-                             [
-                                 "url"=>$v,
-                                 "game"=>$game,
-                                 "source"=>$source,
-                             ]
-                         ),
-                     ];
-                     $insert = (new oMission())->insertMission($data);
-                     echo "insert:".$insert;
-                 }
-             }
+        $count=3;
+        $operation = ($this->argument("operation")??"insert");
+        if($operation=='insert'){
+            for ($i=0;$i<=$count;$i++){
+                $m=$i+1;
+                $url='http://www.2cpseo.com/events/lol/p-'.$m;
+                $ql = QueryList::get($url);
+                $links=$ql->find('.versus a')->attrs('href')->all();
+                if($links){
+                    foreach ($links as $v){
+                        $data = [
+                            "asign_to"=>1,
+                            "mission_type"=>$mission_type,//赛事
+                            "mission_status"=>1,
+                            "game"=>$game,
+                            "source"=>$source,//
+                            "detail"=>json_encode(
+                                [
+                                    "url"=>$v,
+                                    "game"=>$game,
+                                    "source"=>$source,
+                                ]
+                            ),
+                        ];
+                        if($data){
+                            $insert = (new oMission())->insertMission($data);
+                            echo "insert:".$insert.' lenth:'.strlen($data['detail']);
+                        }
 
-         }*/
-        (new oMission())->collect($game,$source,$mission_type);
+                    }
+                }
+
+            }
+        }else{
+            (new oMission())->collect($game,$source,$mission_type);
+        }
+
     }
 }

@@ -7,7 +7,7 @@ function curl_get($url, $referer = '')
 
     $header = array(
         'Accept: application/json',
-        //'Referer: '.$referer,        'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'
     );
     if ($referer) {
         array_push($header, $referer);
@@ -24,7 +24,7 @@ function curl_get($url, $referer = '')
     // curl_setopt($curl, CURLOPT_TIMEOUT_MS, 500);
 
     // 设置请求头
-    // curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+     curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
     //设置获取的信息以文件流的形式返回，而不是直接输出。
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -36,7 +36,6 @@ function curl_get($url, $referer = '')
     $headers = substr($data, 0, $header_size);
     $body = substr($data, $header_size);
 
-   dd($data);
 
     if(strpos($data,'if(!LOLsummonerjs)var LOLsummonerjs=') !==false){
         $data=str_replace('if(!LOLsummonerjs)var LOLsummonerjs=','',$data);
@@ -305,7 +304,7 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
     $fileKey = "file_get_" . $url;
     $currentFile = $redis->get($fileKey);
     if ($currentFile && strlen($currentFile) > 5) {
-        return $currentFile;
+    //    return $currentFile;
     }
     if (trim($url) == '') {
         return $url;
@@ -321,7 +320,7 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             $filename = substr(strrchr($url, '/') . '.jpg', 1);
             $ext = '.jpg';
         } else {
-            if ($ext != '.gif' && $ext != '.jpg') {
+            if (!in_array($ext, ['.gif','.jpg','.png'])) {
                 return $url;
             } else {
                 $filename = substr(strrchr($url, '/'), 1);
@@ -335,37 +334,51 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
     if (!file_exists($save_dir) && !mkdir($save_dir, 0777, true)) {
         return $url;
     }
-    //获取远程文件所采用的方法
-    if ($type) {
-        $ch = curl_init();
-        $timeout = 5;
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-        $img = curl_exec($ch);
-        curl_close($ch);
-    } else {
-        ob_start();
-        readfile($url);
-        $img = ob_get_contents();
-        ob_end_clean();
-    }
-    //文件大小
-    $fp2 = @fopen($save_dir . $filename, 'a');
-    fwrite($fp2, $img);
-    fclose($fp2);
-    {
-        //生成文件内容hash作为文件名
-        $new_name = md5_file($save_dir . $filename) . $ext;
-        rename($save_dir . $filename, $save_dir . $new_name);
+    try{
+        //获取远程文件所采用的方法
+        if ($type) {
+            $ch = curl_init();
+            $timeout = 5;
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+            $img = curl_exec($ch);
+            curl_close($ch);
+        } else {
+            ob_start();
+            readfile($url);
+            $img = ob_get_contents();
+            ob_end_clean();
+        }
+        //文件大小
+        $fp2 = @fopen($save_dir . $filename, 'a');
+        fwrite($fp2, $img);
+        fclose($fp2);
+        {
+            //生成文件内容hash作为文件名
+            $new_name = md5_file($save_dir . $filename) . $ext;
+            rename($save_dir . $filename, $save_dir . $new_name);
+            //存储到redis,一天内不再重新获取
+            //$redis->set($fileKey, $save_dir . $new_name);
+            //$redis->expire($fileKey, 86400);
+        }
+        unset($img, $url);
+        $root =  $save_dir . $new_name;
+        $upload = (new AliyunService())->upload2Oss([$root]);
         //存储到redis,一天内不再重新获取
-        $redis->set($fileKey, $save_dir . $new_name);
-        $redis->expire($fileKey, 86400);
+        if(strlen($upload[0])>10)
+        {
+            $redis->set($fileKey, $upload[0]);
+            $redis->expire($fileKey, 86400);
+        }
+        return $upload[0];
     }
-    unset($img, $url);
-    $root =  $save_dir . $new_name;
-    $upload = (new AliyunService())->upload2Oss([$root]);
-    return $upload[0];
+    catch (\Exception $e)
+    {
+        echo "get img error:".$url."\n";
+        return $url;
+    }
+
 }
 
 

@@ -116,6 +116,7 @@ class lol_qq
             }
             $arr['content'][$key]['stats'] = $this->getStats($value['description']);
             $arr['content'][$key]['from_list'] = $trees[$key] ?? [];
+            $arr['content'][$key]['iconPath'] = getImage($arr['content'][$key]['iconPath']);
             $data[$key] = getDataFromMapping($this->data_map, $arr['content'][$key]);
         }
         return $data;

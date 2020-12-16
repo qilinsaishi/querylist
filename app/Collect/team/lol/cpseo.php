@@ -10,7 +10,7 @@ class cpseo
         [
             "team_name"=>['path'=>"baseInfo.cname",'default'=>''],
             "en_name"=>['path'=>"baseInfo.ename",'default'=>''],
-            "aka"=>['path'=>"aka","default"=>""],
+            "aka"=>['path'=>"baseInfo.aka","default"=>""],
             "location"=>['path'=>"baseInfo.area","default"=>"未知"],
             "established_date"=>['path'=>"baseInfo.create_time",'default'=>"未知"],
             "coach"=>['path'=>"",'default'=>"暂无"],
@@ -62,11 +62,11 @@ class cpseo
          * ]
          * }
          */
-        var_dump($arr);
         if(strlen($arr['content']['baseInfo']['area'])>10)
         {
             unset($arr['content']['baseInfo']['area']);
         }
+        $arr['content']['baseInfo']['logo'] = getImage($arr['content']['baseInfo']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }
@@ -98,7 +98,7 @@ class cpseo
                 $createTime = str_replace('建队时间：', '', $val);
             }
             if(strpos($val,'简介：') !==false) {
-                $intro=$wraps[$key+1];
+                $intro=$wraps[$key+1] ?? '';
             }
         }
 

@@ -27,9 +27,10 @@ class wanplus
         $url = $arr['detail']['url'] ?? '';
         $ajaxRequest=new AjaxRequest();
         $res = $ajaxRequest->getCollectWanplusTeam($url);
+        $title= $arr['detail']['title'] ?? '';
         $cdata = [];
         if (!empty($res))
-        {
+        {   $res['title']=$title;
             //处理战队采集数据
             $cdata = [
                 'mission_id' => $arr['mission_id'],
@@ -52,6 +53,7 @@ class wanplus
         //处理胜平负
         $t = explode("/",$arr['content']['military_exploits']??'');
         $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
+        $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }

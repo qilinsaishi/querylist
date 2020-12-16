@@ -12,7 +12,7 @@ class Runes extends Command
      *符文
      * @var string
      */
-    protected $signature = 'command:runes';
+    protected $signature = 'command:runes  {operation}';
 
     /**
      * The console command description.
@@ -38,24 +38,28 @@ class Runes extends Command
      */
     public function handle()
     {
-        /*$url='https://lol.qq.com/act/a20170926preseason/data/cn/runes.json';
-        $data = [
-            "asign_to"=>1,
-            "mission_type"=>'runes',//符文
-            "mission_status"=>1,
-            "game"=>'lol',
-            "source"=>'lol_qq',//
-            "detail"=>json_encode(
-                [
-                    "url"=>$url,
-                    "game"=>'lol',//英雄联盟
-                    "source"=>'lol_qq',//符文
-                ]
-            ),
-        ];
-        $insert = (new oMission())->insertMission($data);
-        echo "insert:".$insert;*/
+        $url='https://lol.qq.com/act/a20170926preseason/data/cn/runes.json';
+        $operation = ($this->argument("operation")??"insert");
+        if($operation=='insert'){
+            $data = [
+                "asign_to"=>1,
+                "mission_type"=>'runes',//符文
+                "mission_status"=>1,
+                "game"=>'lol',
+                "source"=>'lol_qq',//
+                "detail"=>json_encode(
+                    [
+                        "url"=>$url,
+                        "game"=>'lol',//英雄联盟
+                        "source"=>'lol_qq',//符文
+                    ]
+                ),
+            ];
+            $insert = (new oMission())->insertMission($data);
+            echo "insert:".$insert.' lenth:'.strlen($data['detail']);
+        }else{
+            (new oMission())->collect('lol','lol_qq','runes');
+        }
 
-        (new oMission())->collect('lol','lol_qq','runes');
     }
 }

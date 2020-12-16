@@ -12,7 +12,7 @@ class Hero extends Command
      *
      * @var string
      */
-    protected $signature = 'lol:hero';
+    protected $signature = 'lol:hero {operation}';
 
     /**
      * The console command description.
@@ -38,30 +38,34 @@ class Hero extends Command
      */
     public function handle()
     {   //英雄联盟官网-英雄数据
-        $cdata=curl_get('https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js');
-        $cdata=$cdata['hero'] ?? [];
-        if($cdata){
-            foreach ($cdata as $val){
-                $url='https://game.gtimg.cn/images/lol/act/img/js/hero/'.$val['heroId'].'.js';
-                $data = [
-                    "asign_to"=>1,
-                    "mission_type"=>'hero',
-                    "mission_status"=>1,
-                    "game"=>'lol',
-                    "source"=>'lol_qq',
-                    "detail"=>json_encode(
-                        [
-                            "url"=>$url,
-                            "game"=>'lol',//英雄联盟
-                            "source"=>'lol_qq',
-                        ]
-                    ),
-                ];
-                $insert = (new oMission())->insertMission($data);
-                echo "insert:".$insert;
+        $operation = ($this->argument("operation")??"insert");
+        if($operation=='insert'){
+            $cdata=curl_get('https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js');
+            $cdata=$cdata['hero'] ?? [];
+            if($cdata){
+                foreach ($cdata as $val){
+                    $url='https://game.gtimg.cn/images/lol/act/img/js/hero/'.$val['heroId'].'.js';
+                    $data = [
+                        "asign_to"=>1,
+                        "mission_type"=>'hero',
+                        "mission_status"=>1,
+                        "game"=>'lol',
+                        "source"=>'lol_qq',
+                        "detail"=>json_encode(
+                            [
+                                "url"=>$url,
+                                "game"=>'lol',//英雄联盟
+                                "source"=>'lol_qq',
+                            ]
+                        ),
+                    ];
+                    $insert = (new oMission())->insertMission($data);
+                    echo "insert:".$insert.' lenth:'.strlen($data['detail']);
+                }
             }
+        }else{
+            (new oMission())->collect('lol','lol_qq','hero');
         }
 
-      // (new oMission())->collect('lol','lol_qq');
     }
 }

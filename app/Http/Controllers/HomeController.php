@@ -14,6 +14,8 @@ class HomeController extends Controller
     public function index()
     {
 
+        $data=$this->kplInfo();dd($data);
+
         //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
 
         /*$client=new ClientServices();
@@ -258,13 +260,12 @@ dd($res);
     {
         $iSubType = '330';//330=>活动,329=>赛事，
 
-        $url = 'https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=100&pagesize=15&_=' . msectime();
-
-        $refeerer = 'https://pvp.qq.com/web201605/searchResult.shtml';
+        $url = 'https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=1&pagesize=15&type=iType&id=587';
+        $refeerer = 'Referer: https://pvp.qq.com/web201605/searchResult.shtml';
         $data = curl_get($url, $refeerer);
         dd($data);
-        $resultTotal = $data['data']['resultTotal'] ?? '';
-        $resultNum = $data['data']['resultNum'] ?? '';
+        $resultTotal = $data['msg']['resultTotal'] ?? '';
+        $resultNum = $data['msg']['resultNum'] ?? '';
 
         //$data=curl_get('');
         $page = getLastPage($resultTotal, $resultNum);
@@ -274,7 +275,7 @@ dd($res);
             //echo $url.'<br/>';
             $data[$i] = $url;
         }
-        dd($data);
+       return $data;
     }
 
     public function cpseoTeam($url='http://www.2cpseo.com/teams/lol/p-1'){

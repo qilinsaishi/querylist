@@ -100,7 +100,6 @@ class chaofan
          * game_id：游戏id(1:lol;)
          */
 
-
         $data = ['match_list'=>[],'team'=>[],'event'=>[],'tournament'=>[]];
         foreach($arr['content']['list'] as $key => $value)
         {
