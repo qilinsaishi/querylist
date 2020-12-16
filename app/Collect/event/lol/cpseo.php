@@ -49,6 +49,7 @@ class cpseo
          * }
          */
         var_dump($arr);
+        die();
     }
 
     public function getEventData($url)

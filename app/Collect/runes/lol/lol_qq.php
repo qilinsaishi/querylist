@@ -65,7 +65,7 @@ class lol_qq
                     $data['runeDetail'][$v2['runeId']] = ["rune_name"=>$v2['name'],
                         'shortDescription'=>$v2['shortDescription'],
                         'longDescription'=>$v2['longDescription'],
-                        'logo'=>'https://lol.qq.com/act/a20170926preseason/img/runeBuilder/runes/108x108/'.$v2['runeId'].'.png',
+                        'logo'=>getImage('https://lol.qq.com/act/a20170926preseason/img/runeBuilder/runes/108x108/'.$v2['runeId'].'.png'),
                         'rune_id'=>$v2['runeId']
                         ];
                 }
