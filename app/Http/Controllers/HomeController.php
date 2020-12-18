@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
+use App\Models\CollectResultModel;
 use Illuminate\Http\Request;
 use QL\QueryList;
 use GuzzleHttp\Client;
@@ -324,6 +325,12 @@ dd($res);
         }
 
         return $res;
+    }
+    public function test()
+    {
+        $result_list = (new CollectResultModel())->getResult(100);
+        print_R($result_list);
+
     }
 
 }
