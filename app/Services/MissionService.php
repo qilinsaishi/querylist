@@ -256,10 +256,9 @@ class MissionService
                             if (method_exists($class, "getTeams4Match"))
                             {
                                 $teamList4Match = $class->getTeams4Match($result);
-
-                                foreach($teamList4Match as $teamName)
+                                foreach($teamList4Match as $teamInfo)
                                 {
-                                    $team_id = $teamModelClass->saveTeam(['team_name'=>$teamName]);
+                                    $team_id = $teamModelClass->saveTeam($teamInfo);
                                 }
                             }
                             if (method_exists($class, "getTournament4Match"))

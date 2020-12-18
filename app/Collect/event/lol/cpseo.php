@@ -160,7 +160,12 @@ class cpseo
         {
             foreach($match["teamInfo"] as $k => $match_team)
             {
-                $teamList = array_merge($teamList,array_values($match_team['opponents_dec']));
+                foreach($match_team['opponents_dec'] as $k2 => $v2)
+                {
+                    $team = ["team_name"=>$v2,"logo"=>$match_team['opponents_img'][$k2]];
+                    $team['logo'] = getImage('http://www.2cpseo.com'.getAttrFromHTML($team['logo'],"src="));
+                    $teamList[] = $team;
+                }
             }
         }
         return $teamList;
