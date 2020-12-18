@@ -19,7 +19,6 @@ class chaofan
                 "tournament_id"=>['path'=>"tournament_id",'default'=>""],//赛事唯一ID
                 "extra"=>['path'=>"extra_data",'default'=>[]],//额外信息
                 "start_time"=>['path'=>"start_time",'default'=>[]],//开始时间
-
             ],
             'tournament'=>[
                 'game'=>['path'=>"",'default'=>"lol"],//游戏

@@ -244,27 +244,62 @@ class MissionService
                     }
                     elseif ($result['mission_type'] == "event")
                     {
-                        $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentNoIdModel';
-                        $classList = $this->getClass($classList, $ModelClassName);
-                        $ModelClass = $classList[$ModelClassName];
+                        if($result['source']=="cpseo")
+                        {
+                            $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\teamModel';
+                            $classList = $this->getClass($classList, $ModelClassName);
+                            $teamModelClass = $classList[$ModelClassName];
 
-                        $tModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
-                        $classList = $this->getClass($classList, $tModelClassName);
-                        $tModelClass = $classList[$tModelClassName];
-                        $currentTournament = $tModelClass->getTournamentByName($processResult['tournament_name'],$processResult['game']);
-                        if(!isset($currentTournament['tournament_id']))
-                        {
-                            //$collectModel->updateStatus($result['id'],['status'=>2]);
+                            $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
+                            $classList = $this->getClass($classList, $ModelClassName);
+                            $tournamentModelClass = $classList[$ModelClassName];
+                            if (method_exists($class, "getTeams4Match"))
+                            {
+                                $teamList4Match = $class->getTeams4Match($result);
+                                foreach($teamList4Match as $teamInfo)
+                                {
+                                    $team_id = $teamModelClass->saveTeam($teamInfo);
+                                }
+                            }
+                            if (method_exists($class, "getTournament4Match"))
+                            {
+                                $tournamentList4Match = $class->getTournament4Match($result);
+                                foreach($tournamentList4Match as $tournamentName)
+                                {
+                                    $tournament_id = $tournamentModelClass->saveTournament($tournamentList4Match);
+                                }
+                            }
+                            $teamList = $teamModelClass->getTeamList(['page_size'=>1000]);
+                            $tournamentList = $tournamentModelClass->getTournamentList(['page_size'=>1000]);
+                            $processResult = $class->process($result,$teamList,$tournamentList);
+                            $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\matchListModel';
+                            $classList = $this->getClass($classList, $ModelClassName);
+                            $ModelClass = $classList[$ModelClassName];
+                            foreach($processResult as $key => $value)
+                            {
+                                $save = $ModelClass->saveMatch($value);
+                                echo "saveMatch:".$save."\n";
+                            }
                         }
-                        else
+                        elseif($result['source']=="chaofan")
                         {
-                            $collectModel->updateStatus($result['id'],['status'=>3]);
-                            $save = $ModelClass->saveTournament($processResult);
-                            echo "saveEvent:".$save."\n";
-                        }
-                        else
-                        {
-                            $collectModel->updateStatus($result['id'],['status'=>3]);
+                            $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentNoIdModel';
+                            $classList = $this->getClass($classList, $ModelClassName);
+                            $ModelClass = $classList[$ModelClassName];
+
+                            $tModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
+                            $classList = $this->getClass($classList, $tModelClassName);
+                            $tModelClass = $classList[$tModelClassName];
+                            $currentTournament = $tModelClass->getTournamentByName($processResult['tournament_name'],$processResult['game']);
+                            if(!isset($currentTournament['tournament_id']))
+                            {
+                                $save = $ModelClass->saveTournament($processResult);
+                                echo "saveEvent:".$save."\n";
+                            }
+                            else
+                            {
+
+                            }
                         }
                     }
                     if (is_array($save)) {

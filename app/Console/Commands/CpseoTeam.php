@@ -55,7 +55,8 @@ class CpseoTeam extends Command
         if ($operation == 'insert') {
             for ($i = 0; $i <= $count; $i++) {
                 $m = $i + 1;
-                $url = 'http://www.2cpseo.com/teams/kog/p-' . $m;
+                //$url = 'http://www.2cpseo.com/teams/kog/p-' . $m;
+                $url = 'http://www.2cpseo.com/teams/lol/p-' . $m;
                 $ql = QueryList::get($url);
                 $links = $ql->find('.hot-teams-container a')->attrs('href')->all();
                 if ($links) {
