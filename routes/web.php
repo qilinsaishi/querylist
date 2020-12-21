@@ -18,4 +18,5 @@ Route::get('/', function () {
 });
 Route::get('home','HomeController@index');
 Route::get('home/test','HomeController@test');
+Route::get('lol/get','lolIndexController@get');
 
