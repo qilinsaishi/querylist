@@ -27,10 +27,10 @@ class lolIndexController extends Controller
 
     public function get()
     {
-
+        $privilegeService = new PrivilegeService();
         $data=$this->payload;
         $return = [];
-        $functionList = (new PrivilegeService())->getFunction($data);
+        $functionList = $privilegeService->getFunction($data);
         foreach ($functionList as $dataType => $functionInfo)
         {
             $class = $functionInfo['class'];
@@ -38,6 +38,7 @@ class lolIndexController extends Controller
             $params = $data[$dataType];
             $d = $class->$function($params);
             $functionCount = $functionInfo['functionCount'];
+            $functionProcess = $functionInfo['functionProcess']??"";
 
             if(!$functionCount || $functionCount=="")
             {
@@ -46,6 +47,10 @@ class lolIndexController extends Controller
             else
             {
                 $count = $class->$functionCount($params);
+            }
+            if($functionProcess!="")
+            {
+                $d = $privilegeService->$functionProcess($d,$functionList);
             }
             $return[$dataType] = ['data'=>$d,'count'=>$count];
         }
