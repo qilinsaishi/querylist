@@ -6,7 +6,7 @@ use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+
 
 use QL\QueryList;
 use GuzzleHttp\Client;
@@ -27,8 +27,8 @@ class lolIndexController extends Controller
 
     public function get()
     {
-        $data = ["matchList" => ["page" => 1, "page_size" => 10],
-            "teamList" => ["game" => 'lol', "page" => 1, "page_size" => 10]];
+
+        $data=$this->payload;
         $return = [];
         $functionList = (new PrivilegeService())->getFunction($data);
         foreach ($functionList as $dataType => $functionInfo)

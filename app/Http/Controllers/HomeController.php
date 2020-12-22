@@ -15,8 +15,8 @@ class HomeController extends Controller
         $id=$this->request->post('id','');echo $id.'<br/>';
         $name=$this->request->input('name','');echo $name.'<br/>';
         $data=$this->payload;
-        $a=json_decode($data);
-        $all=$this->request->all();dd($all);
+
+        $all=$this->request->all();
 
     }
 

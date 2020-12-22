@@ -134,4 +134,9 @@ class tournamentModel extends Model
             return $currentTournament['tournament_id'];
         }
     }
+
+
+    public function getTournamentCount(){
+        return true;
+    }
 }

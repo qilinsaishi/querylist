@@ -10,26 +10,29 @@ class PrivilegeService
         $privilegeList = [
             "matchList"=>[
                 'list'=>[
-                    'App\Models\Match\cpseo\matchListModel',
-                    'App\Models\Match\chaofan\matchListModel'
+                    ['model'=>'App\Models\Match\#source#\matchListModel','source'=>'cpseo'],
+                    ['model'=>'App\Models\Match\#source#\matchListModel','source'=>'chaofan'],
                 ],
+                'source'=>1,
                 'function'=>"getMatchList",//获取数据方法
                 'functionCount'=>"getMatchCount",//获取列表方法
 
             ],
             "tournament"=>[
                 'list'=> [
-                    'App\Models\Match\cpseo\tournamentModel',
-                    'App\Models\Match\chaofan\tournamentModel'
+                    ['model'=>'App\Models\Match\#source#\tournamentModel','source'=>"chaofan"],
+                    ['model'=>'App\Models\Match\#source#\tournamentModel','source'=>"cpseo"],
                 ],
+                'source'=>1,
                 'function'=>"getTournamentList",
                 'functionCount'=>"getTournamentCount",
             ],
             "teamList"=>[
                 'list'=>[
-                    'App\Models\Match\cpseo\teamModel',
-                    'App\Models\Match\chaofan\teamModel',
+                    ['model'=>'App\Models\Match\#source#\teamModel','source'=>'cpseo'],
+                    ['model'=>'App\Models\Match\#source#\teamModel','source'=>'chaofan'],
                 ],
+                'source'=>1,
                 'function'=>"getTeamList",
                 'functionCount'=>"getTeamCount",
 
@@ -40,6 +43,7 @@ class PrivilegeService
 
     public function getFunction($data)
     {
+        $currentSource = "";
         //获取各个数据类型对应的类库优先级列表以及获取方法
         $priviliegeList = $this->getPriviliege();
         $classList = [];
@@ -47,40 +51,111 @@ class PrivilegeService
         foreach($data as $dataType => $params)
         {
             //echo "found type:".$dataType."\n";
+           // echo "currentSource:".$currentSource."\n";
             $found = 0;
             if(isset($priviliegeList[$dataType]))
             {
-                foreach($priviliegeList[$dataType]['list'] as $modelName)
+                if($currentSource=="" && $priviliegeList[$dataType]['source']==1)
                 {
-                    $classList = $this->getClass($classList,$modelName);
-                    if(!isset($functionList[$dataType]))
+                    foreach($priviliegeList[$dataType]['list'] as $detail)
                     {
-                        if(isset($classList[$modelName]))
+                        $modelName = $detail['model'];
+                        $currentSource = $currentSource==""?$detail['source']:$currentSource;
+                        $modelName = str_replace("#source#",$detail['source'],$modelName);
+                        $classList = $this->getClass($classList,$modelName);
+                        if(!isset($functionList[$dataType]))
                         {
-                            if(method_exists($classList[$modelName],$priviliegeList[$dataType]['function']))
+                            if(isset($classList[$modelName]))
                             {
-                                //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";
-                                $functionList[$dataType] = ["className"=>$modelName,"class"=>$classList[$modelName],"function"=>$priviliegeList[$dataType]['function']];
-                                if(method_exists($classList[$modelName],$priviliegeList[$dataType]['functionCount']))
+                                if(method_exists($classList[$modelName],$priviliegeList[$dataType]['function']))
                                 {
-                                    $functionList[$dataType]['functionCount'] =  $priviliegeList[$dataType]['functionCount'];
+                                    //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";
+                                    $functionList[$dataType] = ["className"=>$modelName,"class"=>$classList[$modelName],"function"=>$priviliegeList[$dataType]['function']];
+                                    if(method_exists($classList[$modelName],$priviliegeList[$dataType]['functionCount']))
+                                    {
+                                        $functionList[$dataType]['functionCount'] =  $priviliegeList[$dataType]['functionCount'];
+                                    }
+                                    else
+                                    {
+                                        $functionList[$dataType]['functionCount'] = "";
+                                    }
+                                    $found = 1;
                                 }
                                 else
                                 {
-                                    $functionList[$dataType]['functionCount'] = "";
+                                    //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." not found\n";
                                 }
-                                $found = 1;
                             }
                             else
                             {
-                                //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." not found\n";
+                                //echo "class:".$modelName.",not found\n";
                             }
-                        }
-                        else
-                        {
-                            //echo "class:".$modelName.",not found\n";
+                            $functionList[$dataType]['source']=$priviliegeList[$dataType]['source'];
                         }
                     }
+                }
+                elseif($currentSource!="" && $priviliegeList[$dataType]['source']==1)
+                {
+                    $functionList[$dataType]['source'] =$priviliegeList[$dataType]['source'];
+                    $list = array_combine(array_column($priviliegeList[$dataType]['list'],"source"),array_column($priviliegeList[$dataType]['list'],"model"));
+                    if(isset($list[$currentSource]))
+                    {
+                        $modelName = $list[$currentSource];
+                        $modelName = str_replace("#source#",$currentSource,$modelName);
+                        $classList = $this->getClass($classList,$modelName);
+                        if(method_exists($classList[$modelName] ??[],$priviliegeList[$dataType]['function']))
+                        {
+                            $functionList[$dataType] = ["className"=>$modelName,"class"=>$classList[$modelName],"function"=>$priviliegeList[$dataType]['function']];
+                            $found = 1;
+                            if(method_exists($classList[$modelName],$priviliegeList[$dataType]['functionCount']))
+                            {
+                                $functionList[$dataType]['functionCount'] =  $priviliegeList[$dataType]['functionCount'];
+
+                            }
+                            else
+                            {
+                                $functionList[$dataType]['functionCount'] = "";
+                            }
+                        }
+                    }
+                    if($found == 0)
+                    {
+                        foreach($priviliegeList[$dataType]['list'] as $detail)
+                        {
+                            $modelName = $detail['model'];
+                            $modelName = str_replace("#source#",$detail['source'],$modelName);
+                            $classList = $this->getClass($classList,$modelName);
+                            if(!isset($functionList[$dataType]))
+                            {
+                                if(isset($classList[$modelName]))
+                                {
+                                    if(method_exists($classList[$modelName],$priviliegeList[$dataType]['function']))
+                                    {
+                                        //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";
+                                        $functionList[$dataType] = ["className"=>$modelName,"class"=>$classList[$modelName],"function"=>$priviliegeList[$dataType]['function']];
+                                        if(method_exists($classList[$modelName],$priviliegeList[$dataType]['functionCount']))
+                                        {
+                                            $functionList[$dataType]['functionCount'] =  $priviliegeList[$dataType]['functionCount'];
+                                        }
+                                        else
+                                        {
+                                            $functionList[$dataType]['functionCount'] = "";
+                                        }
+                                        $found = 1;
+                                    }
+                                    else
+                                    {
+                                        //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." not found\n";
+                                    }
+                                }
+                                else
+                                {
+                                    //echo "class:".$modelName.",not found\n";
+                                }
+                            }
+                        }
+                    }
+                    $functionList[$dataType]['source']=$priviliegeList[$dataType]['source'];
                 }
             }
             if($found==0)

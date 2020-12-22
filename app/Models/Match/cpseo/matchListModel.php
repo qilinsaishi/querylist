@@ -176,4 +176,8 @@ class matchListModel extends Model
             }
         }
     }
+
+    public function getTournamentList(){
+        return true;
+    }
 }
