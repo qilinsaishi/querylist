@@ -2,12 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Libs\AjaxRequest;
-use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
-use Illuminate\Http\Request;
 use QL\QueryList;
-use GuzzleHttp\Client;
 
 class HomeController extends Controller
 {
@@ -22,7 +18,6 @@ class HomeController extends Controller
 
     public function index()
     {
-
 
         $data=$this->kplInfo();dd($data);
 
