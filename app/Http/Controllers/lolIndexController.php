@@ -20,6 +20,11 @@ class lolIndexController extends Controller
     {
 
     }
+    //matchList 比赛 page/page_size
+    //teamList 战队 page/page_size/game
+    //tournament 赛事 page/page_size
+    //player 选手 page/page_size/game
+
     public function get()
     {
         $data = ["matchList" => ["page" => 1, "page_size" => 10],
