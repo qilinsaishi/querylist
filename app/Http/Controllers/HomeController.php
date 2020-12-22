@@ -10,10 +10,12 @@ use GuzzleHttp\Client;
 
 class HomeController extends Controller
 {
-    public function lists(Request $request){
-        $id=$request->post('id','');echo $id.'<br/>';
-        $name=$request->input('name','');echo $name.'<br/>';
-        $all=$request->all();dd($all);
+    public function lists(){
+        $id=$this->request->post('id','');echo $id.'<br/>';
+        $name=$this->request->input('name','');echo $name.'<br/>';
+        $data=$this->payload;
+        $a=json_decode($data);
+        $all=$this->request->all();dd($all);
 
     }
 
