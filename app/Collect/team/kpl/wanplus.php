@@ -11,7 +11,7 @@ class wanplus
         [
             "team_name"=>['path'=>"title",'default'=>''],
             "en_name"=>['path'=>"",'default'=>''],
-            "aka"=>['path'=>"aka","default"=>""],
+            "aka"=>['path'=>"","default"=>""],
             "location"=>['path'=>"country","default"=>"未知"],
             "established_date"=>['path'=>"",'default'=>"未知"],
             "coach"=>['path'=>"",'default'=>"暂无"],
@@ -62,10 +62,29 @@ class wanplus
     }
     public function processMemberList($team_id,$arr)
     {
+
         $missionList = [];
         if(isset($arr['content']['cur_team_members']))
         {
             foreach($arr['content']['cur_team_members'] as $member)
+            {
+                $mission = ['mission_type'=>"player",
+                    'mission_status'=>0,
+                    'title'=>$member['name'],
+                    'detail'=>json_encode(['url'=>$member['link_url'],
+                        'name'=>$member['name'],
+                        'position'=>$member['position']??"",
+                        'logo'=>$member['main_img'],
+                        'team_id'=>$team_id,
+                        'current'=>1
+                    ]),
+                ];
+                $missionList[] = $mission;
+            }
+        }
+        if(isset($arr['content']['old_team_members']))
+        {
+            foreach($arr['content']['old_team_members'] as $member)
             {
                 $mission = ['mission_type' => "player",
                     'mission_status' => 0,
@@ -90,7 +109,7 @@ class wanplus
                     'title'=>$member['name'],
                     'detail' => json_encode(['url' => $member['link_url'],
                         'name' => $member['name'],
-                        'position' => $member['position'],
+                        'position'=>$member['position']??"",
                         'logo' => $member['main_img'],
                         'team_id' => $team_id,
                         'current' => 0

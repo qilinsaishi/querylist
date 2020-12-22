@@ -135,7 +135,14 @@ class PlayerModel extends Model
 
     public function savePlayer($game,$data)
     {
+        echo "player_name:".$data['player_name']."\n";
         $return  = ['player_id'=>0,"result"=>0];
+        if($data['player_name'] == "")
+        {
+            echo "empty_player:\n";
+            sleep(1);
+            return $return;
+        }
         $data['player_name'] = preg_replace("/\s+/", "",$data['player_name']);
         $data['player_name'] = trim($data['player_name']);
         if($data['aka']=="")
@@ -178,7 +185,7 @@ class PlayerModel extends Model
                 if(isset($currentPlayer[$key]) && ($currentPlayer[$key] == $value))
                 {
                     //echo $currentPlayer[$key]."-".$value."\n";
-                    echo $key.":passed\n";
+                    //echo $key.":passed\n";
                     unset($data[$key]);
                 }
                 else

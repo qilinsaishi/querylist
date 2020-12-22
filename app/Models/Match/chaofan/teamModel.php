@@ -39,18 +39,31 @@ class teamModel extends Model
     ];
     protected $toAppend = [
     ];
-    public function getTeamList($params)
+    public function getTeamList($params=[])
     {
         $team_list =$this->select("*");
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
-        $team_list = $team_list
+        if(isset($params['game']))
+        {
+            $team_list = $team_list->where("game",$params['game']);
+        }
+        $team_list = $team_list->orderBy("team_id")
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("team_id")
             ->get()->toArray();
         return $team_list;
     }
+    public function getTeamCount($params=[])
+    {
+        $team_count =$this;
+        if(isset($params['game']))
+        {
+            $team_count = $team_count->where("game",$params['game']);
+        }
+        return $team_count->count();
+    }
+
     public function getTeamByName($team_name,$game)
     {
         $team_info =$this->select("*")
