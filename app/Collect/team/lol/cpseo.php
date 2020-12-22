@@ -25,8 +25,7 @@ class cpseo
         $url = $arr['detail']['url'] ?? '';
         $res = $this->cpseoTeam($url);
         if (!empty($res)) {
-            foreach ($res as $key => $val) {
-                $cdata[$key] = [
+                $cdata= [
                     'mission_id' => $arr['mission_id'],//任务id
                     'content' => json_encode($res),
                     'game' => $arr['game'],//游戏类型
@@ -37,7 +36,6 @@ class cpseo
                     'status' => 1,
                     'update_time' => date("Y-m-d H:i:s")
                 ];
-            }
         }
         return $cdata;
 
