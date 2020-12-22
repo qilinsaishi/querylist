@@ -217,7 +217,7 @@ class pvp_qq
                 $addSkills[$key]['name'] = str_replace('<b>', '', $tempSuggInfos[0]);
                 foreach ($skillBaseInfo as $v) {
                     if ($v['killImg'] == 'http:' . $val) {
-                        $addSkills[$key]['desc'] = $v['name'];
+                        $addSkills[$key]['desc'] = $v['name'] ?? '';
                     }
                 }
             }

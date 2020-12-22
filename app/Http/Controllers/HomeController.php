@@ -10,9 +10,16 @@ use GuzzleHttp\Client;
 
 class HomeController extends Controller
 {
+    public function lists(Request $request){
+        $id=$request->post('id','');echo $id.'<br/>';
+        $name=$request->input('name','');echo $name.'<br/>';
+        $all=$request->all();dd($all);
+
+    }
 
     public function index()
     {
+
 
         $data=$this->kplInfo();dd($data);
 

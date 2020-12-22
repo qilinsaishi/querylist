@@ -12,7 +12,7 @@ class Summoner extends Command
      *
      * @var string
      */
-    protected $signature = 'kpl:summoner';
+    protected $signature = 'kpl:summoner {operation}';
 
     /**
      * The console command description.
@@ -38,26 +38,30 @@ class Summoner extends Command
      */
     public function handle()
     {
-        /*$url = 'https://pvp.qq.com/web201605/js/summoner.json';
-        $data = [
-            "asign_to" => 1,
-            "mission_type" => 'summoner',//召唤师技能
-            "mission_status" => 1,
-            "game" => 'kpl',
-            "source" => 'pvp_qq',//装备
-            "detail" => json_encode(
-                [
-                    "url" => $url,
-                    "game" => 'kpl',//王者荣耀
-                    "source" => 'pvp_qq',//王者荣耀官网
+        $operation = ($this->argument("operation") ?? "insert");
+        if($operation=='insert'){
+            $url = 'https://pvp.qq.com/web201605/js/summoner.json';
+            $data = [
+                "asign_to" => 1,
+                "mission_type" => 'summoner',//召唤师技能
+                "mission_status" => 1,
+                "game" => 'kpl',
+                "source" => 'pvp_qq',//装备
+                "detail" => json_encode(
+                    [
+                        "url" => $url,
+                        "game" => 'kpl',//王者荣耀
+                        "source" => 'pvp_qq',//王者荣耀官网
 
-                ]
-            ),
-        ];
-        $insert = (new oMission())->insertMission($data);
-        echo "insert:" . $insert;*/
+                    ]
+                ),
+            ];
+            $insert = (new oMission())->insertMission($data);
+            echo "insert:" . $insert;
+        }else{
+            (new oMission())->collect('kpl','pvp_qq','summoner');
+        }
 
-        (new oMission())->collect('kpl','pvp_qq','summoner');
     }
 
 }
