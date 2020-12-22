@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CollectResultModel;
+use App\Models\TeamModel;
 use QL\QueryList;
 
 class HomeController extends Controller
@@ -13,6 +14,67 @@ class HomeController extends Controller
         $data=$this->payload;
 
         $all=$this->request->all();
+
+    }
+
+    public function teamInfo(){
+        //$team_id=$this->request->input('team_id','');
+        $teamModel=new TeamModel();
+        $params=[];
+        $params['page_size']=1000;
+        $params['game']='lol';
+        $teamList=$teamModel->getTeamList($params);
+        $data=[];
+        $arr=[];
+        $cdata=[];
+        if(!empty($teamList)){
+            foreach ($teamList as $key=>$val){
+                if(!empty($val['team_name'])){
+                    if(isset($data[$val['team_name']])){
+                        {
+                            $arr[$val['team_name']] = ($arr[$val['team_name']]??1)+1;
+                        }
+                    }
+                    $data[$val['team_name']] = $val['team_id'];
+
+                }
+
+                if(!empty($val['en_name'])){
+                    if(isset($val['en_name'])){
+                        if(isset($data[$val['en_name']]))
+                        {
+                            $arr[$val['en_name']] = ($arr[$val['en_name']]??1)+1;
+                        }
+                    }
+                    $data[$val['en_name']]=$val['team_id'];
+                }
+
+                //$data[$key]['team_id']=$val['team_id'] ?? '';
+                $aka=json_decode($val['aka'],true);
+                if(!empty($aka) && is_array($aka)){
+                    foreach ($aka as $k=>$v){
+                        if(isset($v)){
+                            if(isset($data[$v]))
+                            {
+                                $arr[$v] = ($arr[$v]??1)+1;
+                            }
+
+                        }
+                        $data[$v]=$val['team_id'];
+                    }
+                }
+
+            }
+        }
+        ksort($data);
+        $cdata=[
+            'arr_count'=>count($arr),
+            'datacount'=>count($data),
+            'arr'=>$arr ?? [],
+
+            'data'=> $data ?? []
+        ];
+        print_r($cdata);exit;
 
     }
 

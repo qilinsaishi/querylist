@@ -233,7 +233,7 @@ class PrivilegeService
                     $teamList[$matchInfo['away_id']] = $teamInfo;
                 }
             }
-            $data[$key]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];
+            $data[$key]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
             $data[$key]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
             $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
         }

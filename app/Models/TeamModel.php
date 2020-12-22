@@ -71,7 +71,7 @@ class TeamModel extends Model
         $team_list = $team_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("team_id")
             ->get()->toArray();
         return $team_list;
     }
