@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin\DefaultConfig;
 use App\Models\CollectResultModel;
 use App\Models\TeamModel;
 use QL\QueryList;
@@ -80,7 +81,8 @@ class HomeController extends Controller
 
     public function index()
     {
-
+$model=new DefaultConfig();
+$a=$model->getDefaultById(3);dd($a);
         $data=$this->kplInfo();dd($data);
 
         //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));

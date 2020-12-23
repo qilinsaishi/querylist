@@ -38,6 +38,15 @@ class PrivilegeService
                 'function' => "getTeamList",
                 'functionCount' => "getTeamCount",
                 'functionSingle' => "getTeamById",
+            ],
+            "defaultConfig" => [
+                'list' => [
+                    ['model' => 'App\Models\Admin\DefaultConfig'],
+                ],
+                'withSource' => 0,
+                'function' => "getConfigList",
+                'functionCount' => "getDefaultCount",
+                'functionSingle' => "getDefaultConfigByKey",
             ]
         ];
         return $privilegeList;

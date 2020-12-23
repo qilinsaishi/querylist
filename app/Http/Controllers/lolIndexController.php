@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
+use App\Models\Admin\DefaultConfig;
 use Illuminate\Http\Request;
 
 
@@ -27,8 +28,14 @@ class lolIndexController extends Controller
 
     public function get()
     {
+        $model=new DefaultConfig();
+        $a=$model->getDefaultById(3);dd($a);
+
+        $data = ["defaultConfig"=>["contact_us","phone_num","address"],"matchList" => ["page" => 1, "page_size" => 10],
+           "tournament"=>["page" => 1, "page_size" => 10], "teamList" => ["game" => 'lol', "page" => 1, "page_size" => 10]];
+
         $privilegeService = new PrivilegeService();
-        $data=$this->payload;
+        $data=$this->payload;print_r($data);exit;
         $return = [];
         $functionList = $privilegeService->getFunction($data);
         foreach ($functionList as $dataType => $functionInfo)

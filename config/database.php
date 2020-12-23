@@ -42,7 +42,6 @@ return [
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
-
         'query_list' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
@@ -62,6 +61,21 @@ return [
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
+		 'query_admin' => [
+			'driver' => 'mysql',
+			'host' => env('DB_DATABASE', '127.0.0.1'),
+			'port' => env('DB_PORT', '3306'),
+			'database' => 'queryadmin',
+			'username' => env('DB_USERNAME', 'forge'),
+			'password' => env('DB_PASSWORD', 'forge'),
+			'unix_socket' => env('DB_SOCKET', ''),
+			'charset' => 'utf8mb4',
+			'collation' => 'utf8mb4_unicode_ci',
+			'prefix' => '',
+			'strict' => false,
+			'engine' => null,
+		],
+
 
         'pgsql' => [
             'driver' => 'pgsql',
