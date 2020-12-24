@@ -97,18 +97,29 @@ class PrivilegeService
         $functionList = [];
         foreach ($data as $dataType => $params) {
             //echo "found type:".$dataType."\n";
-            // echo "currentSource:".$currentSource."\n";
+            //echo "currentSource:".$currentSource."\n";
+            //默认没找到
             $found = 0;
+            //数据类型出现在优先级列表
             if (isset($priviliegeList[$dataType])) {
+                //尚未初始化数据来源 且 当前数据类型需要包含数据来源
                 if ($currentSource == "" && $priviliegeList[$dataType]['withSource'] == 1) {
+                    //循环所列的类库列表
                     foreach ($priviliegeList[$dataType]['list'] as $detail) {
                         $modelName = $detail['model'];
                         $currentSource = $currentSource == "" ? $detail['source'] : $currentSource;
+                        //替换成包含数据来源的的类库路径
                         $modelName = str_replace("#source#", $detail['source'], $modelName);
+                        //初始化
                         $classList = $this->getClass($classList, $modelName);
-                        if (!isset($functionList[$dataType])) {
+                        //如果之前没初始化过
+                        if (!isset($functionList[$dataType]))
+                        {
+                            //如果类库初始化成功
                             if (isset($classList[$modelName])) {
-                                if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
+                                //检查基础function方法存在
+                                if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function']))
+                                {
                                     //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";
                                     $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
                                     if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
@@ -129,41 +140,64 @@ class PrivilegeService
 
                                     }
                                     $found = 1;
-                                } else {
+                                }
+                                else
+                                {
                                     //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." not found\n";
                                 }
-                            } else {
+                            }
+                            else
+                            {
                                 //echo "class:".$modelName.",not found\n";
                             }
                             $functionList[$dataType]['source'] = $currentSource;//$priviliegeList[$dataType]['source'];
                         }
                     }
-                } elseif ($currentSource != "" && $priviliegeList[$dataType]['withSource'] == 1) {
-                    $functionList[$dataType]['source'] = $currentSource;//$priviliegeList[$dataType]['source'];
+                }
+                //已经初始化数据来源 且 当前数据类型需要包含数据来源
+                elseif ($currentSource != "" && $priviliegeList[$dataType]['withSource'] == 1)
+                {
+                    //调用已有的数据类型
+                    $functionList[$dataType]['source'] = $currentSource;
+                    //获取当前数据了行的类库列表
                     $list = array_combine(array_column($priviliegeList[$dataType]['list'], "source"), array_column($priviliegeList[$dataType]['list'], "model"));
-                    if (isset($list[$currentSource])) {
+                    //如果包含已经被初始化的数据来源
+                    if (isset($list[$currentSource]))
+                    {
                         $modelName = $list[$currentSource];
                         $modelName = str_replace("#source#", $currentSource, $modelName);
+                        //初始化
                         $classList = $this->getClass($classList, $modelName);
-                        if (method_exists($classList[$modelName] ?? [], $priviliegeList[$dataType]['function'])) {
+                        //检查方法存在
+                        if (method_exists($classList[$modelName] ?? [], $priviliegeList[$dataType]['function']))
+                        {
                             $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
+                            //标记为找到
                             $found = 1;
-                            if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
+                            if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount']))
+                            {
                                 $functionList[$dataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
-
-                            } else {
+                            }
+                            else
+                            {
                                 $functionList[$dataType]['functionCount'] = "";
                             }
-                            if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle'])) {
+                            if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle']))
+                            {
                                 $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
-                            } else {
+                            }
+                            else
+                            {
                                 $functionList[$dataType]['functionSingle'] = "";
-
                             }
                         }
                     }
-                    if ($found == 0) {
-                        foreach ($priviliegeList[$dataType]['list'] as $detail) {
+                    //如果没找到
+                    if ($found == 0)
+                    {
+                        //循环
+                        foreach ($priviliegeList[$dataType]['list'] as $detail)
+                        {
                             $modelName = $detail['model'];
                             $modelName = str_replace("#source#", $detail['source'], $modelName);
                             $classList = $this->getClass($classList, $modelName);
@@ -172,60 +206,87 @@ class PrivilegeService
                                     if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
                                         //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";
                                         $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
-                                        if (method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
+                                        if (method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount']))
+                                        {
                                             $functionList[$dataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
-                                        } else {
+                                        }
+                                        else
+                                        {
                                             $functionList[$dataType]['functionCount'] = "";
                                         }
-                                        if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle'])) {
+                                        if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle']))
+                                        {
                                             $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
-                                        } else {
-                                            $functionList[$dataType]['functionSingle'] = "";
-
                                         }
+                                        else
+                                        {
+                                            $functionList[$dataType]['functionSingle'] = "";
+                                        }
+                                        //标记为找到
                                         $found = 1;
-                                    } else {
+                                    }
+                                    else
+                                    {
                                         //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." not found\n";
                                     }
-                                } else {
+                                }
+                                else
+                                {
                                     //echo "class:".$modelName.",not found\n";
                                 }
                             }
                         }
                     }
-                    $functionList[$dataType]['source'] = $currentSource;//$priviliegeList[$dataType]['source'];
-                }elseif($currentSource == "" && $priviliegeList[$dataType]['withSource'] == 0){
+                    //调用当前的数据来源
+                    $functionList[$dataType]['source'] = $currentSource;
+                }
+                elseif($currentSource == "" && $priviliegeList[$dataType]['withSource'] == 0)
+                {
                     foreach ($priviliegeList[$dataType]['list'] as $detail) {
                         $modelName = $detail['model'];
                         $currentSource = $currentSource == "" ? $detail['source'] : $currentSource;
                         $classList = $this->getClass($classList, $modelName);
-                        if (!isset($functionList[$dataType])) {
-                            if (isset($classList[$modelName])) {
-                                if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
+                        if (!isset($functionList[$dataType]))
+                        {
+                            if (isset($classList[$modelName]))
+                            {
+                                if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function']))
+                                {
                                     //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";exit;
                                     $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
-                                    if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
+                                    if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount']))
+                                    {
                                         $functionList[$dataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
-                                    } else {
+                                    }
+                                    else
+                                    {
                                         $functionList[$dataType]['functionCount'] = "";
                                     }
-                                    if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle'])) {
+                                    if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle']))
+                                    {
                                         $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
-                                    } else {
-                                        $functionList[$dataType]['functionSingle'] = "";
-
                                     }
-                                    if (isset($priviliegeList[$dataType]['functionProcess'])) {
+                                    else
+                                    {
+                                        $functionList[$dataType]['functionSingle'] = "";
+                                    }
+                                    if (isset($priviliegeList[$dataType]['functionProcess']))
+                                    {
                                         $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
-                                    } else {
+                                    }
+                                    else
+                                    {
                                         $functionList[$dataType]['functionProcess'] = "";
-
                                     }
                                     $found = 1;
-                                } else {
+                                }
+                                else
+                                {
                                     echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." not found\n";
                                 }
-                            } else {
+                            }
+                            else
+                            {
                                 //echo "class:".$modelName.",not found\n";
                             }
                             $functionList[$dataType]['source'] = $currentSource;//$priviliegeList[$dataType]['source'];
@@ -234,7 +295,8 @@ class PrivilegeService
 
                 }
             }
-            if ($found == 0) {
+            if ($found == 0)
+            {
                 //echo "dataType:".$dataType.",function not found\n";
             }
         }
