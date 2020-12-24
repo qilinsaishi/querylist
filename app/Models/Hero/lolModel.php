@@ -52,7 +52,7 @@ class lolModel extends Model
         $hero_list = $hero_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("hero_id")
             ->get()->toArray();
         return $hero_list;
     }
@@ -163,5 +163,33 @@ class lolModel extends Model
                 return true;
             }
         }
+    }
+
+    public function getHeroCount($params=[]){
+        $hero_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $hero_count = $hero_count->whereIn('key', $keys);
+            }
+
+        }
+
+        return $hero_count->count();
+    }
+
+    public function getHeroById($hero_id){
+        $hero_info =$this->select("*")
+            ->where("hero_id",$hero_id)
+            ->get()->first();
+        if(isset($hero_info->hero_id))
+        {
+            $hero_info = $hero_info->toArray();
+        }
+        else
+        {
+            $hero_info = [];
+        }
+        return $hero_info;
     }
 }

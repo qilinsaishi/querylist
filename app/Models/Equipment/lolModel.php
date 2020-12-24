@@ -52,7 +52,7 @@ class lolModel extends Model
         $equipment_list = $equipment_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("equipment_id")
             ->get()->toArray();
         return $equipment_list;
     }
@@ -163,5 +163,33 @@ class lolModel extends Model
                 return true;
             }
         }
+    }
+
+    public function getEquipmentCount($params=[]){
+        $equipment_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $equipment_count = $equipment_count->whereIn('key', $keys);
+            }
+
+        }
+
+        return $equipment_count->count();
+    }
+
+    public function getEquipmentById($equipment_id){
+        $equipment_info =$this->select("*")
+            ->where("equipment_id",$equipment_id)
+            ->get()->first();
+        if(isset($equipment_info->equipment_id))
+        {
+            $equipment_info = $equipment_info->toArray();
+        }
+        else
+        {
+            $equipment_info = [];
+        }
+        return $equipment_info;
     }
 }

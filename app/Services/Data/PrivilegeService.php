@@ -29,7 +29,7 @@ class PrivilegeService
                 'functionSingle' => "getTournamentById",
 
             ],
-            "teamList" => [
+            "teamList" => [//团队列表
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'cpseo'],
                     ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'chaofan'],
@@ -39,7 +39,7 @@ class PrivilegeService
                 'functionCount' => "getTeamCount",
                 'functionSingle' => "getTeamById",
             ],
-            "defaultConfig" => [
+            "defaultConfig" => [//通用配置
                 'list' => [
                     ['model' => 'App\Models\Admin\DefaultConfig', 'source' => ''],
                 ],
@@ -47,7 +47,43 @@ class PrivilegeService
                 'function' => "getDefaultConfigList",
                 'functionCount' => "getDefaultCount",
                 'functionSingle' => "getDefaultConfigByKey",
-            ]
+            ],
+            "lolHeroList" => [//lol英雄列表
+                'list' => [
+                    ['model' => 'App\Models\Hero\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getHeroList",
+                'functionCount' => "getHeroCount",
+                'functionSingle' => "getHeroById",
+            ],
+            "lolHero" => [//lol英雄详情
+                'list' => [
+                    ['model' => 'App\Models\Hero\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getHeroById",
+                'functionSingle' => "getHeroById",
+            ],
+            "lolEquipmentList" => [//lol装备列表
+                'list' => [
+                    ['model' => 'App\Models\Equipment\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getEquipmentList",
+                'functionCount' => "getEquipmentCount",
+                'functionSingle' => "getEquipmentById",
+            ],
+            "lolEquipment" => [//lol装备详情
+                'list' => [
+                    ['model' => 'App\Models\Equipment\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getEquipmentById",
+                'functionSingle' => "getEquipmentById",
+            ],
+
+
         ];
         return $privilegeList;
     }
