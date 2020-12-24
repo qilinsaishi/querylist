@@ -28,19 +28,14 @@ class lolIndexController extends Controller
 
     public function get()
     {
-        $model=new DefaultConfig();
-        try{
-            $a=$model->getDefaultById(3);dd($a);
-        }catch (\Exception $e){
-            dd($e->getMessage());
-        }
 
 
-        $data = ["defaultConfig"=>["contact_us","phone_num","address"],"matchList" => ["page" => 1, "page_size" => 10],
+
+        /*$data = ["defaultConfig"=>["keys"=>["contact_us","phone_num","address"],"filed"=>["name","key","value"]],"matchList" => ["page" => 1, "page_size" => 10],
            "tournament"=>["page" => 1, "page_size" => 10], "teamList" => ["game" => 'lol', "page" => 1, "page_size" => 10]];
-
+print_r(json_encode($data));exit;*/
         $privilegeService = new PrivilegeService();
-        $data=$this->payload;print_r($data);exit;
+        $data=$this->payload;
         $return = [];
         $functionList = $privilegeService->getFunction($data);
         foreach ($functionList as $dataType => $functionInfo)

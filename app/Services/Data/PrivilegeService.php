@@ -41,10 +41,10 @@ class PrivilegeService
             ],
             "defaultConfig" => [
                 'list' => [
-                    ['model' => 'App\Models\Admin\DefaultConfig'],
+                    ['model' => 'App\Models\Admin\DefaultConfig', 'source' => ''],
                 ],
                 'withSource' => 0,
-                'function' => "getConfigList",
+                'function' => "getDefaultConfigList",
                 'functionCount' => "getDefaultCount",
                 'functionSingle' => "getDefaultConfigByKey",
             ]
@@ -158,6 +158,44 @@ class PrivilegeService
                         }
                     }
                     $functionList[$dataType]['source'] = $currentSource;//$priviliegeList[$dataType]['source'];
+                }elseif($currentSource == "" && $priviliegeList[$dataType]['withSource'] == 0){
+                    foreach ($priviliegeList[$dataType]['list'] as $detail) {
+                        $modelName = $detail['model'];
+                        $currentSource = $currentSource == "" ? $detail['source'] : $currentSource;
+                        $classList = $this->getClass($classList, $modelName);
+                        if (!isset($functionList[$dataType])) {
+                            if (isset($classList[$modelName])) {
+                                if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
+                                    //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";exit;
+                                    $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
+                                    if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
+                                        $functionList[$dataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
+                                    } else {
+                                        $functionList[$dataType]['functionCount'] = "";
+                                    }
+                                    if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle'])) {
+                                        $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
+                                    } else {
+                                        $functionList[$dataType]['functionSingle'] = "";
+
+                                    }
+                                    if (isset($priviliegeList[$dataType]['functionProcess'])) {
+                                        $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
+                                    } else {
+                                        $functionList[$dataType]['functionProcess'] = "";
+
+                                    }
+                                    $found = 1;
+                                } else {
+                                    echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." not found\n";
+                                }
+                            } else {
+                                //echo "class:".$modelName.",not found\n";
+                            }
+                            $functionList[$dataType]['source'] = $currentSource;//$priviliegeList[$dataType]['source'];
+                        }
+                    }
+
                 }
             }
             if ($found == 0) {

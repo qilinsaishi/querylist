@@ -30,8 +30,13 @@ class DefaultConfig extends Model
 
 
     public function getDefaultConfigList($params)
-    {
-        $default_config_list =$this->select("*");
+    {    $keys=$params['keys'] ?? [];
+    $default_field=['id','name','key','value'];
+        $filed=isset($params['filed']) && !empty($params['filed']) ? $params['filed']:$default_field;
+        $default_config_list =$this->select($filed);
+        if(!empty($keys)){
+            $default_config_list->whereIn('key',$keys);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $default_config_list = $default_config_list
@@ -39,7 +44,14 @@ class DefaultConfig extends Model
             ->offset(($page-1)*$pageSizge)
             ->orderBy("id")
             ->get()->toArray();
-        return $default_config_list;
+        $data=[];
+        if(isset($default_config_list) && !empty($default_config_list)){
+            foreach ($default_config_list as $val){
+                $data[$val['key']]=$val;
+            }
+        }
+
+        return $data;
     }
     public function getDefaultConfigByName($name,$type)
     {
@@ -58,8 +70,22 @@ class DefaultConfig extends Model
         return $default_config_info;
     }
 
-    public function getDefaultCount(){
-        return true;
+    public function getDefaultCount($params){
+        $default_config_count =$this;
+        $keys=$params['keys'] ?? [];
+        if(!empty($keys)){
+            if(!empty($keys)){
+                $default_config_count=$default_config_count->whereIn('key',$keys);
+            }
+
+        }
+        if(isset($params['game']))
+        {
+            $default_config_count = $default_config_count->where("game",$params['game']);
+        }
+
+        return $default_config_count->count();
+        //return true;
     }
     public function getDefaultById($id)
     {
