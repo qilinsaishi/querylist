@@ -66,7 +66,7 @@ class PlayerModel extends Model
         $player_list = $player_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("player_id")
             ->get()->toArray();
         return $player_list;
     }
@@ -202,5 +202,33 @@ class PlayerModel extends Model
                 return true;
             }
         }
+    }
+
+    public function getPlayerCount($params=[]){
+        $player_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $player_count = $player_count->whereIn('key', $keys);
+            }
+
+        }
+
+        return $player_count->count();
+    }
+
+    public function getPlayerById($player_id){
+        $player_info =$this->select("*")
+            ->where("player_id",$player_id)
+            ->get()->first();
+        if(isset($player_info->player_id))
+        {
+            $player_info = $player_info->toArray();
+        }
+        else
+        {
+            $player_info = [];
+        }
+        return $player_info;
     }
 }

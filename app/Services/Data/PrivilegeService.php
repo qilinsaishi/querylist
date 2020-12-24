@@ -135,6 +135,15 @@ class PrivilegeService
                 'functionProcess' => "processRuneList",//格式化的处理方法
                 'functionSingle' => "getRuneById",
             ],
+            "playerList" => [//队员
+                'list' => [
+                    ['model' => 'App\Models\PlayerModel', 'source' => ''],
+                ],
+                'withSource' => 1,
+                'function' => "getPlayerList",
+                'functionCount' => "getPlayerCount",
+                'functionSingle' => "getPlayerById",
+            ],
 
 
 
