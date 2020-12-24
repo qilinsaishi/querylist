@@ -29,7 +29,12 @@ class lolIndexController extends Controller
     public function get()
     {
         $model=new DefaultConfig();
-        $a=$model->getDefaultById(3);dd($a);
+        try{
+            $a=$model->getDefaultById(3);dd($a);
+        }catch (\Exception $e){
+            dd($e->getMessage());
+        }
+
 
         $data = ["defaultConfig"=>["contact_us","phone_num","address"],"matchList" => ["page" => 1, "page_size" => 10],
            "tournament"=>["page" => 1, "page_size" => 10], "teamList" => ["game" => 'lol', "page" => 1, "page_size" => 10]];

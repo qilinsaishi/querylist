@@ -63,7 +63,7 @@ return [
         ],
 		 'query_admin' => [
 			'driver' => 'mysql',
-			'host' => env('DB_DATABASE', '127.0.0.1'),
+			'host' => env('DB_HOST', '127.0.0.1'),
 			'port' => env('DB_PORT', '3306'),
 			'database' => 'queryadmin',
 			'username' => env('DB_USERNAME', 'forge'),
