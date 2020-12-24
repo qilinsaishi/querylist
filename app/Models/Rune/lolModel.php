@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class lolModel extends Model
 {
@@ -184,41 +185,56 @@ class lolModel extends Model
     }
 
     public function getRuneById($rune_id){
-        $rune_info =$this->select("*")
-            ->where("rune_id",$rune_id)
-            ->get()->first();
-        if(isset($rune_info->rune_id))
-        {
-            $rune_info = $rune_info->toArray();
-        }
-        else
-        {
-            $rune_info = [];
-        }
-        if(isset($rune_info['aka']) && $rune_info['aka']){
-            $rune_info['aka']=json_decode($rune_info['aka'],true);
-            $rune_info['aka']=$rune_info['aka'] ?? [];
-        }
-        if(isset($rune_info['bonuses']) && $rune_info['bonuses']){
-            $rune_info['bonuses']=json_decode($rune_info['bonuses'],true);
-            $rune_info['bonuses']=$rune_info['bonuses'] ?? [];
-        }
-        $run_detail=[];
-        if(isset($rune_info['slots']) && $rune_info['slots']){
-            $rune_info['slots']=json_decode($rune_info['slots'],true);
-            $rune_info['slots']=$rune_info['slots'] ?? [];
-            if(!empty($rune_info['slots'])){
-                foreach ($rune_info['slots'] as $key=>&$val){
-                    $runes=$val['runes'] ?? [];
-                    if(!empty($runes)){
-                        $run_detail_model=new lolDetailModel();
-                        $run_detail=$run_detail_model->getRuneListByIds($runes);
+            $redis_key='lol_runs_'.$rune_id;
+            try{
+                if(Redis::exists($redis_key)){
+                    $rune_info=Redis::get($redis_key);
+                    $rune_info=json_decode($rune_info,true);
+                }else{
+                    $rune_info =$this->select("*")
+                        ->where("rune_id",$rune_id)
+                        ->get()->first();
+                    if(isset($rune_info->rune_id))
+                    {
+                        $rune_info = $rune_info->toArray();
                     }
-                    $val['runs_detail']=$run_detail ?? [];
+                    else
+                    {
+                        $rune_info = [];
+                    }
+                    if(isset($rune_info['aka']) && $rune_info['aka']){
+                        $rune_info['aka']=json_decode($rune_info['aka'],true);
+                        $rune_info['aka']=$rune_info['aka'] ?? [];
+                    }
+                    if(isset($rune_info['bonuses']) && $rune_info['bonuses']){
+                        $rune_info['bonuses']=json_decode($rune_info['bonuses'],true);
+                        $rune_info['bonuses']=$rune_info['bonuses'] ?? [];
+                    }
+                    $run_detail=[];
+                    if(isset($rune_info['slots']) && $rune_info['slots']){
+                        $rune_info['slots']=json_decode($rune_info['slots'],true);
+                        $rune_info['slots']=$rune_info['slots'] ?? [];
+                        if(!empty($rune_info['slots'])){
+                            foreach ($rune_info['slots'] as $key=>&$val){
+                                $runes=$val['runes'] ?? [];
+                                if(!empty($runes)){
+                                    $run_detail_model=new lolDetailModel();
+                                    $run_detail=$run_detail_model->getRuneListByIds($runes);
+                                }
+                                $val['runs_detail']=$run_detail ?? [];
 
+                            }
+                        }
+                    }
+                    Redis::set($redis_key,json_encode($rune_info),120);
                 }
+
+            }catch (\Exception $e){
+                dd($e->getMessage());
             }
-        }
+
+
+
         return $rune_info;
     }
 }

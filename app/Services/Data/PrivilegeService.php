@@ -351,7 +351,7 @@ class PrivilegeService
             {
                 //echo "dataType:".$dataType.",function not found\n";
             }
-        }
+        }//print_r($functionList);exit;
         return $functionList;
     }
 
