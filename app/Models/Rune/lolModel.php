@@ -52,7 +52,7 @@ class lolModel extends Model
         $rune_list = $rune_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("rune_id")
             ->get()->toArray();
         return $rune_list;
     }
@@ -163,5 +163,33 @@ class lolModel extends Model
                 return true;
             }
         }
+    }
+
+    public function getRuneCount($params=[]){
+        $rune_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $rune_count = $rune_count->whereIn('key', $keys);
+            }
+
+        }
+
+        return $rune_count->count();
+    }
+
+    public function getRuneById($rune_id){
+        $rune_info =$this->select("*")
+            ->where("rune_id",$rune_id)
+            ->get()->first();
+        if(isset($rune_info->rune_id))
+        {
+            $rune_info = $rune_info->toArray();
+        }
+        else
+        {
+            $rune_info = [];
+        }
+        return $rune_info;
     }
 }
