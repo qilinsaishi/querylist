@@ -64,12 +64,8 @@ class DefaultConfig extends Model
     public function getDefaultById($id)
     {
 
-        try{
-            $get_default_info =$this->select("*")
-                ->where("id",$id)->first();dd($this);
-        }catch (\Exception $e){
-            dd($e->getMessage());
-        }
+        $get_default_info =$this->select("*")
+            ->where("id",$id)->first();
         if(isset($get_default_info->id))
         {
             $get_default_info = $get_default_info->toArray();
