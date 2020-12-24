@@ -164,7 +164,7 @@ class lolModel extends Model
             }
         }
     }
-    public function getSkillCount($params=[]){
+    public function getSkillCount($params = []){
         $skill_count = $this;
         $keys = $params['keys'] ?? [];
         if (!empty($keys)) {
