@@ -49,7 +49,7 @@ class lolDetailModel extends Model
         $rune_list = $rune_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("rune_id")
             ->get()->toArray();
         return $rune_list;
     }
@@ -159,5 +159,14 @@ class lolDetailModel extends Model
                 return true;
             }
         }
+    }
+
+    public function getRuneListByIds($run_ids)
+    {
+        $rune_list =$this->select("rune_id","rune_name","shortDescription","longDescription","logo");
+        $rune_list = $rune_list
+            ->whereIn('rune_id',$run_ids)
+            ->get()->toArray();
+        return $rune_list;
     }
 }

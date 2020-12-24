@@ -123,7 +123,6 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getRuneList",
                 'functionCount' => "getRuneCount",
-                'functionProcess' => "processRuneList",//格式化的处理方法
                 'functionSingle' => "getRuneById",
             ],
             "lolRune" => [//lol召唤师详情
@@ -132,7 +131,6 @@ class PrivilegeService
                 ],
                 'withSource' => 0,
                 'function' => "getRuneById",
-                'functionProcess' => "processRuneList",//格式化的处理方法
                 'functionSingle' => "getRuneById",
             ],
 
@@ -439,45 +437,5 @@ class PrivilegeService
         return $data;
     }
 
-    public function processRuneList($data, $functionList)
-    {
 
-        //判断战队
-        /*if (isset($functionList['teamList']) && isset($functionList['teamList']['functionSingle'])) {
-
-        } else {
-            $f = $this->getFunction(['teamList' => []], $functionList['matchList']['source']);
-            if (isset($f['teamList']['class'])) {
-                $functionList["teamList"] = $f['teamList'];
-            }
-        }
-        if (!isset($functionList["teamList"]["class"]) || !isset($functionList['teamList']['functionSingle'])) {
-            return $data;
-        }
-        $modelClass = $functionList["teamList"]["class"];
-        $functionSingle = $functionList["teamList"]['functionSingle'];
-        $teamList = [];
-        $tournament = [];
-        foreach ($data as $key => $matchInfo) {
-
-            //战队信息
-            if (!isset($teamList[$matchInfo['home_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['home_id']);
-                if (isset($teamInfo['team_id'])) {
-                    $teamList[$matchInfo['home_id']] = $teamInfo;
-                }
-
-            }
-            if (!isset($teamList[$matchInfo['away_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['away_id']);
-                if (isset($teamInfo['team_id'])) {
-                    $teamList[$matchInfo['away_id']] = $teamInfo;
-                }
-            }
-            $data[$key]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
-            $data[$key]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
-            $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
-        }*/
-        return $data;
-    }
 }

@@ -54,6 +54,11 @@ class lolModel extends Model
             ->offset(($page-1)*$pageSizge)
             ->orderBy("rune_id")
             ->get()->toArray();
+        if(!empty($rune_list)){
+            foreach ($rune_list as &$val){
+                $val=$this->getRuneById($val['rune_id']);
+            }
+        }
         return $rune_list;
     }
     public function getRuneByName($rune_name)
@@ -189,6 +194,30 @@ class lolModel extends Model
         else
         {
             $rune_info = [];
+        }
+        if(isset($rune_info['aka']) && $rune_info['aka']){
+            $rune_info['aka']=json_decode($rune_info['aka'],true);
+            $rune_info['aka']=$rune_info['aka'] ?? [];
+        }
+        if(isset($rune_info['bonuses']) && $rune_info['bonuses']){
+            $rune_info['bonuses']=json_decode($rune_info['bonuses'],true);
+            $rune_info['bonuses']=$rune_info['bonuses'] ?? [];
+        }
+        $run_detail=[];
+        if(isset($rune_info['slots']) && $rune_info['slots']){
+            $rune_info['slots']=json_decode($rune_info['slots'],true);
+            $rune_info['slots']=$rune_info['slots'] ?? [];
+            if(!empty($rune_info['slots'])){
+                foreach ($rune_info['slots'] as $key=>&$val){
+                    $runes=$val['runes'] ?? [];
+                    if(!empty($runes)){
+                        $run_detail_model=new lolDetailModel();
+                        $run_detail=$run_detail_model->getRuneListByIds($runes);
+                    }
+                    $val['runs_detail']=$run_detail ?? [];
+
+                }
+            }
         }
         return $rune_info;
     }
