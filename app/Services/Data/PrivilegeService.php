@@ -144,7 +144,6 @@ class PrivilegeService
 
     public function getFunction($data, $currentSource = "")
     {
-        $currentSource = "";
         //获取各个数据类型对应的类库优先级列表以及获取方法
         $priviliegeList = $this->getPriviliege();
         $classList = [];
@@ -379,6 +378,7 @@ class PrivilegeService
 
     public function processMatchList($data, $functionList)
     {
+
         //判断赛事
         if (isset($functionList['tournament']) && isset($functionList['tournament']['functionSingle'])) {
 
