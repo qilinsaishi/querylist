@@ -82,6 +82,23 @@ class PrivilegeService
                 'function' => "getEquipmentById",
                 'functionSingle' => "getEquipmentById",
             ],
+            "lolSummonerList" => [//lol召唤师列表
+                'list' => [
+                    ['model' => 'App\Models\Summoner\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSkillList",
+                'functionCount' => "getSkillCount",
+                'functionSingle' => "getSkillById",
+            ],
+            "lolSummoner" => [//lol召唤师详情
+                'list' => [
+                    ['model' => 'App\Models\Summoner\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSkillById",
+                'functionSingle' => "getSkillById",
+            ],
 
 
         ];

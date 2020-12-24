@@ -33,8 +33,8 @@ class DefaultConfig extends Model
     {
         $keys = $params['keys'] ?? [];
         $default_field = ['id', 'name', 'key', 'value'];
-        $filed = isset($params['filed']) && !empty($params['filed']) ? $params['filed'] : $default_field;
-        $default_config_list = $this->select($filed);
+        $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
+        $default_config_list = $this->select($field);
         if (!empty($keys)) {
             $default_config_list->whereIn('key', $keys);
         }
