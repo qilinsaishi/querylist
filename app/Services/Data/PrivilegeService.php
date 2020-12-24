@@ -149,12 +149,13 @@ class PrivilegeService
         $classList = [];
         $functionList = [];
         foreach ($data as $dataType => $params) {
-            //echo "found type:".$dataType."\n";
+            //echo "try to find type:".$dataType."\n";
             //echo "currentSource:".$currentSource."\n";
             //默认没找到
             $found = 0;
             //数据类型出现在优先级列表
             if (isset($priviliegeList[$dataType])) {
+                //echo "found type:".$dataType."\n";
                 //尚未初始化数据来源 且 当前数据类型需要包含数据来源
                 if ($currentSource == "" && $priviliegeList[$dataType]['withSource'] == 1) {
                     //循环所列的类库列表
@@ -293,11 +294,11 @@ class PrivilegeService
                     //调用当前的数据来源
                     $functionList[$dataType]['source'] = $currentSource;
                 }
-                elseif($currentSource == "" && $priviliegeList[$dataType]['withSource'] == 0)
+                elseif($priviliegeList[$dataType]['withSource'] == 0)
                 {
                     foreach ($priviliegeList[$dataType]['list'] as $detail) {
                         $modelName = $detail['model'];
-                        $currentSource = $currentSource == "" ? $detail['source'] : $currentSource;
+                        //$currentSource = $currentSource == "" ? $detail['source'] : $currentSource;
                         $classList = $this->getClass($classList, $modelName);
                         if (!isset($functionList[$dataType]))
                         {
