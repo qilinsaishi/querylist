@@ -30,7 +30,7 @@ class lolIndexController extends Controller
     {
 
 
-        /*$data = [ "lolSummonerList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolSummoner" => 1,"lolEquipmentList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolEquipment" => 1,"lolHeroList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolHero" => 1,"defaultConfig"=>["keys"=>["contact","phone_num","address"],"field"=>["name","key","value"]],"matchList" => ["page" => 1, "page_size" => 10],
+        /*$data = [ "lolRuneList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolRune" => 1,"lolSummonerList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolSummoner" => 1,"lolEquipmentList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolEquipment" => 1,"lolHeroList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolHero" => 1,"defaultConfig"=>["keys"=>["contact","phone_num","address"],"field"=>["name","key","value"]],"matchList" => ["page" => 1, "page_size" => 10],
            "tournament"=>["page" => 1, "page_size" => 10], "teamList" => ["game" => 'lol', "page" => 1, "page_size" => 10]];
 print_r(json_encode($data));exit;*/
         $privilegeService = new PrivilegeService();
