@@ -41,7 +41,7 @@ class teamModel extends Model
     protected $toAppend = [
     ];
     public function getTeamList($params=[])
-    {print_r($params);
+    {
         $team_list =$this->select("*");
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
@@ -61,8 +61,7 @@ class teamModel extends Model
 
         if($team_list){
             $team_list=$team_list->toArray();
-        }echo '=======';
-        print_r($team_list);echo '====';exit;
+        }
         return $team_list;
     }
     public function getTeamCount($params=[])
