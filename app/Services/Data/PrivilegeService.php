@@ -139,7 +139,7 @@ class PrivilegeService
                 'list' => [
                     ['model' => 'App\Models\PlayerModel', 'source' => ''],
                 ],
-                'withSource' => 1,
+                'withSource' => 0,
                 'function' => "getPlayerList",
                 'functionCount' => "getPlayerCount",
                 'functionSingle' => "getPlayerById",
