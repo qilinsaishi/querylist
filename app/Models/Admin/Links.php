@@ -44,7 +44,7 @@ class Links extends Model
         $default_link_list = $default_link_list
             ->limit($pageSizge)
             ->offset(($page - 1) * $pageSizge)
-            ->orderBy("id")
+            ->orderBy("sort")
             ->get()->toArray();
 
         return $default_link_list;
