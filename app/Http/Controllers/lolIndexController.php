@@ -30,8 +30,20 @@ class lolIndexController extends Controller
     {
 
 
-        /*$data = [  "links" => ["game" => 'lol', "page" => 1, "page_size" => 10], "playerList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolRuneList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolRune" => 1,"lolSummonerList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolSummoner" => 1,"lolEquipmentList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolEquipment" => 1,"lolHeroList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolHero" => 1,"defaultConfig"=>["keys"=>["contact","sitemap","aboutus"],"field"=>["name","key","value"]],"matchList" => ["page" => 1, "page_size" => 10],
-           "tournament"=>["page" => 1, "page_size" => 10], "teamList" => ["game" => 'lol', "page" => 1, "page_size" => 10]];
+        /*$data = [  "links" => ["game" => 'lol', "page" => 1, "page_size" => 10],
+        "playerList" => ["game" => 'lol',"hot"=>1, "page" => 1, "page_size" => 10],
+        "lolRuneList" => ["game" => 'lol', "page" => 1, "page_size" => 10],
+        "lolRune" => 1,
+        "lolSummonerList" => ["game" => 'lol', "page" => 1, "page_size" => 10],
+        "lolSummoner" => 1,
+        "lolEquipmentList" => ["game" => 'lol', "page" => 1, "page_size" => 10],
+        "lolEquipment" => 1,
+        "lolHeroList" => ["game" => 'lol', "page" => 1, "page_size" => 10],
+        "lolHero" => 1,
+        "defaultConfig"=>["keys"=>["contact","sitemap","aboutus"],"field"=>["name","key","value"]],
+        "matchList" => ["page" => 1, "page_size" => 10],
+        "tournament"=>["page" => 1, "page_size" => 10],
+        "teamList" => ["game" => 'lol', "hot"=>1,"page" => 1, "page_size" => 10]];
 print_r(json_encode($data));exit;*/
         $privilegeService = new PrivilegeService();
         $data=$this->payload;

@@ -61,6 +61,11 @@ class PlayerModel extends Model
         {
             $player_list = $player_list->where("en_name",$params['en_name']);
         }
+        $hot=$params['hot']??0;
+        if($hot==1)
+        {
+            $player_list->where("hot",$hot);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $player_list = $player_list

@@ -4,6 +4,7 @@ namespace App\Models\Match\cpseo;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class teamModel extends Model
 {
@@ -40,18 +41,28 @@ class teamModel extends Model
     protected $toAppend = [
     ];
     public function getTeamList($params=[])
-    {
+    {print_r($params);
         $team_list =$this->select("*");
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
+        $hot=$params['hot']??0;
         if(isset($params['game']))
         {
             $team_list = $team_list->where("game",$params['game']);
         }
+        if($hot==1)
+        {
+            $team_list->where("hot",$hot);
+        }
         $team_list = $team_list->orderBy("team_id")
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->get()->toArray();
+            ->get();
+
+        if($team_list){
+            $team_list=$team_list->toArray();
+        }echo '=======';
+        print_r($team_list);echo '====';exit;
         return $team_list;
     }
     public function getTeamCount($params=[])
