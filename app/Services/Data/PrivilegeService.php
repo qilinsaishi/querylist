@@ -144,6 +144,15 @@ class PrivilegeService
                 'functionCount' => "getPlayerCount",
                 'functionSingle' => "getPlayerById",
             ],
+            "links" => [//友链
+                'list' => [
+                    ['model' => 'App\Models\Admin\links', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getLinkList",
+                'functionCount' => "getLinkCount",
+                'functionSingle' => "getLinkById",
+            ],
 
 
 
