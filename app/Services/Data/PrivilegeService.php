@@ -123,7 +123,7 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getRuneList",
                 'functionCount' => "getRuneCount",
-                'functionProcess' => "processRuneList",//格式化的处理方法
+                //'functionProcess' => "processRuneList",//格式化的处理方法
                 'functionSingle' => "getRuneById",
             ],
             "lolRune" => [//lol召唤师详情
@@ -132,7 +132,7 @@ class PrivilegeService
                 ],
                 'withSource' => 0,
                 'function' => "getRuneById",
-                'functionProcess' => "processRuneList",//格式化的处理方法
+                //'functionProcess' => "processRuneList",//格式化的处理方法
                 'functionSingle' => "getRuneById",
             ],
             "playerList" => [//队员
@@ -143,6 +143,7 @@ class PrivilegeService
                 'function' => "getPlayerList",
                 'functionCount' => "getPlayerCount",
                 'functionSingle' => "getPlayerById",
+                'functionProcess' => "processPlayerList",//格式化的处理方法
             ],
             "links" => [//友链
                 'list' => [
@@ -458,11 +459,9 @@ class PrivilegeService
         return $data;
     }
 
-    public function processRuneList($data, $functionList)
+    public function processPlayerList($data, $functionList)
     {
-
-        //判断战队
-        /*if (isset($functionList['teamList']) && isset($functionList['teamList']['functionSingle'])) {
+        if (isset($functionList['teamList']) && isset($functionList['teamList']['functionSingle'])) {
 
         } else {
             $f = $this->getFunction(['teamList' => []], $functionList['matchList']['source']);
@@ -470,33 +469,34 @@ class PrivilegeService
                 $functionList["teamList"] = $f['teamList'];
             }
         }
-        if (!isset($functionList["teamList"]["class"]) || !isset($functionList['teamList']['functionSingle'])) {
-            return $data;
-        }
         $modelClass = $functionList["teamList"]["class"];
         $functionSingle = $functionList["teamList"]['functionSingle'];
-        $teamList = [];
-        $tournament = [];
-        foreach ($data as $key => $matchInfo) {
-
-            //战队信息
-            if (!isset($teamList[$matchInfo['home_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['home_id']);
-                if (isset($teamInfo['team_id'])) {
-                    $teamList[$matchInfo['home_id']] = $teamInfo;
+        $teamInfo=[];
+        if(!empty($data)){
+            foreach ($data as $key=>&$val){
+                if(!$val['player_name']){
+                    unset($data[$key]);
+                }
+                $team_id=$val['team_id'] ?? '';
+                if($team_id){
+                    $teamInfo = $modelClass->$functionSingle($val['team_id']);
+                }
+                $val['team_info']=$teamInfo;
+                if(!empty($val['team_history'])){
+                    $val['team_history']=json_decode($val['team_history'],true);
+                }
+                if(!empty($val['event_history'])){
+                    $val['event_history']=json_decode($val['event_history'],true);
+                }
+                if(!empty($val['stat'])){
+                    $val['stat']=json_decode($val['stat'],true);
                 }
 
             }
-            if (!isset($teamList[$matchInfo['away_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['away_id']);
-                if (isset($teamInfo['team_id'])) {
-                    $teamList[$matchInfo['away_id']] = $teamInfo;
-                }
-            }
-            $data[$key]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
-            $data[$key]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
-            $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
-        }*/
+        }
+        if($data){
+            $data=array_values($data);
+        }
         return $data;
     }
 }
