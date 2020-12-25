@@ -14,7 +14,8 @@ class lol_qq
             "en_name"=>['path'=>"id",'default'=>''],
             "aka"=>['path'=>"",'default'=>""],//别名
             "description"=>['path'=>"description",'default'=>'暂无'],
-            "logo"=>['path'=>"big_img",'default'=>''],
+            "logo"=>['path'=>"thumb_img",'default'=>''],
+            "image"=>['path'=>"big_img",'default'=>''],
             "rank"=>['path'=>"maxrank",'default'=>''],
         ];
     public function collect($arr)
@@ -48,6 +49,7 @@ class lol_qq
         {
             $value["id"] = str_replace("Summoner","",$value["id"]);
             $value['big_img'] = getImage($value['big_img']);
+            $value['thumb_img'] = getImage($value['thumb_img']);
             $data[$key] = getDataFromMapping($this->data_map,$value);
         }
         return $data;
