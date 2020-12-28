@@ -143,6 +143,30 @@ class MissionService
                             $modelClass = $classList[$modelClassName];
                             $save = $modelClass->saveHero($processResult);
                         }
+                        if (method_exists($class, "processSkins"))
+                        {
+                            $skinModelClassName = 'App\Models\Hero\Skin\\' . $result['game'] . "Model";
+                            $classList = $this->getClass($classList, $skinModelClassName);
+                            $skinModelClass = $classList[$skinModelClassName];
+                            $skinList = $class->processSkins($result);
+                            foreach($skinList as $skinInfo)
+                            {
+                                $saveSkin = $skinModelClass->saveSkin($skinInfo);
+
+                            }
+                        }
+                        if (method_exists($class, "processSpells"))
+                        {
+                            $spellModelClassName = 'App\Models\Hero\Spell\\' . $result['game'] . "Model";
+                            $classList = $this->getClass($classList, $spellModelClassName);
+                            $spellModelClass = $classList[$spellModelClassName];
+                            $spellList = $class->processSpells($result);
+                            foreach($spellList as $spellInfo)
+                            {
+                                $saveSpell = $spellModelClass->saveSpell($spellInfo);
+                            }
+                        }
+
                     } elseif ($result['mission_type'] == "equipment") {
                         //生成类库路径
                         $modelClassName = 'App\Models\Equipment\\' . $result['game'] . "Model";
