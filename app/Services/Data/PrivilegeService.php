@@ -154,7 +154,7 @@ class PrivilegeService
                 'functionCount' => "getLinkCount",
                 'functionSingle' => "getLinkById",
             ],
-            "site" => [//lol英雄详情
+            "gameConfig" => [//lol英雄详情
                 'list' => [
                     ['model' => 'App\Models\Admin\Site', 'source' => ''],
                 ],
