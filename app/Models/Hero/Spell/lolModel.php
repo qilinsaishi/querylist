@@ -46,7 +46,7 @@ class lolModel extends Model
     public function getSpellByHero($params)
     {
         $spell_list =$this->select("*");
-        $pageSizge = $params['page_size']??10;
+        $pageSizge = $params['page_size']??20;
         $page = $params['page']??1;
         if(isset($params['hero_id']) && $params['hero_id']>0)
         {

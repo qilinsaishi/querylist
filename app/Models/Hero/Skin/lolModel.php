@@ -46,7 +46,7 @@ class lolModel extends Model
     public function getSkinByHero($params)
     {
         $skin_list =$this->select("*");
-        $pageSizge = $params['page_size']??10;
+        $pageSizge = $params['page_size']??20;
         $page = $params['page']??1;
         if(isset($params['hero_id']) && $params['hero_id']>0)
         {
@@ -110,10 +110,20 @@ class lolModel extends Model
         }
         return $this->where('skin_id',$skin_id)->update($data);
     }
+    public function deleteSkin($skin_id=0)
+    {
+        return $this->where('skin_id',$skin_id)->delete($skin_id);
+    }
 
     public function saveSkin($data)
     {
         $currentSkin = $this->getSkinById($data['skin_id']);
+        if($data['data']['chromas']!=0)
+        {
+            echo "toDeleteSkin:".$data['skin_id']."\n";
+            $this->deleteSkin($data['skin_id']);
+            return;
+        }
         if(!isset($currentSkin['skin_id']))
         {
             echo "toInsertSkin:"."\n";
