@@ -46,7 +46,7 @@ class lolModel extends Model
     public function getSkinByHero($params)
     {
         $skin_list =$this->select("*");
-        $pageSizge = $params['page_size']??3;
+        $pageSizge = $params['page_size']??10;
         $page = $params['page']??1;
         if(isset($params['hero_id']) && $params['hero_id']>0)
         {

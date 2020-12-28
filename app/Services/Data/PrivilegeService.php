@@ -469,16 +469,16 @@ class PrivilegeService
 
     public function processPlayerList($data, $functionList)
     {
-        if (isset($functionList['teamList']) && isset($functionList['teamList']['functionSingle'])) {
+        if (isset($functionList['playerList']) && isset($functionList['playerList']['functionSingle'])) {
 
         } else {
-            $f = $this->getFunction(['teamList' => []], $functionList['matchList']['source']);
-            if (isset($f['teamList']['class'])) {
-                $functionList["teamList"] = $f['teamList'];
+            $f = $this->getFunction(['playerList' => []], $functionList['teamList']['source']);
+            if (isset($f['playerList']['class'])) {
+                $functionList["playerList"] = $f['playerList'];
             }
         }
-        $modelClass = $functionList["teamList"]["class"];
-        $functionSingle = $functionList["teamList"]['functionSingle'];
+        $modelClass = $functionList["playerList"]["class"];
+        $functionSingle = $functionList["playerList"]['functionSingle'];
         $teamInfo=[];
         if(!empty($data)){
             foreach ($data as $key=>&$val){
