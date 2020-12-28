@@ -75,7 +75,7 @@ class lol_qq
     public function process($arr)
     {
         /**
-         * $data['hero']=>基础信息,$data['skins']=>皮肤,$data['技能']=>皮肤,
+         * $data['hero']=>基础信息,$data['skins']=>皮肤,$data['spells']=>皮肤,
          * hero: $res['show_list_img'] = 'https://game.gtimg.cn/images/lol/act/img/champion/' . $res['alias'] . '.png';
          */
         foreach($arr['content']['roles'] as $key => $value)
