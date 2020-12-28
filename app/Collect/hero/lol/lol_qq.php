@@ -2,6 +2,8 @@
 
 namespace App\Collect\hero\lol;
 
+use App\Libs\ClientServices;
+
 class lol_qq
 {
     protected $data_map =
@@ -45,10 +47,14 @@ class lol_qq
     {
         $cdata = [];
         $url = $arr['detail']['url'] ?? '';
-        $res = curl_get($url);
-        $res = $res['hero'] ?? [];
+        $client=new ClientServices();
+        $data=$client->curlGet($url);
+        $res['hero']=$data['hero'] ?? [];
+        $res['skins']=$data['skins'] ?? [];
+        $res['spells']=$data['spells'] ?? [];
+
         if (!empty($res)) {
-            $res['show_list_img'] = 'https://game.gtimg.cn/images/lol/act/img/champion/' . $res['alias'] . '.png';
+            //$res['show_list_img'] = 'https://game.gtimg.cn/images/lol/act/img/champion/' . $res['alias'] . '.png';
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
@@ -68,6 +74,10 @@ class lol_qq
 
     public function process($arr)
     {
+        /**
+         * $data['hero']=>基础信息,$data['skins']=>皮肤,$data['技能']=>皮肤,
+         * hero: $res['show_list_img'] = 'https://game.gtimg.cn/images/lol/act/img/champion/' . $res['alias'] . '.png';
+         */
         foreach($arr['content']['roles'] as $key => $value)
         {
             $arr['content']['roles'][$key] = $this->role_list[$value]??"未知";

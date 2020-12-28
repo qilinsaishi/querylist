@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Libs\ClientServices;
 use App\Models\Admin\DefaultConfig;
 use App\Models\CollectResultModel;
 use App\Models\TeamModel;
@@ -19,6 +20,7 @@ class HomeController extends Controller
     }
 
     public function teamInfo(){
+
         //$team_id=$this->request->input('team_id','');
         $teamModel=new TeamModel();
         $params=[];
@@ -80,7 +82,10 @@ class HomeController extends Controller
     }
 
     public function index()
-    {
+    {$url='https://game.gtimg.cn/images/lol/act/img/js/hero/1.js';
+        $client=new ClientServices();
+        $data=$client->curlGet($url);
+        dd($data);
 $model=new DefaultConfig();
 $a=$model->getDefaultById(3);dd($a);
         $data=$this->kplInfo();dd($data);
