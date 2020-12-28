@@ -88,6 +88,7 @@ class Site extends Model
             ->where(["game"=>$game,'status'=>0])->orderBy("sort","desc")->first();
         if (isset($get_site_info->id)) {
             $get_site_info = $get_site_info->toArray();
+            $get_site_info['content']=htmlspecialchars_decode($get_site_info['content']);
         } else {
             $get_site_info = [];
         }
