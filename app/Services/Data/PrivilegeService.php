@@ -64,6 +64,7 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getHeroById",
                 'functionSingle' => "getHeroById",
+                'functionProcess' => "processLolHero",
             ],
             "lolEquipmentList" => [//lol装备列表
                 'list' => [
@@ -99,23 +100,6 @@ class PrivilegeService
                 'function' => "getSkillById",
                 'functionSingle' => "getSkillById",
             ],
-            "lolSummonerList" => [//lol召唤师列表
-                'list' => [
-                    ['model' => 'App\Models\Summoner\lolModel', 'source' => ''],
-                ],
-                'withSource' => 0,
-                'function' => "getSkillList",
-                'functionCount' => "getSkillCount",
-                'functionSingle' => "getSkillById",
-            ],
-            "lolSummoner" => [//lol召唤师详情
-                'list' => [
-                    ['model' => 'App\Models\Summoner\lolModel', 'source' => ''],
-                ],
-                'withSource' => 0,
-                'function' => "getSkillById",
-                'functionSingle' => "getSkillById",
-            ],
             "lolRuneList" => [//lol召唤师列表
                 'list' => [
                     ['model' => 'App\Models\Rune\lolModel', 'source' => ''],
@@ -133,6 +117,22 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getRuneById",
                 //'functionProcess' => "processRuneList",//格式化的处理方法
+                'functionSingle' => "getRuneById",
+            ],
+            "lolHeroSkin" => [//lol英雄皮肤详情
+                'list' => [
+                    ['model' => 'App\Models\Hero\Skin\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSkinByHero",
+                'functionSingle' => "getRuneById",
+            ],
+            "lolHeroSpell" => [//lol英雄技能详情
+                'list' => [
+                    ['model' => 'App\Models\Hero\Spell\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSpellByHero",
                 'functionSingle' => "getRuneById",
             ],
             "playerList" => [//队员
@@ -504,6 +504,40 @@ class PrivilegeService
         }
         if($data){
             $data=array_values($data);
+        }
+        return $data;
+    }
+    public function processLolHero($data, $functionList)
+    {
+        $data['skinList'] = [];
+        $data['spellList'] = [];
+        if (isset($functionList['lolHeroSkin']) && isset($functionList['lolHeroSkin']['function'])) {
+
+        } else {
+            $f = $this->getFunction(['lolHeroSkin' => []]);
+            if (isset($f['lolHeroSkin']['class'])) {
+                $functionList["lolHeroSkin"] = $f['lolHeroSkin'];
+            }
+        }
+        $modelClass = $functionList["lolHeroSkin"]["class"];
+        $function = $functionList["lolHeroSkin"]['function'];
+        $teamInfo=[];
+        if(!empty($data)){
+            $data['skinList'] = $modelClass->getSkinByHero(["hero_id"=>$data['id']]);
+        }
+        if (isset($functionList['lolHeroSpell']) && isset($functionList['lolHeroSpell']['function'])) {
+
+        } else {
+            $f = $this->getFunction(['lolHeroSpell' => []]);
+            if (isset($f['lolHeroSpell']['class'])) {
+                $functionList["lolHeroSpell"] = $f['lolHeroSpell'];
+            }
+        }
+        $modelClass = $functionList["lolHeroSpell"]["class"];
+        $function = $functionList["lolHeroSpell"]['function'];
+        $teamInfo=[];
+        if(!empty($data)){
+            $data['spellList'] = $modelClass->getSpellByHero(["hero_id"=>$data['id']]);
         }
         return $data;
     }

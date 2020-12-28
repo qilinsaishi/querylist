@@ -43,6 +43,20 @@ class lolModel extends Model
     ];
     protected $toAppend = [
     ];
+    public function getSpellByHero($params)
+    {
+        $spell_list =$this->select("*");
+        $pageSizge = $params['page_size']??3;
+        $page = $params['page']??1;
+        if(isset($params['hero_id']) && $params['hero_id']>0)
+        {
+            $spell_list = $spell_list->where("hero_id",$params['hero_id']);
+        }
+        $spell_list = $spell_list->orderBy("spell_id") ->limit($pageSizge)
+            ->offset(($page-1)*$pageSizge)
+            ->get()->toArray();
+        return $spell_list;
+    }
     public function getSpellByName($spell_name)
     {
         $spell_info =$this->select("*")
