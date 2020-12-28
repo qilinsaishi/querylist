@@ -154,6 +154,14 @@ class PrivilegeService
                 'functionCount' => "getLinkCount",
                 'functionSingle' => "getLinkById",
             ],
+            "site" => [//lol英雄详情
+                'list' => [
+                    ['model' => 'App\Models\Admin\Site', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSiteById",
+                'functionSingle' => "getSiteById",
+            ],
 
 
 

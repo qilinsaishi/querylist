@@ -30,7 +30,7 @@ class lolIndexController extends Controller
     {
 
 
-        /*$data = [  "links" => ["game" => 'lol', "page" => 1, "page_size" => 10],
+        /*$data = [  "site" => 'lol', "links" => ["game" => 'lol', "page" => 1, "page_size" => 10],
         "playerList" => ["game" => 'lol',"hot"=>1, "page" => 1, "page_size" => 10],
         "lolRuneList" => ["game" => 'lol', "page" => 1, "page_size" => 10],
         "lolRune" => 1,
