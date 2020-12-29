@@ -66,7 +66,8 @@ class InformationModel extends Model
         $information_list = $information_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("id",
+                "desc")
             ->get()->toArray();
         return $information_list;
     }
@@ -209,8 +210,26 @@ class InformationModel extends Model
         }
     }
 
-    public function getInformationCount($params=[]){
-        $information_count = $this;
-        return $information_count->count();
+    public function getInformationCount($params=[])
+    {
+        $information_count =$this;
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $information_count = $information_count->where("game",$params['game']);
+        }
+        $hot=$params['hot']??0;
+        if($hot==1)
+        {
+            $information_count->where("hot",$hot);
+        }
+        if(isset($params['type']))
+        {
+            $types = explode(",",$params['type']);
+
+            $information_count->whereIn("type",$types);
+        }
+        $information_count = $information_count->count();
+        return $information_count;
     }
 }

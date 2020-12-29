@@ -54,7 +54,7 @@ class PrivilegeService
                 ],
                 'withSource' => 0,
                 'function' => "getInformationList",
-                'functionCount' => "getDefaultCount",
+                'functionCount' => "getInformationCount",
                 'functionSingle' => "getInformationById",
             ],
             "lolHeroList" => [//lol英雄列表
