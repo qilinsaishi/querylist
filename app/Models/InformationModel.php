@@ -43,7 +43,8 @@ class InformationModel extends Model
     ];
     public function getInformationList($params)
     {
-        $information_list =$this->select("*");
+        $fields = $params['fields']??"id,title,author,author_id,logo,create_time";
+        $information_list =$this->select(explode(",",$fields));
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
@@ -54,6 +55,12 @@ class InformationModel extends Model
         {
             $information_list->where("hot",$hot);
         }
+        if(isset($params['type']))
+        {
+            $types = explode(",",$params['type']);
+
+            $information_list->whereIn("type",$types);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $information_list = $information_list
@@ -63,12 +70,27 @@ class InformationModel extends Model
             ->get()->toArray();
         return $information_list;
     }
-    public function getInformationById($id,$game)
+    public function getInformationBySiteId($id,$game)
     {
         $information =$this->select("*")
                     ->where("site_id",$id)
                     ->where("game",$game)
                     ->get()->first();
+        if(isset($information->id))
+        {
+            $information = $information->toArray();
+        }
+        else
+        {
+            $information = [];
+        }
+        return $information;
+    }
+    public function getInformationById($id)
+    {
+        $information =$this->select("*")
+            ->where("id",$id)
+            ->get()->first();
         if(isset($information->id))
         {
             $information = $information->toArray();
@@ -136,7 +158,7 @@ class InformationModel extends Model
         }
         $data['title'] = preg_replace("/\s+/", "",$data['title']);
         $data['title'] = trim($data['title']);
-        $currentInformation = $this->getInformationById($data['site_id'],$game);
+        $currentInformation = $this->getInformationBySiteId($data['site_id'],$game);
         if(!isset($currentInformation['id']))
         {
             echo "toInsertInformation:\n";
@@ -189,14 +211,6 @@ class InformationModel extends Model
 
     public function getInformationCount($params=[]){
         $information_count = $this;
-        $keys = $params['keys'] ?? [];
-        if (!empty($keys)) {
-            if (!empty($keys)) {
-                $information_count = $information_count->whereIn('key', $keys);
-            }
-
-        }
-
         return $information_count->count();
     }
 }

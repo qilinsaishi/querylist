@@ -66,6 +66,16 @@ class lol_qq
         //target=23 ( 23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区')
         $arr['content']['target'] = $this->type[$arr['content']['target']];
         $arr['content']['avatar'] = getImage($arr['content']['avatar']);
+        $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
+        preg_match($imgpreg,$arr['content']['sContent'],$imgList);
+        foreach($imgList as $img)
+        {
+            if(substr($img,0,4)=="http")
+            {
+                $src = getImage($img);
+                $arr['content']['sContent'] = str_replace($img,$src,$arr['content']['sContent']);
+            }
+        }
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }
