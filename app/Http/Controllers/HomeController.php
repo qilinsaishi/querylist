@@ -82,11 +82,58 @@ class HomeController extends Controller
     }
 
     public function index()
-    {$url='https://apps.game.qq.com/cmc/zmMcnContentInfo?r0=jsonp&source=web_pc&type=0&docid=2581504277095223195&_=1609211418082';
-        $client=new ClientServices();
-        $data=$client->curlGet($url);
-        $data=curl_get($url);
+    {
+        $url='http://lol.kuai8.com/gonglue/index_1.html';
+
+       /* $client=new ClientServices();
+        $data=curl_get($url);dd($data);
+        $data=$client->curlGet($url);*/
+
+        for($i=0;$i<=32;$i++){
+            $m=$i+1;
+            $url='http://lol.kuai8.com/gonglue/index_'.$m.'.html';
+            $ql = QueryList::get($url);
+            $data=$ql->rules([
+                'title' => ['.con .tit', 'text'],
+                'desc' => ['.con  .txt', 'text'],
+                'link' => ['.img  a', 'href'],
+                'img_url' => ['.img img', 'src'],
+                'dtime' => ['.con  .time', 'text']
+            ])->range('.Cont .news-list li')->queryData();
+            foreach ($data as $val){
+                $data = [
+                    "asign_to"=>1,
+                    "mission_type"=>'information',//攻略
+                    "mission_status"=>1,
+                    "game"=>'lol',
+                    "source"=>'kuai8',//
+                    'title'=>'',
+                    "detail"=>json_encode(
+                        [
+                            "url"=>$url,
+                            "game"=>'lol',//英雄联盟
+                            "source"=>'kuai8',//资讯
+                            "title"=>$val['title'] ?? '',
+                            "desc"=>$val['desc'] ?? '',
+                            "img_url"=>$val['img_url'] ?? '',
+                            "dtime"=>$val['dtime'] ?? '',
+
+                        ]
+                    ),
+                ];
+            }
+        }exit;
+        print_r($data);exit;
+        /*foreach ($data as &$val){
+            $detail_url=$val['link'];
+            $detail_ql=QueryList::get($detail_url);
+            $content=$detail_ql->find('.article-detail .a-detail-cont')->html();
+            $val['content']=$content ?? '';
+        }dd($data);*/
+        //$links=$ql->find('.news-list li .con .tit')->texts()->all();//分页
         dd($data);
+        $data=curl_get($url);
+
 $model=new DefaultConfig();
 $a=$model->getDefaultById(3);dd($a);
         $data=$this->kplInfo();dd($data);

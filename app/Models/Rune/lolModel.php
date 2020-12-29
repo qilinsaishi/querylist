@@ -47,6 +47,8 @@ class lolModel extends Model
     public function getRuneList($params)
     {
         $rune_list =$this->select("*");
+        //游戏类型
+
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $rune_list = $rune_list
@@ -167,14 +169,6 @@ class lolModel extends Model
 
     public function getRuneCount($params=[]){
         $rune_count = $this;
-        $keys = $params['keys'] ?? [];
-        if (!empty($keys)) {
-            if (!empty($keys)) {
-                $rune_count = $rune_count->whereIn('key', $keys);
-            }
-
-        }
-
         return $rune_count->count();
     }
 

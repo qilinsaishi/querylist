@@ -21,7 +21,8 @@ class lol_qq
                 $array=curl_get($detail_url);//获取详情接口信息
                 $detail_data= $array['data']['result'] ?? [];
                 //23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区'
-                if(($detail_data && strlen($detail_data['sContent']) >400) && (!empty($detail_data['authorID']) && $detail_data['authorID'] >0) ){
+
+                if(($detail_data && strlen($detail_data['sContent']) >150) ){
                     $detail_data['sCreated']=date("Y-m-d H:i:s");
                     $detail_data['target']= $target;
                     $cdata[$key] = [
