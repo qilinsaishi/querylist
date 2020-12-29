@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CollectResultModel as CollectModel;
+use App\Models\InformationModel;
 use App\Models\MissionModel as MissionModel;
 use App\Models\TeamModel as TeamModel;
 use App\Models\PlayerModel as PlayerModel;
@@ -91,6 +92,7 @@ class MissionService
         $missionModel = new MissionModel();
         $teamModel = new TeamModel();
         $playerModel = new PlayerModel();
+        $informationModel = new InformationModel();
         $result_list = $collectModel->getResult(100, $game, $source, $mission_type);
 
         //初始化空的类库列表
@@ -135,7 +137,12 @@ class MissionService
                         }
                     } elseif ($result['mission_type'] == "player") {
                         $save = $playerModel->savePlayer($result["game"], $processResult);
-                    } elseif ($result['mission_type'] == "hero") {
+                    }
+                    elseif ($result['mission_type'] == "information")
+                    {
+                        $save = $informationModel->saveInformation($result["game"], $processResult);
+                    }
+                    elseif ($result['mission_type'] == "hero") {
                         //生成类库路径
                         $modelClassName = 'App\Models\Hero\\' . $result['game'] . "Model";
                         $classList = $this->getClass($classList, $modelClassName);
