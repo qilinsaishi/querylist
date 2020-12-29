@@ -6,7 +6,25 @@ class lol_qq
 {
     protected $data_map =
         [
-        ];
+            "author_id"=>['path'=>"authorID",'default'=>''],//原站点作者ID
+            "author"=>['path'=>"sAuthor",'default'=>''],//原站点作者
+            "logo"=>['path'=>"avatar",'default'=>''],//logo
+            "site_id"=>['path'=>"iDocID",'default'=>""],//原站点ID
+            "game"=>['path'=>"",'default'=>"lol"],//对应游戏
+            "source"=>['path'=>"",'default'=>"lol_qq"],//来源
+            "title"=>['path'=>"sTitle",'default'=>''],//标题
+            "content"=>['path'=>"sContent",'default'=>''],//内容
+            "type"=>['path'=>"target",'default'=>1],//类型
+            "site_time"=>['path'=>"sIdxTime",'default'=>""]//来源站点的时间
+            ];
+    protected $type = [
+        23=>1,//'综合',
+        24=>2,//'公告',
+        25=>3,//'赛事',
+        27=>4,//'攻略',
+        28=>5,//'社区'
+    ];
+
     public function collect($arr)
     {
         $cdata = [];
@@ -45,8 +63,21 @@ class lol_qq
         }
     }
     public function process($arr)
-    {//target=23 ( 23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区')
-        var_dump($arr);
-        die();
+    {
+        //target=23 ( 23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区')
+        $arr['content']['target'] = $this->type[$arr['content']['target']];
+        $arr['content']['avatar'] = getImage($arr['content']['avatar']);
+        $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
+        preg_match($imgpreg,$arr['content']['sContent'],$imgList);
+        foreach($imgList as $img)
+        {
+            if(substr($img,0,4)=="http")
+            {
+                $src = getImage($img);
+                $arr['content']['sContent'] = str_replace($img,$src,$arr['content']['sContent']);
+            }
+        }
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
 }

@@ -48,6 +48,15 @@ class PrivilegeService
                 'functionCount' => "getDefaultCount",
                 'functionSingle' => "getDefaultConfigByKey",
             ],
+            "informationList" => [//资讯
+                'list' => [
+                    ['model' => 'App\Models\InformationModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getInformationList",
+                'functionCount' => "getInformationCount",
+                'functionSingle' => "getInformationById",
+            ],
             "lolHeroList" => [//lol英雄列表
                 'list' => [
                     ['model' => 'App\Models\Hero\lolModel', 'source' => ''],

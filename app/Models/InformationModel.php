@@ -1,0 +1,235 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+
+class InformationModel extends Model
+{
+    protected $table = "information";
+    protected $primaryKey = "id";
+    public $timestamps = false;
+    protected $connection = "query_list";
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $attributes = [
+    ];
+    protected $toJson = [
+    ];
+    protected $toAppend = [
+    ];
+    public function getInformationList($params)
+    {
+        $fields = $params['fields']??"id,title,author,author_id,logo,create_time";
+        $information_list =$this->select(explode(",",$fields));
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $information_list = $information_list->where("game",$params['game']);
+        }
+        $hot=$params['hot']??0;
+        if($hot==1)
+        {
+            $information_list->where("hot",$hot);
+        }
+        if(isset($params['type']))
+        {
+            $types = explode(",",$params['type']);
+
+            $information_list->whereIn("type",$types);
+        }
+        $pageSizge = $params['page_size']??3;
+        $page = $params['page']??1;
+        $information_list = $information_list
+            ->limit($pageSizge)
+            ->offset(($page-1)*$pageSizge)
+            ->orderBy("id",
+                "desc")
+            ->get()->toArray();
+        return $information_list;
+    }
+    public function getInformationBySiteId($id,$game)
+    {
+        $information =$this->select("*")
+                    ->where("site_id",$id)
+                    ->where("game",$game)
+                    ->get()->first();
+        if(isset($information->id))
+        {
+            $information = $information->toArray();
+        }
+        else
+        {
+            $information = [];
+        }
+        return $information;
+    }
+    public function getInformationById($id)
+    {
+        $information =$this->select("*")
+            ->where("id",$id)
+            ->get()->first();
+        if(isset($information->id))
+        {
+            $information = $information->toArray();
+        }
+        else
+        {
+            $information = [];
+        }
+        return $information;
+    }
+    public function insertInformation($data)
+    {
+        foreach($this->attributes as $key => $value)
+        {
+            if(!isset($data[$key]))
+            {
+                $data[$key] = $value;
+            }
+
+        }
+        foreach($this->toJson as $key)
+        {
+            if(isset($data[$key]))
+            {
+                $data[$key] = json_encode($data[$key]);
+            }
+        }
+        $currentTime = date("Y-m-d H:i:s");
+        if(!isset($data['create_time']))
+        {
+            $data['create_time'] = $currentTime;
+        }
+        if(!isset($data['update_time']))
+        {
+            $data['update_time'] = $currentTime;
+        }
+        return $this->insertGetId($data);
+    }
+
+    public function updateInformation($id=0,$data=[])
+    {
+        foreach($this->toJson as $key)
+        {
+            if(isset($data[$key]))
+            {
+                $data[$key] = json_encode($data[$key]);
+            }
+        }
+        $currentTime = date("Y-m-d H:i:s");
+        if(!isset($data['update_time']))
+        {
+            $data['update_time'] = $currentTime;
+        }
+        return $this->where('id',$id)->update($data);
+    }
+
+    public function saveInformation($game,$data)
+    {
+        echo "title:".$data['title']."\n";
+        if($data['title'] == "")
+        {
+            echo "empty_title:\n";
+            sleep(1);
+            return false;
+        }
+        $data['title'] = preg_replace("/\s+/", "",$data['title']);
+        $data['title'] = trim($data['title']);
+        $currentInformation = $this->getInformationBySiteId($data['site_id'],$game);
+        if(!isset($currentInformation['id']))
+        {
+            echo "toInsertInformation:\n";
+            return  $this->insertInformation(array_merge($data,["game"=>$game]));
+        }
+        else
+        {
+            echo "toUpdateInformation:".$currentInformation['id']."\n";
+            //校验原有数据
+            foreach($data as $key => $value)
+            {
+                if(in_array($key,$this->toAppend))
+                {
+                    $t = json_decode($currentInformation[$key],true);
+
+                    foreach($value as $k => $v)
+                    {
+                        if(!in_array($v,$t))
+                        {
+                            $t[] = $v;
+                        }
+                    }
+                    $data[$key] = $t;
+                }
+                if(in_array($key,$this->toJson))
+                {
+                    $value = json_encode($value);
+                }
+                if(isset($currentInformation[$key]) && ($currentInformation[$key] == $value))
+                {
+                    //echo $currentInformation[$key]."-".$value."\n";
+                    //echo $key.":passed\n";
+                    unset($data[$key]);
+                }
+                else
+                {
+                    echo $key.":difference:\n";
+                }
+            }
+            if(count($data))
+            {
+                return $this->updateInformation($currentInformation['id'],$data);
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    public function getInformationCount($params=[])
+    {
+        $information_count =$this;
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $information_count = $information_count->where("game",$params['game']);
+        }
+        $hot=$params['hot']??0;
+        if($hot==1)
+        {
+            $information_count->where("hot",$hot);
+        }
+        if(isset($params['type']))
+        {
+            $types = explode(",",$params['type']);
+
+            $information_count->whereIn("type",$types);
+        }
+        $information_count = $information_count->count();
+        return $information_count;
+    }
+}
