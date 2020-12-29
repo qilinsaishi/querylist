@@ -82,9 +82,10 @@ class HomeController extends Controller
     }
 
     public function index()
-    {$url='https://game.gtimg.cn/images/lol/act/img/js/hero/1.js';
+    {$url='https://apps.game.qq.com/cmc/zmMcnContentInfo?r0=jsonp&source=web_pc&type=0&docid=2581504277095223195&_=1609211418082';
         $client=new ClientServices();
         $data=$client->curlGet($url);
+        $data=curl_get($url);
         dd($data);
 $model=new DefaultConfig();
 $a=$model->getDefaultById(3);dd($a);
