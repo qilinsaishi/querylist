@@ -14,8 +14,8 @@ class lol_qq
             "source"=>['path'=>"",'default'=>"lol_qq"],//来源
             "title"=>['path'=>"sTitle",'default'=>''],//标题
             "content"=>['path'=>"sContent",'default'=>''],//内容
-            "type"=>['path'=>"target",'default'=>1]//类型
-
+            "type"=>['path'=>"target",'default'=>1],//类型
+            "site_time"=>['path'=>"sIdxTime",'default'=>""]//来源站点的时间
             ];
     protected $type = [
         23=>1,//'综合',
