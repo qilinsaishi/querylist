@@ -17,6 +17,7 @@ class kuai8
         $url = $arr['detail']['url'] ?? '';
         $detail_ql=QueryList::get($url);
         $content=$detail_ql->find('.article-detail .a-detail-cont')->html();
+        $author=$detail_ql->find('.article-detail .a-detail-head span:eq(0)')->text();
         $title=$arr['detail']['title'] ?? '';
         $desc=$arr['detail']['desc'] ?? '';
         $img_url=$arr['detail']['img_url'] ?? '';
@@ -28,6 +29,7 @@ class kuai8
             'source_url'=>$url,
             'img_url'=>$img_url,
             'content'=>$content ?? '',
+            'author'=>$author ?? '',
         ];
         if (!empty($res)) {
 
