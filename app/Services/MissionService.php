@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CollectResultModel as CollectModel;
 use App\Models\InformationModel;
+use App\Models\AuthorModel;
 use App\Models\MissionModel as MissionModel;
 use App\Models\TeamModel as TeamModel;
 use App\Models\PlayerModel as PlayerModel;
@@ -93,6 +94,7 @@ class MissionService
         $teamModel = new TeamModel();
         $playerModel = new PlayerModel();
         $informationModel = new InformationModel();
+        $authorModel = new AuthorModel();
         $result_list = $collectModel->getResult(500, $game, $source, $mission_type);
 
         //初始化空的类库列表
@@ -140,6 +142,15 @@ class MissionService
                     }
                     elseif ($result['mission_type'] == "information")
                     {
+                        //if(!isset($processResult['author_id']) || $processResult['author_id']<=0)
+                        {
+                            //保存作者
+                            $author_id = $authorModel->saveAuthor($processResult["author"], $result['source'],$processResult['author_id']??0);
+                            if($author_id>0)
+                            {
+                                $processResult['author_id'] =   $author_id;
+                            }
+                        }
                         $save = $informationModel->saveInformation($result["game"], $processResult);
                     }
                     elseif ($result['mission_type'] == "hero") {

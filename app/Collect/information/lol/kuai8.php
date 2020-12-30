@@ -10,7 +10,17 @@ class kuai8
     //资讯攻略
     protected $data_map =
         [
-        ];
+            "author_id"=>['path'=>"",'default'=>0],//原站点作者ID
+            "author"=>['path'=>"author",'default'=>''],//原站点作者
+            "logo"=>['path'=>"img_url",'default'=>''],//logo
+            "site_id"=>['path'=>"site_id",'default'=>0],//原站点ID
+            "game"=>['path'=>"",'default'=>"lol"],//对应游戏
+            "source"=>['path'=>"",'default'=>"kuai8"],//来源
+            "title"=>['path'=>"title",'default'=>''],//标题
+            "content"=>['path'=>"content",'default'=>''],//内容
+            "type"=>['path'=>"",'default'=>4],//类型
+            "site_time"=>['path'=>"dtime",'default'=>""]//来源站点的时间
+            ];
     public function collect($arr)
     {
         $cdata = [];
@@ -48,6 +58,21 @@ class kuai8
     }
     public function process($arr)
     {
-        var_dump($arr);
+        $t = explode("/",$arr['source_link']);
+        $t2 = explode(".",$t[count($t)-1]);
+        $arr['content']['site_id'] = $t2['0'];
+        $arr['content']['logo'] = getImage($arr['content']['img_url']);
+        $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
+        preg_match($imgpreg,$arr['content']['content'],$imgList);
+        foreach($imgList as $img)
+        {
+            if(substr($img,0,4)=="http")
+            {
+                $src = getImage($img);
+                $arr['content']['content'] = str_replace($img,$src,$arr['content']['content']);
+            }
+        }
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
 }
