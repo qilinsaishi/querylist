@@ -71,6 +71,11 @@ class teamModel extends Model
         {
             $team_count = $team_count->where("game",$params['game']);
         }
+        $hot=$params['hot']??0;
+        if($hot==1)
+        {
+            $team_count->where("hot",$hot);
+        }
         return $team_count->count();
     }
     public function getTeamById($team_id)
