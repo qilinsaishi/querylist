@@ -31,17 +31,18 @@ class Links extends Model
 
     public function getLinkList($params)
     {
-        $keys = $params['keys'] ?? [];
+        $game = $params['game'] ?? '';
         $default_link_list=[];
         $default_field = ['id', 'name', 'url', 'logo','game'];
         $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
         $default_link_list = $this->select($field);
-        if (!empty($keys)) {
-            $default_link_list->whereIn('key', $keys);
-        }
         $pageSizge = $params['page_size'] ?? 3;
         $page = $params['page'] ?? 1;
+        if(!empty($game)){
+            $default_link_list->where('game',$game);
+        }
         $default_link_list = $default_link_list
+
             ->limit($pageSizge)
             ->offset(($page - 1) * $pageSizge)
             ->orderBy("sort")
@@ -67,17 +68,10 @@ class Links extends Model
     public function getLinkCount($params)
     {
         $link_count = $this;
-        $keys = $params['keys'] ?? [];
-        if (!empty($keys)) {
-            if (!empty($keys)) {
-                $link_count = $link_count->whereIn('key', $keys);
-            }
-
+        $game = $params['game'] ?? '';
+        if(!empty($game)){
+            $link_count->where('game',$game);
         }
-        if (isset($params['game'])) {
-            $link_count = $link_count->where("game", $params['game']);
-        }
-
         return $link_count->count();
         //return true;
     }

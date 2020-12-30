@@ -211,12 +211,25 @@ class PlayerModel extends Model
 
     public function getPlayerCount($params=[]){
         $player_count = $this;
-        $keys = $params['keys'] ?? [];
-        if (!empty($keys)) {
-            if (!empty($keys)) {
-                $player_count = $player_count->whereIn('key', $keys);
-            }
-
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $player_count = $player_count->where("game",$params['game']);
+        }
+        //战队名称
+        if(isset($params['player_name']) && strlen($params['player_name'])>=3)
+        {
+            $player_count = $player_count->where("player_name",$params['player_name']);
+        }
+        //战队名称
+        if(isset($params['en_name']) && strlen($params['en_name'])>=3)
+        {
+            $player_count = $player_count->where("en_name",$params['en_name']);
+        }
+        $hot=$params['hot']??0;
+        if($hot==1)
+        {
+            $player_count->where("hot",$hot);
         }
 
         return $player_count->count();
