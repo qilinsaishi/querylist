@@ -56,7 +56,7 @@ class Strategy extends Command
                 foreach ($data as $val){
                     $data = [
                         "asign_to"=>1,
-                        "mission_type"=>'strategy',//攻略
+                        "mission_type"=>'information',//攻略
                         "mission_status"=>1,
                         "game"=>'lol',
                         "source"=>'kuai8',//
@@ -79,7 +79,7 @@ class Strategy extends Command
                 }
             }
         }else{
-            (new oMission())->collect('lol','kuai8','strategy');
+            (new oMission())->collect('lol','kuai8','information');
         }
     }
 }

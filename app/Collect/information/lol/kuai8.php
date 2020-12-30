@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Collect\strategy\lol;
+namespace App\Collect\information\lol;
 
 use App\Libs\ClientServices;
 use QL\QueryList;
 
 class kuai8
 {
+    //资讯攻略
     protected $data_map =
         [
         ];
