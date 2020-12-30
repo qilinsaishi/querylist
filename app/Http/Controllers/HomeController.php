@@ -89,9 +89,9 @@ class HomeController extends Controller
         $data=curl_get($url);dd($data);
         $data=$client->curlGet($url);*/
 
-        for($i=0;$i<=32;$i++){
-            $m=$i+1;
-            $url='http://lol.kuai8.com/gonglue/index_'.$m.'.html';
+        //for($i=0;$i<=32;$i++){
+           // $m=$i+1;
+            //$url='http://lol.kuai8.com/gonglue/index_'.$m.'.html';
             $ql = QueryList::get($url);
             $data=$ql->rules([
                 'title' => ['.con .tit', 'text'],
@@ -100,7 +100,7 @@ class HomeController extends Controller
                 'img_url' => ['.img img', 'src'],
                 'dtime' => ['.con  .time', 'text']
             ])->range('.Cont .news-list li')->queryData();
-            foreach ($data as $val){
+           /* foreach ($data as $val){
                 $data = [
                     "asign_to"=>1,
                     "mission_type"=>'information',//攻略
@@ -121,15 +121,17 @@ class HomeController extends Controller
                         ]
                     ),
                 ];
-            }
-        }exit;
-        print_r($data);exit;
-        /*foreach ($data as &$val){
+            }*/
+        //}//exit;
+        //print_r($data);exit;
+        foreach ($data as &$val){
             $detail_url=$val['link'];
             $detail_ql=QueryList::get($detail_url);
             $content=$detail_ql->find('.article-detail .a-detail-cont')->html();
+            $author=$detail_ql->find('.article-detail .a-detail-head span:eq(0)')->text();print_r($author);exit;
+            $val['author']=$author ?? '';
             $val['content']=$content ?? '';
-        }dd($data);*/
+        }dd($data);
         //$links=$ql->find('.news-list li .con .tit')->texts()->all();//分页
         dd($data);
         $data=curl_get($url);
