@@ -55,6 +55,10 @@ class InformationModel extends Model
         {
             $information_list->where("hot",$hot);
         }
+        if(isset($params['author_id']) && $params['author_id']>0)
+        {
+            $information_list->where("author_id",$params['author_id']);
+        }
         if(isset($params['type']))
         {
             $types = explode(",",$params['type']);
@@ -222,6 +226,10 @@ class InformationModel extends Model
         if($hot==1)
         {
             $information_count->where("hot",$hot);
+        }
+        if(isset($params['author_id']) && $params['author_id']>0)
+        {
+            $information_count->where("author_id",$params['author_id']);
         }
         if(isset($params['type']))
         {
