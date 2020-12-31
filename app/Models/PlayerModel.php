@@ -51,6 +51,11 @@ class PlayerModel extends Model
         {
             $player_list = $player_list->where("game",$params['game']);
         }
+        //所属战队
+        if(isset($params['team_id']) && $params['team_id']>0)
+        {
+            $player_list = $player_list->where("team_id",$params['team_id']);
+        }
         //战队名称
         if(isset($params['player_name']) && strlen($params['player_name'])>=3)
         {
@@ -77,7 +82,7 @@ class PlayerModel extends Model
     }
     public function getPlayerByName($player_name,$game)
     {
-        echo $player_name."-".$game."\n";
+        //echo $player_name."-".$game."\n";
         $player_info =$this->select("*")
                     ->where("player_name",$player_name)
                     ->where("game",$game)
@@ -215,6 +220,11 @@ class PlayerModel extends Model
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
             $player_count = $player_count->where("game",$params['game']);
+        }
+        //所属战队
+        if(isset($params['team_id']) && $params['team_id']>0)
+        {
+            $player_list = $player_count->where("team_id",$params['team_id']);
         }
         //战队名称
         if(isset($params['player_name']) && strlen($params['player_name'])>=3)

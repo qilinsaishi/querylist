@@ -77,7 +77,7 @@ class TeamModel extends Model
     }
     public function getTeamByName($team_name,$game)
     {
-        echo $team_name."-".$game."\n";
+        //echo $team_name."-".$game."\n";
         $team_info =$this->select("*")
                     ->where("team_name",$team_name)
                     ->where("game",$game)

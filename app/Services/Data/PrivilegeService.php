@@ -39,6 +39,17 @@ class PrivilegeService
                 'functionCount' => "getTeamCount",
                 'functionSingle' => "getTeamById",
             ],
+            "team" => [//团队列表
+                'list' => [
+                    ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'cpseo'],
+                    ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'chaofan'],
+                ],
+                'withSource' => 1,
+                'function' => "getTeamById",
+                //'functionCount' => "getTeamCount",
+                'functionSingle' => "getTeamById",
+                'functionProcess' => "processTeam",
+            ],
             "defaultConfig" => [//通用配置
                 'list' => [
                     ['model' => 'App\Models\Admin\DefaultConfig', 'source' => ''],
@@ -55,6 +66,15 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getInformationList",
                 'functionCount' => "getInformationCount",
+                'functionSingle' => "getInformationById",
+            ],
+            "totalTeamInfo" => [//资讯
+                'list' => [
+                    ['model' => 'App\Models\TeamModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getTeamByName",
+                'functionCount' => "",
                 'functionSingle' => "getInformationById",
             ],
             "information" => [//资讯
@@ -568,6 +588,40 @@ class PrivilegeService
         $teamInfo=[];
         if(!empty($data)){
             $data['spellList'] = $modelClass->getSpellByHero(["hero_id"=>$data['id']]);
+        }
+        return $data;
+    }
+    public function processTeam($data, $functionList)
+    {
+        if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['function'])) {
+
+        } else {
+            $f = $this->getFunction(['totalTeamInfo' => []]);
+            if (isset($f['totalTeamInfo']['class'])) {
+                $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
+            }
+        }
+        $modelClass = $functionList["totalTeamInfo"]["class"];
+        $function = $functionList["totalTeamInfo"]['function'];
+        $teamInfo=[];
+        if(!empty($data)){
+            $data['totalTeamInfo'] = $modelClass->getTeamByName($data['team_name'],$data['game']);
+        }
+        if(isset($data['totalTeamInfo']['team_id']))
+        {
+            if (isset($functionList['playerList']) && isset($functionList['playerList']['function'])) {
+
+            } else {
+                $f = $this->getFunction(['playerList' => []]);
+                if (isset($f['playerList']['class'])) {
+                    $functionList["playerList"] = $f['playerList'];
+                }
+            }
+            $modelClass = $functionList["playerList"]["class"];
+            $function = $functionList["playerList"]['function'];
+            if(!empty($data)){
+                $data['playerList'] = $modelClass->$function(['team_id'=>$data['totalTeamInfo']['team_id']]);
+            }
         }
         return $data;
     }
