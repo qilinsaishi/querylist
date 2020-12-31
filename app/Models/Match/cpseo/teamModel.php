@@ -42,7 +42,8 @@ class teamModel extends Model
     ];
     public function getTeamList($params=[])
     {
-        $team_list =$this->select("*");
+        $fields = $params['fields']??"team_id,team_name,logo";
+        $team_list =$this->select(explode(",",$fields));
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $hot=$params['hot']??0;
