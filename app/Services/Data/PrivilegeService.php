@@ -289,6 +289,12 @@ class PrivilegeService
                             {
                                 $functionList[$dataType]['functionSingle'] = "";
                             }
+                            if (isset($priviliegeList[$dataType]['functionProcess'])) {
+                                $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
+                            } else {
+                                $functionList[$dataType]['functionProcess'] = "";
+
+                            }
                         }
                     }
                     //如果没找到
@@ -320,6 +326,12 @@ class PrivilegeService
                                         else
                                         {
                                             $functionList[$dataType]['functionSingle'] = "";
+                                        }
+                                        if (isset($priviliegeList[$dataType]['functionProcess'])) {
+                                            $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
+                                        } else {
+                                            $functionList[$dataType]['functionProcess'] = "";
+
                                         }
                                         //标记为找到
                                         $found = 1;
