@@ -20,8 +20,8 @@ class PrivilegeService
             ],
             "tournament" => [
                 'list' => [
-                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
                 ],
                 'withSource' => 1,
                 'function' => "getTournamentList",
