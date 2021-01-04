@@ -53,6 +53,10 @@ class matchListModel extends Model
         {
             $match_list = where("hot",1);
         }
+        if(isset($params['team_id']) && $params['team_id']>0)
+        {
+            $match_list = $match_list->where("home_id",$params['team_id'])->orWhere("away_id",$params['team_id']);
+        }
         $match_list = $match_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)

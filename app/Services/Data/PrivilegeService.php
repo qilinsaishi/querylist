@@ -622,6 +622,20 @@ class PrivilegeService
             if(!empty($data)){
                 $data['playerList'] = $modelClass->$function(['team_id'=>$data['totalTeamInfo']['team_id']]);
             }
+
+            if (isset($functionList['matchList']) && isset($functionList['matchList']['function'])) {
+
+            } else {
+                $f = $this->getFunction(['matchList' => []]);
+                if (isset($f['matchList']['class'])) {
+                    $functionList["matchList"] = $f['matchList'];
+                }
+            }
+            $modelClass = $functionList["matchList"]["class"];
+            $function = $functionList["matchList"]['function'];
+            if(!empty($data)){
+                $data['matchList'] = $modelClass->$function(['team_id'=>$data['team_id'],'page_size'=>10]);
+            }
         }
         return $data;
     }

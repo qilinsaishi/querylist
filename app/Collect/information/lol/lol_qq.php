@@ -8,7 +8,7 @@ class lol_qq
         [
             "author_id"=>['path'=>"authorID",'default'=>''],//原站点作者ID
             "author"=>['path'=>"sAuthor",'default'=>''],//原站点作者
-            "logo"=>['path'=>"avatar",'default'=>''],//logo
+            "logo"=>['path'=>"sIMG",'default'=>''],//logo
             "site_id"=>['path'=>"iDocID",'default'=>""],//原站点ID
             "game"=>['path'=>"",'default'=>"lol"],//对应游戏
             "source"=>['path'=>"",'default'=>"lol_qq"],//来源
@@ -66,7 +66,7 @@ class lol_qq
     {
         //target=23 ( 23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区')
         $arr['content']['target'] = $this->type[$arr['content']['target']];
-        $arr['content']['avatar'] = getImage($arr['content']['avatar']);
+        $arr['content']['sIMG'] = getImage("http:".$arr['content']['sIMG']);
         $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
         preg_match($imgpreg,$arr['content']['sContent'],$imgList);
         foreach($imgList as $img)
