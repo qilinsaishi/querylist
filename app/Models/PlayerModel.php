@@ -167,7 +167,17 @@ class PlayerModel extends Model
         if(!isset($currentPlayer['player_id']))
         {
             echo "toInsertPlayer:\n";
-            return  $this->insertPlayer(array_merge($data,["game"=>$game]));
+            $insert = $this->insertPlayer(array_merge($data,["game"=>$game]));
+            if($insert)
+            {
+                $return['player_id'] = $insert;
+                $return['result'] = 1;
+            }
+            else
+            {
+                $return['player_id'] = 0;
+                $return['result'] = 0;
+            }
         }
         else
         {

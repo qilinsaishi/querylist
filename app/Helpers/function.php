@@ -300,6 +300,7 @@ if (!function_exists('randStr')) {
 //获取远程图片，并以文件的hash作为文件名保存
 function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type = 0)
 {
+    $start_time = microtime(true);
     $redis = app("redis.connection");
     $fileKey = "file_get_" . $url;
     $currentFile = $redis->get($fileKey);
@@ -362,7 +363,7 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             //$redis->set($fileKey, $save_dir . $new_name);
             //$redis->expire($fileKey, 86400);
         }
-        unset($img, $url);
+        unset($img/*, $url*/);
         $root =  $save_dir . $new_name;
         $upload = (new AliyunService())->upload2Oss([$root]);
         //存储到redis,一天内不再重新获取
@@ -371,11 +372,13 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             $redis->set($fileKey, $upload[0]);
             $redis->expire($fileKey, 86400);
         }
+        echo "process time:".(microtime(true)-$start_time)."\n";
         return $upload[0];
     }
     catch (\Exception $e)
     {
         echo "get img error:".$url."\n";
+        echo "process time:".(microtime(true)-$start_time)."\n";
         return $url;
     }
 
