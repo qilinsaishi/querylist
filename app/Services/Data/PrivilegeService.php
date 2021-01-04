@@ -185,7 +185,7 @@ class PrivilegeService
             ],
             "links" => [//友链
                 'list' => [
-                    ['model' => 'App\Models\Admin\links', 'source' => ''],
+                    ['model' => 'App\Models\Admin\Links', 'source' => ''],
                 ],
                 'withSource' => 0,
                 'function' => "getLinkList",
