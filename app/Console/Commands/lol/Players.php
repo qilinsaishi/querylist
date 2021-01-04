@@ -12,7 +12,7 @@ class Players extends Command
      *
      * @var string
      */
-    protected $signature = 'lol:player';
+    protected $signature = 'lol:player  {operation}';
 
     /**
      * The console command description.
@@ -38,26 +38,30 @@ class Players extends Command
      */
     public function handle()
     {
-        /*$operation = ($this->argument("operation") ?? "insert");
-        $data = [
-            "asign_to" => 1,
-            "mission_type" => 'player',
-            "mission_status" => 1,
-            "game" => 'lol',
-            "source" => 'wanplus',
-            "detail" => json_encode(
-                [
-                    "url" => 'https://www.wanplus.com//lol/player/1246',
-                    "game" => 'lol',//lol
-                    "source" => 'wanplus',
-                    "name" => 'Nuclear',
-                    "position" => 'ADC',
-                    "main_img" => 'https://static.wanplus.com/data/lol/player/1246.png',
-                ]
-            ),
-        ];
-        $insert = (new oMission())->insertMission($data);
-        echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);*/
-        (new oMission())->collect('lol', 'wanplus', 'player');
+        $operation = ($this->argument("operation") ?? "insert");
+        if ($operation == 'insert') {
+            $data = [
+                "asign_to" => 1,
+                "mission_type" => 'player',
+                "mission_status" => 1,
+                "game" => 'lol',
+                "source" => 'wanplus',
+                "detail" => json_encode(
+                    [
+                        "url" => 'https://www.wanplus.com//lol/player/1246',
+                        "game" => 'lol',//lol
+                        "source" => 'wanplus',
+                        "name" => 'Nuclear',
+                        "position" => 'ADC',
+                        "main_img" => 'https://static.wanplus.com/data/lol/player/1246.png',
+                    ]
+                ),
+            ];
+            $insert = (new oMission())->insertMission($data);
+            echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+        }else{
+            (new oMission())->collect('lol', 'wanplus', 'player');
+        }
+
     }
 }
