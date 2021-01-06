@@ -45,7 +45,7 @@ class PlayerModel extends Model
     ];
     public function getPlayerList($params)
     {
-        $fields = $params['fields']??"team_id,team_name,logo";
+        $fields = $params['fields']??"player_id,player_name,logo";
         $player_list =$this->select(explode(",",$fields));
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
