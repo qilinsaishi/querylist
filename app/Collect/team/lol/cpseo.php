@@ -19,7 +19,6 @@ class cpseo
             "race_stat"=>['path'=>"",'default'=>[]],
             "original_source"=>['path'=>"",'default'=>"cpseo"],
             "site_id"=>['path'=>"site_id",'default'=>0],
-
         ];
 
     public function collect($arr)
