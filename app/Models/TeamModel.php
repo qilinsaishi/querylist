@@ -50,7 +50,13 @@ class TeamModel extends Model
     ];
     public function getTeamList($params)
     {
-        $team_list =$this->select("*");
+        $fields = $params['fields']??"team_id,team_name,logo";
+        $team_list =$this->select(explode(",",$fields));
+        //数据来源
+        if(isset($params['source']) && strlen($params['source'])>=2)
+        {
+            $team_list = $team_list->where("original_source",$params['source']);
+        }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
@@ -77,11 +83,25 @@ class TeamModel extends Model
     }
     public function getTeamByName($team_name,$game)
     {
-        //echo $team_name."-".$game."\n";
         $team_info =$this->select("*")
                     ->where("team_name",$team_name)
                     ->where("game",$game)
                     ->get()->first();
+        if(isset($team_info->team_id))
+        {
+            $team_info = $team_info->toArray();
+        }
+        else
+        {
+            $team_info = [];
+        }
+        return $team_info;
+    }
+    public function getTeamById($team_id)
+    {
+        $team_info =$this->select("*")
+            ->where("team_id",$team_id)
+            ->get()->first();
         if(isset($team_info->team_id))
         {
             $team_info = $team_info->toArray();
@@ -128,6 +148,7 @@ class TeamModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
+        unset($data['original_source']);
         return $this->where('team_id',$team_id)->update($data);
     }
 
@@ -156,6 +177,16 @@ class TeamModel extends Model
         }
         else
         {
+            echo "source:".$currentTeam['original_source'] ."-". $data['original_source']."\n";
+            //非同来源不做覆盖
+            if($currentTeam['original_source'] != $data['original_source'])
+            {
+                echo "differentSorce4Team:pass\n";
+                $return['team_id'] = $currentTeam['team_id'];
+                $return['result'] = 1;
+                return $return;
+            }
+            unset($data['original_source']);
             $return['team_id'] = $currentTeam['team_id'];
             echo "toUpdateTeam:".$currentTeam['team_id']."\n";
             //校验原有数据
@@ -199,5 +230,30 @@ class TeamModel extends Model
                 return $return;
             }
         }
+    }
+    public function getTeamCount($params=[])
+    {
+        $team_count =$this;
+        //数据来源
+        if(isset($params['source']) && strlen($params['source'])>=2)
+        {
+            $team_count = $team_count->where("original_source",$params['source']);
+        }
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $team_count = $team_count->where("game",$params['game']);
+        }
+        //战队名称
+        if(isset($params['team_name']) && strlen($params['team_name'])>=3)
+        {
+            $team_count = $team_count->where("team_name",$params['team_name']);
+        }
+        //战队名称
+        if(isset($params['en_name']) && strlen($params['en_name'])>=3)
+        {
+            $team_count = $team_count->where("en_name",$params['en_name']);
+        }
+        return $team_count->count();
     }
 }

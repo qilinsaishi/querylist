@@ -39,6 +39,15 @@ class PrivilegeService
                 'functionCount' => "getTeamCount",
                 'functionSingle' => "getTeamById",
             ],
+            "totalTeamList" => [//团队列表
+                'list' => [
+                    ['model' => 'App\Models\TeamModel'],
+                ],
+                'withSource' => 0,
+                'function' => "getTeamList",
+                'functionCount' => "getTeamCount",
+                'functionSingle' => "getTeamById",
+            ],
             "team" => [//团队列表
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'cpseo'],
