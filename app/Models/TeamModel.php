@@ -48,6 +48,9 @@ class TeamModel extends Model
     protected $toAppend = [
         "aka"
     ];
+    protected $keep = [
+      "original_source","team_history"
+    ];
     public function getTeamList($params)
     {
         $fields = $params['fields']??"team_id,team_name,logo";
@@ -148,7 +151,13 @@ class TeamModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
-        unset($data['original_source']);
+        foreach($this->keep as $key)
+        {
+            if(isset($data[$key]))
+            {
+                unset($data[$key]);
+            }
+        }
         return $this->where('team_id',$team_id)->update($data);
     }
 
