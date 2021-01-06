@@ -94,6 +94,7 @@ class PrivilegeService
                 'function' => "getTeamById",
                 'functionCount' => "getTeamCount",
                 'functionSingle' => "getTeamById",
+                'functionProcess' => "processTotalTeam",
             ],
             "totalPlayerInfo" => [//队员总表
                 'list' => [
@@ -662,6 +663,22 @@ class PrivilegeService
             $function = $functionList["matchList"]['function'];
             if(!empty($data)){
                 $data['matchList'] = $modelClass->$function(['team_id'=>$data['team_id'],'page_size'=>10]);
+            }
+        }
+        return $data;
+    }
+    public function processTotalTeam($data, $functionList)
+    {
+        if(isset($data['team_id']))
+        {
+            $f = $this->getFunction(['totalPlayerList' => []]);
+            if (isset($f['totalPlayerList']['class'])) {
+                $functionList["totalPlayerList"] = $f['totalPlayerList'];
+            }
+            $modelClass = $functionList["totalPlayerList"]["class"];
+            $function = $functionList["totalPlayerList"]['function'];
+            if(!empty($data)){
+                $data['playerList'] = $modelClass->$function(['team_id'=>$data['team_id']]);
             }
         }
         return $data;
