@@ -39,6 +39,24 @@ class PrivilegeService
                 'functionCount' => "getTeamCount",
                 'functionSingle' => "getTeamById",
             ],
+            "totalTeamList" => [//团队总列表
+                'list' => [
+                    ['model' => 'App\Models\TeamModel'],
+                ],
+                'withSource' => 0,
+                'function' => "getTeamList",
+                'functionCount' => "getTeamCount",
+                'functionSingle' => "getTeamById",
+            ],
+            "totalPlayerList" => [//队员总列表
+                'list' => [
+                    ['model' => 'App\Models\PlayerModel'],
+                ],
+                'withSource' => 0,
+                'function' => "getPlayerList",
+                'functionCount' => "getPlayerCount",
+                'functionSingle' => "getPlayerById",
+            ],
             "team" => [//团队列表
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'cpseo'],
@@ -68,14 +86,23 @@ class PrivilegeService
                 'functionCount' => "getInformationCount",
                 'functionSingle' => "getInformationById",
             ],
-            "totalTeamInfo" => [//资讯
+            "totalTeamInfo" => [//战队信息
                 'list' => [
                     ['model' => 'App\Models\TeamModel', 'source' => ''],
                 ],
                 'withSource' => 0,
-                'function' => "getTeamByName",
-                'functionCount' => "",
-                'functionSingle' => "getInformationById",
+                'function' => "getTeamById",
+                'functionCount' => "getTeamCount",
+                'functionSingle' => "getTeamById",
+            ],
+            "totalPlayerInfo" => [//队员总表
+                'list' => [
+                    ['model' => 'App\Models\PlayerModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getPlayerById",
+                'functionCount' => "getPlayerCount",
+                'functionSingle' => "getPlayerById",
             ],
             "information" => [//资讯
                 'list' => [

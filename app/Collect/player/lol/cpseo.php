@@ -19,6 +19,8 @@ class cpseo
             "stat"=>['path'=>'','default'=>[]],
             "team_id"=>['path'=>'team_id','default'=>0],
             "logo"=>['path'=>'logo','default'=>0],
+            "original_source"=>['path'=>"",'default'=>"cpseo"],
+            "site_id"=>['path'=>"site_id",'default'=>0],
             ];
 
     public function collect($arr)
@@ -62,6 +64,8 @@ class cpseo
          * "intro":"2020-11-17，由韩国明星金希澈投资的LCK联赛战队hyFresh Blade今日官宣两名选手加入。" //简介
          * }
          */
+        $t = explode("/",$arr['source_link']);
+        $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         $arr['content']['aka'] = explode(",",$arr['content']['real_name']);
         //     '/^[\x7f-\xff]+$/' 全是中文
         if(preg_match('/[\x7f-\xff]/', $arr['content']['nickname']))

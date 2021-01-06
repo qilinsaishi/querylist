@@ -349,10 +349,18 @@ class MissionService
                         if ($save['result'] > 0) {
                             $collectModel->updateStatus($result['id'], ['status' => 2]);
                         }
+                        else
+                        {
+                            $collectModel->updateStatus($result['id'], ['status' => 3]);
+                        }
                     } else {
                         echo "save:" . $save . "\n";
                         if ($save > 0) {
                             $collectModel->updateStatus($result['id'], ['status' => 2]);
+                        }
+                        else
+                        {
+                            $collectModel->updateStatus($result['id'], ['status' => 3]);
                         }
                     }
                 }

@@ -20,6 +20,8 @@ class wanplus
             "logo"=>['path'=>"logo",'default'=>''],
             "description"=>['path'=>"",'default'=>"暂无"],
             "race_stat"=>['path'=>"raceStat",'default'=>[]],
+            "original_source"=>['path'=>"",'default'=>"wanplus"],
+            "site_id"=>['path'=>"site_id",'default'=>0],
         ];
     public function collect($arr)
     {
@@ -50,6 +52,8 @@ class wanplus
     }
     public function process($arr)
     {
+        $t = explode("/",$arr['source_link']);
+        $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         //处理胜平负
         $t = explode("/",$arr['content']['military_exploits']??'');
         $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
@@ -88,7 +92,6 @@ class wanplus
                     'detail' => json_encode(['url' => $member['link_url'],
                         'name' => $member['name'],
                         'position' => $member['position']??"",
-
                         'logo' => $member['main_img'],
                         'team_id' => $team_id,
                         'current' => 0

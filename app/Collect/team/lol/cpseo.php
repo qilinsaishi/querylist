@@ -14,9 +14,11 @@ class cpseo
             "location"=>['path'=>"baseInfo.area","default"=>"未知"],
             "established_date"=>['path'=>"baseInfo.create_time",'default'=>"未知"],
             "coach"=>['path'=>"",'default'=>"暂无"],
-            "logo"=>['path'=>"logo",'default'=>''],
+            "logo"=>['path'=>"baseInfo.logo",'default'=>''],
             "description"=>['path'=>"baseInfo.intro",'default'=>"暂无"],
             "race_stat"=>['path'=>"",'default'=>[]],
+            "original_source"=>['path'=>"",'default'=>"cpseo"],
+            "site_id"=>['path'=>"site_id",'default'=>0],
         ];
 
     public function collect($arr)
@@ -60,6 +62,8 @@ class cpseo
          * ]
          * }
          */
+        $t = explode("/",$arr['source_link']);
+        $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         if(strlen($arr['content']['baseInfo']['area'])>10)
         {
             unset($arr['content']['baseInfo']['area']);

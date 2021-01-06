@@ -45,11 +45,17 @@ class PlayerModel extends Model
     ];
     public function getPlayerList($params)
     {
-        $player_list =$this->select("*");
+        $fields = $params['fields']??"team_id,team_name,logo";
+        $player_list =$this->select(explode(",",$fields));
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
             $player_list = $player_list->where("game",$params['game']);
+        }
+        //数据来源
+        if(isset($params['source']) && strlen($params['source'])>=2)
+        {
+            $player_list = $player_list->where("original_source",$params['source']);
         }
         //所属战队
         if(isset($params['team_id']) && $params['team_id']>0)
@@ -140,6 +146,7 @@ class PlayerModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
+        unset($data['original_source']);
         return $this->where('player_id',$player_id)->update($data);
     }
 
@@ -181,6 +188,15 @@ class PlayerModel extends Model
         }
         else
         {
+            echo "source:".$currentPlayer['original_source'] ."-". $data['original_source']."\n";
+            //非同来源不做覆盖
+            if($currentPlayer['original_source'] != $data['original_source'])
+            {
+                echo "differentSorce4Team:pass\n";
+                $return['player_id'] = $currentPlayer['player_id'];
+                $return['result'] = 1;
+                return $return;
+            }
             echo "toUpdatePlayer:".$currentPlayer['player_id']."\n";
             //校验原有数据
             foreach($data as $key => $value)
@@ -230,6 +246,11 @@ class PlayerModel extends Model
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
             $player_count = $player_count->where("game",$params['game']);
+        }
+        //数据来源
+        if(isset($params['source']) && strlen($params['source'])>=2)
+        {
+            $player_count = $player_count->where("original_source",$params['source']);
         }
         //所属战队
         if(isset($params['team_id']) && $params['team_id']>0)
