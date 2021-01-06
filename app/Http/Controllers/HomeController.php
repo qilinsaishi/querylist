@@ -93,6 +93,7 @@ class HomeController extends Controller
            // $m=$i+1;
             //$url='http://lol.kuai8.com/gonglue/index_'.$m.'.html';
             $ql = QueryList::get($url);
+            $imgs=$ql->find('.Cont .news-list li img')->attrs('data-original');//print_r($imgs);exit;
             $data=$ql->rules([
                 'title' => ['.con .tit', 'text'],
                 'desc' => ['.con  .txt', 'text'],
@@ -100,7 +101,7 @@ class HomeController extends Controller
                 'img_url' => ['.img img', 'src'],
                 'dtime' => ['.con  .time', 'text']
             ])->range('.Cont .news-list li')->queryData();
-           /* foreach ($data as $val){
+           foreach ($data as $key=>$val){
                 $data = [
                     "asign_to"=>1,
                     "mission_type"=>'information',//攻略
@@ -115,15 +116,15 @@ class HomeController extends Controller
                             "source"=>'kuai8',//资讯
                             "title"=>$val['title'] ?? '',
                             "desc"=>$val['desc'] ?? '',
-                            "img_url"=>$val['img_url'] ?? '',
+                            "img_url"=>$imgs[$key] ?? '',
                             "dtime"=>$val['dtime'] ?? '',
 
                         ]
                     ),
                 ];
-            }*/
+            }
         //}//exit;
-        //print_r($data);exit;
+        print_r($data);exit;
         foreach ($data as &$val){
             $detail_url=$val['link'];
             $detail_ql=QueryList::get($detail_url);
