@@ -84,7 +84,7 @@ class Site extends Model
     public function getSiteById($game)
     {
 
-        $get_site_info = $this->select("id","name","title","keywords","description","content")
+        $get_site_info = $this->select("id","name","title","logo","keywords","description","content")
             ->where(["game"=>$game,'status'=>0])->orderBy("sort","desc")->first();
         if (isset($get_site_info->id)) {
             $get_site_info = $get_site_info->toArray();
