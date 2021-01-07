@@ -83,8 +83,25 @@ class HomeController extends Controller
 
     public function index()
     {
-        $url='http://lol.kuai8.com/gonglue/index_1.html';
+        //攻略
+        $client=new ClientServices();
+        $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=1&pagesize=15&order=sIdxTime&_=1610014039887';
+        $refeerer = 'https://pvp.qq.com/web201605/searchResult.shtml';
 
+        $headers = [
+            'Referer'  => $refeerer,
+            'Accept' => 'application/json',
+        ];
+        $data=$client->curlGet($url,'',$headers);print_r($data);exit;
+
+       //详情：$detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=497272&&_=1610017024624';
+       // $url='http://lol.kuai8.com/gonglue/index_1.html';
+
+        $pageData = curl_get($url,$refeerer);print_r($pageData);exit;
+
+        foreach($pageData['msg']['result'] as $val) {
+            $detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id='.$val['iNewsId'];
+        }
        /* $client=new ClientServices();
         $data=curl_get($url);dd($data);
         $data=$client->curlGet($url);*/

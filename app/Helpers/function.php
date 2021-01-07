@@ -7,7 +7,7 @@ function curl_get($url, $referer = '')
 
     $header = array(
         'Accept: application/json',
-        //'Referer: '.$referer,        'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'
+        //'Referer: '.$referer,
     );
     if ($referer) {
         array_push($header, $referer);
@@ -36,7 +36,7 @@ function curl_get($url, $referer = '')
     $headers = substr($data, 0, $header_size);
     $body = substr($data, $header_size);
 
-
+print_r($data);exit;
     if(strpos($data,'if(!LOLsummonerjs)var LOLsummonerjs=') !==false){
         $data=str_replace('if(!LOLsummonerjs)var LOLsummonerjs=','',$data);
         $data=str_replace(';','',$data);
@@ -44,6 +44,10 @@ function curl_get($url, $referer = '')
     if(strpos($data,'callback(') !==false){
         $data=str_replace('callback(','',$data);
         $data=str_replace(');','',$data);
+    }
+    if(strpos($data,'searchObj=') !==false){
+        $data=str_replace('var searchObj=','',$data);
+        $data=str_replace(';','',$data);
     }
 
 

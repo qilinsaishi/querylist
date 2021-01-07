@@ -126,7 +126,7 @@ class pvp_qq
     public function getData($url, $itemId)
     {
 
-        $html = iconv('gb2312', 'utf-8', file_get_contents($url));
+        $html = iconv('gbk', 'utf-8', file_get_contents($url));
         $ql = QueryList::html($html);
 
         //皮肤

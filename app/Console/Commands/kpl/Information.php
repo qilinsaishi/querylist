@@ -39,35 +39,34 @@ class Information extends Command
     public function handle()
     {
         $operation = ($this->argument("operation")??"insert");
+        $type=1764;//1761=>新闻,1762=>公告,1763=>活动,1764=>赛事
         //获取分页总数和每页条数
         if($operation=='insert'){
 
-
-            $lastPage=99;
+            $lastPage=49;
             for ($i=0;$i<=$lastPage;$i++){
                 $m=$i+1;
-                $url = 'https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page='.$m.'&pagesize=15';
-                $refeerer = 'Referer: https://pvp.qq.com/web201605/searchResult.shtml';
-                $pageData = curl_get($url, $refeerer);
+
+                $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&order=sIdxTime&r0=cors&type=iTarget&source=app_news_search&pagesize=12&page='.$m.'&id='.$type;
+                $pageData = curl_get($url);
                 $cdata=$pageData['msg']['result'] ?? [];
                 if($cdata){
                     foreach ($cdata as $key=>$val){
-                        $refeerer_detail ='Referer: https://pvp.qq.com/web201605/newsDetail.shtml?G_Biz='.$val['iBiz'].'&tid='.$val['iNewsId'];
-                        $detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id='.$val['iNewsId'];
+
+                        $detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id='.$val['iNewsId'];
                         $data = [
                             "asign_to"=>1,
                             "mission_type"=>'information',//资讯
                             "mission_status"=>1,
                             "game"=>'kpl',
                             "source"=>'pvp_qq',//
-                            'title'=>'',
+                            'title'=>$val['sTitle'] ?? '',
                             "detail"=>json_encode(
                                 [
                                     "url"=>$detail_url,
-                                    "refeerer_detail"=>$refeerer_detail,
                                     "game"=>'kpl',//王者荣耀
                                     "source"=>'pvp_qq',//资讯
-
+                                    'type'=>$type,//1761=>新闻,1762=>公告,1763=>活动,1764=>赛事
                                 ]
                             ),
                         ];
