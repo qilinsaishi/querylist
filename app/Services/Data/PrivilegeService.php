@@ -48,6 +48,16 @@ class PrivilegeService
                 'functionCount' => "getTeamCount",
                 'functionSingle' => "getTeamById",
             ],
+            "totalTeamInfo" => [//团队总列表
+                'list' => [
+                    ['model' => 'App\Models\TeamModel'],
+                ],
+                'withSource' => 0,
+                'function' => "getTeamById",
+                'functionCount' => "getTeamCount",
+                'functionSingle' => "getTeamById",
+                'functionProcess' => "processTotalTeam"
+            ],
             "totalPlayerList" => [//队员总列表
                 'list' => [
                     ['model' => 'App\Models\PlayerModel'],
@@ -85,16 +95,6 @@ class PrivilegeService
                 'function' => "getInformationList",
                 'functionCount' => "getInformationCount",
                 'functionSingle' => "getInformationById",
-            ],
-            "totalTeamInfo" => [//战队信息
-                'list' => [
-                    ['model' => 'App\Models\TeamModel', 'source' => ''],
-                ],
-                'withSource' => 0,
-                'function' => "getTeamById",
-                'functionCount' => "getTeamCount",
-                'functionSingle' => "getTeamById",
-                'functionProcess' => "processTotalTeam",
             ],
             "totalPlayerInfo" => [//队员总表
                 'list' => [
@@ -220,13 +220,20 @@ class PrivilegeService
                 'functionCount' => "getLinkCount",
                 'functionSingle' => "getLinkById",
             ],
-            "gameConfig" => [//lol英雄详情
+            "gameConfig" => [//lol游戏配置
                 'list' => [
                     ['model' => 'App\Models\Admin\Site', 'source' => ''],
                 ],
                 'withSource' => 0,
                 'function' => "getSiteById",
                 'functionSingle' => "getSiteById",
+            ],
+            "keywordMapList" => [//关键字对应
+                'list' => [
+                    ['model' => 'App\Models\KeywordMapModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getList",
             ],
 
 

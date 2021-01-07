@@ -68,4 +68,37 @@ class KeywordMapModel extends Model
         }
         return;
     }
+    public function getList($params)
+    {
+        $fields = $params['fields']??"source_id,source_type,content_id,content_type,count";
+        $keyword_list =$this->select(explode(",",$fields));
+        //目标ID
+        if(isset($params['content_id']) && ($params['content_id'])>0)
+        {
+            $keyword_list = $keyword_list->where("content_id",$params['content_id']);
+        }
+        //来源ID
+        if(isset($params['source_id']) && ($params['source_id'])>0)
+        {
+            $keyword_list = $keyword_list->where("source_id",$params['source_id']);
+        }
+        //目标类型
+        if(isset($params['content_type']) && ($params['content_type'])>0)
+        {
+            $keyword_list = $keyword_list->where("content_type",$params['content_type']);
+        }
+        //来源类型
+        if(isset($params['source_type']) && ($params['source_type'])>0)
+        {
+            $keyword_list = $keyword_list->where("source_type",$params['source_type']);
+        }
+        $pageSizge = $params['page_size']??3;
+        $page = $params['page']??1;
+        $keyword_list = $keyword_list
+            ->limit($pageSizge)
+            ->offset(($page-1)*$pageSizge)
+            ->orderBy("content_time","desc")
+            ->get()->toArray();
+        return $keyword_list;
+    }
 }
