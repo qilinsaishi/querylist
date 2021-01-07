@@ -294,14 +294,14 @@ class PlayerModel extends Model
     {
         $keywords = [];
         $playerList = $this->getPlayerList(["game"=>$game,"fields"=>"player_id,player_name,en_name,aka","page_size"=>10000]);
-        foreach($playerList as $player_id => $player_info)
+        foreach($playerList as $player_info)
         {
             $t = array_unique(array_merge([$player_info['player_name']],[$player_info['en_name']],json_decode($player_info['aka'])));
             foreach($t as $value)
             {
                 if(trim($value) != "" && !isset($keywords[trim($value)]))
                 {
-                    $keywords[trim($value)] = $player_id;
+                    $keywords[trim($value)] = $player_info['player_id'];
                 }
             }
         }

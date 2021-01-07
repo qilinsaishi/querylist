@@ -15,7 +15,7 @@ class KeywordService
         $informationModel = (new InformationModel());
         $keywordMapModel = (new KeywordMapModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["keywords"=>1,"fields"=>"content,id,create_time","page_size"=>200]);
+        $informationList = $informationModel->getInformationList(["keywords"=>1,"fields"=>"content,id,create_time","page_size"=>300]);
         $teamKeywords = $this->teamKeywords($game,1);
         $playerKeywords = $this->playerKeywords($game,1);
         foreach($informationList as $information)
