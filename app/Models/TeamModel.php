@@ -115,6 +115,21 @@ class TeamModel extends Model
         }
         return $team_info;
     }
+    public function getTeamBySiteId($team_id)
+    {
+        $team_info =$this->select("*")
+            ->where("site_id",$team_id)
+            ->get()->first();
+        if(isset($team_info->team_id))
+        {
+            $team_info = $team_info->toArray();
+        }
+        else
+        {
+            $team_info = [];
+        }
+        return $team_info;
+    }
     public function insertTeam($data)
     {
         foreach($this->attributes as $key => $value)
@@ -269,14 +284,14 @@ class TeamModel extends Model
     {
         $keywords = [];
         $teamList = $this->getTeamList(["game"=>$game,"fields"=>"team_id,team_name,en_name,aka","page_size"=>10000]);
-        foreach($teamList as $team_id => $team_info)
+        foreach($teamList as $team_info)
         {
             $t = array_unique(array_merge([$team_info['team_name']],[$team_info['en_name']],json_decode($team_info['aka'])));
             foreach($t as $value)
             {
                 if(trim($value) != "" && !isset($keywords[trim($value)]))
                 {
-                    $keywords[trim($value)] = $team_id;
+                    $keywords[trim($value)] = $team_info['team_id'];
                 }
             }
         }

@@ -8,7 +8,7 @@ class RedisService
     public function getCacheConfig()
     {
         $cacheConfig = [
-            "matchList" => [
+            "matchList1" => [
                 'prefix'=>"matchList",
                 'expire'=>3600,
             ],

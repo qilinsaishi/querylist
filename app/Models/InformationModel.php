@@ -68,8 +68,12 @@ class InformationModel extends Model
         if(isset($params['type']))
         {
             $types = explode(",",$params['type']);
-
             $information_list->whereIn("type",$types);
+        }
+        if(isset($params['ids']))
+        {
+            //$types = explode(",",$params['type']);
+            $information_list->whereIn("id",$params['ids']);
         }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
@@ -226,7 +230,7 @@ class InformationModel extends Model
         //是否需要处理关键字
         if(isset($params['keywords']))
         {
-            $information_list = $information_list->where("keywords",$params['keywords']>0?1:0);
+            $information_count = $information_count->where("keywords",$params['keywords']>0?1:0);
         }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
@@ -247,6 +251,11 @@ class InformationModel extends Model
             $types = explode(",",$params['type']);
 
             $information_count->whereIn("type",$types);
+        }
+        if(isset($params['ids']))
+        {
+            //$types = explode(",",$params['type']);
+            $information_count->whereIn("id",$params['ids']);
         }
         $information_count = $information_count->count();
         return $information_count;
