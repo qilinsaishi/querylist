@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\InformationModel;
+use App\Models\KeywordMapModel;
 use App\Models\TeamModel as TeamModel;
 use App\Models\PlayerModel as PlayerModel;
 
@@ -12,8 +13,9 @@ class KeywordService
     public function information($game = "")
     {
         $informationModel = (new InformationModel());
+        $keywordMapModel = (new KeywordMapModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["keywords"=>1,"fields"=>"content,id","page_size"=>200]);
+        $informationList = $informationModel->getInformationList(["keywords"=>1,"fields"=>"content,id,create_time","page_size"=>200]);
         $teamKeywords = $this->teamKeywords($game,1);
         $playerKeywords = $this->playerKeywords($game,1);
         foreach($informationList as $information)
@@ -44,11 +46,15 @@ class KeywordService
             {
                 $result[$information['id']]['player'] = $player;
             }
+            $informationModel->updateInformation($information['id'],['keywords'=>0,'keywords_list'=> $result[$information['id']]]);
+            $keywordMapModel->saveMap($information['id'],"information", $result[$information['id']],$information['create_time']);
         }
+        /*
         foreach($result as $id => $keywordsList)
         {
-            $informationModel->updateInformation($id,['keywords'=>0,'keywords_list'=>$keywordsList]);
+
         }
+        */
     }
 
     public function teamKeywords($game,$force = 0)
