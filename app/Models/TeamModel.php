@@ -178,7 +178,8 @@ class TeamModel extends Model
 
     public function saveTeam($game,$data)
     {
-        $return  = ['team_id'=>0,"result"=>0];
+        $return  = ['team_id'=>0,"result"=>0,'site_id'=>0];
+        $site_id = $data['site_id']??0;
         $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
         $data['team_name'] = trim($data['team_name']);
         $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
@@ -198,6 +199,8 @@ class TeamModel extends Model
         {
             $return['team_id'] = $this->insertTeam(array_merge($data,["game"=>$game]));
             $return['result'] =  $return['team_id']?1:0;
+            $return['site_id'] =  $return['team_id']?$data['site_id']:0;
+
         }
         else
         {
@@ -207,6 +210,7 @@ class TeamModel extends Model
             {
                 echo "differentSorce4Team:pass\n";
                 $return['team_id'] = $currentTeam['team_id'];
+                $return['site_id'] = $currentTeam['site_id'];
                 $return['result'] = 1;
                 return $return;
             }
@@ -246,11 +250,13 @@ class TeamModel extends Model
             if(count($data))
             {
                 $return['result'] = $this->updateTeam($currentTeam['team_id'],$data);
+                $return['site_id'] = $site_id;
                 return $return;
             }
             else
             {
                 $return['result'] = 1;
+                $return['site_id'] = $site_id;
                 return $return;
             }
         }

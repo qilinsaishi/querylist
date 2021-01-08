@@ -655,7 +655,7 @@ class PrivilegeService
             $modelClass = $functionList["playerList"]["class"];
             $function = $functionList["playerList"]['function'];
             if(!empty($data)){
-                $data['playerList'] = $modelClass->$function(['team_id'=>$data['totalTeamInfo']['team_id']]);
+                $data['playerList'] = $modelClass->$function(['team_id'=>$data['totalTeamInfo']['site_id']]);
             }
 
             if (isset($functionList['matchList']) && isset($functionList['matchList']['function'])) {

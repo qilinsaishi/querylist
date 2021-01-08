@@ -122,7 +122,7 @@ class MatchListService
                         print_r($save);
                         echo "-----save:\n";
                         if (method_exists($class, "processMemberList") && isset($save['team_id']) && intval($save['team_id'])>0) {
-                            $missionList = $class->processMemberList($save['team_id'], $result);
+                            $missionList = $class->processMemberList($save['site_id'], $result);
                             foreach ($missionList as $mission) {
                                 $mission = array_merge($mission, ['title' => $mission['title'], 'game' => $result['game'], 'connect_mission_id' => $result['mission_id'], 'source' => $result['source'], 'asign_to' => 1]);
                                 $insert = $missionModel->insertMission($mission);
