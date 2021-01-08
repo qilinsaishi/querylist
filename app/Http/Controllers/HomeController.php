@@ -85,16 +85,23 @@ class HomeController extends Controller
     {
         //攻略
         $client=new ClientServices();
-        $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=1&pagesize=15&order=sIdxTime&_=1610014039887';
+        $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=1&pagesize=15&order=sIdxTime&_='.msectime();
         $refeerer = 'https://pvp.qq.com/web201605/searchResult.shtml';
 
         $headers = [
             'Referer'  => $refeerer,
             'Accept' => 'application/json',
         ];
-        $data=$client->curlGet($url,'',$headers);print_r($data);exit;
-
-       //详情：$detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=497272&&_=1610017024624';
+        $data=$client->curlGet($url,'',$headers);//print_r($data['msg']['result']);exit;
+        $result=$data['msg']['result'] ?? [];
+        if($result){
+            foreach ($result as $val){
+                $detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id='.$val['iNewsId'].'&&_='.msectime();
+                $cdata=curl_get($detail_url);
+                print_r($cdata);exit;
+            }
+        }
+        //详情：$detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=497272&&_='.msectime();
        // $url='http://lol.kuai8.com/gonglue/index_1.html';
 
         $pageData = curl_get($url,$refeerer);print_r($pageData);exit;

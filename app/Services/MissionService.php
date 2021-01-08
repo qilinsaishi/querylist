@@ -69,7 +69,7 @@ class MissionService
                     }
                 }
                 //随机等待
-                $sleep = rand(10, 20);
+                $sleep = rand(5, 10);
                 sleep($sleep);
                 echo $sleep . "\n";
             }
