@@ -53,7 +53,7 @@ class TeamModel extends Model
     ];
     public function getTeamList($params)
     {
-        $fields = $params['fields']??"team_id,team_name,logo";
+        $fields = $params['fields']??"team_id,team_name,logo,team_history";
         $team_list =$this->select(explode(",",$fields));
         //数据来源
         if(isset($params['source']) && strlen($params['source'])>=2)
@@ -82,6 +82,9 @@ class TeamModel extends Model
             ->offset(($page-1)*$pageSizge)
             ->orderBy("team_id")
             ->get()->toArray();
+        foreach ($team_list as &$val){
+            $val['team_history']=htmlspecialchars_decode($val['team_history']);
+        }
         return $team_list;
     }
     public function getTeamByName($team_name,$game)
