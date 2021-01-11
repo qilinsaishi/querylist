@@ -13,7 +13,7 @@ class CpseoEvent extends Command
      *
      * @var string
      */
-    protected $signature = 'command:seo_event {operation}';
+    protected $signature = 'command:seo_event  {operation} {game} {mission_type} {source}';
 
     /**
      * The console command description.
@@ -39,15 +39,19 @@ class CpseoEvent extends Command
      */
     public function handle()
     {
-        $mission_type='event';
+        /*$mission_type='event';
         $game='lol';
         $source='cpseo';
-        $count=3;
+        $count=3;*/
+        $game = ($this->argument("game")??"");
+        $mission_type = ($this->argument("mission_type")??"");
+        $source = ($this->argument("source")??"");
+        $count=1;
         $operation = ($this->argument("operation")??"insert");
         if($operation=='insert'){
             for ($i=0;$i<=$count;$i++){
                 $m=$i+1;
-                $url='http://www.2cpseo.com/events/lol/p-'.$m;
+                $url='http://www.2cpseo.com/events/kog/p-'.$m;
                 $ql = QueryList::get($url);
                 $links=$ql->find('.versus a')->attrs('href')->all();
                 if($links){
