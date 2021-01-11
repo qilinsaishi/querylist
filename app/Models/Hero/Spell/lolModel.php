@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Models\Match\chaofan;
+namespace App\Models\Hero\Spell;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
-class teamModel extends Model
+class lolModel extends Model
 {
-    protected $table = "chaofan_team_info";
-    //protected $primaryKey = "team_id";
+    protected $table = "lol_hero_spell_info";
+    protected $primaryKey = "spell_id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -34,69 +36,43 @@ class teamModel extends Model
      * @var array
      */
     protected $attributes = [
+        "data"=>[]
     ];
     protected $toJson = [
+        "data"
     ];
     protected $toAppend = [
     ];
-    public function getTeamList($params=[])
+    public function getSpellByHero($params)
     {
-        $fields = $params['fields']??"team_id,team_name,logo";
-        $team_list =$this->select(explode(",",$fields));
-        $pageSizge = $params['page_size']??3;
+        $spell_list =$this->select("*");
+        $pageSizge = $params['page_size']??20;
         $page = $params['page']??1;
-        if(isset($params['game']))
+        if(isset($params['hero_id']) && $params['hero_id']>0)
         {
-            $team_list = $team_list->where("game",$params['game']);
+            $spell_list = $spell_list->where("hero_id",$params['hero_id']);
         }
-        $team_list = $team_list->orderBy("team_id")
-            ->limit($pageSizge)
+        $spell_list = $spell_list->orderBy("spell_id") ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
             ->get()->toArray();
-        return $team_list;
+        return $spell_list;
     }
-    public function getTeamCount($params=[])
+    public function getSpellByName($spell_name)
     {
-        $team_count =$this;
-        if(isset($params['game']))
+        $spell_info =$this->select("*")
+                    ->where("spell_name",$spell_name)
+                    ->get()->first();
+        if(isset($spell_info->spell_id))
         {
-            $team_count = $team_count->where("game",$params['game']);
-        }
-        return $team_count->count();
-    }
-
-    public function getTeamByName($team_name,$game)
-    {
-        $team_info =$this->select("*")
-            ->where("team_name",$team_name)
-            ->where("game",$game)
-            ->get()->first();
-        if(isset($team_info->team_id))
-        {
-            $team_info = $team_info->toArray();
+            $spell_info = $spell_info->toArray();
         }
         else
         {
-            $team_info = [];
+            $spell_info = [];
         }
-        return $team_info;
+        return $spell_info;
     }
-    public function getTeamById($team_id)
-    {
-        $team_info =$this->select("*")
-            ->where("team_id",$team_id)
-            ->get()->first();
-        if(isset($team_info->team_id))
-        {
-            $team_info = $team_info->toArray();
-        }
-        else
-        {
-            $team_info = [];
-        }
-        return $team_info;
-    }
-    public function insertTeam($data)
+    public function insertSpell($data)
     {
         foreach($this->attributes as $key => $value)
         {
@@ -125,35 +101,33 @@ class teamModel extends Model
         return $this->insertGetId($data);
     }
 
-    public function updateTeam($team_id=0,$data=[])
+    public function updateSpell($spell_id=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
         {
             $data['update_time'] = $currentTime;
         }
-        return $this->where('team_id',$team_id)->update($data);
+        return $this->where('spell_id',$spell_id)->update($data);
     }
 
-    public function saveTeam($data)
+    public function saveSpell($data)
     {
-        $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
-        $data['team_name'] = trim($data['team_name']);
-        $currentTeam = $this->getTeamById($data['team_id']);
-        if(!isset($currentTeam['team_id']))
+        $currentSpell = $this->getSpellByName($data['spell_name']);
+        if(!isset($currentSpell['spell_id']))
         {
-            echo "toInsertTeam:"."\n";
-            return $this->insertTeam($data);
+            echo "toInsertSpell:"."\n";
+            return $this->insertSpell($data);
         }
         else
         {
-            echo "toUpdateTeam:".$currentTeam['team_id']."\n";
+            echo "toUpdateSpell:".$currentSpell['spell_id']."\n";
             //校验原有数据
             foreach($data as $key => $value)
             {
                 if(in_array($key,$this->toAppend))
                 {
-                    $t = json_decode($currentTeam[$key],true);
+                    $t = json_decode($currentSpell[$key],true);
                     foreach($value as $k => $v)
                     {
                         if(!in_array($v,$t))
@@ -167,9 +141,9 @@ class teamModel extends Model
                 {
                     $value = json_encode($value);
                 }
-                if(isset($currentTeam[$key]) && ($currentTeam[$key] == $value))
+                if(isset($currentSpell[$key]) && ($currentSpell[$key] == $value))
                 {
-                    //echo $currentTeam[$key]."-".$value."\n";
+                    //echo $currentSpell[$key]."-".$value."\n";
                     echo $key.":passed\n";
                     unset($data[$key]);
                 }
@@ -180,7 +154,7 @@ class teamModel extends Model
             }
             if(count($data))
             {
-                return $this->updateTeam($currentTeam['team_id'],$data);
+                return $this->updateSpell($currentSpell['spell_id'],$data);
             }
             else
             {
@@ -188,5 +162,14 @@ class teamModel extends Model
             }
         }
     }
+    public function getSpellCount($params=[]){
+        $spell_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $spell_count = $spell_count->whereIn('key', $keys);
+            }
+        }
+        return $spell_count->count();
+    }
 }
-

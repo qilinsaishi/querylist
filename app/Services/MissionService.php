@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\CollectResultModel as CollectModel;
+use App\Models\InformationModel;
+use App\Models\AuthorModel;
 use App\Models\MissionModel as MissionModel;
 use App\Models\TeamModel as TeamModel;
 use App\Models\PlayerModel as PlayerModel;
@@ -13,7 +15,7 @@ class MissionService
     public function collect($game = "", $source = "", $mission_type = '')
     {
         //获取爬取任务列表
-        $mission_list = $this->getMission($game, $source, $mission_type, 100);
+        $mission_list = $this->getMission($game, $source, $mission_type, 400);
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         //初始化空的类库列表
@@ -91,6 +93,8 @@ class MissionService
         $missionModel = new MissionModel();
         $teamModel = new TeamModel();
         $playerModel = new PlayerModel();
+        $informationModel = new InformationModel();
+        $authorModel = new AuthorModel();
         $result_list = $collectModel->getResult(100, $game, $source, $mission_type);
 
         //初始化空的类库列表
@@ -135,7 +139,21 @@ class MissionService
                         }
                     } elseif ($result['mission_type'] == "player") {
                         $save = $playerModel->savePlayer($result["game"], $processResult);
-                    } elseif ($result['mission_type'] == "hero") {
+                    }
+                    elseif ($result['mission_type'] == "information")
+                    {
+                        //if(!isset($processResult['author_id']) || $processResult['author_id']<=0)
+                        {
+                            //保存作者
+                            $author_id = $authorModel->saveAuthor($processResult["author"], $result['source'],$processResult['author_id']??0);
+                            if($author_id>0)
+                            {
+                                $processResult['author_id'] =   $author_id;
+                            }
+                        }
+                        $save = $informationModel->saveInformation($result["game"], $processResult);
+                    }
+                    elseif ($result['mission_type'] == "hero") {
                         //生成类库路径
                         $modelClassName = 'App\Models\Hero\\' . $result['game'] . "Model";
                         $classList = $this->getClass($classList, $modelClassName);
@@ -143,6 +161,30 @@ class MissionService
                             $modelClass = $classList[$modelClassName];
                             $save = $modelClass->saveHero($processResult);
                         }
+                        if (method_exists($class, "processSkins"))
+                        {
+                            $skinModelClassName = 'App\Models\Hero\Skin\\' . $result['game'] . "Model";
+                            $classList = $this->getClass($classList, $skinModelClassName);
+                            $skinModelClass = $classList[$skinModelClassName];
+                            $skinList = $class->processSkins($result);
+                            foreach($skinList as $skinInfo)
+                            {
+                                $saveSkin = $skinModelClass->saveSkin($skinInfo);
+
+                            }
+                        }
+                        if (method_exists($class, "processSpells"))
+                        {
+                            $spellModelClassName = 'App\Models\Hero\Spell\\' . $result['game'] . "Model";
+                            $classList = $this->getClass($classList, $spellModelClassName);
+                            $spellModelClass = $classList[$spellModelClassName];
+                            $spellList = $class->processSpells($result);
+                            foreach($spellList as $spellInfo)
+                            {
+                                $saveSpell = $spellModelClass->saveSpell($spellInfo);
+                            }
+                        }
+
                     } elseif ($result['mission_type'] == "equipment") {
                         //生成类库路径
                         $modelClassName = 'App\Models\Equipment\\' . $result['game'] . "Model";
@@ -307,10 +349,18 @@ class MissionService
                         if ($save['result'] > 0) {
                             $collectModel->updateStatus($result['id'], ['status' => 2]);
                         }
+                        else
+                        {
+                            $collectModel->updateStatus($result['id'], ['status' => 3]);
+                        }
                     } else {
                         echo "save:" . $save . "\n";
                         if ($save > 0) {
                             $collectModel->updateStatus($result['id'], ['status' => 2]);
+                        }
+                        else
+                        {
+                            $collectModel->updateStatus($result['id'], ['status' => 3]);
                         }
                     }
                 }

@@ -4,6 +4,7 @@ namespace App\Models\Match\cpseo;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class teamModel extends Model
 {
@@ -41,17 +42,27 @@ class teamModel extends Model
     ];
     public function getTeamList($params=[])
     {
-        $team_list =$this->select("*");
+        $fields = $params['fields']??"team_id,team_name,logo";
+        $team_list =$this->select(explode(",",$fields));
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
+        $hot=$params['hot']??0;
         if(isset($params['game']))
         {
             $team_list = $team_list->where("game",$params['game']);
         }
+        if($hot==1)
+        {
+            $team_list->where("hot",$hot);
+        }
         $team_list = $team_list->orderBy("team_id")
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->get()->toArray();
+            ->get();
+
+        if($team_list){
+            $team_list=$team_list->toArray();
+        }
         return $team_list;
     }
     public function getTeamCount($params=[])
@@ -60,6 +71,11 @@ class teamModel extends Model
         if(isset($params['game']))
         {
             $team_count = $team_count->where("game",$params['game']);
+        }
+        $hot=$params['hot']??0;
+        if($hot==1)
+        {
+            $team_count->where("hot",$hot);
         }
         return $team_count->count();
     }

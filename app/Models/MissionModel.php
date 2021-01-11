@@ -56,6 +56,7 @@ class MissionModel extends Model
         $mission_list = $mission_list
             ->whereIn("mission_status", $status)
             ->limit($count)
+            ->orderBy('mission_id',"desc")
             ->get()->toArray();
         return $mission_list;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Libs\ClientServices;
 use App\Models\Admin\DefaultConfig;
 use App\Models\CollectResultModel;
 use App\Models\TeamModel;
@@ -19,6 +20,7 @@ class HomeController extends Controller
     }
 
     public function teamInfo(){
+
         //$team_id=$this->request->input('team_id','');
         $teamModel=new TeamModel();
         $params=[];
@@ -81,6 +83,60 @@ class HomeController extends Controller
 
     public function index()
     {
+        $url='http://lol.kuai8.com/gonglue/index_1.html';
+
+       /* $client=new ClientServices();
+        $data=curl_get($url);dd($data);
+        $data=$client->curlGet($url);*/
+
+        //for($i=0;$i<=32;$i++){
+           // $m=$i+1;
+            //$url='http://lol.kuai8.com/gonglue/index_'.$m.'.html';
+            $ql = QueryList::get($url);
+            $imgs=$ql->find('.Cont .news-list li img')->attrs('data-original');//print_r($imgs);exit;
+            $data=$ql->rules([
+                'title' => ['.con .tit', 'text'],
+                'desc' => ['.con  .txt', 'text'],
+                'link' => ['.img  a', 'href'],
+                'img_url' => ['.img img', 'src'],
+                'dtime' => ['.con  .time', 'text']
+            ])->range('.Cont .news-list li')->queryData();
+           foreach ($data as $key=>$val){
+                $data = [
+                    "asign_to"=>1,
+                    "mission_type"=>'information',//攻略
+                    "mission_status"=>1,
+                    "game"=>'lol',
+                    "source"=>'kuai8',//
+                    'title'=>'',
+                    "detail"=>json_encode(
+                        [
+                            "url"=>$url,
+                            "game"=>'lol',//英雄联盟
+                            "source"=>'kuai8',//资讯
+                            "title"=>$val['title'] ?? '',
+                            "desc"=>$val['desc'] ?? '',
+                            "img_url"=>$imgs[$key] ?? '',
+                            "dtime"=>$val['dtime'] ?? '',
+
+                        ]
+                    ),
+                ];
+            }
+        //}//exit;
+        print_r($data);exit;
+        foreach ($data as &$val){
+            $detail_url=$val['link'];
+            $detail_ql=QueryList::get($detail_url);
+            $content=$detail_ql->find('.article-detail .a-detail-cont')->html();
+            $author=$detail_ql->find('.article-detail .a-detail-head span:eq(0)')->text();print_r($author);exit;
+            $val['author']=$author ?? '';
+            $val['content']=$content ?? '';
+        }dd($data);
+        //$links=$ql->find('.news-list li .con .tit')->texts()->all();//分页
+        dd($data);
+        $data=curl_get($url);
+
 $model=new DefaultConfig();
 $a=$model->getDefaultById(3);dd($a);
         $data=$this->kplInfo();dd($data);

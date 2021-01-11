@@ -20,8 +20,8 @@ class PrivilegeService
             ],
             "tournament" => [
                 'list' => [
-                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
                 ],
                 'withSource' => 1,
                 'function' => "getTournamentList",
@@ -39,6 +39,48 @@ class PrivilegeService
                 'functionCount' => "getTeamCount",
                 'functionSingle' => "getTeamById",
             ],
+            "totalTeamList" => [//团队总列表
+                'list' => [
+                    ['model' => 'App\Models\TeamModel'],
+                ],
+                'withSource' => 0,
+                'function' => "getTeamList",
+                'functionCount' => "getTeamCount",
+                'functionSingle' => "getTeamById",
+                'functionSingleBySite' => "getTeamBySiteId",
+                'functionSingleByName' => "getTeamByName"
+
+            ],
+            "totalTeamInfo" => [//团队总列表
+                'list' => [
+                    ['model' => 'App\Models\TeamModel'],
+                ],
+                'withSource' => 0,
+                'function' => "getTeamById",
+                'functionCount' => "getTeamCount",
+                'functionSingle' => "getTeamById",
+                'functionProcess' => "processTotalTeam"
+            ],
+            "totalPlayerList" => [//队员总列表
+                'list' => [
+                    ['model' => 'App\Models\PlayerModel'],
+                ],
+                'withSource' => 0,
+                'function' => "getPlayerList",
+                'functionCount' => "getPlayerCount",
+                'functionSingle' => "getPlayerById",
+            ],
+            "team" => [//团队列表
+                'list' => [
+                    ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'cpseo'],
+                    ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'chaofan'],
+                ],
+                'withSource' => 1,
+                'function' => "getTeamById",
+                //'functionCount' => "getTeamCount",
+                'functionSingle' => "getTeamById",
+                'functionProcess' => "processTeam",
+            ],
             "defaultConfig" => [//通用配置
                 'list' => [
                     ['model' => 'App\Models\Admin\DefaultConfig', 'source' => ''],
@@ -47,6 +89,34 @@ class PrivilegeService
                 'function' => "getDefaultConfigList",
                 'functionCount' => "getDefaultCount",
                 'functionSingle' => "getDefaultConfigByKey",
+            ],
+            "informationList" => [//资讯列表
+                'list' => [
+                    ['model' => 'App\Models\InformationModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getInformationList",
+                'functionCount' => "getInformationCount",
+                'functionSingle' => "getInformationById",
+            ],
+            "totalPlayerInfo" => [//队员总表
+                'list' => [
+                    ['model' => 'App\Models\PlayerModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getPlayerById",
+                'functionCount' => "getPlayerCount",
+                'functionSingle' => "getPlayerById",
+                'functionProcess' => "processTotalPlayer"
+            ],
+            "information" => [//资讯
+                'list' => [
+                    ['model' => 'App\Models\InformationModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getInformationById",
+                'functionCount' => "",
+                'functionSingle' => "getInformationById",
             ],
             "lolHeroList" => [//lol英雄列表
                 'list' => [
@@ -64,6 +134,7 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getHeroById",
                 'functionSingle' => "getHeroById",
+                'functionProcess' => "processLolHero",
             ],
             "lolEquipmentList" => [//lol装备列表
                 'list' => [
@@ -99,23 +170,6 @@ class PrivilegeService
                 'function' => "getSkillById",
                 'functionSingle' => "getSkillById",
             ],
-            "lolSummonerList" => [//lol召唤师列表
-                'list' => [
-                    ['model' => 'App\Models\Summoner\lolModel', 'source' => ''],
-                ],
-                'withSource' => 0,
-                'function' => "getSkillList",
-                'functionCount' => "getSkillCount",
-                'functionSingle' => "getSkillById",
-            ],
-            "lolSummoner" => [//lol召唤师详情
-                'list' => [
-                    ['model' => 'App\Models\Summoner\lolModel', 'source' => ''],
-                ],
-                'withSource' => 0,
-                'function' => "getSkillById",
-                'functionSingle' => "getSkillById",
-            ],
             "lolRuneList" => [//lol召唤师列表
                 'list' => [
                     ['model' => 'App\Models\Rune\lolModel', 'source' => ''],
@@ -123,6 +177,7 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getRuneList",
                 'functionCount' => "getRuneCount",
+                //'functionProcess' => "processRuneList",//格式化的处理方法
                 'functionSingle' => "getRuneById",
             ],
             "lolRune" => [//lol召唤师详情
@@ -131,28 +186,77 @@ class PrivilegeService
                 ],
                 'withSource' => 0,
                 'function' => "getRuneById",
+                //'functionProcess' => "processRuneList",//格式化的处理方法
                 'functionSingle' => "getRuneById",
             ],
-
-
+            "lolHeroSkin" => [//lol英雄皮肤详情
+                'list' => [
+                    ['model' => 'App\Models\Hero\Skin\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSkinByHero",
+                'functionSingle' => "getRuneById",
+            ],
+            "lolHeroSpell" => [//lol英雄技能详情
+                'list' => [
+                    ['model' => 'App\Models\Hero\Spell\lolModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSpellByHero",
+                'functionSingle' => "getRuneById",
+            ],
+            "playerList" => [//队员
+                'list' => [
+                    ['model' => 'App\Models\PlayerModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getPlayerList",
+                'functionCount' => "getPlayerCount",
+                'functionSingle' => "getPlayerById",
+                'functionProcess' => "processPlayerList",//格式化的处理方法
+            ],
+            "links" => [//友链
+                'list' => [
+                    ['model' => 'App\Models\Admin\Links', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getLinkList",
+                'functionCount' => "getLinkCount",
+                'functionSingle' => "getLinkById",
+            ],
+            "gameConfig" => [//lol游戏配置
+                'list' => [
+                    ['model' => 'App\Models\Admin\Site', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSiteById",
+                'functionSingle' => "getSiteById",
+            ],
+            "keywordMapList" => [//关键字对应
+                'list' => [
+                    ['model' => 'App\Models\KeywordMapModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getList",
+            ],
         ];
         return $privilegeList;
     }
 
     public function getFunction($data, $currentSource = "")
     {
-        $currentSource = "";
         //获取各个数据类型对应的类库优先级列表以及获取方法
         $priviliegeList = $this->getPriviliege();
         $classList = [];
         $functionList = [];
         foreach ($data as $dataType => $params) {
-            //echo "found type:".$dataType."\n";
+            //echo "try to find type:".$dataType."\n";
             //echo "currentSource:".$currentSource."\n";
             //默认没找到
             $found = 0;
             //数据类型出现在优先级列表
             if (isset($priviliegeList[$dataType])) {
+                //echo "found type:".$dataType."\n";
                 //尚未初始化数据来源 且 当前数据类型需要包含数据来源
                 if ($currentSource == "" && $priviliegeList[$dataType]['withSource'] == 1) {
                     //循环所列的类库列表
@@ -225,6 +329,12 @@ class PrivilegeService
                             } else {
                                 $functionList[$dataType]['functionSingle'] = "";
                             }
+                            if (isset($priviliegeList[$dataType]['functionProcess'])) {
+                                $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
+                            } else {
+                                $functionList[$dataType]['functionProcess'] = "";
+
+                            }
                         }
                     }
                     //如果没找到
@@ -249,6 +359,12 @@ class PrivilegeService
                                         } else {
                                             $functionList[$dataType]['functionSingle'] = "";
                                         }
+                                        if (isset($priviliegeList[$dataType]['functionProcess'])) {
+                                            $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
+                                        } else {
+                                            $functionList[$dataType]['functionProcess'] = "";
+
+                                        }
                                         //标记为找到
                                         $found = 1;
                                     } else {
@@ -262,10 +378,12 @@ class PrivilegeService
                     }
                     //调用当前的数据来源
                     $functionList[$dataType]['source'] = $currentSource;
-                } elseif ($currentSource == "" && $priviliegeList[$dataType]['withSource'] == 0) {
+                }
+                elseif($priviliegeList[$dataType]['withSource'] == 0)
+                {
                     foreach ($priviliegeList[$dataType]['list'] as $detail) {
                         $modelName = $detail['model'];
-                        $currentSource = $currentSource == "" ? $detail['source'] : $currentSource;
+                        //$currentSource = $currentSource == "" ? $detail['source'] : $currentSource;
                         $classList = $this->getClass($classList, $modelName);
                         if (!isset($functionList[$dataType])) {
                             if (isset($classList[$modelName])) {
@@ -357,6 +475,7 @@ class PrivilegeService
         }
         $modelClass = $functionList["teamList"]["class"];
         $functionSingle = $functionList["teamList"]['functionSingle'];
+
         $teamList = [];
         $tournament = [];
         foreach ($data as $key => $matchInfo) {
@@ -366,7 +485,6 @@ class PrivilegeService
                 if (isset($tournamentInfo['tournament_id'])) {
                     $tournament[$matchInfo['tournament_id']] = $tournamentInfo;
                 }
-
             }
             //战队信息
             if (!isset($teamList[$matchInfo['home_id']])) {
@@ -389,5 +507,173 @@ class PrivilegeService
         return $data;
     }
 
+    public function processPlayerList($data, $functionList)
+    {
+        if (isset($functionList['playerList']) && isset($functionList['playerList']['functionSingle'])) {
 
+        } else {
+            $f = $this->getFunction(['playerList' => []], $functionList['teamList']['source']);
+            if (isset($f['playerList']['class'])) {
+                $functionList["playerList"] = $f['playerList'];
+            }
+        }
+        $modelClass = $functionList["playerList"]["class"];
+        $functionSingle = $functionList["playerList"]['functionSingle'];
+        $teamInfo=[];
+        if(!empty($data)){
+            foreach ($data as $key=>&$val){
+                if(!$val['player_name']){
+                    unset($data[$key]);
+                }
+                $team_id=$val['team_id'] ?? '';
+                if($team_id){
+                    $teamInfo = $modelClass->$functionSingle($val['team_id']);
+                }
+                $val['team_info']=$teamInfo;
+                if(!empty($val['team_history'])){
+                    $val['team_history']=json_decode($val['team_history'],true);
+                }
+                if(!empty($val['event_history'])){
+                    $val['event_history']=json_decode($val['event_history'],true);
+                }
+                if(!empty($val['stat'])){
+                    $val['stat']=json_decode($val['stat'],true);
+                }
+
+            }
+        }
+        if($data){
+            $data=array_values($data);
+        }
+        return $data;
+    }
+    public function processLolHero($data, $functionList)
+    {
+        $data['skinList'] = [];
+        $data['spellList'] = [];
+        if (isset($functionList['lolHeroSkin']) && isset($functionList['lolHeroSkin']['function'])) {
+
+        } else {
+            $f = $this->getFunction(['lolHeroSkin' => []]);
+            if (isset($f['lolHeroSkin']['class'])) {
+                $functionList["lolHeroSkin"] = $f['lolHeroSkin'];
+            }
+        }
+        $modelClass = $functionList["lolHeroSkin"]["class"];
+        $function = $functionList["lolHeroSkin"]['function'];
+        $teamInfo=[];
+        if(!empty($data)){
+            $data['skinList'] = $modelClass->getSkinByHero(["hero_id"=>$data['id']]);
+        }
+        if (isset($functionList['lolHeroSpell']) && isset($functionList['lolHeroSpell']['function'])) {
+
+        } else {
+            $f = $this->getFunction(['lolHeroSpell' => []]);
+            if (isset($f['lolHeroSpell']['class'])) {
+                $functionList["lolHeroSpell"] = $f['lolHeroSpell'];
+            }
+        }
+        $modelClass = $functionList["lolHeroSpell"]["class"];
+        $function = $functionList["lolHeroSpell"]['function'];
+        $teamInfo=[];
+        if(!empty($data)){
+            $data['spellList'] = $modelClass->getSpellByHero(["hero_id"=>$data['id']]);
+        }
+        return $data;
+    }
+    public function processTeam($data, $functionList)
+    {
+        if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['function'])) {
+
+        } else {
+            $f = $this->getFunction(['totalTeamInfo' => []]);
+            if (isset($f['totalTeamInfo']['class'])) {
+                $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
+            }
+        }
+        $modelClass = $functionList["totalTeamInfo"]["class"];
+        $function = $functionList["totalTeamInfo"]['function'];
+        $teamInfo=[];
+        if(!empty($data)){
+            $data['totalTeamInfo'] = $modelClass->getTeamByName($data['team_name'],$data['game']);
+        }
+        if(isset($data['totalTeamInfo']['team_id']))
+        {
+            if (isset($functionList['playerList']) && isset($functionList['playerList']['function'])) {
+
+            } else {
+                $f = $this->getFunction(['playerList' => []]);
+                if (isset($f['playerList']['class'])) {
+                    $functionList["playerList"] = $f['playerList'];
+                }
+            }
+            $modelClass = $functionList["playerList"]["class"];
+            $function = $functionList["playerList"]['function'];
+            if(!empty($data)){
+                $data['playerList'] = $modelClass->$function(['team_id'=>$data['totalTeamInfo']['site_id']]);
+            }
+
+            if (isset($functionList['matchList']) && isset($functionList['matchList']['function'])) {
+
+            } else {
+                $f = $this->getFunction(['matchList' => []]);
+                if (isset($f['matchList']['class'])) {
+                    $functionList["matchList"] = $f['matchList'];
+                }
+            }
+            $modelClass = $functionList["matchList"]["class"];
+            $function = $functionList["matchList"]['function'];
+            if(!empty($data)){
+                $data['matchList'] = $modelClass->$function(['team_id'=>$data['team_id'],'page_size'=>10]);
+            }
+        }
+        return $data;
+    }
+    public function processTotalTeam($data, $functionList)
+    {
+        if(isset($data['team_id']))
+        {
+            $f = $this->getFunction(['totalPlayerList' => []]);
+            if (isset($f['totalPlayerList']['class'])) {
+                $functionList["totalPlayerList"] = $f['totalPlayerList'];
+            }
+            $modelClass = $functionList["totalPlayerList"]["class"];
+            $function = $functionList["totalPlayerList"]['function'];
+            $data['playerList'] = $modelClass->$function(['team_id'=>$data['team_id']]);
+        }
+        return $data;
+    }
+    public function processTotalPlayer($data, $functionList)
+    {
+        if(isset($data['player_id']))
+        {
+            if (isset($functionList['totalPlayerList']) && isset($functionList['totalPlayerList']['function'])) {}else {
+                $f = $this->getFunction(['totalPlayerList' => []]);
+                if (isset($f['totalPlayerList']['class'])) {
+                    $functionList["totalPlayerList"] = $f['totalPlayerList'];
+                }
+            }
+            if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['function'])) {}else{
+                $f = $this->getFunction(["totalTeamInfo"=>[]]);
+                if (isset($f['totalTeamInfo']['class'])) {
+                    $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
+                }
+            }
+            $modelClass = $functionList["totalPlayerList"]["class"];
+            $function = $functionList["totalPlayerList"]['function'];
+            $teamModelClass = $functionList["totalTeamInfo"]["class"];
+            $teamFunction = $functionList["totalTeamInfo"]['function'];
+            $data['playerList'] = $modelClass->$function(['team_id'=>$data['team_id']]);
+            foreach($data['playerList'] as $key => $playerInfo)
+            {
+                if($playerInfo['player_id']==$data['player_id'])
+                {
+                    unset($data['playerList'][$key]);
+                    break;
+                }
+            }
+            $data['teamInfo'] = $teamModelClass->$teamFunction(['team_id'=>$data['team_id'],"fields"=>"team_id,team_name,description,logo"]);
+        }
+        return $data;
+    }
 }

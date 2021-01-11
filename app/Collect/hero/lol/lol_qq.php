@@ -2,33 +2,37 @@
 
 namespace App\Collect\hero\lol;
 
+use App\Libs\ClientServices;
+
 class lol_qq
 {
     protected $data_map =
         [
-            "hero_name"=>['path'=>"name",'default'=>''],
-            "cn_name"=>['path'=>"title",'default'=>''],
-            "en_name"=>['path'=>"alias",'default'=>''],
-            "description"=>['path'=>"shortBio",'default'=>'暂无'],
-            "roles"=>['path'=>"roles",'default'=>[]],//职业
-            "logo"=>['path'=>"show_list_img",'default'=>''],
-            "difficulty"=>['path'=>"difficulty",'default'=>0],//上手难度
-            "physical_attack"=>['path'=>"attack",'default'=>0],//物理攻击
-            "magic_attack"=>['path'=>"magic",'default'=>0],//魔法攻击
-            "defense"=>['path'=>"defense",'default'=>0],//防御
-            "hp"=>['path'=>"hp",'default'=>0],
-            "mp"=>['path'=>"mp",'default'=>0],
-            "hp_regen"=>['path'=>"hpregen",'default'=>0],//生命回复
-            "mp_regen"=>['path'=>"mpregen",'default'=>0],//魔法回复
-            "attack_speed"=>['path'=>"attackspeed",'default'=>0],//攻击速度
-            "attack_range"=>['path'=>"attackrange",'default'=>0],//攻击范围
-            "attack_damage"=>['path'=>"attackdamage",'default'=>0],//攻击
-            "price"=>['path'=>"goldPrice",'default'=>0],//攻击
-            "move_speed"=>['path'=>"movespeed",'default'=>0],//移动速度
-            "magic_defense"=>['path'=>"spellblock",'default'=>0],//魔法抗性
-            "ally_tips"=>['path'=>"allytips",'default'=>[]],//使用技巧
-            "enemy_tips"=>['path'=>"enemytips",'default'=>[]],//对手技巧
-            "aka"=>['path'=>"",'default'=>""],//别名
+            "hero_name"=>['path'=>"hero.name",'default'=>''],
+            "cn_name"=>['path'=>"hero.title",'default'=>''],
+            "en_name"=>['path'=>"hero.alias",'default'=>''],
+            "description"=>['path'=>"hero.shortBio",'default'=>'暂无'],
+            "roles"=>['path'=>"hero.roles",'default'=>[]],//职业
+            "logo"=>['path'=>"hero.show_list_img",'default'=>''],
+            "difficulty"=>['path'=>"hero.difficulty",'default'=>0],//上手难度
+            "physical_attack"=>['path'=>"hero.attack",'default'=>0],//物理攻击
+            "magic_attack"=>['path'=>"hero.magic",'default'=>0],//魔法攻击
+            "defense"=>['path'=>"hero.defense",'default'=>0],//防御
+            "hp"=>['path'=>"hero.hp",'default'=>0],
+            "mp"=>['path'=>"hero.mp",'default'=>0],
+            "hp_regen"=>['path'=>"hero.hpregen",'default'=>0],//生命回复
+            "mp_regen"=>['path'=>"hero.mpregen",'default'=>0],//魔法回复
+            "attack_speed"=>['path'=>"hero.attackspeed",'default'=>0],//攻击速度
+            "attack_range"=>['path'=>"hero.attackrange",'default'=>0],//攻击范围
+            "attack_damage"=>['path'=>"hero.attackdamage",'default'=>0],//攻击
+            "price"=>['path'=>"hero.goldPrice",'default'=>0],//攻击
+            "move_speed"=>['path'=>"hero.movespeed",'default'=>0],//移动速度
+            "magic_defense"=>['path'=>"hero.spellblock",'default'=>0],//魔法抗性
+            "ally_tips"=>['path'=>"hero.allytips",'default'=>[]],//使用技巧
+            "enemy_tips"=>['path'=>"hero.enemytips",'default'=>[]],//对手技巧
+            "aka"=>['path'=>"hero.",'default'=>""],//别名
+            "keywords"=>['path'=>"hero.keywords",'default'=>""],//关键字
+            "id"=>['path'=>"hero.heroId",'default'=>[]],//原站点ID
         ];
     //职业列表
     protected $role_list =
@@ -45,10 +49,14 @@ class lol_qq
     {
         $cdata = [];
         $url = $arr['detail']['url'] ?? '';
-        $res = curl_get($url);
-        $res = $res['hero'] ?? [];
+        $client=new ClientServices();
+        $data=$client->curlGet($url);
+        $res['hero']=$data['hero'] ?? [];
+        $res['skins']=$data['skins'] ?? [];
+        $res['spells']=$data['spells'] ?? [];
+
         if (!empty($res)) {
-            $res['show_list_img'] = 'https://game.gtimg.cn/images/lol/act/img/champion/' . $res['alias'] . '.png';
+            //$res['show_list_img'] = 'https://game.gtimg.cn/images/lol/act/img/champion/' . $res['alias'] . '.png';
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
@@ -68,13 +76,54 @@ class lol_qq
 
     public function process($arr)
     {
-        foreach($arr['content']['roles'] as $key => $value)
+        /**
+         * $data['hero']=>基础信息,$data['skins']=>皮肤,$data['spells']=>皮肤,
+         * hero: $res['show_list_img'] = 'https://game.gtimg.cn/images/lol/act/img/champion/' . $res['alias'] . '.png';
+         */
+        foreach($arr['content']['hero']['roles'] as $key => $value)
         {
-            $arr['content']['roles'][$key] = $this->role_list[$value]??"未知";
+            $arr['content']['hero']['roles'][$key] = $this->role_list[$value]??"未知";
         }
-        ksort($arr['content']);
-        $arr['content']['show_list_img'] = getImage($arr['content']['show_list_img']);
+        ksort($arr['content']['hero']);
+        $arr['content']['hero']['show_list_img'] = getImage('https://game.gtimg.cn/images/lol/act/img/champion/' . $arr['content']['hero']['alias'] . '.png');
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
+    }
+    public function processSkins($arr)
+    {
+        $skinList = [];
+        if(isset($arr['content']['skins']))
+        {
+            foreach($arr['content']['skins'] as $key => $value)
+            {
+                foreach($value as $k => $v)
+                {
+                    if(substr($k,-3)=="Img")
+                    {
+                        $value[$k] = getImage($v);
+                    }
+                }
+                $skinList[$value['skinId']] = ["skin_id"=>$value['skinId'],
+                    'hero_id'=>$value['heroId'],
+                    'data'=>$value];
+            }
+        }
+        return $skinList;
+    }
+    public function processSpells($arr)
+    {
+        $spellList = [];
+        if(isset($arr['content']['spells']))
+        {
+            foreach($arr['content']['spells'] as $key => $value)
+            {
+                $value['abilityIconPath'] = getImage($value['abilityIconPath']);
+                $spellList[$value['spellKey']] = [
+                    'spell_name'=>$value['name'],
+                    'hero_id'=>$value['heroId'],
+                    'data'=>$value];
+            }
+        }
+        return $spellList;
     }
 }

@@ -35,10 +35,13 @@ class DefaultConfig extends Model
         $default_field = ['id', 'name', 'key', 'value'];
         $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
         $default_config_list = $this->select($field);
+        $count=3;
         if (!empty($keys)) {
             $default_config_list->whereIn('key', $keys);
+            $count=count($keys);
         }
-        $pageSizge = $params['page_size'] ?? 3;
+
+        $pageSizge = $params['page_size'] ?? $count;
         $page = $params['page'] ?? 1;
         $default_config_list = $default_config_list
             ->limit($pageSizge)

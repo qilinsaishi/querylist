@@ -39,7 +39,7 @@ class Information extends Command
     public function handle()
     {
 
-        $target=23;//23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区'
+        $target=27;//23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区'
         $operation = ($this->argument("operation")??"insert");
         //获取分页总数和每页条数
         if($operation=='insert'){
@@ -50,7 +50,7 @@ class Information extends Command
             $lastPage=getLastPage($resultTotal,$resultNum);
             for ($i=0;$i<=$lastPage;$i++){
                 $m=$i+1;
-                $url='https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page='.$m.'&num=16&target=24&source=web_pc&_='.msectime();
+                $url='https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page='.$m.'&num=16&target='.$target.'&source=web_pc&_='.msectime();
                 $data = [
                     "asign_to"=>1,
                     "mission_type"=>'information',//资讯

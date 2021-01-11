@@ -45,11 +45,22 @@ class PlayerModel extends Model
     ];
     public function getPlayerList($params)
     {
-        $player_list =$this->select("*");
+        $fields = $params['fields']??"player_id,player_name,logo";
+        $player_list =$this->select(explode(",",$fields));
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
             $player_list = $player_list->where("game",$params['game']);
+        }
+        //数据来源
+        if(isset($params['source']) && strlen($params['source'])>=2)
+        {
+            $player_list = $player_list->where("original_source",$params['source']);
+        }
+        //所属战队
+        if(isset($params['team_id']) && $params['team_id']>0)
+        {
+            $player_list = $player_list->where("team_id",$params['team_id']);
         }
         //战队名称
         if(isset($params['player_name']) && strlen($params['player_name'])>=3)
@@ -61,18 +72,23 @@ class PlayerModel extends Model
         {
             $player_list = $player_list->where("en_name",$params['en_name']);
         }
+        $hot=$params['hot']??0;
+        if($hot==1)
+        {
+            $player_list->where("hot",$hot);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $player_list = $player_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("player_id")
             ->get()->toArray();
         return $player_list;
     }
     public function getPlayerByName($player_name,$game)
     {
-        echo $player_name."-".$game."\n";
+        //echo $player_name."-".$game."\n";
         $player_info =$this->select("*")
                     ->where("player_name",$player_name)
                     ->where("game",$game)
@@ -130,6 +146,7 @@ class PlayerModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
+        unset($data['original_source']);
         return $this->where('player_id',$player_id)->update($data);
     }
 
@@ -157,10 +174,29 @@ class PlayerModel extends Model
         if(!isset($currentPlayer['player_id']))
         {
             echo "toInsertPlayer:\n";
-            return  $this->insertPlayer(array_merge($data,["game"=>$game]));
+            $insert = $this->insertPlayer(array_merge($data,["game"=>$game]));
+            if($insert)
+            {
+                $return['player_id'] = $insert;
+                $return['result'] = 1;
+            }
+            else
+            {
+                $return['player_id'] = 0;
+                $return['result'] = 0;
+            }
         }
         else
         {
+            echo "source:".$currentPlayer['original_source'] ."-". $data['original_source']."\n";
+            //非同来源不做覆盖
+            if($currentPlayer['original_source'] != $data['original_source'])
+            {
+                echo "differentSorce4Team:pass\n";
+                $return['player_id'] = $currentPlayer['player_id'];
+                $return['result'] = 1;
+                return $return;
+            }
             echo "toUpdatePlayer:".$currentPlayer['player_id']."\n";
             //校验原有数据
             foreach($data as $key => $value)
@@ -202,5 +238,73 @@ class PlayerModel extends Model
                 return true;
             }
         }
+    }
+
+    public function getPlayerCount($params=[]){
+        $player_count = $this;
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $player_count = $player_count->where("game",$params['game']);
+        }
+        //数据来源
+        if(isset($params['source']) && strlen($params['source'])>=2)
+        {
+            $player_count = $player_count->where("original_source",$params['source']);
+        }
+        //所属战队
+        if(isset($params['team_id']) && $params['team_id']>0)
+        {
+            $player_list = $player_count->where("team_id",$params['team_id']);
+        }
+        //战队名称
+        if(isset($params['player_name']) && strlen($params['player_name'])>=3)
+        {
+            $player_count = $player_count->where("player_name",$params['player_name']);
+        }
+        //战队名称
+        if(isset($params['en_name']) && strlen($params['en_name'])>=3)
+        {
+            $player_count = $player_count->where("en_name",$params['en_name']);
+        }
+        $hot=$params['hot']??0;
+        if($hot==1)
+        {
+            $player_count->where("hot",$hot);
+        }
+
+        return $player_count->count();
+    }
+
+    public function getPlayerById($player_id){
+        $player_info =$this->select("*")
+            ->where("player_id",$player_id)
+            ->get()->first();
+        if(isset($player_info->player_id))
+        {
+            $player_info = $player_info->toArray();
+        }
+        else
+        {
+            $player_info = [];
+        }
+        return $player_info;
+    }
+    public function getAllKeywords($game)
+    {
+        $keywords = [];
+        $playerList = $this->getPlayerList(["game"=>$game,"fields"=>"player_id,player_name,en_name,aka","page_size"=>10000]);
+        foreach($playerList as $player_info)
+        {
+            $t = array_unique(array_merge([$player_info['player_name']],[$player_info['en_name']],json_decode($player_info['aka'])));
+            foreach($t as $value)
+            {
+                if(trim($value) != "" && !isset($keywords[trim($value)]))
+                {
+                    $keywords[trim($value)] = $player_info['player_id'];
+                }
+            }
+        }
+        return $keywords;
     }
 }

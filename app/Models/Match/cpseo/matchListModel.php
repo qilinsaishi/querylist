@@ -45,6 +45,18 @@ class matchListModel extends Model
         $match_list =$this->select("*");
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
+        if(isset($params['game']) && $params['game']!="")
+        {
+            $match_list = where("game",$params['game']);
+        }
+        if(isset($params['hot']) && $params['hot']>0)
+        {
+            $match_list = where("hot",1);
+        }
+        if(isset($params['team_id']) && $params['team_id']>0)
+        {
+            $match_list = $match_list->where("home_id",$params['team_id'])->orWhere("away_id",$params['team_id']);
+        }
         $match_list = $match_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)

@@ -13,6 +13,7 @@ use QL\QueryList;
 use GuzzleHttp\Client;
 
 use App\Services\Data\PrivilegeService;
+use App\Services\Data\RedisService;
 
 class lolIndexController extends Controller
 {
@@ -21,52 +22,54 @@ class lolIndexController extends Controller
     {
 
     }
-    //matchList 比赛 page/page_size
-    //teamList 战队 page/page_size/game
-    //tournament 赛事 page/page_size
-    //player 选手 page/page_size/game
 
     public function get()
     {
-
-
-        /*$data = [ "lolRuneList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolRune" => 1,"lolSummonerList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolSummoner" => 1,"lolEquipmentList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolEquipment" => 1,"lolHeroList" => ["game" => 'lol', "page" => 1, "page_size" => 10],"lolHero" => 1,"defaultConfig"=>["keys"=>["contact","phone_num","address"],"field"=>["name","key","value"]],"matchList" => ["page" => 1, "page_size" => 10],
-           "tournament"=>["page" => 1, "page_size" => 10], "teamList" => ["game" => 'lol', "page" => 1, "page_size" => 10]];
-print_r(json_encode($data));exit;*/
+        $redisService = new RedisService();
         $privilegeService = new PrivilegeService();
         $data=$this->payload;
         $return = [];
         $functionList = $privilegeService->getFunction($data);
         foreach ($functionList as $dataType => $functionInfo)
         {
-            $class = $functionInfo['class'];
-            $function = $functionInfo['function'];
-            $params = $data[$dataType];
-            $d = $class->$function($params);
-            $functionCount = $functionInfo['functionCount'];
-            $functionProcess = $functionInfo['functionProcess']??"";
-
-            if(!$functionCount || $functionCount=="")
+            $toSave = 1;
+            $dataArr = $redisService->processCache($dataType,$data[$dataType]);
+            if(is_array($dataArr))
             {
-                $count = 0;
+
+                //$return[$dataType] = $cache;
+                $toSave = 0;
             }
             else
             {
-                $count = $class->$functionCount($params);
+                $class = $functionInfo['class'];
+                $function = $functionInfo['function'];
+                $params = $data[$dataType];
+                $d = $class->$function($params);
+                $functionCount = $functionInfo['functionCount'];
+                $functionProcess = $functionInfo['functionProcess']??"";
+
+                if(!$functionCount || $functionCount=="")
+                {
+                    $count = 0;
+                }
+                else
+                {
+                    $count = $class->$functionCount($params);
+                }
+                if($functionProcess!="")
+                {
+                    $d = $privilegeService->$functionProcess($d,$functionList);
+                }
+                $dataArr = ['data'=>$d,'count'=>$count];
             }
-            if($functionProcess!="")
+            if($toSave==1)
             {
-                $d = $privilegeService->$functionProcess($d,$functionList);
+                $redisService->saveCache($dataType,$data[$dataType],$dataArr);
             }
-            $return[$dataType] = ['data'=>$d,'count'=>$count];
+            $return[$dataType] = $dataArr;
         }
         return $return;
-        //$name = (new Request())->post("data","here");
-        //v//ar_dump($name);
-
-        //$name2 = Input::all();
-        //($name2);
-        //print_R($result_list);
     }
 
 }

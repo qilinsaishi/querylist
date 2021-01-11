@@ -48,9 +48,18 @@ class TeamModel extends Model
     protected $toAppend = [
         "aka"
     ];
+    protected $keep = [
+      "original_source","team_history"
+    ];
     public function getTeamList($params)
     {
-        $team_list =$this->select("*");
+        $fields = $params['fields']??"team_id,team_name,logo";
+        $team_list =$this->select(explode(",",$fields));
+        //数据来源
+        if(isset($params['source']) && strlen($params['source'])>=2)
+        {
+            $team_list = $team_list->where("original_source",$params['source']);
+        }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
@@ -77,11 +86,40 @@ class TeamModel extends Model
     }
     public function getTeamByName($team_name,$game)
     {
-        echo $team_name."-".$game."\n";
         $team_info =$this->select("*")
                     ->where("team_name",$team_name)
                     ->where("game",$game)
                     ->get()->first();
+        if(isset($team_info->team_id))
+        {
+            $team_info = $team_info->toArray();
+        }
+        else
+        {
+            $team_info = [];
+        }
+        return $team_info;
+    }
+    public function getTeamById($team_id)
+    {
+        $team_info =$this->select("*")
+            ->where("team_id",$team_id)
+            ->get()->first();
+        if(isset($team_info->team_id))
+        {
+            $team_info = $team_info->toArray();
+        }
+        else
+        {
+            $team_info = [];
+        }
+        return $team_info;
+    }
+    public function getTeamBySiteId($team_id)
+    {
+        $team_info =$this->select("*")
+            ->where("site_id",$team_id)
+            ->get()->first();
         if(isset($team_info->team_id))
         {
             $team_info = $team_info->toArray();
@@ -128,12 +166,20 @@ class TeamModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
+        foreach($this->keep as $key)
+        {
+            if(isset($data[$key]))
+            {
+                unset($data[$key]);
+            }
+        }
         return $this->where('team_id',$team_id)->update($data);
     }
 
     public function saveTeam($game,$data)
     {
-        $return  = ['team_id'=>0,"result"=>0];
+        $return  = ['team_id'=>0,"result"=>0,'site_id'=>0];
+        $site_id = $data['site_id']??0;
         $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
         $data['team_name'] = trim($data['team_name']);
         $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
@@ -153,9 +199,22 @@ class TeamModel extends Model
         {
             $return['team_id'] = $this->insertTeam(array_merge($data,["game"=>$game]));
             $return['result'] =  $return['team_id']?1:0;
+            $return['site_id'] =  $return['team_id']?$data['site_id']:0;
+
         }
         else
         {
+            echo "source:".$currentTeam['original_source'] ."-". $data['original_source']."\n";
+            //非同来源不做覆盖
+            if($currentTeam['original_source'] != $data['original_source'])
+            {
+                echo "differentSorce4Team:pass\n";
+                $return['team_id'] = $currentTeam['team_id'];
+                $return['site_id'] = $currentTeam['site_id'];
+                $return['result'] = 1;
+                return $return;
+            }
+            unset($data['original_source']);
             $return['team_id'] = $currentTeam['team_id'];
             echo "toUpdateTeam:".$currentTeam['team_id']."\n";
             //校验原有数据
@@ -191,13 +250,57 @@ class TeamModel extends Model
             if(count($data))
             {
                 $return['result'] = $this->updateTeam($currentTeam['team_id'],$data);
+                $return['site_id'] = $site_id;
                 return $return;
             }
             else
             {
                 $return['result'] = 1;
+                $return['site_id'] = $site_id;
                 return $return;
             }
         }
+    }
+    public function getTeamCount($params=[])
+    {
+        $team_count =$this;
+        //数据来源
+        if(isset($params['source']) && strlen($params['source'])>=2)
+        {
+            $team_count = $team_count->where("original_source",$params['source']);
+        }
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $team_count = $team_count->where("game",$params['game']);
+        }
+        //战队名称
+        if(isset($params['team_name']) && strlen($params['team_name'])>=3)
+        {
+            $team_count = $team_count->where("team_name",$params['team_name']);
+        }
+        //战队名称
+        if(isset($params['en_name']) && strlen($params['en_name'])>=3)
+        {
+            $team_count = $team_count->where("en_name",$params['en_name']);
+        }
+        return $team_count->count();
+    }
+    public function getAllKeywords($game)
+    {
+        $keywords = [];
+        $teamList = $this->getTeamList(["game"=>$game,"fields"=>"team_id,team_name,en_name,aka","page_size"=>10000]);
+        foreach($teamList as $team_info)
+        {
+            $t = array_unique(array_merge([$team_info['team_name']],[$team_info['en_name']],json_decode($team_info['aka'])));
+            foreach($t as $value)
+            {
+                if(trim($value) != "" && !isset($keywords[trim($value)]))
+                {
+                    $keywords[trim($value)] = $team_info['team_id'];
+                }
+            }
+        }
+        return $keywords;
     }
 }

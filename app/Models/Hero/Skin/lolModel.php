@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Models\Match\chaofan;
+namespace App\Models\Hero\Skin;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
-class teamModel extends Model
+class lolModel extends Model
 {
-    protected $table = "chaofan_team_info";
-    //protected $primaryKey = "team_id";
+    protected $table = "lol_hero_skin_info";
+    protected $primaryKey = "skin_id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -34,69 +36,43 @@ class teamModel extends Model
      * @var array
      */
     protected $attributes = [
+        "data"=>[]
     ];
     protected $toJson = [
+        "data"
     ];
     protected $toAppend = [
     ];
-    public function getTeamList($params=[])
+    public function getSkinByHero($params)
     {
-        $fields = $params['fields']??"team_id,team_name,logo";
-        $team_list =$this->select(explode(",",$fields));
-        $pageSizge = $params['page_size']??3;
+        $skin_list =$this->select("*");
+        $pageSizge = $params['page_size']??20;
         $page = $params['page']??1;
-        if(isset($params['game']))
+        if(isset($params['hero_id']) && $params['hero_id']>0)
         {
-            $team_list = $team_list->where("game",$params['game']);
+            $skin_list = $skin_list->where("hero_id",$params['hero_id']);
         }
-        $team_list = $team_list->orderBy("team_id")
-            ->limit($pageSizge)
+        $skin_list = $skin_list->orderBy("skin_id") ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
             ->get()->toArray();
-        return $team_list;
+        return $skin_list;
     }
-    public function getTeamCount($params=[])
+    public function getSkinById($skin_id)
     {
-        $team_count =$this;
-        if(isset($params['game']))
+        $skin_info =$this->select("*")
+                    ->where("skin_id",$skin_id)
+                    ->get()->first();
+        if(isset($skin_info->skin_id))
         {
-            $team_count = $team_count->where("game",$params['game']);
-        }
-        return $team_count->count();
-    }
-
-    public function getTeamByName($team_name,$game)
-    {
-        $team_info =$this->select("*")
-            ->where("team_name",$team_name)
-            ->where("game",$game)
-            ->get()->first();
-        if(isset($team_info->team_id))
-        {
-            $team_info = $team_info->toArray();
+            $skin_info = $skin_info->toArray();
         }
         else
         {
-            $team_info = [];
+            $skin_info = [];
         }
-        return $team_info;
+        return $skin_info;
     }
-    public function getTeamById($team_id)
-    {
-        $team_info =$this->select("*")
-            ->where("team_id",$team_id)
-            ->get()->first();
-        if(isset($team_info->team_id))
-        {
-            $team_info = $team_info->toArray();
-        }
-        else
-        {
-            $team_info = [];
-        }
-        return $team_info;
-    }
-    public function insertTeam($data)
+    public function insertSkin($data)
     {
         foreach($this->attributes as $key => $value)
         {
@@ -125,35 +101,43 @@ class teamModel extends Model
         return $this->insertGetId($data);
     }
 
-    public function updateTeam($team_id=0,$data=[])
+    public function updateSkin($skin_id=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
         {
             $data['update_time'] = $currentTime;
         }
-        return $this->where('team_id',$team_id)->update($data);
+        return $this->where('skin_id',$skin_id)->update($data);
+    }
+    public function deleteSkin($skin_id=0)
+    {
+        return $this->where('skin_id',$skin_id)->delete($skin_id);
     }
 
-    public function saveTeam($data)
+    public function saveSkin($data)
     {
-        $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
-        $data['team_name'] = trim($data['team_name']);
-        $currentTeam = $this->getTeamById($data['team_id']);
-        if(!isset($currentTeam['team_id']))
+        $currentSkin = $this->getSkinById($data['skin_id']);
+        if($data['data']['chromas']!=0)
         {
-            echo "toInsertTeam:"."\n";
-            return $this->insertTeam($data);
+            echo "toDeleteSkin:".$data['skin_id']."\n";
+            $this->deleteSkin($data['skin_id']);
+            return;
+        }
+        if(!isset($currentSkin['skin_id']))
+        {
+            echo "toInsertSkin:"."\n";
+            return $this->insertSkin($data);
         }
         else
         {
-            echo "toUpdateTeam:".$currentTeam['team_id']."\n";
+            echo "toUpdateSkin:".$currentSkin['skin_id']."\n";
             //校验原有数据
             foreach($data as $key => $value)
             {
                 if(in_array($key,$this->toAppend))
                 {
-                    $t = json_decode($currentTeam[$key],true);
+                    $t = json_decode($currentSkin[$key],true);
                     foreach($value as $k => $v)
                     {
                         if(!in_array($v,$t))
@@ -167,9 +151,9 @@ class teamModel extends Model
                 {
                     $value = json_encode($value);
                 }
-                if(isset($currentTeam[$key]) && ($currentTeam[$key] == $value))
+                if(isset($currentSkin[$key]) && ($currentSkin[$key] == $value))
                 {
-                    //echo $currentTeam[$key]."-".$value."\n";
+                    //echo $currentSkin[$key]."-".$value."\n";
                     echo $key.":passed\n";
                     unset($data[$key]);
                 }
@@ -180,7 +164,7 @@ class teamModel extends Model
             }
             if(count($data))
             {
-                return $this->updateTeam($currentTeam['team_id'],$data);
+                return $this->updateSkin($currentSkin['skin_id'],$data);
             }
             else
             {
@@ -188,5 +172,14 @@ class teamModel extends Model
             }
         }
     }
+    public function getSkinCount($params=[]){
+        $skin_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $skin_count = $skin_count->whereIn('key', $keys);
+            }
+        }
+        return $skin_count->count();
+    }
 }
-
