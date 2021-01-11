@@ -39,11 +39,11 @@ class CpseoPlayer extends Command
     public function handle()
     {
         // 英雄联盟队员信息
-        $mission_type = 'player';
+      $mission_type = 'player';
         $game = 'lol';
         $source = 'cpseo';
         //王者荣耀信息
-        /* $mission_type='player';
+       /*  $mission_type='player';
          $game='kpl';
          $source='cpseo';*/
         /* $data = [
