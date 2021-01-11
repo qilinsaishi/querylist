@@ -192,4 +192,21 @@ class lolModel extends Model
         }
         return $hero_info;
     }
+    public function getAllKeywords($game)
+    {
+        $keywords = [];
+        $heroList = $this->getHeroList(["game"=>$game,"fields"=>"hero_id,hero_name,en_name,aka","page_size"=>10000]);
+        foreach($heroList as $hero_info)
+        {
+            $t = array_unique(array_merge([$hero_info['hero_name']],[$hero_info['en_name']],json_decode($hero_info['aka'])));
+            foreach($t as $value)
+            {
+                if(trim($value) != "" && !isset($keywords[trim($value)]))
+                {
+                    $keywords[trim($value)] = $hero_info['hero_id'];
+                }
+            }
+        }
+        return $keywords;
+    }
 }
