@@ -83,7 +83,10 @@ class TeamModel extends Model
             ->orderBy("team_id")
             ->get()->toArray();
         foreach ($team_list as &$val){
-            $val['team_history']=htmlspecialchars_decode($val['team_history']);
+            if(isset($val['team_history']))
+            {
+                $val['team_history']=htmlspecialchars_decode($val['team_history']);
+            }
         }
         return $team_list;
     }
