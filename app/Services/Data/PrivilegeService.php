@@ -575,13 +575,13 @@ class PrivilegeService
                     $teamInfo = $modelClass->$functionSingle($val['team_id']);
                 }
                 $val['team_info']=$teamInfo;
-                if(!empty($val['team_history'])){
+                if(isset($val['team_history'])){
                     $val['team_history']=json_decode($val['team_history'],true);
                 }
-                if(!empty($val['event_history'])){
+                if(isset($val['event_history'])){
                     $val['event_history']=json_decode($val['event_history'],true);
                 }
-                if(!empty($val['stat'])){
+                if(isset($val['stat'])){
                     $val['stat']=json_decode($val['stat'],true);
                 }
 
