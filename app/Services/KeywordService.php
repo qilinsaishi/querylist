@@ -26,26 +26,35 @@ class KeywordService
             //echo strlen(strip_tags($information['content']))."\n";
             foreach($teamKeywords as $keyword => $team_id)
             {
-                $count = substr_count(strip_tags($information['content']),$keyword);
-                if($count>0)
+                if(strlen($keyword)>=3)
                 {
-                    $team[$keyword] = ["id"=>$team_id,"count"=>$count] ;
+                    $count = substr_count(strip_tags($information['content']),$keyword);
+                    if($count>0)
+                    {
+                        $team[$keyword] = ["id"=>$team_id,"count"=>$count] ;
+                    }
                 }
             }
             foreach($playerKeywords as $keyword => $player_id)
             {
-                $count = substr_count(strip_tags($information['content']),$keyword);
-                if($count>0)
+                if(strlen($keyword)>=3)
                 {
-                    $player[$keyword] = ["id"=>$player_id,"count"=>$count] ;
+                    $count = substr_count(strip_tags($information['content']), $keyword);
+                    if ($count > 0)
+                    {
+                        $player[$keyword] = ["id" => $player_id, "count" => $count];
+                    }
                 }
             }
             foreach($heroKeywords as $keyword => $hero_id)
             {
-                $count = substr_count(strip_tags($information['content']),$keyword);
-                if($count>0)
+                if(strlen($keyword)>=3)
                 {
-                    $hero[$keyword] = ["id"=>$hero_id,"count"=>$count] ;
+                    $count = substr_count(strip_tags($information['content']), $keyword);
+                    if ($count > 0)
+                    {
+                        $hero[$keyword] = ["id" => $hero_id, "count" => $count];
+                    }
                 }
             }
             $result[$information['id']]['team'] = $team;
