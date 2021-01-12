@@ -33,7 +33,7 @@ class DefaultConfig extends Model
     {
         $keys = $params['keys'] ?? [];
         $default_field = ['id', 'name', 'key', 'value'];
-        $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
+        $field = isset($params['fields']) && !empty($params['fields']) ? $params['fields'] : $default_field;
         $default_config_list = $this->select($field);
         $count=3;
         if (!empty($keys)) {
