@@ -48,7 +48,7 @@ class matchListModel extends Model
         $match_list = $match_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("match_id")
+            ->orderBy("match_id","desc")
             ->get()->toArray();
         return $match_list;
     }
