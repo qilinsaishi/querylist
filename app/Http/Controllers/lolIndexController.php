@@ -30,44 +30,48 @@ class lolIndexController extends Controller
         $data=$this->payload;
         $return = [];
         $functionList = $privilegeService->getFunction($data);
-        foreach ($functionList as $dataType => $functionInfo)
+        foreach($data as $name => $params)
         {
-            $toSave = 1;
-            $dataArr = $redisService->processCache($dataType,$data[$dataType]);
-            if(is_array($dataArr))
+            $dataType = $params['dataType']??$name;
+            if(isset($functionList[$dataType]))
             {
-
-                //$return[$dataType] = $cache;
-                $toSave = 0;
-            }
-            else
-            {
-                $class = $functionInfo['class'];
-                $function = $functionInfo['function'];
-                $params = $data[$dataType];
-                $d = $class->$function($params);
-                $functionCount = $functionInfo['functionCount'];
-                $functionProcess = $functionInfo['functionProcess']??"";
-
-                if(!$functionCount || $functionCount=="")
+                $toSave = 1;
+                $dataArr = $redisService->processCache($dataType,$params);
+                if(is_array($dataArr))
                 {
-                    $count = 0;
+
+                    //$return[$dataType] = $cache;
+                    $toSave = 0;
                 }
                 else
                 {
-                    $count = $class->$functionCount($params);
+                    $functionInfo = $functionList[$dataType];
+                    $class = $functionInfo['class'];
+                    $function = $functionInfo['function'];
+                    //$params = $data[$dataType];
+                    $d = $class->$function($params);
+                    $functionCount = $functionInfo['functionCount'];
+                    $functionProcess = $functionInfo['functionProcess']??"";
+                    if(!$functionCount || $functionCount=="")
+                    {
+                        $count = 0;
+                    }
+                    else
+                    {
+                        $count = $class->$functionCount($params);
+                    }
+                    if($functionProcess!="")
+                    {
+                        $d = $privilegeService->$functionProcess($d,$functionList);
+                    }
+                    $dataArr = ['data'=>$d,'count'=>$count];
                 }
-                if($functionProcess!="")
+                if($toSave==1)
                 {
-                    $d = $privilegeService->$functionProcess($d,$functionList);
+                    $redisService->saveCache($dataType,$data[$name],$dataArr);
                 }
-                $dataArr = ['data'=>$d,'count'=>$count];
+                $return[$name] = $dataArr;
             }
-            if($toSave==1)
-            {
-                $redisService->saveCache($dataType,$data[$dataType],$dataArr);
-            }
-            $return[$dataType] = $dataArr;
         }
         return $return;
     }

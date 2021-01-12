@@ -249,7 +249,8 @@ class PrivilegeService
         $priviliegeList = $this->getPriviliege();
         $classList = [];
         $functionList = [];
-        foreach ($data as $dataType => $params) {
+        foreach ($data as $name => $params) {
+            $dataType = $params['dataType']??$name;
             //echo "try to find type:".$dataType."\n";
             //echo "currentSource:".$currentSource."\n";
             //默认没找到
