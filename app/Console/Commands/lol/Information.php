@@ -39,15 +39,16 @@ class Information extends Command
     public function handle()
     {
 
-        $target=27;//23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区'
+        $target=23;//23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区'
         $operation = ($this->argument("operation")??"insert");
         //获取分页总数和每页条数
         if($operation=='insert'){
-            $init_url='https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page=1&num=16&target='.$target.'&source=web_pc&_='.msectime();
+            $init_url='https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page=1&num=10&target='.$target.'&source=web_pc&_='.msectime();
             $data=curl_get($init_url);
             $resultTotal=$data['data']['resultTotal'] ?? '';
             $resultNum=$data['data']['resultNum'] ?? '';
             $lastPage=getLastPage($resultTotal,$resultNum);
+            $lastPage=1;
             for ($i=0;$i<=$lastPage;$i++){
                 $m=$i+1;
                 $url='https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page='.$m.'&num=16&target='.$target.'&source=web_pc&_='.msectime();
