@@ -640,7 +640,7 @@ class PrivilegeService
             }
             $modelClass = $functionList["totalPlayerList"]["class"];
             $function = $functionList["totalPlayerList"]['function'];
-            $data['playerList'] = $modelClass->$function(['team_id'=>$data['team_id']]);
+            $data['playerList'] = $modelClass->$function(['team_id'=>$data['team_id'],"page_size"=>100]);
         }
         return $data;
     }
