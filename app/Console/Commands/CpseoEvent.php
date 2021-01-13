@@ -46,12 +46,12 @@ class CpseoEvent extends Command
         $game = ($this->argument("game")??"");
         $mission_type = ($this->argument("mission_type")??"");
         $source = ($this->argument("source")??"");
-        $count=1;
+        $count=4;
         $operation = ($this->argument("operation")??"insert");
         if($operation=='insert'){
             for ($i=0;$i<=$count;$i++){
                 $m=$i+1;
-                $url='http://www.2cpseo.com/events/kog/p-'.$m;
+                $url='http://www.2cpseo.com/events/'.$game.'/p-'.$m;
                 $ql = QueryList::get($url);
                 $links=$ql->find('.versus a')->attrs('href')->all();
                 if($links){

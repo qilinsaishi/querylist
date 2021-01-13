@@ -96,16 +96,19 @@ class lol_qq
         {
             foreach($arr['content']['skins'] as $key => $value)
             {
-                foreach($value as $k => $v)
-                {
-                    if(substr($k,-3)=="Img")
+                if($value['chromas']==0 && $value['chromas'] !=""){
+                    foreach($value as $k => $v)
                     {
-                        $value[$k] = getImage($v);
+                        if(substr($k,-3)=="Img")
+                        {
+                            $value[$k] = getImage($v);
+                        }
                     }
+                    $skinList[$value['skinId']] = ["skin_id"=>$value['skinId'],
+                        'hero_id'=>$value['heroId'],
+                        'data'=>$value];
                 }
-                $skinList[$value['skinId']] = ["skin_id"=>$value['skinId'],
-                    'hero_id'=>$value['heroId'],
-                    'data'=>$value];
+
             }
         }
         return $skinList;
