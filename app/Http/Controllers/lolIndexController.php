@@ -36,7 +36,7 @@ class lolIndexController extends Controller
             if(isset($functionList[$dataType]))
             {
                 $toSave = 1;
-                $dataArr = $redisService->processCache($dataType,$params);
+                $dataArr = $redisService->processCache($dataType,$data[($params['cacheWith']??"")]??$params);
                 if(is_array($dataArr))
                 {
 
@@ -68,7 +68,7 @@ class lolIndexController extends Controller
                 }
                 if($toSave==1)
                 {
-                    $redisService->saveCache($dataType,$data[$name],$dataArr);
+                    $redisService->saveCache($dataType,$data[($params['cacheWith']??"")]??$params,$dataArr);
                 }
                 $return[$name] = $dataArr;
             }

@@ -79,11 +79,22 @@ class PlayerModel extends Model
         }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
-        $player_list = $player_list
-            ->limit($pageSizge)
-            ->offset(($page-1)*$pageSizge)
-            ->orderBy("player_id")
-            ->get()->toArray();
+        if(isset($params['rand']) && $params['rand'] >0)
+        {
+            $player_list = $player_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->inRandomOrder()
+                ->get()->toArray();
+        }
+        else
+        {
+            $player_list = $player_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->orderBy("player_id")
+                ->get()->toArray();
+        }
         return $player_list;
     }
     public function getPlayerByName($player_name,$game)

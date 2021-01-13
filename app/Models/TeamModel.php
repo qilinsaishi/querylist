@@ -77,11 +77,22 @@ class TeamModel extends Model
         }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
-        $team_list = $team_list
-            ->limit($pageSizge)
-            ->offset(($page-1)*$pageSizge)
-            ->orderBy("team_id")
-            ->get()->toArray();
+        if(isset($params['rand']) && $params['rand'] >0)
+        {
+            $team_list = $team_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->inRandomOrder()
+                ->get()->toArray();
+        }
+        else
+        {
+            $team_list = $team_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->orderBy("team_id")
+                ->get()->toArray();
+        }
         foreach ($team_list as &$val){
             if(isset($val['team_history']))
             {
