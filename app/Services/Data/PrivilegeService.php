@@ -664,7 +664,7 @@ class PrivilegeService
             $function = $functionList["totalPlayerList"]['function'];
             $teamModelClass = $functionList["totalTeamInfo"]["class"];
             $teamFunction = $functionList["totalTeamInfo"]['function'];
-            $data['playerList'] = $modelClass->$function(['team_id'=>$data['team_id']]);
+            $data['playerList'] = $modelClass->$function(['team_id'=>$data['team_id'],"page_size"=>100]);
             foreach($data['playerList'] as $key => $playerInfo)
             {
                 if($playerInfo['player_id']==$data['player_id'])
