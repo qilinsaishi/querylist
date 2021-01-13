@@ -21,7 +21,8 @@ class cpseo
             "logo"=>['path'=>'logo','default'=>0],
             "original_source"=>['path'=>"",'default'=>"cpseo"],
             "site_id"=>['path'=>"site_id",'default'=>0],
-            ];
+            "description"=>['path'=>"intro",'default'=>""],
+        ];
 
     public function collect($arr)
     {

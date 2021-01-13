@@ -170,7 +170,7 @@ class PlayerModel extends Model
         {
             $data['aka'] = is_array($data['aka'])?$data['aka']:[$data['aka']];
         }
-        $currentPlayer = $this->getPlayerByName($data['player_name'],$game);
+        $currentPlayer = $this->getPlayerBySiteId($data['site_id'],$game);
         if(!isset($currentPlayer['player_id']))
         {
             echo "toInsertPlayer:\n";
@@ -279,6 +279,20 @@ class PlayerModel extends Model
     public function getPlayerById($player_id){
         $player_info =$this->select("*")
             ->where("player_id",$player_id)
+            ->get()->first();
+        if(isset($player_info->player_id))
+        {
+            $player_info = $player_info->toArray();
+        }
+        else
+        {
+            $player_info = [];
+        }
+        return $player_info;
+    }
+    public function getPlayerBySiteId($site_id){
+        $player_info =$this->select("*")
+            ->where("site_id",$site_id)
             ->get()->first();
         if(isset($player_info->player_id))
         {
