@@ -564,7 +564,7 @@ class PrivilegeService
         $function = $functionList["lolHeroSkin"]['function'];
         $teamInfo=[];
         if(!empty($data)){
-            $data['skinList'] = $modelClass->$function(["hero_id"=>$data['hero_id']]);
+            $data['skinList'] = $modelClass->$function(["hero_id"=>$data['id']]);
         }
         if (isset($functionList['lolHeroSpell']) && isset($functionList['lolHeroSpell']['function'])) {
 
@@ -578,7 +578,7 @@ class PrivilegeService
         $function = $functionList["lolHeroSpell"]['function'];
         $teamInfo=[];
         if(!empty($data)){
-            $data['spellList'] = $modelClass->$function(["hero_id"=>$data['hero_id']]);
+            $data['spellList'] = $modelClass->$function(["hero_id"=>$data['id']]);
         }
         return $data;
     }
