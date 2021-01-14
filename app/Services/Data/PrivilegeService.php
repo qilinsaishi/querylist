@@ -649,7 +649,10 @@ class PrivilegeService
     {
         foreach($data as $key => $value)
         {
-            $data[$key]['content'] = string_split(strip_tags($value['content']),100);
+            if(isset($value['content']))
+            {
+                $data[$key]['content'] = string_split(strip_tags($value['content']),100);
+            }
         }
         return $data;
     }
