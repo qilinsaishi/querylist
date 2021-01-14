@@ -59,6 +59,7 @@ class pvp_qq
             $value['ming_des'] = preg_replace("/<([a-zA-Z]+)[^>]*>/", "",$value['ming_des']);
             $value['ming_des'] = preg_replace("{</([a-zA-Z]+)[^>]*>}", "",$value['ming_des']);
             $value['logo'] = "https://game.gtimg.cn/images/yxzj/img201606/mingwen/".$value['ming_id'].".png";
+            $value['logo'] = getImage($value['logo']);
             $data[$key] = getDataFromMapping($this->data_map, $value);
         }
         return $data;

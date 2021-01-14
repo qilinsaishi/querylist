@@ -52,6 +52,7 @@ class pvp_qq
         {
             $value['summoner_rank'] = str_replace("LV.","",str_replace("解锁","",$value['summoner_rank']));
             $value['logo'] = "https://game.gtimg.cn/images/yxzj/img201606/summoner/".$value['summoner_id']."-big.jpg";
+            $value['logo'] = getImage($value['logo']);
             $data[$key] = getDataFromMapping($this->data_map, $value);
         }
         return $data;
