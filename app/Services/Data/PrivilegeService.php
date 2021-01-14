@@ -98,6 +98,7 @@ class PrivilegeService
                 'function' => "getInformationList",
                 'functionCount' => "getInformationCount",
                 'functionSingle' => "getInformationById",
+                'functionProcess' => "processInformation",
             ],
             "totalPlayerInfo" => [//队员总表
                 'list' => [
@@ -641,6 +642,14 @@ class PrivilegeService
             $modelClass = $functionList["totalPlayerList"]["class"];
             $function = $functionList["totalPlayerList"]['function'];
             $data['playerList'] = $modelClass->$function(['team_id'=>$data['team_id'],"page_size"=>100]);
+        }
+        return $data;
+    }
+    public function processInformation($data, $functionList)
+    {
+        foreach($data as $key => $value)
+        {
+            $data[$key]['content'] = string_split(strip_tags($value['content']),100);
         }
         return $data;
     }
