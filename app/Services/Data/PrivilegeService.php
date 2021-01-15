@@ -225,6 +225,15 @@ class PrivilegeService
                 'functionCount' => "getLinkCount",
                 'functionSingle' => "getLinkById",
             ],
+            "imageList" => [//轮播图
+                'list' => [
+                    ['model' => 'App\Models\Admin\imageList', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getImageList",
+                'functionCount' => "getImageCount",
+                'functionSingle' => "getImageById",
+            ],
             "gameConfig" => [//lol游戏配置
                 'list' => [
                     ['model' => 'App\Models\Admin\Site', 'source' => ''],
