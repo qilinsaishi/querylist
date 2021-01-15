@@ -32,7 +32,9 @@ class ImageList extends Model
     public function getImageList($params)
     {
         $game = $params['game'] ?? '';
-        $cid=$params['cid'] ?? '';
+        $cid=$params['cid'] ?? 0;
+        $site_id=$params['site_id'] ?? 1;
+        $cname=$params['cname'] ?? '';
         $default_image_list=[];
         $default_field = ['id', 'name','game', 'url','cid', 'logo','sort','station_time','status'];
         $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
@@ -42,7 +44,11 @@ class ImageList extends Model
         if(!empty($game)){
             $default_image_list->where('game',$game);
         }
-        if(!empty($cid)){
+        if($cid > 0){
+            $default_image_list->where('cid',$cid);
+        }
+        if($site_id !='' && strlen($cname)>3 ){
+            $cid=ImageCategory::getIdByName($cname,$site_id);
             $default_image_list->where('cid',$cid);
         }
         $default_image_list = $default_image_list
@@ -82,13 +88,20 @@ class ImageList extends Model
     {
         $image_count = $this;
         $game = $params['game'] ?? '';
-        $cid=$params['cid'] ?? '';
+        $cid=$params['cid'] ?? 0;
+        $site_id=$params['site_id'] ?? 1;
+        $cname=$params['cname'] ?? '';
         if(!empty($game)){
             $image_count =$image_count->where('game',$game);
         }
-        if(!empty($cid)){
-            $image_count=$image_count->where('cid',$cid);
+        if($cid > 0){
+            $image_count->where('cid',$cid);
         }
+        if($site_id !='' && strlen($cname)>3 ){
+            $cid=ImageCategory::getIdByName($cname,$site_id);
+            $image_count->where('cid',$cid);
+        }
+
         return $image_count->count();
         //return true;
     }

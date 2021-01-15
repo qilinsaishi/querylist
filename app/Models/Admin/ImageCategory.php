@@ -3,6 +3,7 @@
 namespace App\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
+use phpDocumentor\Reflection\Types\Self_;
 
 class ImageCategory extends Model
 {
@@ -26,6 +27,13 @@ class ImageCategory extends Model
      */
     protected $hidden = [
     ];
+
+    static public function getIdByName($name,$site_id){
+        $obj=self::where(['name'=>$name,'site_id'=>$site_id])->first();
+        $id=$obj['id'] ?? '';
+        return $id;
+
+    }
 
 
 
