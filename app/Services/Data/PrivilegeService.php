@@ -227,7 +227,7 @@ class PrivilegeService
             ],
             "imageList" => [//轮播图
                 'list' => [
-                    ['model' => 'App\Models\Admin\imageList', 'source' => ''],
+                    ['model' => 'App\Models\Admin\ImageList', 'source' => ''],
                 ],
                 'withSource' => 0,
                 'function' => "getImageList",
