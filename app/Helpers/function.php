@@ -399,12 +399,7 @@ function string_split($str,$split_length=1,$charset="UTF-8")
     }
     if ($split_length < 1) return false;
     $len = mb_strlen($str, $charset);
-    $arr = array();
-    for ($i = 0; $i < $len; $i += $split_length) {
-        $s = mb_substr($str, $i, $split_length, $charset);
-        $arr[] = $s;
-    }
-    return implode("",$arr);
+    return mb_substr($str,0,$split_length,$charset);
 }
 
 
