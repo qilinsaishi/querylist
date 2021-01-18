@@ -34,9 +34,9 @@ class ImageList extends Model
         $game = $params['game'] ?? '';
         $cid=$params['cid'] ?? 0;
         $site_id=$params['site_id'] ?? 1;
-        $cname=$params['cname'] ?? '';
+        $flag=$params['flag'] ?? '';
         $default_image_list=[];
-        $default_field = ['id', 'name','game', 'url','cid', 'logo','sort','station_time','status'];
+        $default_field = ['id', 'name','game', 'url','cid', 'logo','sort','station_time','status','flag'];
         $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
         $default_image_list = $this->select($field)->where('status',1);;
         $pageSizge = $params['page_size'] ?? 3;
@@ -47,9 +47,9 @@ class ImageList extends Model
         if($cid > 0){
             $default_image_list->where('cid',$cid);
         }
-        if($site_id !='' && strlen($cname)>3 ){
-            $cid=ImageCategory::getIdByName($cname,$site_id);
-            $default_image_list->where('cid',$cid);
+        if($site_id !='' && strlen($flag)>3 ){
+            //$cid=ImageCategory::getIdByName($flag,$site_id);
+            $default_image_list->where(['flag'=>$flag,'site_id'=>$site_id]);
         }
         $default_image_list = $default_image_list
             ->with('category')
@@ -90,16 +90,16 @@ class ImageList extends Model
         $game = $params['game'] ?? '';
         $cid=$params['cid'] ?? 0;
         $site_id=$params['site_id'] ?? 1;
-        $cname=$params['cname'] ?? '';
+        $flag=$params['flag'] ?? '';
         if(!empty($game)){
             $image_count =$image_count->where('game',$game);
         }
         if($cid > 0){
             $image_count->where('cid',$cid);
         }
-        if($site_id !='' && strlen($cname)>3 ){
-            $cid=ImageCategory::getIdByName($cname,$site_id);
-            $image_count->where('cid',$cid);
+        if($site_id !='' && strlen($flag)>3 ){
+           // $cid=ImageCategory::getIdByName($cname,$site_id);
+            $image_count->where(['flag'=>$flag,'site_id'=>$site_id]);
         }
 
         return $image_count->count();
