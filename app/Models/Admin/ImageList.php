@@ -49,7 +49,7 @@ class ImageList extends Model
         }
         if($site_id !='' && strlen($flag)>3 ){
             //$cid=ImageCategory::getIdByName($flag,$site_id);
-            $default_image_list->where(['flag'=>$flag,'flag'=>$flag]);
+            $default_image_list->where(['flag'=>$flag,'site_id'=>$site_id]);
         }
         $default_image_list = $default_image_list
             ->with('category')
@@ -99,7 +99,7 @@ class ImageList extends Model
         }
         if($site_id !='' && strlen($flag)>3 ){
            // $cid=ImageCategory::getIdByName($cname,$site_id);
-            $image_count->where('flag',$flag);
+            $image_count->where(['flag'=>$flag,'site_id'=>$site_id]);
         }
 
         return $image_count->count();
