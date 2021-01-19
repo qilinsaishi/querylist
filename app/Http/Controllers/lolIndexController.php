@@ -75,5 +75,11 @@ class lolIndexController extends Controller
         }
         return $return;
     }
+    public function refresh()
+    {
+        $redisService = new RedisService();
+        $dataType = $this->request->get("dataType","defaultConfig");
+        $redisService->refreshCache($dataType,[]);
+    }
 
 }
