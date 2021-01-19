@@ -249,6 +249,14 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getList",
             ],
+            "anotherKeyword" => [//本地维护关键字
+                'list' => [
+                    ['model' => 'App\Models\KeywordsModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getKeywordsList",
+                'functionCount' => "getKeywordsCount",
+            ],
         ];
         return $privilegeList;
     }
