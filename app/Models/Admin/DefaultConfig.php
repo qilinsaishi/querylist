@@ -32,6 +32,7 @@ class DefaultConfig extends Model
     public function getDefaultConfigList($params)
     {
         $keys = $params['keys'] ?? [];
+        $site_id = $params['site_id'] ?? 1;
         $default_field = ['id', 'name', 'key', 'value'];
         $field = isset($params['fields']) && !empty($params['fields']) ? $params['fields'] : $default_field;
         $default_config_list = $this->select($field);
@@ -39,6 +40,9 @@ class DefaultConfig extends Model
         if (!empty($keys)) {
             $default_config_list->whereIn('key', $keys);
             $count=count($keys);
+        }
+        if($site_id >0){
+            $default_config_list->where('site_id', $site_id);
         }
 
         $pageSizge = $params['page_size'] ?? $count;
@@ -76,6 +80,7 @@ class DefaultConfig extends Model
     {
         $default_config_count = $this;
         $keys = $params['keys'] ?? [];
+        $site_id = $params['site_id'] ?? 1;
         if (!empty($keys)) {
             if (!empty($keys)) {
                 $default_config_count = $default_config_count->whereIn('key', $keys);
@@ -84,6 +89,9 @@ class DefaultConfig extends Model
         }
         if (isset($params['game'])) {
             $default_config_count = $default_config_count->where("game", $params['game']);
+        }
+        if($site_id >0){
+            $default_config_count=$default_config_count->where('site_id', $site_id);
         }
 
         return $default_config_count->count();
