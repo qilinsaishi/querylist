@@ -8,6 +8,7 @@ use App\Models\TeamModel as TeamModel;
 use App\Models\PlayerModel as PlayerModel;
 use App\Models\KeywordsModel as KeywordsModel;
 use App\Models\Hero\lolModel as lolHeroModel;
+//use App\tfidf;
 
 class KeywordService
 {
@@ -177,5 +178,83 @@ class KeywordService
             }
         }
         return $return;
+    }
+    //爬取数据
+    public function tfIdf($game = "")
+    {
+        $informationModel = (new InformationModel());
+        $keywordMapModel = (new KeywordMapModel());
+        $result = [];
+        $informationList = $informationModel->getInformationList(["keywords"=>1,"fields"=>"content,id,create_time","page_size"=>300]);
+        $sh = scws_open();
+        scws_set_charset($sh, 'utf8');
+        //scws_set_dict($sh, '/path/to/dict.xdb');
+        //scws_set_rule($sh, '/path/to/rules.ini');
+
+
+
+        foreach($informationList as $information)
+        {
+            $text = strip_tags($information['content']);
+            scws_send_text($sh, $text);
+            $top = scws_get_tops($sh, 5);
+            print_r($top);
+            die();
+            $keywords = $oTfidf->get_tfidf(strip_tags($information['content']));
+            print_R($keywords);
+            die();
+            $team = [];$player = [];$hero = [];$another = [];
+            //echo strlen(strip_tags($information['content']))."\n";
+            foreach($anotherKeywords as $keyword => $id)
+            {
+                if(strlen($keyword)>=3)
+                {
+                    $count = substr_count(strip_tags($information['content']),$keyword);
+                    if($count>0)
+                    {
+                        $another[$keyword] = ["id"=>$id,"count"=>$count] ;
+                    }
+                }
+            }
+            foreach($teamKeywords as $keyword => $team_id)
+            {
+                if(strlen($keyword)>=3)
+                {
+                    $count = substr_count(strip_tags($information['content']),$keyword);
+                    if($count>0)
+                    {
+                        $team[$keyword] = ["id"=>$team_id,"count"=>$count] ;
+                    }
+                }
+            }
+            foreach($playerKeywords as $keyword => $player_id)
+            {
+                if(strlen($keyword)>=3)
+                {
+                    $count = substr_count(strip_tags($information['content']), $keyword);
+                    if ($count > 0)
+                    {
+                        $player[$keyword] = ["id" => $player_id, "count" => $count];
+                    }
+                }
+            }
+            foreach($heroKeywords as $keyword => $hero_id)
+            {
+                if(strlen($keyword)>=3)
+                {
+                    $count = substr_count(strip_tags($information['content']), $keyword);
+                    if ($count > 0)
+                    {
+                        $hero[$keyword] = ["id" => $hero_id, "count" => $count];
+                    }
+                }
+            }
+            $result[$information['id']]['another'] = $another;
+            $result[$information['id']]['team'] = $team;
+            $result[$information['id']]['player'] = $player;
+            $result[$information['id']]['hero'] = $hero;
+            $informationModel->updateInformation($information['id'],['keywords'=>0,'keywords_list'=> $result[$information['id']]]);
+            $keywordMapModel->saveMap($information['id'],"information", $result[$information['id']],$information['create_time']);
+        }
     }
 }

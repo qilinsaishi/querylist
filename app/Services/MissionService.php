@@ -96,7 +96,6 @@ class MissionService
         $informationModel = new InformationModel();
         $authorModel = new AuthorModel();
         $result_list = $collectModel->getResult(500, $game, $source, $mission_type);
-
         //初始化空的类库列表
         $classList = [];
         //循环任务列表

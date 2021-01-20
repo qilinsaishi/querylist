@@ -3,17 +3,16 @@
 namespace App\Console\Commands;
 
 
-use App\Services\AliyunService;
 use Illuminate\Console\Command;
 use App\Services\KeywordService as oKeyword;
-class Keyword extends Command
+class TfIdf extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'keyword:process {type} {game}';
+    protected $signature = 'keyword:tfidf {game}';
 
     /**
      * The console command description.
@@ -39,18 +38,7 @@ class Keyword extends Command
      */
     public function handle()
     {
-        $operation = ($this->argument("type")??"information");
         $game = ($this->argument("game")??"");
-        switch ($operation) {
-            case "information":
-                (new oKeyword())->information($game);
-                break;
-            default:
-
-                break;
-        }
-
-
-
+        (new oKeyword())->tfIdf($game);
     }
 }

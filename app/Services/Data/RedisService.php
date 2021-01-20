@@ -27,11 +27,12 @@ class RedisService
                 'prefix'=>"links",
                 'expire'=>86400,
             ],
-
+            /*
             "information" => [//资讯
                 'prefix'=>"info",
                 'expire'=>30,
             ],
+            */
 
             "totalPlayerList" => [//队员总表
                 'prefix'=>"totalPlayerList",
