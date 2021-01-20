@@ -38,7 +38,7 @@ class InformationModel extends Model
     protected $attributes = [
     ];
     protected $toJson = [
-        "keywords_list"
+        "keywords_list","scws_list"
     ];
     protected $toAppend = [
     ];
@@ -50,6 +50,11 @@ class InformationModel extends Model
         if(isset($params['keywords']))
         {
             $information_list = $information_list->where("keywords",$params['keywords']>0?1:0);
+        }
+        //是否需要处理关键字
+        if(isset($params['scws']))
+        {
+            $information_list = $information_list->where("scws",$params['scws']>0?1:0);
         }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
@@ -231,6 +236,11 @@ class InformationModel extends Model
         if(isset($params['keywords']))
         {
             $information_count = $information_count->where("keywords",$params['keywords']>0?1:0);
+        }
+        //是否需要处理关键字
+        if(isset($params['scws']))
+        {
+            $information_count = $information_count->where("scws",$params['scws']>0?1:0);
         }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)

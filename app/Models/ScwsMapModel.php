@@ -7,9 +7,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class KeywordMapModel extends Model
+class ScwsMapModel extends Model
 {
-    protected $table = "keyword_map";
+    protected $table = "scws_map";
     protected $primaryKey = "id";
     public $timestamps = false;
     protected $connection = "query_list";
@@ -45,26 +45,24 @@ class KeywordMapModel extends Model
         }
         return $this->insertGetId($data);
     }
-    public function deleteByContent($id=0,$type="information")
+    public function deleteByContent($id=0)
     {
-        return $this->where('content_id',$id)->where('content_type',$type)->delete();
+        return $this->where('content_id',$id)->delete();
     }
 
     public function saveMap($id,$type,$mapList,$time)
     {
         $this->deleteByContent($id,$type);
-        foreach($mapList as $source_type => $list)
+        foreach($mapList as $keyword_info)
         {
-            foreach($list as $keyword => $keyword_info)
-            {
-                $map = ['keyword'=>$keyword,
-                    "source_type"=>$source_type,"content_type"=>$type,
-                    "source_id"=>$keyword_info['id'],"content_id"=>$id,
-                    "count"=>$keyword_info['count'],
+            $map = ['keyword'=>$keyword_info['word'],
+                    "weight"=>$keyword_info['weight'],
+                    "attr"=>$keyword_info['attr'],
+                    "content_id"=>$id,
+                    "count"=>$keyword_info['times'],
                     "content_time"=>$time,
-                    ];
-                $this->insert($map);
-            }
+                ];
+            $this->insert($map);
         }
         return;
     }
@@ -78,19 +76,9 @@ class KeywordMapModel extends Model
             $keyword_list = $keyword_list->where("content_id",$params['content_id']);
         }
         //来源ID
-        if(isset($params['source_id']) && ($params['source_id'])>0)
+        if(isset($params['word']) && strlen($params['word'])>0)
         {
-            $keyword_list = $keyword_list->where("source_id",$params['source_id']);
-        }
-        //目标类型
-        if(isset($params['content_type']) && ($params['content_type'])>0)
-        {
-            $keyword_list = $keyword_list->where("content_type",$params['content_type']);
-        }
-        //来源类型
-        if(isset($params['source_type']) && ($params['source_type'])>0)
-        {
-            $keyword_list = $keyword_list->where("source_type",$params['source_type']);
+            $keyword_list = $keyword_list->where("word",$params['word']);
         }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
