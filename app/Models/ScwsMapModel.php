@@ -50,19 +50,25 @@ class ScwsMapModel extends Model
         return $this->where('content_id',$id)->delete();
     }
 
-    public function saveMap($id,$type,$mapList,$time)
+    public function saveMap($id,$type,$mapList,$keywordMapList,$time)
     {
+        echo "content_id:".$id."\n";
         $this->deleteByContent($id,$type);
+        echo "deleted:".$this->deleteByContent($id,$type)."\n";
         foreach($mapList as $keyword_info)
         {
-            $map = ['keyword'=>$keyword_info['word'],
+            if(isset($keywordMapList[$keyword_info['word']]))
+            {
+                $map = ['keyword'=>$keyword_info['word'],
+                    'keyword_id'=>$keywordMapList[$keyword_info['word']],
                     "weight"=>$keyword_info['weight'],
                     "attr"=>$keyword_info['attr'],
                     "content_id"=>$id,
                     "count"=>$keyword_info['times'],
                     "content_time"=>$time,
                 ];
-            $this->insert($map);
+                $this->insert($map);
+            }
         }
         return;
     }
