@@ -187,7 +187,7 @@ class KeywordService
         $scwsMapModel = (new ScwsMapModel());
         $scwsKeywordMapModel = (new ScwsKeywordMapModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["scws"=>1,"fields"=>"content,id,create_time","page_size"=>300]);
+        $informationList = $informationModel->getInformationList(["scws"=>1,"fields"=>"content,id,type,game,create_time","page_size"=>300]);
         $sh = scws_open();
         scws_set_charset($sh, 'utf8');
         foreach($informationList as $information)
@@ -196,9 +196,16 @@ class KeywordService
             $text = strip_tags($information['content']);
             scws_send_text($sh, $text);
             $top = scws_get_tops($sh,10);
-            $informationModel->updateInformation($information['id'],['scws'=>0,'scws_list'=> $top]);
             $keywordMap = $scwsKeywordMapModel->saveMap($top);
-            $scwsMapModel->saveMap($information['id'],"information", $top,$keywordMap,$information['create_time']);
+            foreach($top as $key => $wordInfo)
+            {
+                if(isset($keywordMap[$wordInfo['word']]))
+                {
+                    $top[$key]['keyword_id'] = $keywordMap[$wordInfo['word']];
+                }
+            }
+            $informationModel->updateInformation($information['id'],['scws'=>0,'scws_list'=> $top]);
+            $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time']);
         }
     }
 }

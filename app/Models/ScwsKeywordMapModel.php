@@ -60,6 +60,21 @@ class ScwsKeywordMapModel extends Model
         }
         return $word;
     }
+    public function getById($id)
+    {
+        $word =$this->select("*")
+            ->where("id",$id)
+            ->get()->first();
+        if(isset($word->id))
+        {
+            $word = $word->toArray();
+        }
+        else
+        {
+            $word = [];
+        }
+        return $word;
+    }
     public function saveMap($mapList)
     {
         $return = [];

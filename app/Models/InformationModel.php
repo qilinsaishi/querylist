@@ -106,9 +106,9 @@ class InformationModel extends Model
         }
         return $information;
     }
-    public function getInformationById($id)
+    public function getInformationById($id,$fields = "*")
     {
-        $information =$this->select("*")
+        $information =$this->select($fields)
             ->where("id",$id)
             ->get()->first();
         if(isset($information->id))

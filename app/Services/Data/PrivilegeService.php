@@ -257,6 +257,22 @@ class PrivilegeService
                 'function' => "getKeywordsList",
                 'functionCount' => "getKeywordsCount",
             ],
+            "scwsInformaitonList" => [//由scws分词索引生成的中文分词
+                'list' => [
+                    ['model' => 'App\Models\ScwsMapModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getList",
+                'functionCount' => "getCount",
+                'functionProcess' => "processScwsInformationList",
+            ],
+            "scwsKeyword" => [//由scws分词索引生成的中文分词
+                'list' => [
+                    ['model' => 'App\Models\ScwsKeywordMapModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getById",
+            ],
         ];
         return $privilegeList;
     }
@@ -703,6 +719,30 @@ class PrivilegeService
                 }
             }
             $data['teamInfo'] = $teamModelClass->$teamFunction(['team_id'=>$data['team_id'],"fields"=>"team_id,team_name,description,logo"]);
+        }
+        return $data;
+    }
+    public function processScwsInformationList($data, $functionList)
+    {
+        if (isset($functionList['information']) && isset($functionList['information']['function'])) {
+
+        } else {
+            $f = $this->getFunction(['information' => []]);
+            if (isset($f['information']['class'])) {
+                $functionList["information"] = $f['information'];
+            }
+        }
+        $modelClass = $functionList["information"]["class"];
+        $function = $functionList["information"]['function'];
+        foreach($data as $key => $value)
+        {
+            $information = $modelClass->$function($value['content_id'],["id","title","logo","create_time","site_time","content"]);
+            $information['content'] = string_split(strip_tags($information['content']),100);
+            if(isset($information['id']))
+            {
+
+                $data[$key]['content'] = $information;
+            }
         }
         return $data;
     }
