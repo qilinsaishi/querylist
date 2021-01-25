@@ -31,6 +31,64 @@ class cpseo
     }
     public function process($arr)
     {
+        /**
+         * Array
+        (
+        [baseInfo] => Array //战队基本信息
+        (
+        [logo] => http://www.2cpseo.com/storage/dj/November2019/1dc10e7228f132b4bd5af7f52ddee322.jpg
+        [name] => ESG //战队名称
+        [game] => kpl //游戏类型
+        [subname] => ESG //子名称
+        [intro] => <p>ESG是来自韩国的一支<span style="">王者荣耀</span>战队.</p> //简介
+        )
+
+        [team_members] => Array  //战队队员列表
+        (
+        [0] => http://www.2cpseo.com/player/2319
+        [1] => http://www.2cpseo.com/player/2320
+        [2] => http://www.2cpseo.com/player/2321
+        [3] => http://www.2cpseo.com/player/2322
+        [4] => http://www.2cpseo.com/player/2323
+        [5] => http://www.2cpseo.com/player/2324
+        [6] => http://www.2cpseo.com/player/2325
+        )
+
+        )
+         *  [information] => Array //资讯
+        (
+        [sTitle] => 【LPL赛事速看】第三周D7：乌迪尔男枪野区起飞！V5、WE横扫对手！
+        [link] => http://www.2cpseo.com/article/djtt/9032
+        [sDesc] => 乌迪尔拿了mvp，玩家沸腾了，玩家们问：谁是乌迪尔？？
+        [sIMG] => /img-asset/medium/storage/articles/January2021//467311b9581531b0042ee48ac8c0733b.jpg
+        [sCreated] => 2021-01-25 09:33:59
+        [type] => 1761
+        [content] => <p><iframe frameborder="0" scrolling="no" src="https://ygzone-v.2cpmm.com/ygzone-v/video/21/01/25/6c6bf7532eadd079fc6a6250476b6939.mp4" style="min-he
+        ight:450px" width="100%"></iframe></p>
+        )
+         *  [history_match] => Array //赛事
+        (
+        [0] => Array
+        (
+        [date] => 2020-12-21
+        [score] => 1 : 0
+        [teams] => Array
+        (
+        [0] => FPX
+        [1] => RW
+        )
+
+        [team_url] => Array
+        (
+        [0] => http://www.2cpseo.com/team/40
+        [1] => http://www.2cpseo.com/team/41
+        )
+
+        )
+
+
+
+         */
         var_dump($arr);
     }
     /**
@@ -42,43 +100,59 @@ class cpseo
     {
         $res = [];
         $ql = QueryList::get($url);
-        $logo = $ql->find('.kf_roster_dec img')->attr('src');
-        $aka = $ql->find('.kf_roster_dec .text span:eq(0)')->text();
-        $wraps = $ql->find('.text_wrap .text_2 p')->text();
-        $wraps = explode("\n", $wraps);
-        foreach ($wraps as $key=>$val) {
-            if (strpos($val, '地区：') !== false) {
-                $area = str_replace('地区：', '', $val);
-            }
-            if (strpos($val, '中文名称：') !== false) {
-                $cname = str_replace('中文名称：', '', $val);
-            }
-            if (strpos($val, '英文名称：') !== false) {
-                $ename = str_replace('英文名称：', '', $val);
-            }
-            if (strpos($val, '建队时间：') !== false) {
-                $createTime = str_replace('建队时间：', '', $val);
-            }
-            if(strpos($val,'简介：') !==false) {
-                $intro=$wraps[$key+1] ?? '';
-            }
+        $logo = $ql->find('.logo-block img')->attr('src');
+        $logo='http://www.2cpseo.com'.$logo;
+        $name = $ql->find('.name-block .name')->text();
+        $subname = $ql->find('.name-block .subname')->text();
+        $intro_content=$ql->find('.intro-content-block .intro-content')->html();
+        $team_members=$ql->find('.l-m-team-member:eq(0) td a')->attrs('href')->all();
+
+        $history_match=$ql->rules([
+            'date' => ['.text:eq(0)', 'text'],
+            'score' => ['.score', 'text'],
+            'info' => ['.info', 'html'],
+            'teams' => ['.info a', 'texts'],
+        ])->range('.l-m-history-match .item')->queryData();
+        foreach ($history_match as &$val){
+            $info=$val['info'] ?? '';
+            $link=QueryList::html($info)->find('a')->attrs('href')->toArray();
+            $val['team_url']=$link ?? [];
+            unset($val['info']);
         }
 
+        $article_list=$ql->rules([
+            'sTitle' => ['.article-title', 'text'],
+            'link' => ['a', 'href'],
+            'sDesc' => ['.article-content', 'text'],
+            'sIMG' => ['img', 'src'],
+        ])->range('.home-article-list .article-item')->queryData(function($item){
+            $item['sCreated'] = QueryList::get($item['link'])->find('.article-date')->text();
+            $item['type']=1761;//资讯
+            $item['content'] = QueryList::get($item['link'])->find('.article-content')->html();
+            return $item;
+        });
+        $teamArr=explode('team/',$url);
+        $team_id=end($teamArr);
+
+
         $baseInfo = [
-            'logo' => 'http://www.2cpseo.com' . $logo,
-            'aka' => $aka ?? '',
-            'game_id' => 2,
-            'area' => $area ?? '',
-            'cname' => $cname ?? '',
-            'ename' => $ename ?? '',
-            'create_time' => $createTime ?? '',
-            'intro' => $intro ?? ''
+            'logo' => $logo,
+            'name' => $name ?? '',
+            'team_id'=>$team_id,
+            'game' => 'kpl',
+            'subname' => $subname ?? '',
+            'intro' => $intro_content ?? '',
+            'connect_info'=>['team_id'=>$team_id]
+
         ];
-        $teamListLink = $ql->find('.versus a')->attrs('href')->all();
+
         $res = [
             'baseInfo' => $baseInfo,
-            'teamListLink' => $teamListLink
+            'history_match' => $history_match,
+            'team_members' => $team_members,
+            'information'=>$article_list,
         ];
+
         return $res;
     }
 }

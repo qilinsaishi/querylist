@@ -56,9 +56,9 @@ class cpseo
     {
         $baseInfo = [];
         $ql = QueryList::get($url);
-        $logo = $ql->find('.kf_roster_dec:eq(0) img')->attr('src');
-        $wraps = $ql->find('.text_wrap:eq(0) .text_2 p')->text();
-        $wraps = explode("\n", $wraps);
+        $logo = $ql->find('.commonDetail-intro img')->attr('src');
+        $name = $ql->find('.intro-content-block .intro-name')->text();
+        $wraps = $ql->find('.intro-content p')->texts()->all();
         if ($wraps) {
             foreach ($wraps as $key => $val) {
                 if (strpos($val, '昵称：') !== false) {
@@ -66,7 +66,6 @@ class cpseo
                 }
                 if (strpos($val, '真名：') !== false) {
                     $realname = str_replace('真名：', '', $val);
-                    $realname=ltrim($realname);
                 }
                 if (strpos($val, '位置：') !== false) {
                     $position = str_replace('位置：', '', $val);
@@ -80,6 +79,9 @@ class cpseo
                 if (strpos($val, '擅长英雄：') !== false) {
                     $goodAtHeroes = str_replace('擅长英雄：', '', $val);
                 }
+                if (strpos($val, '主玩英雄：') !== false) {
+                    $goodAtHeroes = str_replace('主玩英雄：', '', $val);
+                }
                 if (strpos($val, '生日：') !== false) {
                     $birthday = str_replace('生日：', '', $val);
                 }
@@ -89,17 +91,22 @@ class cpseo
 
             }
         }
+        if (strpos($name, '（') !== false) {
+            $replace_str='（'.$nickname.'）';
+            $name = str_replace($replace_str, '', $name);
+        }
         $baseInfo = [
             'logo' => 'http://www.2cpseo.com' . $logo,
-            'nickname' => $nickname ?? '',
-            'real_name' => $realname ?? '',
-            'position' => $position ?? '',
-            'area' => $area ?? '',
-            'game_id'=>2,//王者荣耀
-            'goodAtHeroes' => $goodAtHeroes ?? '',
-            'birthday' => $birthday ?? '',
-            'usedId' => $usedId ?? '',
-            'intro' => $intro ?? ''
+            'name' => $name ?? '',//名称
+            'nickname' => $nickname ?? '',//昵称
+            'real_name' => $realname ?? '',//真名
+            'position' => $position ?? '',//位置
+            'area' => $area ?? '',//地区
+            'game'=>'kpl',//王者荣耀
+            'goodAtHeroes' => $goodAtHeroes ?? '',//擅长英雄
+            'birthday' => $birthday ?? '',//生日
+            'usedId' => $usedId ?? '',//曾用ID
+            'intro' => $intro ?? '',//
         ];
         return $baseInfo;
     }
