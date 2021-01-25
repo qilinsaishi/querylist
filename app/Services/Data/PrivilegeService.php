@@ -713,7 +713,7 @@ class PrivilegeService
             {
                 if(in_array($word['keyword_id'],$disableKeywordList))
                 {
-                    unset($data['scws_list']);
+                    unset($data['scws_list'][$key]);
                 }
             }
             $data['scws_list'] = json_encode($data['scws_list']);

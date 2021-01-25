@@ -100,6 +100,6 @@ class ScwsKeywordMapModel extends Model
     {
         $keyword_list =$this->select("id");
         $keyword_list = $keyword_list->where("available",0)->get()->toArray();
-        return $keyword_list;
+        return array_column($keyword_list,"id");
     }
 }
