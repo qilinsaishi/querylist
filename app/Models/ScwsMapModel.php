@@ -74,7 +74,8 @@ class ScwsMapModel extends Model
     }
     public function getList($params)
     {
-        $keyword_list =$this->select("content_id",\DB::raw('sum(weight) as weight'));
+        $connection = DB::connection($this->connection);
+        $keyword_list =$this->select("content_id",$connection->raw('sum(weight) as weight'));
         //目标ID
         if(isset($params['game']) && strlen($params['game'])>0)
         {
