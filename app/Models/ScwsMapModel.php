@@ -104,6 +104,10 @@ class ScwsMapModel extends Model
                 $keyword_list = $keyword_list->whereIn("keyword_id",$ids);
             }
         }
+        if(isset($params['expect_id']))
+        {
+            $keyword_list->where("content_id","!=",$params['expect_id']);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $keyword_list = $keyword_list
@@ -116,22 +120,26 @@ class ScwsMapModel extends Model
     }
     public function getCount($params)
     {
-        $keyword_list =$this;
+        $keyword_count =$this;
         //目标ID
         if(isset($params['game']) && strlen($params['game'])>0)
         {
-            $keyword_list = $keyword_list->where("game",$params['game']);
+            $keyword_count = $keyword_count->where("game",$params['game']);
         }
         //类型
         if(isset($params['type']) && strlen($params['type'])>0)
         {
             $types = explode(",",$params['type']);
-            $keyword_list = $keyword_list->whereIn("content_type",$types);
+            $keyword_count = $keyword_count->whereIn("content_type",$types);
         }
         //目标ID
         if(isset($params['content_id']) && ($params['content_id'])>0)
         {
-            $keyword_list = $keyword_list->where("content_id",$params['content_id']);
+            $keyword_count = $keyword_count->where("content_id",$params['content_id']);
+        }
+        if(isset($params['expect_id']))
+        {
+            $keyword_count->where("content_id","!=",$params['expect_id']);
         }
         //来源ID
         if(isset($params['ids']))
@@ -139,14 +147,14 @@ class ScwsMapModel extends Model
             $ids = explode(",",$params['ids']);
             if(count($ids)==1)
             {
-                $keyword_list = $keyword_list->where("keyword_id",$ids[0]);
+                $keyword_count = $keyword_count->where("keyword_id",$ids[0]);
             }
             else
             {
-                $keyword_list = $keyword_list->whereIn("keyword_id",$ids);
+                $keyword_count = $keyword_count->whereIn("keyword_id",$ids);
             }
         }
-        $keyword_list = $keyword_list->count();
-        return $keyword_list;
+        $keyword_count = $keyword_count->count();
+        return $keyword_count;
     }
 }
