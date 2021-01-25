@@ -96,4 +96,10 @@ class ScwsKeywordMapModel extends Model
         }
         return $return;
     }
+    public function getDisableList()
+    {
+        $keyword_list =$this->select("id");
+        $keyword_list = $keyword_list->where("available",0)->get()->toArray();
+        return $keyword_list;
+    }
 }

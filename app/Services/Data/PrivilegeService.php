@@ -98,7 +98,7 @@ class PrivilegeService
                 'function' => "getInformationList",
                 'functionCount' => "getInformationCount",
                 'functionSingle' => "getInformationById",
-                'functionProcess' => "processInformation",
+                'functionProcess' => "processInformationList",
             ],
             "totalPlayerInfo" => [//队员总表
                 'list' => [
@@ -118,6 +118,7 @@ class PrivilegeService
                 'function' => "getInformationById",
                 'functionCount' => "",
                 'functionSingle' => "getInformationById",
+                'functionProcess' => "processInformation"
             ],
             "lolHeroList" => [//lol英雄列表
                 'list' => [
@@ -272,6 +273,7 @@ class PrivilegeService
                 ],
                 'withSource' => 0,
                 'function' => "getById",
+                'functionProcess'=>"getDisableList",
             ],
         ];
         return $privilegeList;
@@ -678,7 +680,7 @@ class PrivilegeService
         }
         return $data;
     }
-    public function processInformation($data, $functionList)
+    public function processInformationList($data, $functionList)
     {
         foreach($data as $key => $value)
         {
@@ -688,6 +690,35 @@ class PrivilegeService
             }
         }
         return $data;
+    }
+    public function processInformation($data, $functionList)
+    {
+        if(isset($data['scws_list'])) {
+            $data['scws_list'] = json_decode($data['scws_list'], true);
+
+            if (isset($functionList['scwsKeyword']) && isset($functionList['scwsKeyword']['function']))
+            {}
+            else
+            {
+                $f = $this->getFunction(['scwsKeyword' => []]);
+                if (isset($f['scwsKeyword']['class']))
+                {
+                    $functionList["scwsKeyword"] = $f['scwsKeyword'];
+                }
+            }
+            $modelClass = $functionList["scwsKeyword"]["class"];
+            $function = $functionList["scwsKeyword"]['functionProcess'];
+            $disableKeywordList = $modelClass->$function();
+            foreach($data['scws_list'] as $key => $word)
+            {
+                if(in_array($word['keyword_id'],$disableKeywordList))
+                {
+                    unset($data['scws_list']);
+                }
+            }
+            $data['scws_list'] = json_encode($data['scws_list']);
+            return $data;
+        }
     }
     public function processTotalPlayer($data, $functionList)
     {
