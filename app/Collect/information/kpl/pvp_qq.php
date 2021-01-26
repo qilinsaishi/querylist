@@ -76,7 +76,7 @@ class pvp_qq
          * sIMG：缩略图片*/
         //var_dump($arr);
         $arr['content']['target'] = $this->type[$arr['content']['type']];
-        $arr['content']['sIMG'] = getImage("http:".$arr['content']['sIMG']);
+        $arr['content']['sIMG'] = getImage($arr['content']['sIMG']);
         $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
         preg_match($imgpreg,$arr['content']['sContent'],$imgList);
         foreach($imgList as $img)
