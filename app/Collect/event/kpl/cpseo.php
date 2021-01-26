@@ -75,7 +75,7 @@ class cpseo
                     // 注意这里的QueryList对象与上面的QueryList对象是同一个对象
                     $item['game_items'] = QueryList::html($item['game_list'])->rules(array(
                         'date_no' => array('.game-time','text'),
-                        'game-name' => array('.game-name','text'),
+                        'game_name' => array('.game-name','text'),
                         'team_name' => array('.team-name','texts'),
 
                     ))->range('a')->queryData();
