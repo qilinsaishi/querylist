@@ -24,6 +24,7 @@ class pvp_qq
         $url = $arr['detail']['url'] ?? '';
         $client = new ClientServices();
         $res = $client->curlGet($url);//curl获取json数据
+
         if (!empty($res)) {
             $cdata = [
                 'mission_id' => $arr['mission_id'],

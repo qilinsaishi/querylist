@@ -400,7 +400,7 @@ dd($baseInfos);
         $res['addSkills']=$addSkills ?? [];//技能加点建议
         $res['heroInfoBox']=$heroInfoBox ?? [];//英雄关系
         $res['equipBox']=$equipBox ?? [];//出装建议
-dd($res);
+
         return $res;
     }
 

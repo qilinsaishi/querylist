@@ -40,7 +40,7 @@ class Information extends Command
     public function handle()
     {
 
-        $target=28;//23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区'
+        $target=23;//23=>'综合',24=>'公告',25=>'赛事',27=>'攻略',28=>'社区'
         $operation = ($this->argument("operation")??"insert");
         //获取分页总数和每页条数
         if($operation=='insert'){

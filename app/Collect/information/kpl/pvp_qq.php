@@ -21,9 +21,13 @@ class pvp_qq
             if(!empty($res)){
                 $res['type']=$type;
                 $res['create_time']=date("Y-m-d H:i:s",time());
-                unset($res['linkList']);
-                //unset($res['sCoverList']);
-                unset($res['sCoverMap']);
+                if(isset($res['linkList']) && $res['linkList']){
+                    unset($res['linkList']);
+                }
+                if(isset($res['sCoverMap']) && $res['sCoverMap']){
+                    unset($res['sCoverMap']);
+                }
+
             }
 
         }
