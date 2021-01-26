@@ -141,7 +141,7 @@ class MissionService
                     }
                     elseif ($result['mission_type'] == "information")
                     {
-                        //if(!isset($processResult['author_id']) || $processResult['author_id']<=0)
+                        if(isset($processResult["author"]) && (!isset($processResult['author_id']) || intval($processResult['author_id'])<=0))
                         {
                             //保存作者
                             $author_id = $authorModel->saveAuthor($processResult["author"], $result['source'],$processResult['author_id']??0);

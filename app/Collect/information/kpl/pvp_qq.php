@@ -6,8 +6,25 @@ class pvp_qq
 {
     protected $data_map =
         [
-        ];
-
+            "author_id"=>['path'=>"authorID",'default'=>''],//原站点作者ID
+            "author"=>['path'=>"sAuthor",'default'=>''],//原站点作者
+            "logo"=>['path'=>"sIMG",'default'=>''],//logo
+            "site_id"=>['path'=>"iNewsId",'default'=>""],//原站点ID
+            "game"=>['path'=>"",'default'=>"lol"],//对应游戏
+            "source"=>['path'=>"",'default'=>"lol_qq"],//来源
+            "title"=>['path'=>"sTitle",'default'=>''],//标题
+            "content"=>['path'=>"sContent",'default'=>''],//内容
+            "type"=>['path'=>"target",'default'=>1],//类型
+            "site_time"=>['path'=>"sCreated",'default'=>""]//来源站点的时间
+            ];
+    protected $type = [
+        1761=>1,//'综合',
+        1762=>2,//'公告',
+        1764=>3,//'赛事',
+        1765=>4,//'攻略',
+        1763=>6,//'活动'
+        //1761=>新闻,1762=>公告,1763=>活动,1764=>赛事,1765=>攻略
+    ];
     public function collect($arr)
     {
         $cdata = [];
@@ -61,7 +78,20 @@ class pvp_qq
          * sDesc：描述
          * type:类型;//1761=>新闻,1762=>公告,1763=>活动,1764=>赛事,1765=>攻略
          * sIMG：缩略图片*/
-
-        var_dump($arr);
+        //var_dump($arr);
+        $arr['content']['target'] = $this->type[$arr['content']['type']];
+        $arr['content']['sIMG'] = getImage("http:".$arr['content']['sIMG']);
+        $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
+        preg_match($imgpreg,$arr['content']['sContent'],$imgList);
+        foreach($imgList as $img)
+        {
+            if(substr($img,0,4)=="http")
+            {
+                $src = getImage($img);
+                $arr['content']['sContent'] = str_replace($img,$src,$arr['content']['sContent']);
+            }
+        }
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
 }
