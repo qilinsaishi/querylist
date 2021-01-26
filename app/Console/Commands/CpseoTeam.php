@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\CollectResultModel;
 use App\Services\MissionService as oMission;
 use Illuminate\Console\Command;
 use QL\QueryList;
@@ -62,26 +63,36 @@ class CpseoTeam extends Command
                 $url = 'http://www.2cpseo.com/teams/kog/p-' . $m;
                 //$url = 'http://www.2cpseo.com/teams/lol/p-' . $m;
                 $ql = QueryList::get($url);
-                $links = $ql->find('.hot-teams-container a')->attrs('href')->all();
+                $links = $ql->find('.team-list a')->attrs('href')->all();
                 if ($links) {
+                    $collectResultModel=new CollectResultModel();
                     foreach ($links as $v) {
-                        $data = [
-                            "asign_to" => 1,
-                            "mission_type" => $mission_type,//赛事
-                            "mission_status" => 1,
-                            "game" => $game,
-                            "source" => $source,//
-                            "detail" => json_encode(
-                                [
-                                    "url" => $v,
-                                    "game" => $game,
-                                    "source" => $source,
-                                ]
-                            ),
+                        $params=[
+                            'game'=>$game,
+                            'mission_type'=>$mission_type,
+                            'source_link'=>$v,
                         ];
-                        if($data){
-                            $insert = (new oMission())->insertMission($data);
-                            echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+                        $result=$collectResultModel->getCollectResultCount($params);
+                        $result=$result ?? 0;
+                        if($result <=0){
+                            $data = [
+                                "asign_to" => 1,
+                                "mission_type" => $mission_type,//赛事
+                                "mission_status" => 1,
+                                "game" => $game,
+                                "source" => $source,//
+                                "detail" => json_encode(
+                                    [
+                                        "url" => $v,
+                                        "game" => $game,
+                                        "source" => $source,
+                                    ]
+                                ),
+                            ];
+                            if($data){
+                                $insert = (new oMission())->insertMission($data);
+                                echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+                            }
                         }
 
                     }

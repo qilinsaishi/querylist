@@ -12,7 +12,7 @@ class CpseoPlayer extends Command
      *
      * @var string
      */
-    protected $signature = 'command:seo_player  {operation}';
+    protected $signature = 'command:seo_player   {operation} {game} {mission_type} {source}';
 
     /**
      * The console command description.
@@ -39,30 +39,37 @@ class CpseoPlayer extends Command
     public function handle()
     {
         // 英雄联盟队员信息
-      $mission_type = 'player';
+       /* $mission_type = 'player';
         $game = 'lol';
-        $source = 'cpseo';
-        //王者荣耀信息
-       /*  $mission_type='player';
-         $game='kpl';
-         $source='cpseo';*/
-        /* $data = [
-              "asign_to"=>1,
-              "mission_type"=>$mission_type,
-              "mission_status"=>1,
-              "game"=>$game,
-              "source"=>$source,
-              "detail"=>json_encode(
-                  [
-                      "url"=>'http://www.2cpseo.com/player/594',
-                      "game"=>$game,//lol
-                      "source"=>$source,
+        $source = 'cpseo';*/
+        $game = ($this->argument("game")??"");
+        $mission_type = ($this->argument("mission_type")??"");
+        $source = ($this->argument("source")??"");
+        $operation = ($this->argument("operation")??"insert");
+        if ($operation == 'insert') {
+            $data = [
+                "asign_to"=>1,
+                "mission_type"=>$mission_type,
+                "mission_status"=>1,
+                "game"=>$game,
+                "source"=>$source,
+                "detail"=>json_encode(
+                    [
+                        "url"=>'http://www.2cpseo.com/player/616',
+                        "game"=>$game,//lol
+                        "source"=>$source,
 
-                  ]
-              ),
-          ];
-          $insert = (new oMission())->insertMission($data);
-          echo "insert:".$insert;*/
+                    ]
+                ),
+            ];
+            $insert = (new oMission())->insertMission($data);
+            echo "insert:".$insert;
+        }else{
+            (new oMission())->collect($game, $source, $mission_type);
+        }
+        //王者荣耀信息
+
+        /* */
         (new oMission())->collect($game, $source, $mission_type);
     }
 }

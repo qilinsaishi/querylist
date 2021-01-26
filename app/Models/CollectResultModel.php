@@ -65,6 +65,31 @@ class CollectResultModel extends Model
         return $this->where('id',$id)->update($data);
     }
     //
+    public function getCollectResultCount($params=[]){
+        $collectResultModel = $this;
+        $game=$params['game'] ?? '';
+        $mission_type=$params['mission_type'] ?? '';
+        $source_link=$params['source_link'] ?? '';
+        //游戏
+        if($game!="")
+        {
+            $collectResultModel = $collectResultModel->where("game",$game);
+        }
+
+        //类型
+        if($mission_type!="")
+        {
+            $collectResultModel = $collectResultModel->where("mission_type",$mission_type);
+        }
+        //采集来源
+        if($source_link!="")
+        {
+            $collectResultModel = $collectResultModel->where("source_link",$source_link);
+        }
+
+
+        return $collectResultModel->count();
+    }
 
 
 
