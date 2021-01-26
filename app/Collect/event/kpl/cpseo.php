@@ -56,7 +56,7 @@ class cpseo
 
         $baseInfo = [
             'logo' => $logo,
-            'title' => $title ?? '',
+            'title' => $match_name ?? '',
             'start_time' => $startTime ?? '',
             'end_time' => $endTime ?? '',
             'game' =>'kpl',//game: 1表示lol
