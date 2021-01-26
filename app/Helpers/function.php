@@ -307,6 +307,7 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
     $redis = app("redis.connection");
     $fileKey = "file_get_" . $url;
     $currentFile = $redis->get($fileKey);
+    echo "cache:".$currentFile.'\n';
     if ($currentFile && strlen($currentFile) > 5) {
         return $currentFile;
     }

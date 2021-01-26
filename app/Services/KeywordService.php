@@ -10,6 +10,7 @@ use App\Models\TeamModel as TeamModel;
 use App\Models\PlayerModel as PlayerModel;
 use App\Models\KeywordsModel as KeywordsModel;
 use App\Models\Hero\lolModel as lolHeroModel;
+use App\Models\Hero\kplModel as kplHeroModel;
 
 class KeywordService
 {
@@ -146,6 +147,10 @@ class KeywordService
             if($game=="lol")
             {
                 $heroKeywords = (new lolHeroModel())->getAllKeywords($game);
+            }
+            elseif($game=="kpl")
+            {
+                $heroKeywords = (new kplHeroModel())->getAllKeywords($game);
             }
             if(count($heroKeywords)>0)
             {
