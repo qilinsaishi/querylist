@@ -237,11 +237,12 @@ class PrivilegeService
             ],
             "gameConfig" => [//lol游戏配置
                 'list' => [
-                    ['model' => 'App\Models\Admin\Site', 'source' => ''],
+                    ['model' => 'App\Models\Admin\GameConfig', 'source' => ''],
                 ],
                 'withSource' => 0,
-                'function' => "getSiteById",
-                'functionSingle' => "getSiteById",
+                'function' => "getGameConfigById",
+                'functionCount' => "getGameConfigCount",
+                'functionSingle' => "getGameConfigById",
             ],
             "keywordMapList" => [//关键字对应
                 'list' => [
