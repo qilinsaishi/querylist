@@ -8,6 +8,17 @@ class cpseo
 {
     protected $data_map =
         [
+            "team_name"=>['path'=>"baseInfo.name",'default'=>''],
+            "en_name"=>['path'=>"baseInfo.ename",'default'=>''],
+            "aka"=>['path'=>"baseInfo.subname","default"=>""],
+            "location"=>['path'=>"baseInfo.area","default"=>"未知"],
+            "established_date"=>['path'=>"baseInfo.create_time",'default'=>"未知"],
+            "coach"=>['path'=>"",'default'=>"暂无"],
+            "logo"=>['path'=>"baseInfo.logo",'default'=>''],
+            "description"=>['path'=>"baseInfo.intro",'default'=>"暂无"],
+            "race_stat"=>['path'=>"",'default'=>[]],
+            "original_source"=>['path'=>"",'default'=>"cpseo"],
+            "site_id"=>['path'=>"site_id",'default'=>0],
         ];
     public function collect($arr)
     {
@@ -31,7 +42,11 @@ class cpseo
     }
     public function process($arr)
     {
-        var_dump($arr);
+        $t = explode("/",$arr['source_link']);
+        $arr['content']['site_id'] = intval($t[count($t)-1]??0);
+        $arr['content']['baseInfo']['logo'] = getImage($arr['content']['baseInfo']['logo']);
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
     /**
      * 来自http://www.2cpseo.com
@@ -80,5 +95,26 @@ class cpseo
             'teamListLink' => $teamListLink
         ];
         return $res;
+    }
+    public function processMemberList($team_id,$arr)
+    {
+        $missionList = [];
+        foreach($arr['content']['teamListLink'] as $member)
+        {
+            $t = explode("/",$member);
+            $mission = ['mission_type'=>"player",
+                'mission_status'=>0,
+                'title'=>$t[count($t)-1],
+                'detail'=>json_encode(['url'=>$member,
+                    'name'=>$t[count($t)-1],
+                    'position'=>"",
+                    'logo'=>"",
+                    'team_id'=>$team_id,
+                    'current'=>1
+                ]),
+            ];
+            $missionList[] = $mission;
+        }
+        return $missionList;
     }
 }
