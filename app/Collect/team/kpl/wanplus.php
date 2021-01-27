@@ -60,8 +60,6 @@ class wanplus
         $arr['content']['logo'] = getImage($arr['content']['logo']);
         $arr['content']['raceStat'] = ["win"=>intval($t[0]??0),"draw"=>intval($t[1]??0),"lose"=>intval($t[2]??0)];
         $data = getDataFromMapping($this->data_map,$arr['content']);
-        print_R($data);
-        die();
         return $data;
     }
     public function processMemberList($team_id,$arr)

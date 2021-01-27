@@ -97,8 +97,8 @@ class cpseo
 
         )
          */
-        
-        var_dump($arr);
+        $t = explode("/",$arr['source_link']);
+        $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         $t = explode("/",$arr['source_link']);
         $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         $arr['content']['baseInfo']['logo'] = getImage($arr['content']['baseInfo']['logo']);
@@ -172,21 +172,24 @@ class cpseo
     public function processMemberList($team_id,$arr)
     {
         $missionList = [];
-        foreach($arr['content']['teamListLink'] as $member)
+        if(isset($arr['content']['team_members']))
         {
-            $t = explode("/",$member);
-            $mission = ['mission_type'=>"player",
-                'mission_status'=>0,
-                'title'=>$t[count($t)-1],
-                'detail'=>json_encode(['url'=>$member,
-                    'name'=>$t[count($t)-1],
-                    'position'=>"",
-                    'logo'=>"",
-                    'team_id'=>$team_id,
-                    'current'=>1
-                ]),
-            ];
-            $missionList[] = $mission;
+            foreach($arr['content']['team_members'] as $member)
+            {
+                $t = explode("/",$member);
+                $mission = ['mission_type'=>"player",
+                    'mission_status'=>0,
+                    'title'=>$t[count($t)-1],
+                    'detail'=>json_encode(['url'=>$member,
+                        'name'=>$t[count($t)-1],
+                        'position'=>"",
+                        'logo'=>"",
+                        'team_id'=>$team_id,
+                        'current'=>1
+                    ]),
+                ];
+                $missionList[] = $mission;
+            }
         }
         return $missionList;
     }
