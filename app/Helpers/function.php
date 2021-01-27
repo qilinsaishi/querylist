@@ -303,11 +303,26 @@ if (!function_exists('randStr')) {
 //获取远程图片，并以文件的hash作为文件名保存
 function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type = 0)
 {
+    if(substr($url,0,2)=='//')
+    {
+        $url = 'http:'.$url;
+    }
+    elseif(substr($url,0,4)!='http')
+    {
+        $url = 'http://'.$url;
+    }
+    $url = explode('?',$url);
+    $url = $url['0'];
+    if(substr($url,-1)=='/')
+    {
+        $url = substr($url,0,strlen($url)-1);
+    }
     $start_time = microtime(true);
     $redis = app("redis.connection");
     $fileKey = "file_get_" . $url;
     $currentFile = $redis->get($fileKey);
-    echo "cache:".$currentFile.'\n';
+    echo "url:".$url."\n";
+    echo "cache:".$currentFile."\n";
     if ($currentFile && strlen($currentFile) > 5) {
         return $currentFile;
     }

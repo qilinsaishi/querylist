@@ -11,13 +11,15 @@ class wanplus
         [
             "team_name"=>['path'=>"title",'default'=>''],
             "en_name"=>['path'=>"",'default'=>''],
-            "aka"=>['path'=>"","default"=>""],
+            "aka"=>['path'=>"aka","default"=>""],
             "location"=>['path'=>"country","default"=>"未知"],
             "established_date"=>['path'=>"",'default'=>"未知"],
             "coach"=>['path'=>"",'default'=>"暂无"],
             "logo"=>['path'=>"logo",'default'=>''],
             "description"=>['path'=>"",'default'=>"暂无"],
             "race_stat"=>['path'=>"raceStat",'default'=>[]],
+            "original_source"=>['path'=>"",'default'=>"wanplus"],
+            "site_id"=>['path'=>"site_id",'default'=>0],
         ];
     public function collect($arr)
     {
@@ -51,6 +53,8 @@ class wanplus
     }
     public function process($arr)
     {
+        $t = explode("/",$arr['source_link']);
+        $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         //处理胜平负
         $t = explode("/",$arr['content']['military_exploits']??'');
         $arr['content']['logo'] = getImage($arr['content']['logo']);
@@ -91,7 +95,7 @@ class wanplus
                     'title' => $member['name'],
                     'detail' => json_encode(['url' => $member['link_url'],
                         'name' => $member['name'],
-                        'position' => $member['position'],
+                        'position' => $member['position']??"",
                         'logo' => $member['main_img'],
                         'team_id' => $team_id,
                         'current' => 1
@@ -109,7 +113,7 @@ class wanplus
                     'title'=>$member['name'],
                     'detail' => json_encode(['url' => $member['link_url'],
                         'name' => $member['name'],
-                        'position'=>$member['position']??"",
+                        'position' => $member['position']??"",
                         'logo' => $member['main_img'],
                         'team_id' => $team_id,
                         'current' => 0
@@ -118,7 +122,6 @@ class wanplus
                 $missionList[] = $mission;
             }
         }
-
         return $missionList;
     }
 
