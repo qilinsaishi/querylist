@@ -10,7 +10,7 @@ class pvp_qq
             "author"=>['path'=>"sAuthor",'default'=>''],//原站点作者
             "logo"=>['path'=>"sIMG",'default'=>''],//logo
             "site_id"=>['path'=>"iNewsId",'default'=>""],//原站点ID
-            "game"=>['path'=>"",'default'=>"lol"],//对应游戏
+            "game"=>['path'=>"",'default'=>"kpl"],//对应游戏
             "source"=>['path'=>"",'default'=>"lol_qq"],//来源
             "title"=>['path'=>"sTitle",'default'=>''],//标题
             "content"=>['path'=>"sContent",'default'=>''],//内容
@@ -80,7 +80,7 @@ class pvp_qq
          * sIMG：缩略图片*/
         //var_dump($arr);
         $arr['content']['target'] = $this->type[$arr['content']['type']];
-        $arr['content']['sIMG'] = getImage("http:".$arr['content']['sIMG']);
+        $arr['content']['sIMG'] = getImage($arr['content']['sIMG']);
         $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
         preg_match($imgpreg,$arr['content']['sContent'],$imgList);
         foreach($imgList as $img)

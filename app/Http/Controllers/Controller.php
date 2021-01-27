@@ -17,7 +17,7 @@ class Controller extends BaseController
     public function __construct()
     {
         $this->request = request();
-        $this->setPayload();
+		$this->setPayload();
         //$this->payload = $this->getPayload();
 
     }
