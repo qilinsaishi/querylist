@@ -48,6 +48,11 @@ function curl_get($url, $referer = '')
         $data=str_replace('var searchObj=','',$data);
         $data=str_replace(';','',$data);
     }
+    if(strpos($data,'newbee_hero_list_') !==false){
+        $data=str_replace('newbee_hero_list_','',$data);
+        $data=str_replace(')','',$data);
+    }
+
 
 
         // 显示错误信息

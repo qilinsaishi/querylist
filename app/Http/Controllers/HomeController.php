@@ -83,8 +83,13 @@ class HomeController extends Controller
 
     public function index()
     {
+        $client = new ClientServices();
+        $res = curl_get('https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js');
+        print_r($res);exit;
         //攻略
         $client=new ClientServices();
+        $data=curl_get('https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js');
+
         $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page=1&pagesize=15&order=sIdxTime&_='.msectime();
         $refeerer = 'https://pvp.qq.com/web201605/searchResult.shtml';
 
