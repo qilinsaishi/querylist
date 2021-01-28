@@ -16,6 +16,7 @@ class pvp_qq
                 "type" => ['path' => "", 'default' => 1],
                 "logo" => ['path' => "logo", 'default' => ""],
                 "price" => ['path' => "price", 'default' => 0],//价格
+                "total_price" => ['path' => "total_price", 'default' => 0],//总价
                 "aka" => ['path' => "", 'default' => ""],//别名
                 "id" => ['path' => "item_id", 'default' => 0],//对应站点ID
                 "sub_type" => ['path' => "item_type", 'default' => 1],
@@ -29,6 +30,7 @@ class pvp_qq
                 "type" => ['path' => "", 'default' => 2],
                 "logo" => ['path' => "logo", 'default' => ""],
                 "price" => ['path' => "", 'default' => 0],//价格
+                "total_price" => ['path' => "", 'default' => 0],//总价
                 "aka" => ['path' => "", 'default' => ""],//别名
                 "id" => ['path' => "itemid", 'default' => 0],//对应站点ID
                 "sub_type" => ['path' => "itemtype", 'default' => 1],
