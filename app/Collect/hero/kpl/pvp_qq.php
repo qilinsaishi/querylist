@@ -84,8 +84,10 @@ class pvp_qq
          * "title" => "正义爆轰"
          * "hero_type" => 3
          * "hero_type2" => ""*/
+        $arr['content']['logo']  = getImage($arr['content']['logo']);
         foreach($arr['content']['skinData'] as $key => $value)
         {
+            $arr['content']['skinData'][$key]['bigImg'] = getImage($arr['content']['skinData'][$key]['bigImg']);
             unset($arr['content']['skinData'][$key]['smallImg']);
         }
         foreach($arr['content']['skillBaseInfo'] as $key => $value)
@@ -96,11 +98,16 @@ class pvp_qq
             }
             else
             {
+                $arr['content']['skillBaseInfo'][$key]['killImg'] = getImage($arr['content']['skillBaseInfo'][$key]['killImg']);
                 $t = explode("：",$value['cooling']);
                 $arr['content']['skillBaseInfo'][$key]['cooling'] = $t[1];
                 $t = explode("：",$value['consume']);
                 $arr['content']['skillBaseInfo'][$key]['consume'] = $t[1];
             }
+        }
+        foreach($arr['content']['addSkills'] as $key => $value)
+        {
+            $arr['content']['addSkills'][$key]['killImg'] = getImage($arr['content']['addSkills'][$key]['killImg']);
         }
         $arr['content']['history'] = preg_replace("/<([a-zA-Z]+)[^>]*>/", "",$arr['content']['history']);
         $arr['content']['history'] = preg_replace("{</([a-zA-Z]+)[^>]*>}", "",$arr['content']['history']);
