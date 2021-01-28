@@ -164,4 +164,42 @@ class kplModel extends Model
             }
         }
     }
+
+    public function getSkillCount($params = []){
+        $skill_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $skill_count = $skill_count->whereIn('key', $keys);
+            }
+
+        }
+
+        return $skill_count->count();
+    }
+
+    public function getSkillById($skill_id){
+        $skill_info =$this->select("*")
+            ->where("skill_id",$skill_id)
+            ->get()->first();
+        if(isset($skill_info->skill_id))
+        {
+            $skill_info = $skill_info->toArray();
+        }
+        else
+        {
+            $skill_info = [];
+        }
+        return $skill_info;
+    }
+
+    public function getSkillByIds($skillIds){
+        $skill_info = [];
+        $skill_info =$this->select('skill_id', 'skill_name', 'logo')
+            ->whereIn("id",$skillIds)
+            ->orderBy("skill_id")
+            ->get()->toArray();
+
+        return $skill_info;
+    }
 }

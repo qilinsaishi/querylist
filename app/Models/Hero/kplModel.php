@@ -39,14 +39,14 @@ class kplModel extends Model
         "aka"=>[]
     ];
     protected $toJson = [
-        "aka","stat","skin_list","skill_list","inscription_tips","skill_tips","equipment_tips","hero_tips"
+        "aka","stat","skin_list","skill_list","inscription_tips","skill_tips","equipment_tips","hero_tips",'summoner_skill'
     ];
     protected $toAppend = [
         "aka"
     ];
     public function getHeroList($params)
     {
-        $hero_list =$this->select("*");
+        $hero_list =$this->select('hero_id', 'hero_name', 'cn_name', 'type','logo');
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $hero_list = $hero_list
@@ -163,6 +163,47 @@ class kplModel extends Model
                 return true;
             }
         }
+    }
+    public function getHeroCount($params=[]){
+        $hero_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $hero_count = $hero_count->whereIn('key', $keys);
+            }
+
+        }
+
+        return $hero_count->count();
+    }
+
+    public function getHeroById($hero_id){
+        $hero_info =$this->select("*")
+            ->where("hero_id",$hero_id)
+            ->get()->first();
+        if(isset($hero_info->hero_id))
+        {
+            $hero_info = $hero_info->toArray();
+        }
+        else
+        {
+            $hero_info = [];
+        }
+        return $hero_info;
+    }
+    public function getHeroInfoById($id){
+        $hero_info =$this->select('hero_id', 'hero_name', 'logo')
+            ->where("id",$id)
+            ->get()->first();
+        if(isset($hero_info->hero_id))
+        {
+            $hero_info = $hero_info->toArray();
+        }
+        else
+        {
+            $hero_info = [];
+        }
+        return $hero_info;
     }
     public function getAllKeywords($game)
     {
