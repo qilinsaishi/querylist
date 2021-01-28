@@ -52,7 +52,7 @@ class kplModel extends Model
         $skill_list = $skill_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("skill_id")
             ->get()->toArray();
         return $skill_list;
     }
