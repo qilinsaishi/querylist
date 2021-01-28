@@ -20,6 +20,8 @@ class wanplus
             "stat"=>['path'=>'','default'=>[]],
             "team_id"=>['path'=>'team_id','default'=>0],
             "logo"=>['path'=>'logo','default'=>0],
+            "original_source"=>['path'=>"",'default'=>"wanplus"],
+            "site_id"=>['path'=>"site_id",'default'=>0],
         ];
     public function collect($arr)
     {
@@ -53,8 +55,8 @@ class wanplus
     }
     public function process($arr)
     {
-        print_R($arr);
-        
+        $t = explode("/",$arr['source_link']);
+        $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         foreach($arr['content']['historys'] as $key => $value)
         {
             //起始时间格式化
@@ -84,9 +86,8 @@ class wanplus
             $arr['content']['playData']['stateList']['usedheroes'][$key]['winrate'] = sprintf("%.4f",$value['winrate']);
         }
         */
+        $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
-        print_r($data);
-        die();
         return $data;
     }
     /**
