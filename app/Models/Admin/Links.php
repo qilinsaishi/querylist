@@ -32,23 +32,26 @@ class Links extends Model
     public function getLinkList($params)
     {
         $game = $params['game'] ?? '';
-        $default_link_list=[];
+        $link_list=[];
         $default_field = ['id', 'name', 'url', 'logo','game'];
         $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
-        $default_link_list = $this->select($field);
+        $link_list = $this->select($field);
         $pageSizge = $params['page_size'] ?? 3;
         $page = $params['page'] ?? 1;
         if(!empty($game)){
-            $default_link_list->where('game',$game);
+            $link_list->where('game',$game);
         }
-        $default_link_list = $default_link_list
+        if(isset($params['site_id']) && $params['site_id']>0){
+            $link_list->where('site_id',$params['site_id']);
+        }
+        $link_list = $link_list
 
             ->limit($pageSizge)
             ->offset(($page - 1) * $pageSizge)
             ->orderBy("sort")
             ->get()->toArray();
 
-        return $default_link_list;
+        return $link_list;
     }
 
     public function getLinkByName($name, $type)
@@ -71,6 +74,9 @@ class Links extends Model
         $game = $params['game'] ?? '';
         if(!empty($game)){
             $link_count->where('game',$game);
+        }
+        if(isset($params['site_id']) && $params['site_id']>0){
+            $link_count->where('site_id',$params['site_id']);
         }
         return $link_count->count();
         //return true;

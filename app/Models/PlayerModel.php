@@ -92,7 +92,7 @@ class PlayerModel extends Model
             $player_list = $player_list
                 ->limit($pageSizge)
                 ->offset(($page-1)*$pageSizge)
-                ->orderBy("player_id")
+                ->orderBy("player_id","desc")
                 ->get()->toArray();
         }
         return $player_list;
