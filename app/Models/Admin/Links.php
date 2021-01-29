@@ -45,7 +45,6 @@ class Links extends Model
             $link_list->where('site_id',$params['site_id']);
         }
         $link_list = $link_list
-
             ->limit($pageSizge)
             ->offset(($page - 1) * $pageSizge)
             ->orderBy("sort")
@@ -72,6 +71,7 @@ class Links extends Model
     {
         $link_count = $this;
         $game = $params['game'] ?? '';
+        $site_id = $params['site_id'] ?? 0;
         if(!empty($game)){
             $link_count->where('game',$game);
         }
