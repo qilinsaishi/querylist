@@ -314,7 +314,22 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
 {
     if(substr($url,0,2)=='//')
     {
-        $url = 'http:'.$url;
+        if(substr_count($url,'shp.qpic.cn')>0)
+        {
+            $url = 'https:'.$url;
+        }
+        else
+        {
+            $url = 'http:'.$url;
+        }
+    }
+    elseif(substr($url,0,5)==':http')
+    {
+        $url = substr($url,1);
+    }
+    elseif(substr($url,0,18)=='http://shp.qpic.cn')
+    {
+        $url = str_replace('http://','https://',$url);
     }
     elseif(substr($url,0,4)!='http')
     {
