@@ -85,8 +85,20 @@ class HomeController extends Controller
     {
         $client = new ClientServices();
         //https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js
-        $res = curl_get('https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js');
-        print_r($res);exit;
+        $arrData=[];
+        $res = curl_get('https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_DATA_18_VIDEO_CH_V3.js');
+        if($res){
+            foreach ($res as $key=>$val){
+
+                if(isset($val['jData']) && $val['jData']){
+                    foreach ($val['jData'] as &$v){
+                        $v['url']='https://pvp.qq.com/v/detail.shtml?G_Biz=18&tid='.$v['iVideoId'];
+                    }
+                }
+                $arrData[$val['sTag']]=$val['jData'];
+            }
+        }
+        print_r($arrData);exit;
         //攻略
         $client=new ClientServices();
         $data=curl_get('https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js');

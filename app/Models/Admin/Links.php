@@ -32,6 +32,7 @@ class Links extends Model
     public function getLinkList($params)
     {
         $game = $params['game'] ?? '';
+        $site_id = $params['site_id'] ?? '';
         $default_link_list=[];
         $default_field = ['id', 'name', 'url', 'logo','game'];
         $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
@@ -40,6 +41,9 @@ class Links extends Model
         $page = $params['page'] ?? 1;
         if(!empty($game)){
             $default_link_list->where('game',$game);
+        }
+        if(!empty($site_id)){
+            $default_link_list->where('site_id',$site_id);
         }
         $default_link_list = $default_link_list
 

@@ -52,6 +52,10 @@ function curl_get($url, $referer = '')
         $data=str_replace('newbee_hero_list_','',$data);
         $data=str_replace(')','',$data);
     }
+    if(strpos($data,'web_hero_list_v3') !==false){
+        $data=str_replace('web_hero_list_v3(','',$data);
+        $data=str_replace(')','',$data);
+    }
 
 
 
