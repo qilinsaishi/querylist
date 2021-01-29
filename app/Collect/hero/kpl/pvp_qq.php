@@ -26,6 +26,7 @@ class pvp_qq
             "skill_tips"=>['path'=>"addSkills",'default'=>[]],//技能点建议
             "hero_tips"=>['path'=>"heroInfo",'default'=>[]],//英雄建议
             "equipment_tips"=>['path'=>"equipBox",'default'=>[]],//道具建议
+            "summoner_skill"=>['path'=>"summonerSkill",'default'=>[]],//召唤师技能
         ];
     public $hero_type = [
         1=>'战士',
@@ -276,6 +277,9 @@ class pvp_qq
         $res['addSkills'] = $addSkills ?? [];//技能加点建议
         $res['heroInfoBox'] = $heroInfoBox ?? [];//英雄关系
         $res['equipBox'] = $equipBox ?? [];//出装建议
+        $res['summonerSkill'] = $summonerSkill ?? [];//召唤师技能
+
+
 
         return $res;
     }

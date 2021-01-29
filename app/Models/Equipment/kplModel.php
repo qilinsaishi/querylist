@@ -164,4 +164,39 @@ class kplModel extends Model
             }
         }
     }
+    public function getEquipmentById($equipment_id){
+        $equipment_info =$this->select("*")
+            ->where("equipment_id",$equipment_id)
+            ->get()->first();
+        if(isset($equipment_info->equipment_id))
+        {
+            $equipment_info = $equipment_info->toArray();
+        }
+        else
+        {
+            $equipment_info = [];
+        }
+        return $equipment_info;
+    }
+    public function getEquipmentCount($params=[]){
+        $equipment_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $equipment_count = $equipment_count->whereIn('key', $keys);
+            }
+
+        }
+
+        return $equipment_count->count();
+    }
+    public function getEquipmentByIds($equipment_ids){
+        $equipment_info = [];
+        $equipment_info =$this->select('equipment_id', 'equipment_name', 'logo','description','price','total_price')
+            ->whereIn("id",$equipment_ids)
+            ->orderBy("equipment_id")
+            ->get()->toArray();
+
+        return $equipment_info;
+    }
 }

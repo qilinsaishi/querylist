@@ -84,6 +84,7 @@ class HomeController extends Controller
     public function index()
     {
         $client = new ClientServices();
+        //https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js
         $res = curl_get('https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js');
         print_r($res);exit;
         //攻略

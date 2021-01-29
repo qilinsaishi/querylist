@@ -4,6 +4,16 @@ namespace App\Services\Data;
 
 class PrivilegeService
 {
+    public $hero_type = [
+        1=>'战士',
+        2=>'法师',
+        3=>'坦克',
+        4=>'刺客',
+        5=>'射手',
+        6=>'辅助',
+        10=>'限免',
+        11=>'新手'
+    ];
     //获取各个数据类型对应的类库优先级列表以及获取方法
     public function getPriviliege()
     {
@@ -172,7 +182,7 @@ class PrivilegeService
                 'function' => "getSkillById",
                 'functionSingle' => "getSkillById",
             ],
-            "lolRuneList" => [//lol召唤师列表
+            "lolRuneList" => [//lol符文列表
                 'list' => [
                     ['model' => 'App\Models\Rune\lolModel', 'source' => ''],
                 ],
@@ -182,7 +192,7 @@ class PrivilegeService
                 //'functionProcess' => "processRuneList",//格式化的处理方法
                 'functionSingle' => "getRuneById",
             ],
-            "lolRune" => [//lol召唤师详情
+            "lolRune" => [//lol符文详情
                 'list' => [
                     ['model' => 'App\Models\Rune\lolModel', 'source' => ''],
                 ],
@@ -275,6 +285,75 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getById",
                 'functionProcess'=>"getDisableList",
+            ],
+            "kplHeroList" => [//王者荣耀英雄列表
+                'list' => [
+                    ['model' => 'App\Models\Hero\kplModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getHeroList",
+                'functionCount' => "getHeroCount",
+                'functionSingle' => "getHeroById",
+            ],
+            "kplHero" => [//王者荣耀英雄详情
+                'list' => [
+                    ['model' => 'App\Models\Hero\kplModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getHeroById",
+                'functionSingle' => "getHeroById",
+                'functionProcess' => "processKplHero",
+            ],
+            "kplEquipmentList" => [//王者荣耀装备列表
+                'list' => [
+                    ['model' => 'App\Models\Equipment\kplModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getEquipmentList",
+                'functionCount' => "getEquipmentCount",
+                'functionSingle' => "getEquipmentById",
+            ],
+            "kplEquipment" => [//王者荣耀装备详情
+                'list' => [
+                    ['model' => 'App\Models\Equipment\kplModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getEquipmentById",
+                'functionSingle' => "getEquipmentById",
+            ],
+            "kplSummonerList" => [//王者荣耀召唤师列表
+                'list' => [
+                    ['model' => 'App\Models\Summoner\kplModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSkillList",
+                'functionCount' => "getSkillCount",
+                'functionSingle' => "getSkillById",
+            ],
+            "kplSummoner" => [//王者荣耀召唤师详情
+                'list' => [
+                    ['model' => 'App\Models\Summoner\kplModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getSkillById",
+                'functionSingle' => "getSkillById",
+            ],
+            "kplInscriptionList" => [//王者荣耀铭文列表
+                'list' => [
+                    ['model' => 'App\Models\Inscription\kplModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getInscriptionList",
+                'functionCount' => "getInscriptionCount",
+                'functionSingle' => "getInscriptionById",
+            ],
+            "kplInscription" => [//王者荣耀铭文详情
+                'list' => [
+                    ['model' => 'App\Models\Inscription\kplModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getInscriptionById",
+                'functionSingle' => "getInscriptionById",
             ],
         ];
         return $privilegeList;
@@ -617,6 +696,136 @@ class PrivilegeService
         if(!empty($data)){
             $data['spellList'] = $modelClass->$function(["hero_id"=>$data['id']]);
         }
+        return $data;
+    }
+    public function processKplHero($data, $functionList)
+    {
+        if(isset($data['aka'])){
+            $data['aka']=json_decode($data['aka'],true);
+        }
+        if(isset($data['stat'])){
+            $data['stat']=json_decode($data['stat'],true);
+        }
+        if(isset($data['skin_list'])){
+            $data['skin_list']=json_decode($data['skin_list'],true);
+        }
+        if(isset($data['skill_list'])){
+            $data['skill_list']=json_decode($data['skill_list'],true);
+        }
+        if(isset($data['inscription_tips'])){
+            $data['inscription_tips']=json_decode($data['inscription_tips'],true);
+            if(!empty($data['inscription_tips'])){
+                if (isset($functionList['kplInscription']) && isset($functionList['kplInscription']['function'])) {
+
+                } else {
+                    $f = $this->getFunction(['kplInscription' => []]);
+                    if (isset($f['kplInscription']['class'])) {
+                        $modelClass = $f['kplInscription']['class'] ?? '';
+                        if(isset($data['inscription_tips']['sugglistIds']) && $data['inscription_tips']['sugglistIds']){
+                            if(strpos($data['inscription_tips']['sugglistIds'],'|') !==false){
+                                $inscriptionId=explode('|',$data['inscription_tips']['sugglistIds']);
+                            }else{
+                                $inscriptionId[]=$data['inscription_tips']['sugglistIds'];
+                            }
+                            $inscriptionInfo=$modelClass->getInscriptionByIds($inscriptionId);
+                            $data['inscription_tips']['sugglistIds']=$inscriptionInfo;
+                        }
+                    }
+                }
+            }
+        }
+        if(isset($data['skill_tips'])){
+            $data['skill_tips']=json_decode($data['skill_tips'],true);
+        }
+        //英雄关系
+        if(isset($data['hero_tips'])){
+            $data['hero_tips']=json_decode($data['hero_tips'],true);
+            if(!empty($data['hero_tips'])){
+                $modelClass = $functionList["kplHero"]["class"] ?? '';
+                $function = $functionList["kplHero"]['function'] ?? '';
+
+                if(isset($data['hero_tips']['mate']) && $data['hero_tips']['mate']){//最佳搭档
+                   foreach ($data['hero_tips']['mate'] as &$val){
+                       $heroInfo=$modelClass->getHeroInfoById($val['id']);
+                       $val['hero_name']=$heroInfo['hero_name'] ?? '';
+                       $val['logo']=$heroInfo['logo'] ?? '';
+
+                   }
+                }
+                if(isset($data['hero_tips']['suppress']) && $data['hero_tips']['suppress']){//被压制英雄
+                    foreach ($data['hero_tips']['suppress'] as &$val){
+                        $heroInfo=$modelClass->getHeroInfoById($val['id']);
+                        $val['hero_name']=$heroInfo['hero_name'] ?? '';
+                        $val['logo']=$heroInfo['logo'] ?? '';
+                    }
+
+                }
+                if(isset($data['hero_tips']['suppressed']) && $data['hero_tips']['suppressed']){//压制英雄
+                    foreach ($data['hero_tips']['suppressed'] as &$val){
+                        $heroInfo=$modelClass->getHeroInfoById($val['id']);
+                        $val['hero_name']=$heroInfo['hero_name'] ?? '';
+                        $val['logo']=$heroInfo['logo'] ?? '';
+                    }
+                }
+
+            }
+
+
+        }
+        //英雄-关联装备
+        if(isset($data['equipment_tips'])){
+            $data['equipment_tips']=json_decode($data['equipment_tips'],true);
+            if(!empty($data['equipment_tips'])){
+                if (isset($functionList['kplEquipment']) && isset($functionList['kplEquipment']['function'])) {
+
+                } else {
+                    $f = $this->getFunction(['kplEquipment' => []]);
+                    if (isset($f['kplEquipment']['class'])) {
+                        $modelClass = $f['kplEquipment']['class'] ?? '';
+                        foreach ($data['equipment_tips'] as &$val){
+                            if($val['equipItemIds']){
+                                if(strpos($val['equipItemIds'],'|') !==false){
+                                    $equipItemIds=explode('|',$val['equipItemIds']);
+                                }else{
+                                    $equipItemIds[]=$val['equipItemIds'];
+                                }
+                                $equipmentInfo=$modelClass->getEquipmentByIds($equipItemIds);
+                                $val['equipment_tips']=$equipmentInfo;
+                            }
+
+                        }
+
+                    }
+                }
+            }
+
+        }
+        //召唤师技能
+        if(isset($data['summoner_skill'])){
+            $data['summoner_skill']=json_decode($data['summoner_skill'],true);
+            if(!empty($data['summoner_skill'])){
+                if (isset($functionList['kplSummoner']) && isset($functionList['kplSummoner']['function'])) {
+
+                } else {
+                    $f = $this->getFunction(['kplSummoner' => []]);
+                    if (isset($f['kplSummoner']['class'])) {
+                        $modelClass = $f['kplSummoner']['class'] ?? '';
+                        if(isset($data['summoner_skill']['summonerSkillId']) && $data['summoner_skill']['summonerSkillId']){
+                            if(strpos($data['summoner_skill']['summonerSkillId'],'|') !==false){
+                                $summonerSkillId=explode('|',$data['summoner_skill']['summonerSkillId']);
+                            }else{
+                                $summonerSkillId[]=$data['summoner_skill']['summonerSkillId'];
+                            }
+                            $summonerInfo=$modelClass->getSkillByIds($summonerSkillId);
+                            $data['summoner_skill']=$summonerInfo;
+                        }
+                    }
+                }
+            }
+        }
+        $hero_type=$this->hero_type;
+        $data['type_name']=$hero_type[$data['type']] ?? '';
+
         return $data;
     }
     public function processTeam($data, $functionList)

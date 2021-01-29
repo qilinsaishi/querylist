@@ -46,13 +46,13 @@ class kplModel extends Model
     ];
     public function getInscriptionList($params)
     {
-        $inscription_list =$this->select("*");
+        $inscription_list =$this->select('inscription_id', 'inscription_name','grade', 'logo','type');
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $inscription_list = $inscription_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("id")
+            ->orderBy("inscription_id")
             ->get()->toArray();
         return $inscription_list;
     }
@@ -163,5 +163,42 @@ class kplModel extends Model
                 return true;
             }
         }
+    }
+    public function getInscriptionCount($params = []){
+        $inscription_count = $this;
+        $keys = $params['keys'] ?? [];
+        if (!empty($keys)) {
+            if (!empty($keys)) {
+                $inscription_count = $inscription_count->whereIn('key', $keys);
+            }
+
+        }
+
+        return $inscription_count->count();
+    }
+
+    public function getInscriptionById($skill_id){
+        $inscription_info =$this->select("*")
+            ->where("inscription_id",$skill_id)
+            ->get()->first();
+        if(isset($inscription_info->inscription_id))
+        {
+            $inscription_info = $inscription_info->toArray();
+        }
+        else
+        {
+            $inscription_info = [];
+        }
+        return $inscription_info;
+    }
+
+    public function getInscriptionByIds($inscriptionIds){
+        $inscription_info = [];
+        $inscription_info =$this->select('inscription_id', 'inscription_name', 'logo','description')
+            ->whereIn("id",$inscriptionIds)
+            ->orderBy("inscription_id")
+            ->get()->toArray();
+
+        return $inscription_info;
     }
 }
