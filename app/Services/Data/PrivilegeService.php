@@ -284,7 +284,7 @@ class PrivilegeService
                 ],
                 'withSource' => 0,
                 'function' => "getById",
-                'functionProcess'=>"getDisableList",
+                //'functionProcess'=>"getDisableList",
             ],
             "kplHeroList" => [//王者荣耀英雄列表
                 'list' => [
@@ -917,8 +917,8 @@ class PrivilegeService
                 }
             }
             $modelClass = $functionList["scwsKeyword"]["class"];
-            $function = $functionList["scwsKeyword"]['functionProcess'];
-            $disableKeywordList = $modelClass->$function();
+            //$function = $functionList["scwsKeyword"]['functionProcess'];
+            $disableKeywordList = $modelClass->getDisableList();
             foreach($data['scws_list'] as $key => $word)
             {
                 if(in_array($word['keyword_id'],$disableKeywordList))
@@ -981,7 +981,6 @@ class PrivilegeService
             $information['content'] = string_split(strip_tags($information['content']),100);
             if(isset($information['id']))
             {
-
                 $data[$key]['content'] = $information;
             }
         }
