@@ -49,11 +49,22 @@ class lolModel extends Model
         $hero_list =$this->select("*");
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
-        $hero_list = $hero_list
-            ->limit($pageSizge)
-            ->offset(($page-1)*$pageSizge)
-            ->orderBy("hero_id")
-            ->get()->toArray();
+        if(isset($params['rand']) && $params['rand'] >0)
+        {
+            $hero_list = $hero_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->inRandomOrder()
+                ->get()->toArray();
+        }
+        else
+        {
+            $hero_list = $hero_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->orderBy("id")
+                ->get()->toArray();
+        }
         return $hero_list;
     }
     public function getHeroByName($hero_name)
