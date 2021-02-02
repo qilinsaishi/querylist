@@ -117,9 +117,9 @@ class TeamModel extends Model
         }
         return $team_info;
     }
-    public function getTeamById($team_id)
+    public function getTeamById($team_id,$fields = "*")
     {
-        $team_info =$this->select("*")
+        $team_info =$this->select(explode(",",$fields))
             ->where("team_id",$team_id)
             ->get()->first();
         if(isset($team_info->team_id))
