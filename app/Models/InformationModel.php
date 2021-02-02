@@ -44,8 +44,8 @@ class InformationModel extends Model
     ];
     public function getInformationList($params)
     {
-        $fields = $params['fields']??"id,title,author,author_id,logo,create_time";
-        $information_list =$this->select(explode(",",$fields));
+        $fields = $params['fields']??"id,title,author,author_id,logo,create_time,status";
+        $information_list =$this->select(explode(",",$fields))->where("status",1);
         //是否需要处理关键字
         if(isset($params['keywords']))
         {

@@ -33,10 +33,10 @@ class DefaultConfig extends Model
     {
         $keys = $params['keys'] ?? [];
         $site_id = $params['site_id'] ?? 1;
-        $default_field = ['id', 'name', 'key', 'value'];
+        $default_field = ['id', 'name', 'key', 'value','remarks'];
         $field = isset($params['fields']) && !empty($params['fields']) ? $params['fields'] : $default_field;
         $default_config_list = $this->select($field);
-        $count=3;
+        $count=4;
         if (!empty($keys)) {
             $default_config_list->whereIn('key', $keys);
             $count=count($keys);
