@@ -79,6 +79,7 @@ class PrivilegeService
                 'function' => "getPlayerList",
                 'functionCount' => "getPlayerCount",
                 'functionSingle' => "getPlayerById",
+                'functionProcess' => "processTotalPlayerList",
             ],
             "team" => [//团队列表
                 'list' => [
@@ -961,6 +962,30 @@ class PrivilegeService
             }
             $data['teamInfo'] = $teamModelClass->$teamFunction(['team_id'=>$data['team_id'],"fields"=>"team_id,team_name,description,logo"]);
         }
+        return $data;
+    }
+    public function processTotalPlayerList($data, $functionList)
+    {
+            //print_R($data);die();
+            if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['function'])) {}else{
+                $f = $this->getFunction(["totalTeamInfo"=>[]]);
+                if (isset($f['totalTeamInfo']['class'])) {
+                    $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
+                }
+            }
+            $teamModelClass = $functionList["totalTeamInfo"]["class"];
+            $teamFunction = $functionList["totalTeamInfo"]['function'];
+            foreach($data as $key => $player)
+            {
+                if(isset($player['team_id']))
+                {
+                    $teamInfo = $teamModelClass->$teamFunction($player['team_id'],"team_name,team_id");
+                    if(isset($teamInfo['team_id']))
+                    {
+                        $data[$key]['team_info'] = $teamInfo;
+                    }
+                }
+            }
         return $data;
     }
     public function processScwsInformationList($data, $functionList)
