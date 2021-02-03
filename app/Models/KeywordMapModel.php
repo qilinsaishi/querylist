@@ -45,19 +45,20 @@ class KeywordMapModel extends Model
         }
         return $this->insertGetId($data);
     }
-    public function deleteByContent($id=0,$type="information")
+    public function deleteByContent($id=0,$game="kpl",$type="information")
     {
-        return $this->where('content_id',$id)->where('content_type',$type)->delete();
+        return $this->where('content_id',$id)->where('game',$game)->where('content_type',$type)->delete();
     }
 
-    public function saveMap($id,$type,$mapList,$time)
+    public function saveMap($id,$game,$type,$mapList,$time)
     {
-        $this->deleteByContent($id,$type);
+        $this->deleteByContent($id,$game,$type);
         foreach($mapList as $source_type => $list)
         {
             foreach($list as $keyword => $keyword_info)
             {
                 $map = ['keyword'=>$keyword,
+                    'game'=>$game,
                     "source_type"=>$source_type,"content_type"=>$type,
                     "source_id"=>$keyword_info['id'],"content_id"=>$id,
                     "count"=>$keyword_info['count'],
@@ -70,8 +71,13 @@ class KeywordMapModel extends Model
     }
     public function getList($params)
     {
-        $fields = $params['fields']??"source_id,source_type,content_id,content_type,count";
+        $fields = $params['fields']??"source_id,game,source_type,content_id,content_type,count";
         $keyword_list =$this->select(explode(",",$fields));
+        //对应游戏
+        if(isset($params['game']) && ($params['game'])!="")
+        {
+            $keyword_list = $keyword_list->where("game",$params['game']);
+        }
         //目标ID
         if(isset($params['content_id']) && ($params['content_id'])>0)
         {
