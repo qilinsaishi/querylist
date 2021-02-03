@@ -78,7 +78,7 @@ class KeywordService
             $result[$information['id']]['player'] = $player;
             $result[$information['id']]['hero'] = $hero;
             $informationModel->updateInformation($information['id'],['keywords'=>0,'keywords_list'=> $result[$information['id']]]);
-            $keywordMapModel->saveMap($information['id'],"information", $result[$information['id']],$information['create_time']);
+            $keywordMapModel->saveMap($information['id'],$game,"information", $result[$information['id']],$information['create_time']);
         }
     }
 

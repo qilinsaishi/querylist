@@ -46,7 +46,8 @@ class kplModel extends Model
     ];
     public function getHeroList($params)
     {
-        $hero_list =$this->select('hero_id', 'hero_name', 'cn_name', 'type','logo');
+        $fields = isset($params['fields'])?explode(",",$params['fields']):['hero_id', 'hero_name', 'cn_name', 'type','logo'];
+        $hero_list =$this->select($fields);
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         if(isset($params['rand']) && $params['rand'] >0)
