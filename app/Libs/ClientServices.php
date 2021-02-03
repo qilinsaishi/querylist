@@ -33,7 +33,6 @@ class ClientServices
         }else{
             $response = $client->request('GET', $url);
         }
-
         $data = json_decode($response->getBody(), true);
         return  $data;
     }

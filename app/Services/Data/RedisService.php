@@ -22,6 +22,10 @@ class RedisService
                 'prefix' => "defaultConfig",
                 'expire' => 86400,
             ],
+            "imageList" => [//图片列表
+                'prefix' => "imageList",
+                'expire' => 86400,
+            ],
 
             "links" => [//友链
                 'prefix' => "links",
@@ -96,7 +100,7 @@ class RedisService
 
     public function refreshCache($dataType, $params, $keyName = '')
     {
-        //echo "Here";
+
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
             $privilegeService = new PrivilegeService();
@@ -123,6 +127,9 @@ class RedisService
                 if (isset($data['params'])) {
 
                     if ($dataType == 'defaultConfig' && isset($data['params']['keys']) && $keyName && in_array($keyName, $data['params']['keys'])) {
+                        $redis->del($key);
+                    }
+                    if ($dataType == 'imageList' && isset($data['params']['flag']) && $keyName) {
                         $redis->del($key);
                     }
                     $d = $class->$function($data['params']);
