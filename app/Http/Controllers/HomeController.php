@@ -93,6 +93,11 @@ class HomeController extends Controller
                 if(isset($val['jData']) && $val['jData']){
                     foreach ($val['jData'] as &$v){
                         $v['url']='https://pvp.qq.com/v/detail.shtml?G_Biz=18&tid='.$v['iVideoId'];
+                        if(strpos($v['sIMG'],'http') ===false){
+                            $v['sIMG']='http:'.$v['sIMG'];
+                        }
+                        $v['tag_name']=$val['sTag'];
+
                     }
                 }
                 $arrData[$val['sTag']]=$val['jData'];

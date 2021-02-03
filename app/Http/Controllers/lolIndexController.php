@@ -6,6 +6,7 @@ use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\Admin\DefaultConfig;
+use App\Services\Data\ExtraProcessService;
 use Illuminate\Http\Request;
 
 
@@ -66,10 +67,15 @@ class lolIndexController extends Controller
                     }
                     $dataArr = ['data'=>$d,'count'=>$count];
                 }
+
                 if($toSave==1)
                 {
                     $redisService->saveCache($dataType,$data[($params['cacheWith']??"")]??$params,$dataArr);
                 }
+                if(isset($dataType) && $dataType='informationList') {
+                    $dataArr["data"] = (new ExtraProcessService())->process($dataType,$dataArr["data"]);
+                }
+
                 $return[$name] = $dataArr;
             }
         }
@@ -79,7 +85,8 @@ class lolIndexController extends Controller
     {
         $redisService = new RedisService();
         $dataType = $this->request->get("dataType","defaultConfig");
-        $redisService->refreshCache($dataType,[]);
+        $keyName= $this->request->get("key_name","");
+        $redisService->refreshCache($dataType,[],$keyName);
     }
 
 }

@@ -36,7 +36,7 @@ class ImageList extends Model
         $site_id=$params['site_id'] ?? 1;
         $flag=$params['flag'] ?? '';
         $default_image_list=[];
-        $default_field = ['id', 'name','game', 'url','cid', 'logo','sort','station_time','status','flag'];
+        $default_field = ['id', 'name','game', 'url','cid', 'logo','sort','station_time','status','flag','content'];
         $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
         $default_image_list = $this->select($field)->where('status',1);;
         $pageSizge = $params['page_size'] ?? 3;
