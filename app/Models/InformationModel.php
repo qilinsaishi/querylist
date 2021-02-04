@@ -254,26 +254,26 @@ class InformationModel extends Model
         $hot=$params['hot']??0;
         if($hot==1)
         {
-            $information_count->where("hot",$hot);
+            $information_count = $information_count->where("hot",$hot);
         }
         if(isset($params['author_id']) && $params['author_id']>0)
         {
-            $information_count->where("author_id",$params['author_id']);
+            $information_count = $information_count->where("author_id",$params['author_id']);
         }
         if(isset($params['type']))
         {
             $types = explode(",",$params['type']);
 
-            $information_count->whereIn("type",$types);
+            $information_count = $information_count->whereIn("type",$types);
         }
         if(isset($params['ids']))
         {
             //$types = explode(",",$params['type']);
-            $information_count->whereIn("id",$params['ids']);
+            $information_count = $information_count->whereIn("id",$params['ids']);
         }
         if(isset($params['expect_id']))
         {
-            $information_count->where("id","!=",$params['expect_id']);
+            $information_count = $information_count->where("id","!=",$params['expect_id']);
         }
         $information_count = $information_count->count();
         return $information_count;

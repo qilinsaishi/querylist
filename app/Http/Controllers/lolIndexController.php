@@ -53,6 +53,7 @@ class lolIndexController extends Controller
                     $d = $class->$function($params);
                     $functionCount = $functionInfo['functionCount'];
                     $functionProcess = $functionInfo['functionProcess']??"";
+                    $functionProcessCount = $functionInfo['functionProcessCount']??"";
                     if(!$functionCount || $functionCount=="")
                     {
                         $count = 0;
@@ -61,13 +62,16 @@ class lolIndexController extends Controller
                     {
                         $count = $class->$functionCount($params);
                     }
+                    if($functionProcessCount!="")
+                    {
+                        $count = $privilegeService->$functionProcessCount($d,$functionList,$params);
+                    }
                     if($functionProcess!="")
                     {
-                        $d = $privilegeService->$functionProcess($d,$functionList);
+                        $d = $privilegeService->$functionProcess($d,$functionList,$params);
                     }
                     $dataArr = ['data'=>$d,'count'=>$count];
                 }
-
                 if($toSave==1)
                 {
                     $redisService->saveCache($dataType,$data[($params['cacheWith']??"")]??$params,$dataArr);
