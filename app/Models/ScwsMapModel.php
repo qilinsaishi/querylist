@@ -140,7 +140,7 @@ class ScwsMapModel extends Model
         }
         if(isset($params['expect_id']))
         {
-            $keyword_count->where("content_id","!=",$params['expect_id']);
+            $keyword_count = $keyword_count->where("content_id","!=",$params['expect_id']);
         }
         //来源ID
         if(isset($params['ids']))
