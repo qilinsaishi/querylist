@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\Admin\DefaultConfig;
 use App\Models\CollectResultModel;
@@ -83,6 +84,15 @@ class HomeController extends Controller
 
     public function index()
     {
+        $AjaxModel = new AjaxRequest();
+        //gametype:1表示data2,2表示lol，6表示王者荣耀
+        $gameTypes=[
+            1,
+        ];
+
+        $url='https://www.wanplus.com/ajax/player/recent?isAjax=1&playerId=25474&gametype=1&page=6&heroId=0';
+        $playData = $AjaxModel->getHistoryMatch($url);//ajax 获取所有历史记录
+        print_r($playData);exit;
         $client = new ClientServices();
         //https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js
         $arrData=[];
