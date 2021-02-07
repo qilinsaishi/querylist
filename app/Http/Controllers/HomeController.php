@@ -86,10 +86,20 @@ class HomeController extends Controller
     {
         $AjaxModel = new AjaxRequest();
         //gametype:1表示data2,2表示lol，6表示王者荣耀
-        $gameTypes=[
-            1,
-        ];
+        $gameTypes=[1,2,6];
+        $totalPage=50;
+        $data=[];
+        foreach ($gameTypes as $val){
+            for ($i=1;$i<=$totalPage;$i++){
+                $url='https://www.wanplus.com/ajax/player/recent?isAjax=1&playerId=25474&gametype='.$val.'&page='.$i.'&heroId=0';
+                echo $url;exit;
+                $playData= $AjaxModel->getHistoryMatch($url);
+                print_r($playData);exit;
+            }
+        }
 
+        print_r(count($data));
+exit;
         $url='https://www.wanplus.com/ajax/player/recent?isAjax=1&playerId=25474&gametype=1&page=6&heroId=0';
         $playData = $AjaxModel->getHistoryMatch($url);//ajax 获取所有历史记录
         print_r($playData);exit;

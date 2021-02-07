@@ -106,7 +106,7 @@ class AjaxRequest
         ];
         $client = new ClientServices();
         $data = $client->curlGet($url, $param,$headers);
-print_r($data);exit;
+
         //$data=siz
         if ($data['ret'] == 0) {
             $list = $data['data'] ?? [];
