@@ -15,7 +15,7 @@ use QL\QueryList;
 use GuzzleHttp\Client;
 
 
-class lolIndexController extends Controller
+class IndexController extends Controller
 {
 
     public function index()
@@ -33,9 +33,8 @@ class lolIndexController extends Controller
     public function refresh()
     {
         $redisService = new RedisService();
-        $params = json_decode($this->request->get("params",""),true);
-        $dataType = $params['dataType'] ?? 'defaultConfig';
-        $keyName= $params['key_name'] ?? '';
+        $dataType = $this->request->get("dataType","defaultConfig");
+        $keyName= $this->request->get("key_name","");
         $redisService->refreshCache($dataType,[],$keyName);
     }
 

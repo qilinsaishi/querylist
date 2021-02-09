@@ -92,14 +92,14 @@ class ImageList extends Model
         $site_id=$params['site_id'] ?? 1;
         $flag=$params['flag'] ?? '';
         if(!empty($game)){
-            $image_count =$image_count->where('game',$game);
+            $image_count = $image_count->where('game',$game);
         }
         if($cid > 0){
-            $image_count->where('cid',$cid);
+            $image_count = $image_count->where('cid',$cid);
         }
         if($site_id !='' && strlen($flag)>3 ){
            // $cid=ImageCategory::getIdByName($cname,$site_id);
-            $image_count->where(['flag'=>$flag,'site_id'=>$site_id]);
+            $image_count = $image_count->where(['flag'=>$flag,'site_id'=>$site_id]);
         }
 
         return $image_count->count();

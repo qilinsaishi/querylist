@@ -261,6 +261,8 @@ class PrivilegeService
                 ],
                 'withSource' => 0,
                 'function' => "getList",
+                'functionProcess' => "processkeywordMapList",
+                'functionProcessCount' => "processkeywordMapCount",
             ],
             "anotherKeyword" => [//本地维护关键字
                 'list' => [
@@ -408,7 +410,11 @@ class PrivilegeService
                                         $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
                                     } else {
                                         $functionList[$dataType]['functionProcess'] = "";
-
+                                    }
+                                    if (isset($priviliegeList[$dataType]['functionProcessCount'])) {
+                                        $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
+                                    } else {
+                                        $functionList[$dataType]['functionProcessCount'] = "";
                                     }
                                     $found = 1;
                                 } else {
@@ -451,7 +457,11 @@ class PrivilegeService
                                 $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
                             } else {
                                 $functionList[$dataType]['functionProcess'] = "";
-
+                            }
+                            if (isset($priviliegeList[$dataType]['functionProcessCount'])) {
+                                $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
+                            } else {
+                                $functionList[$dataType]['functionProcessCount'] = "";
                             }
                         }
                     }
@@ -481,7 +491,11 @@ class PrivilegeService
                                             $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
                                         } else {
                                             $functionList[$dataType]['functionProcess'] = "";
-
+                                        }
+                                        if (isset($priviliegeList[$dataType]['functionProcessCount'])) {
+                                            $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
+                                        } else {
+                                            $functionList[$dataType]['functionProcessCount'] = "";
                                         }
                                         //标记为找到
                                         $found = 1;
@@ -522,6 +536,11 @@ class PrivilegeService
                                         $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
                                     } else {
                                         $functionList[$dataType]['functionProcess'] = "";
+                                    }
+                                    if (isset($priviliegeList[$dataType]['functionProcessCount'])) {
+                                        $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
+                                    } else {
+                                        $functionList[$dataType]['functionProcessCount'] = "";
                                     }
                                     $found = 1;
                                 } else {
@@ -1010,5 +1029,66 @@ class PrivilegeService
             }
         }
         return $data;
+    }
+    public function processkeywordMapList($data, $functionList,$params)
+    {
+        if(isset($params['list']))
+        {
+            if(count($data)>0)
+            {
+                $ids = array_column($data,"content_id");
+                //获取文章
+                if($params['content_type'] == "information")
+                {
+                    $p = array_merge($params['list'],['ids'=>$ids]);
+                    $functionList = $this->checkFunction($functionList,"informationList");
+                    $modelClass = $functionList["informationList"]["class"];
+                    $function = $functionList["informationList"]['function'];
+                    $data = $modelClass->$function($p);
+                }
+            }
+            else
+            {
+                $data = [];
+            }
+        }
+        return $data;
+    }
+    public function processkeywordMapCount($data, $functionList,$params)
+    {
+        if(isset($params['list']))
+        {
+            if(count($data)>0)
+            {
+                $ids = array_column($data,"content_id");
+                //获取文章
+                if($params['content_type'] == "information")
+                {
+                    $p = array_merge($params['list'],['ids'=>$ids]);
+                    $functionList = $this->checkFunction($functionList,"informationList");
+                    $modelClass = $functionList["informationList"]["class"];
+                    $function = $functionList["informationList"]['functionCount'];
+                    $data = $modelClass->$function($p);
+                }
+            }
+            else
+            {
+                $data = 0;
+            }
+        }
+        return $data;
+    }
+    //检查方法列表
+    public function checkFunction($functionList,$type)
+    {
+        if (isset($functionList[$type]) && isset($functionList[$type]['function'])) {
+
+        } else {
+            $f = $this->getFunction([$type => []]);
+            if (isset($f[$type]['class'])) {
+                $functionList[$type] = $f[$type];
+            }
+        }
+        return $functionList;
     }
 }
