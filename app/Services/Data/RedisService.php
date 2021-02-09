@@ -64,10 +64,11 @@ class RedisService
             if ($exists) {
                 $data = json_decode($redis->get($keyConfig), true);
                 if (is_array($data)) {
+
                     if (isset($data['data'])) {
                         $data = $data['data'];
                     }
-                    //echo "key:".$keyConfig."exists\n";
+                    echo "key:".$keyConfig."exists\n";
                     return $data;
                 } else {
                     return false;
@@ -84,6 +85,7 @@ class RedisService
     {
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
+
             $redis = app("redis.connection");
             ksort($params);
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
@@ -119,17 +121,20 @@ class RedisService
 
             $redis = app("redis.connection");
             $keyList = $redis->keys($cacheConfig[$dataType]['prefix'] . "_*");
-
             foreach ($keyList as $key) {
                 $data = $redis->get($key);
                 $data = json_decode($data, true);
                 //有参数，尝试刷新数据
+
                 if (isset($data['params'])) {
 
                     if ($dataType == 'defaultConfig' && isset($data['params']['keys']) && $keyName && in_array($keyName, $data['params']['keys'])) {
                         $redis->del($key);
                     }
                     if ($dataType == 'imageList' && isset($data['params']['flag']) && $keyName) {
+                        $redis->del($key);
+                    }
+                    if ($dataType == 'links' && isset($data['params']['site_id']) && $keyName) {
                         $redis->del($key);
                     }
                     $d = $class->$function($data['params']);
