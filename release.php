@@ -11,4 +11,7 @@
 	$command = "php artisan config:cache";
 	(exec($command,$return));
 	echo implode("\n",$return)."\n";
+    $command = "php artisan route:cache";
+    (exec($command,$return));
+    echo implode("\n",$return)."\n";
 	unset($return);
