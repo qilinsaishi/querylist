@@ -84,15 +84,29 @@ class HomeController extends Controller
 
     public function index()
     {
+        $AjaxModel = new AjaxRequest();
         //比赛列表
         //获取每周的周一时间;
         $weekday=date("w");
         $weekday=($weekday + 6) % 7;
-        $date=date('Y-m-d',strtotime("-{$weekday} day"));
-        $schedule_url='http://www.wanplus.com/lol/schedule';
+        $date=strtotime(date('Y-m-d',strtotime("-{$weekday} day")));
+        $url='http://www.wanplus.com/ajax/schedule/list';
+        $param=[
+            'game'=>2,
+            'time'=>$date,
+            'eids'=>''
+        ];
+        $list=$AjaxModel->getMatchList($url, $param );
+        /*$schedule_url='http://www.wanplus.com/lol/schedule';
         $ql = QueryList::get($schedule_url);
-        $slide_list=$ql->find('.slide-list')->htmls();
-        print_r($slide_list);exit;
+        $data_eid=$ql->find('.slide-list li')->attrs('data-eid')->all();
+        $data_gametype=$ql->find('.slide-list li')->attrs('data-gametype')->all();
+        $data_texts=$ql->find('.slide-list li')->texts()->all();
+print_r( $data_eid);exit;*/
+
+
+        $list_url='http://www.wanplus.com/ajax/schedule/list';
+        //print_r($slide_list);exit;
 
         //比赛详情
         $url='http://www.wanplus.com/schedule/68001.html';
@@ -117,7 +131,7 @@ class HomeController extends Controller
         $matchInfo['status']=$ql->find('.box .team-detail li:eq(1) .end')->text();
         $matchInfo['time']=$ql->find('.box .team-detail li:eq(1) .time')->text();
 
-        $AjaxModel = new AjaxRequest();
+
         $url='http://www.wanplus.com/ajax/matchdetail/72706';
         $playData= $AjaxModel->getHistoryMatch($url);
         //期间

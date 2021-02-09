@@ -93,6 +93,37 @@ class AjaxRequest
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
+    public function getMatchList($url, $param = [])
+    {
+        $list = [];
+        $play_url = 'http://www.wanplus.com/ajax/schedule/list';
+        $paramHeaderData = $this->getHeaderInfo($play_url);//
+
+        $headers = [
+            'x-requested-with' => 'XMLHttpRequest',
+            'x-csrf-token' => $paramHeaderData['token'] ?? '',
+            'cookie' => $paramHeaderData['cookieStr'] ?? ''
+        ];
+        $client = new ClientServices();
+        $data = $client->curlPost($url, $param,$headers);
+print_r($data);exit;
+        //$data=siz
+        if ($data['ret'] == 0) {
+            $list = $data['data'] ?? [];
+        } else {
+            return $data['msg'];
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param $url // 通过url获取头文件信息
+     * @param $play_url //ajax请求链接
+     * @param array $param //包含playerid:队员id，赛事id:eid,游戏类型：gametype,
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function getHistoryMatch($url, $param = [])
     {
         $list = [];

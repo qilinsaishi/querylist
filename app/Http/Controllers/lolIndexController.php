@@ -84,8 +84,9 @@ class lolIndexController extends Controller
     public function refresh()
     {
         $redisService = new RedisService();
-        $dataType = $this->request->get("dataType","defaultConfig");
-        $keyName= $this->request->get("key_name","");
+        $params = json_decode($this->request->get("params",""),true);
+        $dataType = $params['dataType'] ?? 'defaultConfig';
+        $keyName= $params['key_name'] ?? '';
         $redisService->refreshCache($dataType,[],$keyName);
     }
 
