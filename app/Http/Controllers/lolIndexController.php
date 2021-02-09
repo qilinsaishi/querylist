@@ -85,7 +85,7 @@ class lolIndexController extends Controller
     {
         $redisService = new RedisService();
         $dataType = $this->request->get("dataType","defaultConfig");
-        $keyName= $this->request->get("key_name","");
+        $keyName= $this->request->get("key_name","");echo $keyName;exit;
         $redisService->refreshCache($dataType,[],$keyName);
     }
 
