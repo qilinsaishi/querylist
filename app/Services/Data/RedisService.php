@@ -68,7 +68,7 @@ class RedisService
                     if (isset($data['data'])) {
                         $data = $data['data'];
                     }
-                    echo "key:".$keyConfig."exists\n";
+                    //echo "key:".$keyConfig."exists\n";
                     return $data;
                 } else {
                     return false;
