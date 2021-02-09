@@ -12,12 +12,10 @@ class RedisService
                 'prefix' => "matchList",
                 'expire' => 3600,
             ],
-
             "teamList" => [//团队列表
                 'prefix' => "teamList",
                 'expire' => 3600,
             ],
-
             "defaultConfig" => [//通用配置
                 'prefix' => "defaultConfig",
                 'expire' => 86400,
@@ -26,18 +24,14 @@ class RedisService
                 'prefix' => "imageList",
                 'expire' => 86400,
             ],
-
             "links" => [//友链
                 'prefix' => "links",
                 'expire' => 86400,
             ],
-            /*
             "information" => [//资讯
                 'prefix'=>"info",
-                'expire'=>30,
+                'expire'=>86400,
             ],
-            */
-
             "totalPlayerList" => [//队员总表
                 'prefix' => "totalPlayerList",
                 'expire' => 60,
@@ -59,6 +53,20 @@ class RedisService
         if (isset($cacheConfig[$dataType])) {
             $redis = app("redis.connection");
             ksort($params);
+//如果接口指定了缓存时间
+            if(isset($params['cache_time']))
+            {
+                $expire = $params['cache_time'];
+            }
+            else
+            {
+                $expire =  $cacheConfig[$dataType]['expire'];
+            }
+            //如果指定缓存时间为非正整数，跳出，不保存
+            if($expire<=0)
+            {
+                return false;
+            }
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
             $exists = $redis->exists($keyConfig);
             if ($exists) {
@@ -89,8 +97,22 @@ class RedisService
             $redis = app("redis.connection");
             ksort($params);
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
+            //如果接口指定了缓存时间
+            if(isset($params['cache_time']))
+            {
+                $expire = $params['cache_time'];
+            }
+            else
+            {
+                $expire =  $cacheConfig[$dataType]['expire'];
+            }
+            //如果指定缓存时间为非正整数，跳出，不保存
+            if($expire<=0)
+            {
+                return true;
+            }
             //有数据原样缓存，没数据缓存时间减少为1/10
-            $expire = $cacheConfig[$dataType]['expire'] * (count($data['data']) > 0 ? 1 : 0.5) + rand(1, 100);
+            $expire = $expire * (count($data['data']) > 0 ? 1 : 0.1) + rand(1, 100);
             $redis->set($keyConfig, json_encode(['params' => $params, 'data' => $data]));
             $redis->expire($keyConfig, $expire);
             //echo "key:".$keyConfig."saved to expire:".$expire."\n";
