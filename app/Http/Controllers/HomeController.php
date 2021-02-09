@@ -84,11 +84,137 @@ class HomeController extends Controller
 
     public function index()
     {
+        //比赛列表
+        //获取每周的周一时间;
+        $weekday=date("w");
+        $weekday=($weekday + 6) % 7;
+        $date=date('Y-m-d',strtotime("-{$weekday} day"));
+        $schedule_url='http://www.wanplus.com/lol/schedule';
+        $ql = QueryList::get($schedule_url);
+        $slide_list=$ql->find('.slide-list')->htmls();
+        print_r($slide_list);exit;
+
+        //比赛详情
+        $url='http://www.wanplus.com/schedule/68001.html';
+        $ql = QueryList::get($url);
+        $event_title=$ql->find('.box h1')->text();
+        $event_url=$ql->find('.box h1 a')->attr('href');
+        $event_url='http://www.wanplus.com'.$event_url;
+        $game_matchid=$ql->find('.box .game a')->attr('data-matchid');
+        $game_matchname=$ql->find('.box .game a')->text();//
+        $data=[];
+
+        $matchInfo=[
+            'event_title'=>$event_title,
+            'event_url'=>$event_url,
+            'match_id'=>$game_matchid,
+            'match_name'=>$game_matchname,
+        ];
+        $data['matchInfo']=$matchInfo;
+
+        $matchInfo=[];
+        $score=$ql->find('.box .team-detail li:eq(1) p')->text();
+        $matchInfo['status']=$ql->find('.box .team-detail li:eq(1) .end')->text();
+        $matchInfo['time']=$ql->find('.box .team-detail li:eq(1) .time')->text();
+
         $AjaxModel = new AjaxRequest();
+        $url='http://www.wanplus.com/ajax/matchdetail/72706';
+        $playData= $AjaxModel->getHistoryMatch($url);
+        //期间
+        $matchInfo['match_duration']=$playData['info']['duration'];
+        //战队信息
+        $playData['info']['oneteam']['team_img']="https://static.wanplus.com/data/lol/team/".$playData['info']['oneteam']['teamid']."_mid.png";
+        $playData['info']['twoteam']['team_img']="https://static.wanplus.com/data/lol/team/".$playData['info']['twoteam']['teamid']."_mid.png";
+        $matchInfo['teamInfo'][0]=$playData['info']['oneteam'];
+        $matchInfo['teamInfo'][1]=$playData['info']['twoteam'];
+        if(strpos($score,':') !==false){
+            $scores=explode(':',$score);
+        }
+        $matchInfo['teamInfo'][0]['score']=$scores[0] ?? 0;
+        $matchInfo['teamInfo'][1]['score']=$scores[1] ?? 0;
+        //击杀数
+        $matchInfo['teamStatsList']['kills']=$playData['teamStatsList']['kills'] ?? [];
+        //金钱数
+        $matchInfo['teamStatsList']['golds']=$playData['teamStatsList']['golds'] ?? [];
+        //推塔数
+        $matchInfo['teamStatsList']['towerkills']=$playData['teamStatsList']['towerkills'] ?? [];
+        //小龙数
+        $matchInfo['teamStatsList']['dragonkills']=$playData['teamStatsList']['dragonkills'] ?? [];
+        //大龙数
+        $matchInfo['teamStatsList']['baronkills']=$playData['teamStatsList']['baronkills'] ?? [];
+        //战队关联英雄
+        if(isset($playData['bpList']['bans']) && $playData['bpList']['bans']){
+            foreach ($playData['bpList']['bans'] as $key=>&$val){
+              if($val){
+                  foreach ($val as $k=>&$v){
+                      $v['img_url']='https://static.wanplus.com/data/lol/hero/square/'.$v['cpherokey'].'.'.$playData['info']['heroImgSuffix'];
+                      $matchInfo['teamHero'][$key][$k]['hero_img']=$v['img_url'];
+                      $matchInfo['teamHero'][$key][$k]['teamid']=$v['teamid'];
+                      $matchInfo['teamHero'][$key][$k]['en_name']=$v['cpherokey'];
+                  }
+              }
+            }
+        }
+        //队员
+        if(isset($playData['plList']) && $playData['plList']){
+            foreach ($playData['plList'] as $key=>$val){
+                if($val){
+                    foreach ($val as $k=>$v){//print_r($v);exit;
+                        $matchInfo['playInfo'][$key][$k]['player_img']="https://static.wanplus.com/data/lol/player/".$v['playerid']."_mid.png";
+                        $matchInfo['playInfo'][$key][$k]['playername']=$v['playername'];
+                        //kda
+                        $matchInfo['playInfo'][$key][$k]['kills']=$v['kills'];//杀死
+                        $matchInfo['playInfo'][$key][$k]['deaths']=$v['deaths'];//死亡
+                        $matchInfo['playInfo'][$key][$k]['assists']=$v['assists'];//助攻
+                        $matchInfo['playInfo'][$key][$k]['kda']=$v['kda'];
+                        //金钱
+                        $matchInfo['playInfo'][$key][$k]['gold']=$v['gold'];
+                        //补刀
+                        $matchInfo['playInfo'][$key][$k]['lasthit']=$v['lasthit'];
+                        //输出伤害
+                        $matchInfo['playInfo'][$key][$k]['totalDamageDealtToChampions']=$v['stats']['totalDamageDealtToChampions'];
+                        //承受伤害
+                        $matchInfo['playInfo'][$key][$k]['totalDamageTaken']=$v['stats']['totalDamageTaken'];
+                        //英雄图片
+                        $matchInfo['playInfo'][$key][$k]['heroImg']="https://static.wanplus.com/data/lol/hero/square/".$v['cpherokey'].'.'.$playData['info']['heroImgSuffix'];
+                        $skill="https://static.wanplus.com/data/lol/skill/".$v['skill1id'].".png";
+                        $skill2="https://static.wanplus.com/data/lol/skill/".$v['skill2id'].".png";
+                        //技能图片
+                        $matchInfo['playInfo'][$key][$k]['skill'][0]=$skill ?? '';
+                        $matchInfo['playInfo'][$key][$k]['skill'][1]=$skill2 ?? '';
+                        //装备图片
+                        if(isset($v['itemcache']) && $v['itemcache']){
+                            foreach ($v['itemcache'] as $key1=>&$val){
+                                $matchInfo['playInfo'][$key][$k]['equipImg'][$key1]="https://static.wanplus.com/data/lol/item/11.2.1/".$val.".png";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $data['matchInfo']=$matchInfo;
+print_r($data);exit;
+$url= 'https://static.wanplus.com/data/lol/hero/square/'.$playData['bpList']['bans'][0][0]['cpherokey'].'.'.$playData['info']['heroImgSuffix'];
+echo $url;exit;
+        print_r($playData['bpList']['bans']);exit;
+        //print_r($playData);exit;
+        $return = [];
+        $data_list = ['pid'=>'player_id','pname'=>'player_name','score'=>'score'];
+        foreach($playData['plList'] as $key => $player)
+        {
+            //player_id;
+            $d = [];
+            foreach($data_list as $k => $v)
+            {
+                $d[$v] = $player[$k];
+            }
+            $return[$player['pid']] = $d;
+        }
+
         //gametype:1表示data2,2表示lol，6表示王者荣耀
         $gameTypes=[1,2,6];
         $totalPage=50;
-        $data=[];
+        $data=[];{}
         foreach ($gameTypes as $val){
             for ($i=1;$i<=$totalPage;$i++){
                 $url='https://www.wanplus.com/ajax/player/recent?isAjax=1&playerId=25474&gametype='.$val.'&page='.$i.'&heroId=0';
