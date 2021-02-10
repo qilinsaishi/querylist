@@ -151,15 +151,15 @@ class RedisService
 
                 if (isset($data['params'])) {
                     $data['params']['dataType']=$dataType;
-                    if ($dataType == 'defaultConfig' && isset($data['params']['keys']) && $keyName && in_array($keyName, $data['params']['keys'])) {
+                    if ($dataType == 'defaultConfig' ) {
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
-                    if ($dataType == 'imageList' && isset($data['params']['flag']) && $keyName) {
+                    if ($dataType == 'imageList' ) {
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
-                    if ($dataType == 'links' && isset($data['params']['site_id']) && $keyName) {
+                    if ($dataType == 'links') {
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
