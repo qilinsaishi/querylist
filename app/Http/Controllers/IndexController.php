@@ -8,6 +8,7 @@ use App\Models\CollectResultModel;
 use App\Models\Admin\DefaultConfig;
 use App\Services\Data\DataService;
 use App\Services\Data\ExtraProcessService;
+use App\Services\Data\RedisService;
 use Illuminate\Http\Request;
 
 
@@ -24,7 +25,7 @@ class IndexController extends Controller
     }
 
     public function get()
-    {
+    {echo 11;exit;
         $data=$this->payload;
         $return = (new DataService())->getData($data);
         return $return;
@@ -35,7 +36,9 @@ class IndexController extends Controller
         $redisService = new RedisService();
         $dataType = $this->request->get("dataType","defaultConfig");
         $keyName= $this->request->get("key_name","");
-        $redisService->refreshCache($dataType,[],$keyName);
+        $data = $redisService->refreshCache($dataType,[],$keyName);print_r($data);exit;
+        $return = (new DataService())->getData($data);
+        return $return;
     }
 
 }

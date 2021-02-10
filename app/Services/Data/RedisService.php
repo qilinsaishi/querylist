@@ -143,6 +143,7 @@ class RedisService
 
             $redis = app("redis.connection");
             $keyList = $redis->keys($cacheConfig[$dataType]['prefix'] . "_*");
+            $params_list = [];
             foreach ($keyList as $key) {
                 $data = $redis->get($key);
                 $data = json_decode($data, true);
@@ -152,13 +153,18 @@ class RedisService
 
                     if ($dataType == 'defaultConfig' && isset($data['params']['keys']) && $keyName && in_array($keyName, $data['params']['keys'])) {
                         $redis->del($key);
+                        $params_list[] = $data['params'];
+
                     }
                     if ($dataType == 'imageList' && isset($data['params']['flag']) && $keyName) {
                         $redis->del($key);
+                        $params_list[] = $data['params'];
                     }
                     if ($dataType == 'links' && isset($data['params']['site_id']) && $keyName) {
                         $redis->del($key);
+                        $params_list[] = $data['params'];
                     }
+                    /*
                     $d = $class->$function($data['params']);
                     if (!$functionCount || $functionCount == "") {
                         $count = 0;
@@ -173,6 +179,8 @@ class RedisService
 
                     $dataArr = ['data' => $d, 'count' => $count];
                     $this->saveCache($dataType, $params, $dataArr);
+                    */
+                    return $params_list;
 
                 } else//没有，删除等待重建
                 {
