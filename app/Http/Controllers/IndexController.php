@@ -25,7 +25,7 @@ class IndexController extends Controller
     }
 
     public function get()
-    {echo 11;exit;
+    {
         $data=$this->payload;
         $return = (new DataService())->getData($data);
         return $return;
@@ -36,8 +36,12 @@ class IndexController extends Controller
         $redisService = new RedisService();
         $dataType = $this->request->get("dataType","defaultConfig");
         $keyName= $this->request->get("key_name","");
-        $data = $redisService->refreshCache($dataType,[],$keyName);print_r($data);exit;
-        $return = (new DataService())->getData($data);
+        $data = $redisService->refreshCache($dataType,[],$keyName);
+        $return=[];
+        if($data) {
+            $return = (new DataService())->getData($data);
+        }
+
         return $return;
     }
 

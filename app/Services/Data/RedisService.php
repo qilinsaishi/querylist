@@ -150,11 +150,10 @@ class RedisService
                 //有参数，尝试刷新数据
 
                 if (isset($data['params'])) {
-
+                    $data['params']['dataType']=$dataType;
                     if ($dataType == 'defaultConfig' && isset($data['params']['keys']) && $keyName && in_array($keyName, $data['params']['keys'])) {
                         $redis->del($key);
                         $params_list[] = $data['params'];
-
                     }
                     if ($dataType == 'imageList' && isset($data['params']['flag']) && $keyName) {
                         $redis->del($key);

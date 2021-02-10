@@ -6,6 +6,7 @@ use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\Admin\DefaultConfig;
+use App\Services\Data\DataService;
 use App\Services\Data\ExtraProcessService;
 use Illuminate\Http\Request;
 
@@ -86,7 +87,9 @@ class lolIndexController extends Controller
         $redisService = new RedisService();
         $dataType = $this->request->get("dataType","defaultConfig");
         $keyName= $this->request->get("key_name","");
-        $redisService->refreshCache($dataType,[],$keyName);
+        $data = $redisService->refreshCache($dataType,[],$keyName);
+        $return = (new DataService())->getData($data);
+        return $return;
     }
 
 }

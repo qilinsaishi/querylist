@@ -22,3 +22,4 @@ Route::get('home/test','HomeController@test');
 Route::post('get','IndexController@get');
 Route::any('lol/team_info','HomeController@teamInfo');
 Route::any('lol/refresh','lolIndexController@refresh');
+Route::any('refresh','IndexController@refresh');
