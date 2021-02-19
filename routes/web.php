@@ -21,5 +21,6 @@ Route::post('home/list','HomeController@lists');
 Route::get('home/test','HomeController@test');
 Route::post('lol/get','lolIndexController@get');
 Route::post('get','indexController@get');
+Route::post('sitemap','indexController@sitemap');
 Route::any('lol/team_info','HomeController@teamInfo');
 Route::get('lol/refresh','lolIndexController@refresh');
