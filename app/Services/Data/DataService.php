@@ -81,7 +81,10 @@ class DataService
         "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'kpl',"source"=>"cpseo","fields"=>'team_id'],
         "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'kpl',"source"=>"cpseo","fields"=>'player_id'],
         "detail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'kpl',"source"=>"cpseo","fields"=>'id'],
-            ]
+            ],
+            2=>[
+                "detail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'id'],
+            ],
         ];
         $menu = $siteMapConfig[$data['site_id']]??[];
         foreach($menu as $type => $menu_detail)
