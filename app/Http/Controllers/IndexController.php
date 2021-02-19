@@ -45,4 +45,11 @@ class IndexController extends Controller
         return $return;
     }
 
+    public function sitemap()
+    {
+        $data=$this->payload;
+        $return = (new DataService())->siteMap($data);
+        return $return;
+    }
+
 }
