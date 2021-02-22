@@ -15,6 +15,7 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
     'asign' => env('ASIGN', 1),
+    'logs_root' => env('LOGS_ROOT'),
     /*
     |--------------------------------------------------------------------------
     | Application Environment
