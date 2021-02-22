@@ -150,6 +150,7 @@ class MissionService
                                 $processResult['author_id'] =   $author_id;
                             }
                         }
+                        $processResult['source']=$result['source'] ?? '';
                         $save = $informationModel->saveInformation($result["game"], $processResult);
                     }
                     elseif ($result['mission_type'] == "hero") {
