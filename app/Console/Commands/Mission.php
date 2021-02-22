@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 use App\Services\AliyunSercies;
 use App\Services\AliyunService;
 use App\Services\InformationService;
+use App\Services\TeamResultService;
 use Illuminate\Console\Command;
 use App\Console\Commands\Information as oInformation;
 use App\Services\MissionService as oMission;
@@ -47,9 +48,13 @@ class Mission extends Command
         $mission_type = ($this->argument("mission_type")??"");
         switch ($operation) {
             case "collect":
+                //资讯采集入任务表
                 if($mission_type=='information'){
-                    //资讯采集入任务表
                     (new InformationService())->insertData();
+                }
+                //采集战队入库
+                if($mission_type=='team'){
+                    (new TeamResultService())->insertTeamData($mission_type);
                 }
 
                 (new oMission())->collect("","",$mission_type);
