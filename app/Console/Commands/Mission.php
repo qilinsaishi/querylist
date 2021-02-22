@@ -5,7 +5,9 @@ namespace App\Console\Commands;
 
 use App\Services\AliyunSercies;
 use App\Services\AliyunService;
+use App\Services\InformationService;
 use Illuminate\Console\Command;
+use App\Console\Commands\Information as oInformation;
 use App\Services\MissionService as oMission;
 class Mission extends Command
 {
@@ -14,7 +16,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {operation} {game} {mission_type}';
+    protected $signature = 'mission:collect {operation} {mission_type} {game} ';
 
     /**
      * The console command description.
@@ -45,7 +47,12 @@ class Mission extends Command
         $mission_type = ($this->argument("mission_type")??"");
         switch ($operation) {
             case "collect":
-                (new oMission())->collect();
+                if($mission_type=='information'){
+                    //资讯采集入任务表
+                    (new InformationService())->insertData();
+                }
+
+                (new oMission())->collect("","",$mission_type);
                 break;
             case "process":
                 (new oMission())->process($game,"",$mission_type);
@@ -64,7 +71,9 @@ class Mission extends Command
                 break;
         }
 
+    }
+    public function insert(){
 
-
+        return 'finish';
     }
 }
