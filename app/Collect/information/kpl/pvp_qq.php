@@ -2,6 +2,8 @@
 
 namespace App\Collect\information\kpl;
 
+use App\Models\InformationModel;
+
 class pvp_qq
 {
     protected $data_map =
@@ -48,20 +50,31 @@ class pvp_qq
             }
 
         }
-        if (!empty($res)) {
-            $cdata = [
-                'mission_id' => $arr['mission_id'],
-                'content' => json_encode($res),
-                'game' => $arr['game'],
-                'source_link' => $url,
-                'title' => $arr['detail']['title'] ?? '',
-                'mission_type' => $arr['mission_type'],
-                'source' => $arr['source'],
-                'status' => 1,
-                'update_time' => date("Y-m-d H:i:s")
-            ];
+        $site_id=$res[$this->data_map['site_id']['path']] ?? 0;
 
+        if($site_id>0){
+
+            $informationModel=new InformationModel();
+            $informationInfo=$informationModel->getInformationBySiteId($site_id,'kpl',$arr['source']);
+
+            if(count($informationInfo) <=0){
+                if (!empty($res)) {
+                    $cdata = [
+                        'mission_id' => $arr['mission_id'],
+                        'content' => json_encode($res),
+                        'game' => $arr['game'],
+                        'source_link' => $url,
+                        'title' => $arr['detail']['title'] ?? '',
+                        'mission_type' => $arr['mission_type'],
+                        'source' => $arr['source'],
+                        'status' => 1,
+                        'update_time' => date("Y-m-d H:i:s")
+                    ];
+
+                }
+            }
         }
+
         return $cdata;
     }
 

@@ -94,11 +94,12 @@ class InformationModel extends Model
             ->get()->toArray();
         return $information_list;
     }
-    public function getInformationBySiteId($id,$game)
+    public function getInformationBySiteId($id,$game,$source)
     {
         $information =$this->select("*")
                     ->where("site_id",$id)
                     ->where("game",$game)
+                    ->where("source",$source)
                     ->get()->first();
         if(isset($information->id))
         {
@@ -182,7 +183,7 @@ class InformationModel extends Model
         }
         $data['title'] = preg_replace("/\s+/", "",$data['title']);
         $data['title'] = trim($data['title']);
-        $currentInformation = $this->getInformationBySiteId($data['site_id'],$game);
+        $currentInformation = $this->getInformationBySiteId($data['site_id'],$game,$data['source']);
         if(!isset($currentInformation['id']))
         {
             echo "toInsertInformation:\n";

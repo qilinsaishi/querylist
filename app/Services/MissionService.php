@@ -15,7 +15,7 @@ class MissionService
     public function collect($game = "", $source = "", $mission_type = '')
     {
         //获取爬取任务列表
-        $mission_list = $this->getMission($game, $source, $mission_type, 400);
+        $mission_list = $this->getMission($game, $source, $mission_type, 2000);
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         //初始化空的类库列表
@@ -150,6 +150,7 @@ class MissionService
                                 $processResult['author_id'] =   $author_id;
                             }
                         }
+                        $processResult['source']=$result['source'] ?? '';
                         $save = $informationModel->saveInformation($result["game"], $processResult);
                     }
                     elseif ($result['mission_type'] == "hero") {
@@ -395,4 +396,6 @@ class MissionService
     {
         return (new MissionModel())->insertMission($data);
     }
+
+
 }

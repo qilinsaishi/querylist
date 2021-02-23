@@ -53,14 +53,12 @@ class Information extends Command
                 $lastPage=1;
                 for ($i=0;$i<=$lastPage;$i++){
                     $m=$i+1;
-                    /*  $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&order=sIdxTime&r0=cors&type=iTarget&source=app_news_search&pagesize=12&page='.$m.'&id='.$type;
-                      $pageData = curl_get($url);资讯*/
                     if($val!=1765){
                         $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&order=sIdxTime&r0=cors&type=iTarget&source=app_news_search&pagesize=12&page='.$m.'&id='.$type;
                         $pageData = curl_get($url);//资讯
                     }else{
                         $client=new ClientServices();
-                        $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page='.$m.'&pagesize=15&order=sIdxTime&_='.msectime();
+                        $url='https://apps.game.qq.com/wmp/v3.1/?p0=18&p1=searchNewsKeywordsList&page='.$m.'&pagesize=15&order=sIdxTime';
                         $refeerer = 'https://pvp.qq.com/web201605/searchResult.shtml';
 
                         $headers = [

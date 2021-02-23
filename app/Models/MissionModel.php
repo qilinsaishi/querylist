@@ -109,4 +109,29 @@ class MissionModel extends Model
         }
         return $this->where('mission_id', $mission_id)->update($data);
     }
+    public function getMissionCount($params=[]){
+        $missionModel = $this;
+        $game=$params['game'] ?? '';
+        $mission_type=$params['mission_type'] ?? '';
+        $source_link=$params['source_link'] ?? '';
+        //游戏
+        if($game!="")
+        {
+            $missionModel = $this->where("game","=",$game);
+        }
+
+        //类型
+        if($mission_type!="")
+        {
+            $missionModel = $missionModel->where("mission_type",$mission_type);
+        }
+        //采集来源
+        if($source_link!="")
+        {
+            $missionModel = $missionModel->where("source_link",$source_link);
+        }
+
+
+        return $missionModel->count();
+    }
 }

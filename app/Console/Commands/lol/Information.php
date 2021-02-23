@@ -50,12 +50,12 @@ class Information extends Command
             foreach ($targetItem as $val){
                 $target=$val;
                 $collectResultModel=new CollectResultModel();
-                $init_url='https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page=1&num=10&target='.$target.'&source=web_pc&_='.msectime();
+                $init_url='https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page=1&num=10&target='.$target.'&source=web_pc';
                 $data=curl_get($init_url);
-                $resultTotal=$data['data']['resultTotal'] ?? '';
-                $resultNum=$data['data']['resultNum'] ?? '';
-                $lastPage=getLastPage($resultTotal,$resultNum);
-                $lastPage=1;
+                //$resultTotal=$data['data']['resultTotal'] ?? '';
+                //$resultNum=$data['data']['resultNum'] ?? '';
+                //$lastPage=getLastPage($resultTotal,$resultNum);
+                $lastPage=49;
                 for ($i=0;$i<=$lastPage;$i++){
                     $m=$i+1;
                     $url='https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page='.$m.'&num=16&target='.$target.'&source=web_pc';
