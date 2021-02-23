@@ -7,6 +7,7 @@ use App\Services\AliyunSercies;
 use App\Services\AliyunService;
 use App\Services\HeroService;
 use App\Services\InformationService;
+use App\Services\KeywordService as oKeyword;
 use App\Services\TeamResultService;
 use Illuminate\Console\Command;
 use App\Console\Commands\Information as oInformation;
@@ -76,6 +77,15 @@ class Mission extends Command
                 foreach($gameList as $g)
                 {
                     (new oMission())->process($g,"",$mission_type);
+                }
+                if($mission_type == "information")
+                {
+                    $oKeyword = new oKeyword();
+                    foreach($gameList as $g)
+                    {
+                        $oKeyword->information($g);
+                        $oKeyword->tfIdf($g);
+                    }
                 }
                 break;
             case "fixImg":
