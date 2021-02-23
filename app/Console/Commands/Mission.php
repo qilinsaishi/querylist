@@ -8,6 +8,7 @@ use App\Services\AliyunService;
 use App\Services\EquipmentService;
 use App\Services\HeroService;
 use App\Services\InformationService;
+use App\Services\SummonerService;
 use App\Services\TeamResultService;
 use Illuminate\Console\Command;
 use App\Console\Commands\Information as oInformation;
@@ -65,6 +66,10 @@ class Mission extends Command
                 //采集装备入库
                 if($mission_type=='equipment'){
                     (new EquipmentService())->insertEquipmentData($mission_type);
+                }
+                //采集召唤师技能入库
+                if($mission_type=='summoner'){
+                    (new SummonerService())->insertSummonerData($mission_type);
                 }
 
                 (new oMission())->collect("","",$mission_type);
