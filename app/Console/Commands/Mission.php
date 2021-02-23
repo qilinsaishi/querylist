@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 
 use App\Services\AliyunSercies;
 use App\Services\AliyunService;
+use App\Services\EquipmentService;
 use App\Services\HeroService;
 use App\Services\InformationService;
 use App\Services\TeamResultService;
@@ -60,6 +61,10 @@ class Mission extends Command
                 //采集英雄入库
                 if($mission_type=='hero'){
                     (new HeroService())->insertHeroData($mission_type);
+                }
+                //采集装备入库
+                if($mission_type=='equipment'){
+                    (new EquipmentService())->insertEquipmentData($mission_type);
                 }
 
                 (new oMission())->collect("","",$mission_type);
