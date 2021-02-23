@@ -52,6 +52,7 @@ class InformationService
             $missionModel = new MissionModel();
             $lastPage = 9;//采集最新的50页数据
             for ($i = 0; $i <= $lastPage; $i++) {
+                $t1 = microtime(true);
                 $m = $i + 1;
                 $url = 'https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page=' . $m . '&num=16&target=' . $target . '&source=web_pc';
                 $params = [
@@ -81,8 +82,10 @@ class InformationService
                         ),
                     ];
                     $insert = (new oMission())->insertMission($data);
-                }
 
+                }
+                $t2 = microtime(true);
+                echo '耗时'.round($t2-$t1,3).'秒'. "\n";
             }
 
         }
@@ -100,6 +103,7 @@ class InformationService
             $missionModel = new MissionModel();
             $lastPage = 9;
             for ($i = 0; $i <= $lastPage; $i++) {
+                $t1 = microtime(true);
                 $m = $i + 1;
                 if ($val != 1765) {
                     //资讯
@@ -160,6 +164,8 @@ class InformationService
 
                     }
                 }
+                $t2 = microtime(true);
+                echo '耗时'.round($t2-$t1,3).'秒' . "\n";
             }
         }
         return true;

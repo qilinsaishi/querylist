@@ -30,8 +30,10 @@ class TeamResultService
         $collectModel=new CollectUrlModel();
         $missionModel=new MissionModel();
         $cdata=$collectModel->getDataFromUrl($game,$mission_type,'wanplus');
+
         if($cdata){
             foreach ($cdata as $val){
+                $t1 = microtime(true);
                 $params = [
                     'game' => $game,
                     'mission_type' => $mission_type,
@@ -58,9 +60,12 @@ class TeamResultService
                     ];
                     $insert = (new oMission())->insertMission($data);
                 }
+                $t2 = microtime(true);
+                echo '耗时'.round($t2-$t1,3).'秒';
 
             }
         }
+
         return true;
     }
     //2ceseo 战队列表
