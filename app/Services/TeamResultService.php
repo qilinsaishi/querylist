@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CollectResultModel;
 use App\Models\CollectUrlModel;
 use App\Models\MissionModel;
+use App\Models\TeamModel;
 use App\Services\MissionService as oMission;
 use QL\QueryList;
 
@@ -39,29 +40,38 @@ class TeamResultService
                     'mission_type' => $mission_type,
                     'source_link' => $val['url'],
                 ];
-                $result =$missionModel->getMissionCount($params);//过滤已经采集过的文章
-                $result = $result ?? 0;
-                if ($result <= 0) {
-                    $data = [
-                        "asign_to"=>1,
-                        "mission_type"=>$val['mission_type'],
-                        "mission_status"=>1,
-                        "game"=>$val['game'],
-                        "source"=>$val['source'],
-                        'source_link'=>$val['url'],
-                        "detail"=>json_encode(
-                            [
-                                "url"=>$val['url'],
-                                "game"=>$val['game'],//lol
+                $urlArr=explode('team/',$val['url']);
+                $site_id=$urlArr[1] ?? 0;
+                $teamModel=new TeamModel();
+                if($site_id>0){
+                    $teamInfo=$teamModel->getTeamBySiteId($site_id);
+                    if(empty($teamInfo)){
+                        $result =$missionModel->getMissionCount($params);//过滤已经采集过的文章
+                        $result = $result ?? 0;
+                        if ($result <= 0) {
+                            $data = [
+                                "asign_to"=>1,
+                                "mission_type"=>$val['mission_type'],
+                                "mission_status"=>1,
+                                "game"=>$val['game'],
                                 "source"=>$val['source'],
-                                "title"=>$val['title'],
-                            ]
-                        ),
-                    ];
-                    $insert = (new oMission())->insertMission($data);
+                                'source_link'=>$val['url'],
+                                "detail"=>json_encode(
+                                    [
+                                        "url"=>$val['url'],
+                                        "game"=>$val['game'],//lol
+                                        "source"=>$val['source'],
+                                        "title"=>$val['title'],
+                                    ]
+                                ),
+                            ];
+                            $insert = (new oMission())->insertMission($data);
+                        }
+                    }
                 }
+
                 $t2 = microtime(true);
-                echo '耗时'.round($t2-$t1,3).'秒';
+               // echo '耗时'.round($t2-$t1,3).'秒';
 
             }
         }
@@ -97,35 +107,44 @@ class TeamResultService
             $links = $ql->find('.team-list a')->attrs('href')->all();
             if (isset($links) && $links) {
                 $missionModel=new MissionModel();
+                $teamModel=new TeamModel();
                 foreach ($links as $v) {
                     $params=[
                         'game'=>$game,
                         'mission_type'=>$mission_type,
                         'source_link'=>$v,
                     ];
-                    $result=$missionModel->getMissionCount($params);
-                    $result=$result ?? 0;
-                    if($result <=0){
-                        $data = [
-                            "asign_to" => 1,
-                            "mission_type" => $mission_type,//赛事
-                            "mission_status" => 1,
-                            "game" => $game,
-                            "source" => 'cpseo',//
-                            'source_link'=>$v,
-                            "detail" => json_encode(
-                                [
-                                    "url" => $v,
+                    $urlArr=explode('team/',$v);
+                    $site_id=$urlArr[1] ?? 0;
+                    if($site_id>0) {
+                        $teamInfo = $teamModel->getTeamBySiteId($site_id);
+                        if (empty($teamInfo)) {
+                            $result=$missionModel->getMissionCount($params);
+                            $result=$result ?? 0;
+                            if($result <=0){
+                                $data = [
+                                    "asign_to" => 1,
+                                    "mission_type" => $mission_type,//赛事
+                                    "mission_status" => 1,
                                     "game" => $game,
-                                    "source" => 'cpseo',
-                                ]
-                            ),
-                        ];
-                        if($data){
-                            $insert = (new oMission())->insertMission($data);
-                            //echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+                                    "source" => 'cpseo',//
+                                    'source_link'=>$v,
+                                    "detail" => json_encode(
+                                        [
+                                            "url" => $v,
+                                            "game" => $game,
+                                            "source" => 'cpseo',
+                                        ]
+                                    ),
+                                ];
+                                if($data){
+                                    $insert = (new oMission())->insertMission($data);
+                                    //echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+                                }
+                            }
                         }
                     }
+
 
                 }
             }
