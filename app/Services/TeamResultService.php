@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CollectResultModel;
 use App\Models\CollectUrlModel;
+use App\Models\MissionModel;
 use App\Services\MissionService as oMission;
 use QL\QueryList;
 
@@ -27,7 +28,7 @@ class TeamResultService
     //玩加电竞（wanplus）
     public function insertWanplusTeam($game,$mission_type){
         $collectModel=new CollectUrlModel();
-        $collectResultModel = new CollectResultModel();
+        $missionModel=new MissionModel();
         $cdata=$collectModel->getDataFromUrl($game,$mission_type,'wanplus');
         if($cdata){
             foreach ($cdata as $val){
@@ -36,8 +37,7 @@ class TeamResultService
                     'mission_type' => $mission_type,
                     'source_link' => $val['url'],
                 ];
-                $result = $collectResultModel->getCollectResultCount($params);//过滤已经采集过的文章
-
+                $result =$missionModel->getMissionCount($params);//过滤已经采集过的文章
                 $result = $result ?? 0;
                 if ($result <= 0) {
                     $data = [
@@ -46,6 +46,7 @@ class TeamResultService
                         "mission_status"=>1,
                         "game"=>$val['game'],
                         "source"=>$val['source'],
+                        'source_link'=>$val['url'],
                         "detail"=>json_encode(
                             [
                                 "url"=>$val['url'],
@@ -90,14 +91,14 @@ class TeamResultService
             $ql = QueryList::get($url);
             $links = $ql->find('.team-list a')->attrs('href')->all();
             if (isset($links) && $links) {
-                $collectResultModel=new CollectResultModel();
+                $missionModel=new MissionModel();
                 foreach ($links as $v) {
                     $params=[
                         'game'=>$game,
                         'mission_type'=>$mission_type,
                         'source_link'=>$v,
                     ];
-                    $result=$collectResultModel->getCollectResultCount($params);
+                    $result=$missionModel->getMissionCount($params);
                     $result=$result ?? 0;
                     if($result <=0){
                         $data = [
@@ -106,6 +107,7 @@ class TeamResultService
                             "mission_status" => 1,
                             "game" => $game,
                             "source" => 'cpseo',//
+                            'source_link'=>$v,
                             "detail" => json_encode(
                                 [
                                     "url" => $v,

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
+use App\Models\MissionModel;
 use App\Services\MissionService as oMission;
 
 class InformationService
@@ -46,7 +47,7 @@ class InformationService
         $total = 0;
         foreach ($targetItem as $val) {
             $target = $val;
-            $collectResultModel = new CollectResultModel();
+            $missionModel= new MissionModel();
             $lastPage = 49;//采集最新的50页数据
             for ($i = 0; $i <= $lastPage; $i++) {
                 $m = $i + 1;
@@ -56,7 +57,7 @@ class InformationService
                     'mission_type' => 'information',
                     'source_link' => $url,
                 ];
-                $result = $collectResultModel->getCollectResultCount($params);//过滤已经采集过的文章
+                $result =  $missionModel->getMissionCount($params);//过滤已经采集过的文章
                 $result = $result ?? 0;
                 if ($result <= 0) {
                     $data = [
@@ -66,6 +67,7 @@ class InformationService
                         "game" => 'lol',
                         "source" => 'lol_qq',//
                         'title' => '',
+                        'source_link'=>$url,
                         "detail" => json_encode(
                             [
                                 "url" => $url,
@@ -92,7 +94,7 @@ class InformationService
         ];
         foreach ($targetItem as $val) {
             $type = $val;
-            $collectResultModel = new CollectResultModel();
+            $missionModel= new MissionModel();
             $lastPage = 50;
             for ($i = 0; $i <= $lastPage; $i++) {
                 $m = $i + 1;
@@ -122,7 +124,7 @@ class InformationService
                             'mission_type' => 'information',
                             'source_link' => $detail_url,
                         ];
-                        $result = $collectResultModel->getCollectResultCount($params);
+                        $result =$missionModel->getMissionCount($params);
                         //过滤已经采集过的文章
                         $result = $result ?? 0;
                         if ($result <= 0) {
@@ -133,6 +135,7 @@ class InformationService
                                 "game" => 'kpl',
                                 "source" => 'pvp_qq',//
                                 'title' => $val['sTitle'] ?? '',
+                                'source_link'=>$detail_url,
                                 "detail" => json_encode(
                                     [
                                         "url" => $detail_url,
