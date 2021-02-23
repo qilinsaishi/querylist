@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
+use App\Models\InformationModel;
 use App\Models\MissionModel;
 use App\Services\MissionService as oMission;
 
@@ -18,6 +19,7 @@ class InformationService
         foreach ($gameItem as $val) {
             switch ($val) {
                 case "lol":
+
                     $this->insertLolInformation();
                     break;
                 case "kpl":
@@ -47,7 +49,7 @@ class InformationService
         $total = 0;
         foreach ($targetItem as $val) {
             $target = $val;
-            $missionModel= new MissionModel();
+            $missionModel = new MissionModel();
             $lastPage = 49;//采集最新的50页数据
             for ($i = 0; $i <= $lastPage; $i++) {
                 $m = $i + 1;
@@ -57,7 +59,8 @@ class InformationService
                     'mission_type' => 'information',
                     'source_link' => $url,
                 ];
-                $result =  $missionModel->getMissionCount($params);//过滤已经采集过的文章
+                $result = $missionModel->getMissionCount($params);//过滤已经采集过的文章
+
                 $result = $result ?? 0;
                 if ($result <= 0) {
                     $data = [
@@ -67,7 +70,7 @@ class InformationService
                         "game" => 'lol',
                         "source" => 'lol_qq',//
                         'title' => '',
-                        'source_link'=>$url,
+                        'source_link' => $url,
                         "detail" => json_encode(
                             [
                                 "url" => $url,
@@ -94,7 +97,7 @@ class InformationService
         ];
         foreach ($targetItem as $val) {
             $type = $val;
-            $missionModel= new MissionModel();
+            $missionModel = new MissionModel();
             $lastPage = 50;
             for ($i = 0; $i <= $lastPage; $i++) {
                 $m = $i + 1;
@@ -118,34 +121,41 @@ class InformationService
                 $cdata = $pageData['msg']['result'] ?? [];
                 if ($cdata) {
                     foreach ($cdata as $key => $val) {
-                        $detail_url = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=' . $val['iNewsId'];//攻略
-                        $params = [
-                            'game' => 'kpl',
-                            'mission_type' => 'information',
-                            'source_link' => $detail_url,
-                        ];
-                        $result =$missionModel->getMissionCount($params);
-                        //过滤已经采集过的文章
-                        $result = $result ?? 0;
-                        if ($result <= 0) {
-                            $data = [
-                                "asign_to" => 1,
-                                "mission_type" => 'information',//资讯
-                                "mission_status" => 1,
-                                "game" => 'kpl',
-                                "source" => 'pvp_qq',//
-                                'title' => $val['sTitle'] ?? '',
-                                'source_link'=>$detail_url,
-                                "detail" => json_encode(
-                                    [
-                                        "url" => $detail_url,
-                                        "game" => 'kpl',//王者荣耀
-                                        "source" => 'pvp_qq',//资讯
-                                        'type' => $type,//1761=>新闻,1762=>公告,1763=>活动,1764=>赛事,1765=>攻略
-                                    ]
-                                ),
+                        $site_id = $val['iNewsId'] ?? 0;
+                        $informationModel = new InformationModel();
+                        $informationInfo = $informationModel->getInformationBySiteId($site_id, 'kpl', 'pvp_qq');
+                        if (count($informationInfo) <= 0) {
+                            $detail_url = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=' . $val['iNewsId'];//攻略
+                            $params = [
+                                'game' => 'kpl',
+                                'mission_type' => 'information',
+                                'source_link' => $detail_url,
                             ];
-                            $insert = (new oMission())->insertMission($data);
+                            $result = $missionModel->getMissionCount($params);
+                            //过滤已经采集过的文章
+                            $result = $result ?? 0;
+                            if ($result <= 0) {
+                                $data = [
+                                    "asign_to" => 1,
+                                    "mission_type" => 'information',//资讯
+                                    "mission_status" => 1,
+                                    "game" => 'kpl',
+                                    "source" => 'pvp_qq',//
+                                    'title' => $val['sTitle'] ?? '',
+                                    'source_link' => $detail_url,
+                                    "detail" => json_encode(
+                                        [
+                                            "url" => $detail_url,
+                                            "game" => 'kpl',//王者荣耀
+                                            "source" => 'pvp_qq',//资讯
+                                            'type' => $type,//1761=>新闻,1762=>公告,1763=>活动,1764=>赛事,1765=>攻略
+                                        ]
+                                    ),
+                                ];
+                                $insert = (new oMission())->insertMission($data);
+                            }
+                        }else{
+                            continue;
                         }
 
                     }
