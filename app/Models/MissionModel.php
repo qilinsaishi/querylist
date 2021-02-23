@@ -63,7 +63,7 @@ class MissionModel extends Model
 
     public function getMissionByTitle($title = '', $mission_type, $game, $source, $asign_to)
     {
-        echo $title . "-" . $mission_type . "-" . $game . "-" . $source . "\n";
+        //echo $title . "-" . $mission_type . "-" . $game . "-" . $source . "\n";
         $mission_obj = $this->select("*");
         if (!empty($title)) {
             $mission_obj->where("title", $title);

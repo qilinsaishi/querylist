@@ -50,7 +50,7 @@ class InformationService
         foreach ($targetItem as $val) {
             $target = $val;
             $missionModel = new MissionModel();
-            $lastPage = 49;//采集最新的50页数据
+            $lastPage = 9;//采集最新的50页数据
             for ($i = 0; $i <= $lastPage; $i++) {
                 $m = $i + 1;
                 $url = 'https://apps.game.qq.com/cmc/zmMcnTargetContentList?r0=jsonp&page=' . $m . '&num=16&target=' . $target . '&source=web_pc';
@@ -98,7 +98,7 @@ class InformationService
         foreach ($targetItem as $val) {
             $type = $val;
             $missionModel = new MissionModel();
-            $lastPage = 50;
+            $lastPage = 9;
             for ($i = 0; $i <= $lastPage; $i++) {
                 $m = $i + 1;
                 if ($val != 1765) {

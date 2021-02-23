@@ -118,7 +118,7 @@ class TeamResultService
                         ];
                         if($data){
                             $insert = (new oMission())->insertMission($data);
-                            echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+                            //echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
                         }
                     }
 
