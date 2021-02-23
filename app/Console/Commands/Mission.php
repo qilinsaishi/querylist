@@ -65,7 +65,18 @@ class Mission extends Command
                 (new oMission())->collect("","",$mission_type);
                 break;
             case "process":
-                (new oMission())->process($game,"",$mission_type);
+                if($game != "all")
+                {
+                    $gameList = [$game];
+                }
+                else
+                {
+                    $gameList = ['lol','kpl'];
+                }
+                foreach($gameList as $g)
+                {
+                    (new oMission())->process($g,"",$mission_type);
+                }
                 break;
             case "fixImg":
                 (new oMission())->fixImg();
