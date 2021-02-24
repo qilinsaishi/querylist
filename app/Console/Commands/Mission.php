@@ -8,6 +8,7 @@ use App\Services\AliyunService;
 use App\Services\EquipmentService;
 use App\Services\HeroService;
 use App\Services\InformationService;
+use App\Services\InscriptionService;
 use App\Services\RunesService;
 use App\Services\SummonerService;
 use App\Services\TeamResultService;
@@ -76,6 +77,11 @@ class Mission extends Command
                 if($mission_type=='runes'){
                     (new RunesService())->insertRunesData();
                 }
+                //采集kpl铭文入库
+                if($mission_type=='inscription'){
+                    (new InscriptionService())->insertInscriptionData();
+                }
+
 
 
                 (new oMission())->collect("","",$mission_type);
