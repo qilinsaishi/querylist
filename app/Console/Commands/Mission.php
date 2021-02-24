@@ -20,7 +20,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {operation} {mission_type} {game} ';
+    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=}';
 
     /**
      * The console command description.
@@ -46,6 +46,7 @@ class Mission extends Command
      */
     public function handle()
     {
+        $count = $this->option("count")??2;
         $operation = ($this->argument("operation")??"collect");
         $game = ($this->argument("game")??"");
         $mission_type = ($this->argument("mission_type")??"");
@@ -85,7 +86,7 @@ class Mission extends Command
                 }
                 foreach($gameList as $g)
                 {
-                    (new oMission())->process($g,"",$mission_type);
+                    (new oMission())->process($g,"",$mission_type,$count);
                 }
                 break;
             case "fixImg":

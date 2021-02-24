@@ -86,7 +86,7 @@ class MissionService
         return ($mission_list);
     }
 
-    public function process($game = "kpl", $source = "", $mission_type)
+    public function process($game = "kpl", $source = "", $mission_type,$count=2)
     {
         //获取爬取任务列表
         $collectModel = new CollectModel();
@@ -95,7 +95,7 @@ class MissionService
         $playerModel = new PlayerModel();
         $informationModel = new InformationModel();
         $authorModel = new AuthorModel();
-        $result_list = $collectModel->getResult(10, $game, $source, $mission_type);
+        $result_list = $collectModel->getResult($count, $game, $source, $mission_type);
         //初始化空的类库列表
         $classList = [];
         //循环任务列表
