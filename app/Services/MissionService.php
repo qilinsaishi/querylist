@@ -51,7 +51,7 @@ class MissionService
                             try {
                                 //保存结果
                                 $rt = $collectModel->insertCollectResult($result);
-                                //echo 'act:insert,id='.$rt.' lenth:'.strlen(json_encode($result));
+                                echo 'act:insert,mission_id='.$result['mission_id'].' lenth:'.strlen(json_encode($result)). "\n";
                                 //如果保存成功
                                 if ($rt) {
                                     //更新任务状态，以后改成接口模式
@@ -71,7 +71,7 @@ class MissionService
                 //随机等待
                 $sleep = rand(5, 10);
                 sleep($sleep);
-                echo $sleep . "\n";
+               // echo $sleep . "\n";
             }
         }
     }
@@ -86,7 +86,7 @@ class MissionService
         return ($mission_list);
     }
 
-    public function process($game = "kpl", $source = "", $mission_type)
+    public function process($game = "kpl", $source = "", $mission_type,$count=2)
     {
         //获取爬取任务列表
         $collectModel = new CollectModel();
@@ -95,7 +95,7 @@ class MissionService
         $playerModel = new PlayerModel();
         $informationModel = new InformationModel();
         $authorModel = new AuthorModel();
-        $result_list = $collectModel->getResult(10, $game, $source, $mission_type);
+        $result_list = $collectModel->getResult($count, $game, $source, $mission_type);
         //初始化空的类库列表
         $classList = [];
         //循环任务列表
@@ -368,7 +368,7 @@ class MissionService
             //随机等待
             $sleep = rand(1, 2);
             //sleep($sleep);
-            echo $sleep . "\n";
+            //echo $sleep . "\n";
         }
     }
 

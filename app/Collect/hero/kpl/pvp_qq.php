@@ -3,6 +3,7 @@
 namespace App\Collect\hero\kpl;
 
 use App\Libs\ClientServices;
+use App\Models\Hero\kplModel;
 use QL\QueryList;
 
 class pvp_qq
@@ -41,6 +42,7 @@ class pvp_qq
     public function collect($arr)
     {
         $res = [];
+        $cdata=[];
         $url = $arr['detail']['url'] ?? '';
         $itemId = $arr['detail']['ename'] ?? '';
         $res = $this->getData($url, $itemId);//curl获取json数据
@@ -51,20 +53,25 @@ class pvp_qq
         $res['hero_type2'] = $arr['detail']['hero_type2'] ?? '';
         $res['logo'] = $arr['detail']['logo'] ?? '';
         $res['item_id'] = $itemId;
-        if (!empty($res)) {
-            $cdata = [
-                'mission_id' => $arr['mission_id'],
-                'content' => json_encode($res),
-                'game' => $arr['game'],
-                'source_link' => $url,
-                'title' => $arr['detail']['title'] ?? '',
-                'mission_type' => $arr['mission_type'],
-                'source' => $arr['source'],
-                'status' => 1,
-                'update_time' => date("Y-m-d H:i:s")
-            ];
-            return $cdata;
+        $kplModel=new kplModel();
+        $heroInfo=$kplModel->getHeroInfoById($itemId);
+        if(empty($heroInfo)){
+            if (!empty($res)) {
+                $cdata = [
+                    'mission_id' => $arr['mission_id'],
+                    'content' => json_encode($res),
+                    'game' => $arr['game'],
+                    'source_link' => $url,
+                    'title' => $arr['detail']['title'] ?? '',
+                    'mission_type' => $arr['mission_type'],
+                    'source' => $arr['source'],
+                    'status' => 1,
+                    'update_time' => date("Y-m-d H:i:s")
+                ];
+
+            }
         }
+        return $cdata;
     }
 
     public function process($arr)

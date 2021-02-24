@@ -204,6 +204,20 @@ class lolModel extends Model
         }
         return $hero_info;
     }
+    public function getHeroInfoById($id){
+        $hero_info =$this->select('hero_id', 'hero_name', 'logo')
+            ->where("id",$id)
+            ->get()->first();
+        if(isset($hero_info->hero_id))
+        {
+            $hero_info = $hero_info->toArray();
+        }
+        else
+        {
+            $hero_info = [];
+        }
+        return $hero_info;
+    }
     public function getAllKeywords($game)
     {
         $keywords = [];

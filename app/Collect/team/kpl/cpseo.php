@@ -179,6 +179,7 @@ class cpseo
                 $t = explode("/",$member);
                 $mission = ['mission_type'=>"player",
                     'mission_status'=>0,
+                    'source_link' =>$member,
                     'title'=>$t[count($t)-1],
                     'detail'=>json_encode(['url'=>$member,
                         'name'=>$t[count($t)-1],
