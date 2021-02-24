@@ -8,6 +8,8 @@ use App\Services\AliyunService;
 use App\Services\EquipmentService;
 use App\Services\HeroService;
 use App\Services\InformationService;
+use App\Services\InscriptionService;
+use App\Services\RunesService;
 use App\Services\SummonerService;
 use App\Services\TeamResultService;
 use Illuminate\Console\Command;
@@ -62,16 +64,26 @@ class Mission extends Command
                 }
                 //采集英雄入库
                 if($mission_type=='hero'){
-                    (new HeroService())->insertHeroData($mission_type);
+                    (new HeroService())->insertHeroData();
                 }
                 //采集装备入库
                 if($mission_type=='equipment'){
-                    (new EquipmentService())->insertEquipmentData($mission_type);
+                    (new EquipmentService())->insertEquipmentData();
                 }
                 //采集召唤师技能入库
                 if($mission_type=='summoner'){
-                    (new SummonerService())->insertSummonerData($mission_type);
+                    (new SummonerService())->insertSummonerData();
                 }
+                //采集lol符文入库
+                if($mission_type=='runes'){
+                    (new RunesService())->insertRunesData();
+                }
+                //采集kpl铭文入库
+                if($mission_type=='inscription'){
+                    (new InscriptionService())->insertInscriptionData();
+                }
+
+
 
                 (new oMission())->collect("","",$mission_type);
                 break;

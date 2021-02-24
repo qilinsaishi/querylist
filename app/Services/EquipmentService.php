@@ -20,7 +20,7 @@ class EquipmentService
             switch ($val) {
                 case "lol":
 
-                    //$this->insertLolEquipment();
+                    $this->insertLolEquipment();
                     break;
                 case "kpl":
                     $this->insertKplEquipment();

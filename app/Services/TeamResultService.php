@@ -117,9 +117,9 @@ class TeamResultService
                     $urlArr=explode('team/',$v);
                     $site_id=$urlArr[1] ?? 0;
                     if($site_id>0) {
-                        $teamInfo = $teamModel->getTeamBySiteId($site_id);
+                        $teamInfo = $teamModel->getTeamBySiteId($site_id);//过滤已经采集过的数据
                         if (empty($teamInfo)) {
-                            $result=$missionModel->getMissionCount($params);
+                            $result=$missionModel->getMissionCount($params);//过滤已经加入过的任务
                             $result=$result ?? 0;
                             if($result <=0){
                                 $data = [
