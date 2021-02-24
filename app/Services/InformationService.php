@@ -28,8 +28,12 @@ class InformationService
                     break;
                 case "dota2":
                     $typeList=['news','gamenews','competition','news_update'];
+                    $raidersList=['raiders','newer','step','skill'];
                     foreach ($typeList as $val){
                         $this->insertDota2Information($val);
+                    }
+                    foreach ($raidersList as $val){
+                        $this->insertDota2Raiders($val);
                     }
 
                     break;
@@ -241,6 +245,71 @@ class InformationService
             }
         }
         return true;
+    }
+
+    //官网攻略
+    public function insertDota2Raiders($gametype){
+        $missionModel = new MissionModel();
+        $count = 19;
+        $cdata = [];
+        for ($i = 0; $i <= $count; $i++) {
+            $m = $i + 1;
+
+            if($gametype=='raiders'){
+                $url = 'https://www.dota2.com.cn/'.$gametype.'/index' . $m . '.htm#hd_li';
+            }else{
+                $url = 'https://www.dota2.com.cn/raiders/'.$gametype.'/index' . $m . '.htm#hd_li';
+            }
+
+            $urlall = QueryList::get($url)->find(".content .hd_li .img_left a")->attrs('href')->all();
+           // print_r($urlall);exit;
+
+            if ($urlall) {
+                foreach ($urlall as $key => $val) {
+                    $title = QueryList::get($url)->find(".content .hd_li li:eq(" . $key . ") .title_right .enter_title")->text();
+                    $remark= QueryList::get($url)->find(".content .hd_li li:eq(" . $key . ") .title_right p")->text();
+                    $create_time= '';
+                    $logo = QueryList::get($url)->find(".content .hd_li li:eq(" . $key . ") .img_left  img")->attr('src');
+                    $params = [
+                        'game' => 'dota2',
+                        'mission_type' => 'information',
+                        'source_link' => $val,
+                    ];
+                    $result = $missionModel->getMissionCount($params);
+                    //过滤已经采集过的文章
+                    $result = $result ?? 0;
+                    if($result <=0){
+                        $data = [
+                            "asign_to" => 1,
+                            "mission_type" => 'information',//资讯
+                            "mission_status" => 1,
+                            "game" => 'dota2',
+                            "source" => 'gamedota2',//
+                            'title' => $title ?? '',
+                            'source_link' => $val,
+                            "detail" => json_encode(
+                                [
+                                    "url" => $val,
+                                    "game" => 'dota2',//dota2
+                                    "source" => 'gamedota2',//资讯
+                                    'type' => 'dota2',
+                                    'remark'=>$remark,
+                                    'create_time'=>$create_time,
+                                    'logo'=>$logo,
+                                    'type'=>'raiders',//1=>gamenews
+                                    'author'=>'官网攻略'
+                                ]
+                            ),
+                        ];
+                        $insert = (new oMission())->insertMission($data);
+                    }
+
+
+                }
+            }
+        }
+        return true;
+
     }
 
 }

@@ -31,27 +31,41 @@ class gamedota2
 
         $cdata = [];
         $url = $arr['detail']['url'] ?? '';
-        $site_id = str_replace(array('https://www.dota2.com.cn/article/details/', '.html'), '', $url);
+        $site_id = str_replace(array('https://www.dota2.com.cn/article/details/', '.html','.shtml'), '', $url);
         $site_ids = explode('/', $site_id);
         $site_id = end($site_ids);
         $title = $arr['title'] ?? '';
         $type = $arr['detail']['type'] ?? '';
+        $qt = QueryList::get($url);
         if ($type == 'gamenews') {
             $type = 2;//官方新闻
         } elseif ($type == 'competition') {
             $type = 3;//赛事新闻
         } elseif ($type == 'news_update') {
-            $type = 4;//更新日志
-        } else {
-            $type = 5;//综合新闻
+            $type = 4;//公告
+        } elseif ($type == 'raiders') {
+            $type = 5;//攻略
+        }
+        else {
+            $type = 1;//综合新闻
         }
         $res = $arr['detail'] ?? [];
         $res['type'] = $type;
-        $qt = QueryList::get($url);
-        $content = $qt->find(".news_main .content")->html();
+        if($type==5){
+            $content = $qt->find(".news_main .font_style")->html();
+        }else{
+            $content = $qt->find(".news_main .content")->html();
+        }
+
         $res['content'] = $content;
         $res['site_id'] = $site_id;
         $res['title'] = $title ?? '';
+        $create_time=$qt->find(".news_main .title h3")->text();
+        $create_times=explode('【字号： 大 中 小 】',$create_time);
+        $create_time=$create_times[0] ?? '';
+        if($res['create_time']==''){
+            $res['create_time']=$create_time;
+        }
 
         $informationModel = new InformationModel();
         $informationInfo = $informationModel->getInformationBySiteId($site_id, 'dota2', $arr['source']);
@@ -80,7 +94,7 @@ class gamedota2
     {
 
         /**
-         * $type:1=>综合新闻;2=>官方新闻;3=>赛事新闻;4=>更新日志;
+         * $type:1=>官方新闻;3=>赛事新闻;4=>公告;
          * remark:简介
          * create_time创建时间
          * logo
