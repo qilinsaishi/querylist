@@ -7,6 +7,7 @@ use App\Models\CollectResultModel;
 use App\Models\InformationModel;
 use App\Models\MissionModel;
 use App\Services\MissionService as oMission;
+use QL\QueryList;
 
 class InformationService
 {
@@ -20,12 +21,16 @@ class InformationService
             switch ($val) {
                 case "lol":
 
-                    $this->insertLolInformation();
+                   // $this->insertLolInformation();
                     break;
                 case "kpl":
-                    $this->insertKplInformation();
+                   // $this->insertKplInformation();
                     break;
                 case "dota2":
+                    $typeList=['news','gamenews','competition','news_update'];
+                    foreach ($typeList as $val){
+                        $this->insertDota2Information($val);
+                    }
 
                     break;
                 case "csgo":
@@ -85,13 +90,14 @@ class InformationService
 
                 }
                 $t2 = microtime(true);
-                echo '耗时'.round($t2-$t1,3).'秒'. "\n";
+                echo '耗时' . round($t2 - $t1, 3) . '秒' . "\n";
             }
 
         }
         return true;
     }
 
+    //王者荣耀资讯站
     public function insertKplInformation()
     {
         //1761=>新闻,1762=>公告,1763=>活动,1764=>赛事,1765=>攻略
@@ -158,16 +164,74 @@ class InformationService
                                 ];
                                 $insert = (new oMission())->insertMission($data);
                             }
-                        }else{
+                        } else {
                             continue;
                         }
 
                     }
                 }
                 $t2 = microtime(true);
-                echo '耗时'.round($t2-$t1,3).'秒' . "\n";
+                echo '耗时' . round($t2 - $t1, 3) . '秒' . "\n";
             }
         }
         return true;
     }
+
+    //dota2官网资讯
+    public function insertDota2Information($gametype)
+    {
+        $missionModel = new MissionModel();
+        $count = 19;
+        $cdata = [];
+        for ($i = 0; $i <= $count; $i++) {
+            $m = $i + 1;
+            $url = 'https://www.dota2.com.cn/news/'.$gametype.'/index' . $m . '.htm';
+            $urlall = QueryList::get($url)->find("#news_lists .panes .active a")->attrs('href')->all();
+            if ($urlall) {
+                foreach ($urlall as $key => $val) {
+                    $title = QueryList::get($url)->find("#news_lists .panes .active a:eq(" . $key . ") .news_msg .title")->text();
+                    $remark= QueryList::get($url)->find("#news_lists .panes .active a:eq(" . $key . ") .news_msg .content")->text();
+                    $create_time= QueryList::get($url)->find("#news_lists .panes .active a:eq(" . $key . ") .news_msg .date")->text();
+                    $logo = QueryList::get($url)->find("#news_lists .panes .active a:eq(" . $key . ") .news_logo img")->attr('src');
+                    $params = [
+                        'game' => 'dota2',
+                        'mission_type' => 'information',
+                        'source_link' => $val,
+                    ];
+                    $result = $missionModel->getMissionCount($params);
+                    //过滤已经采集过的文章
+                    $result = $result ?? 0;
+                    if($result <=0){
+                        $data = [
+                            "asign_to" => 1,
+                            "mission_type" => 'information',//资讯
+                            "mission_status" => 1,
+                            "game" => 'dota2',
+                            "source" => 'gamedota2',//
+                            'title' => $title ?? '',
+                            'source_link' => $val,
+                            "detail" => json_encode(
+                                [
+                                    "url" => $val,
+                                    "game" => 'dota2',//dota2
+                                    "source" => 'gamedota2',//资讯
+                                    'type' => 'dota2',
+                                    'remark'=>$remark,
+                                    'create_time'=>$create_time,
+                                    'logo'=>$logo,
+                                    'type'=>$gametype,//1=>gamenews
+                                    'author'=>'官网资讯'
+                                ]
+                            ),
+                        ];
+                        $insert = (new oMission())->insertMission($data);
+                    }
+
+
+                }
+            }
+        }
+        return true;
+    }
+
 }

@@ -84,6 +84,46 @@ class HomeController extends Controller
 
     public function index()
     {
+        //dota2资讯
+        //$url='https://www.dota2.com.cn/news/gamenews/index1.htm';
+        $count=19;
+        $cdata=[];
+        for($i=0;$i<=$count;$i++){
+            $m=$i+1;
+            $url='https://www.dota2.com.cn/news/gamenews/index'.$m.'.htm';
+            $urlall=QueryList::get($url)->find("#news_lists .panes .active a")->attrs('href')->all();
+            if($urlall){
+                foreach ($urlall as $key=>$val){
+                    $cdata[$i][$key]['link']=$val;
+                    $cdata[$i][$key]['title']=QueryList::get($url)->find("#news_lists .panes .active a:eq(".$key.") .news_msg .title")->text();
+                    $cdata[$i][$key]['remark']=QueryList::get($url)->find("#news_lists .panes .active a:eq(".$key.") .news_msg .content")->text();
+                    $cdata[$i][$key]['create_time']=QueryList::get($url)->find("#news_lists .panes .active a:eq(".$key.") .news_msg .date")->text();
+                    $cdata[$i][$key]['logo']=QueryList::get($url)->find("#news_lists .panes .active a:eq(".$key.") .news_logo img")->attr('src');
+
+
+                }
+            }
+            /*$cdata[$i] = QueryList::get($url)->rules([
+                'title' => ['.news_msg .title', 'text'],
+                'remark' => ['.news_msg .content', 'text'],
+                'create_time' => ['.news_msg .date', 'text'],
+                'logo' => ['.news_logo img', 'src'],
+
+            ])->range('#news_lists .panes .active a')
+                ->queryData();*/
+        }print_r($cdata);exit;
+
+
+        $data = QueryList::get($url)->rules([
+            'title' => ['.news_msg .title', 'text'],
+            'remark' => ['.news_msg .content', 'text'],
+            'create_time' => ['.news_msg .date', 'text'],
+            'logo' => ['.news_logo img', 'src']
+        ])->range('#news_lists .panes .active a')
+            ->queryData();
+
+
+
         $AjaxModel = new AjaxRequest();
         //比赛列表
         //获取每周的周一时间;

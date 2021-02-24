@@ -57,6 +57,7 @@ class Mission extends Command
                 if($mission_type=='information'){
                     (new InformationService())->insertData();
                 }
+               // exit;
                 //采集战队入库
                 if($mission_type=='team'){
                     (new TeamResultService())->insertTeamData($mission_type);
