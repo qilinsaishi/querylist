@@ -15,20 +15,19 @@ class gamedota2
             "site_id"=>['path'=>"site_id",'default'=>""],//原站点ID
             "game"=>['path'=>"",'default'=>"dota2"],//对应游戏
             "source"=>['path'=>"",'default'=>"gamedota2"],//来源
-            "title"=>['path'=>"remark",'default'=>''],//标题
-            "content"=>['path'=>"sContent",'default'=>''],//内容
+            "title"=>['path'=>"title",'default'=>''],//标题
+            "content"=>['path'=>"content",'default'=>''],//内容
             "type"=>['path'=>"target",'default'=>1],//类型
             "site_time"=>['path'=>"create_time",'default'=>""]//来源站点的时间
             ];
     protected $type = [
         1=>1,//'综合',
-        2=>2,//'公告',
+        2=>1,//'公告',
         3=>3,//'赛事',
         4=>2,//'攻略',
     ];
     public function collect($arr)
     {
-
         $cdata = [];
         $url = $arr['detail']['url'] ?? '';
         $site_id = str_replace(array('https://www.dota2.com.cn/article/details/', '.html'), '', $url);
@@ -71,14 +70,11 @@ class gamedota2
 
             }
         }
-
-
         return $cdata;
     }
 
     public function process($arr)
     {
-
         /**
          * $type:1=>综合新闻;2=>官方新闻;3=>赛事新闻;4=>更新日志;
          * remark:简介
@@ -89,10 +85,26 @@ class gamedota2
          * site_id：文章id
          *
          */
-        var_dump($arr);
+        $arr['content']['logo'] = getImage($arr['content']['logo']);
+        $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
+        preg_match($imgpreg,$arr['content']['content'],$imgList);
+        foreach($imgList as $img)
+        {
+            if(substr($img,0,4)!="<img")
+            {
+                if(substr($img,0,1)=='/')
+                {
+                    $img2 = 'https://www.dota2.com.cn/'.$img;
+                }
+                else
+                {
+                    $img2 = $img;
+                }
+                $src = getImage($img2);
+                $arr['content']['content'] = str_replace($img,$src,$arr['content']['content']);
+            }
+        }
         $data = getDataFromMapping($this->data_map,$arr['content']);
-        print_R($data);
-        die();
-
+        return $data;
     }
 }
