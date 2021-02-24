@@ -9,7 +9,23 @@ class gamedota2
 {
     protected $data_map =
         [
-        ];
+            "author_id"=>['path'=>"",'default'=>'0'],//原站点作者ID
+            "author"=>['path'=>"author",'default'=>''],//原站点作者
+            "logo"=>['path'=>"logo",'default'=>''],//logo
+            "site_id"=>['path'=>"site_id",'default'=>""],//原站点ID
+            "game"=>['path'=>"",'default'=>"dota2"],//对应游戏
+            "source"=>['path'=>"",'default'=>"gamedota2"],//来源
+            "title"=>['path'=>"remark",'default'=>''],//标题
+            "content"=>['path'=>"sContent",'default'=>''],//内容
+            "type"=>['path'=>"target",'default'=>1],//类型
+            "site_time"=>['path'=>"create_time",'default'=>""]//来源站点的时间
+            ];
+    protected $type = [
+        1=>1,//'综合',
+        2=>2,//'公告',
+        3=>3,//'赛事',
+        4=>2,//'攻略',
+    ];
     public function collect($arr)
     {
 
@@ -74,5 +90,9 @@ class gamedota2
          *
          */
         var_dump($arr);
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        print_R($data);
+        die();
+
     }
 }
