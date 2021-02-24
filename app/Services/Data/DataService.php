@@ -66,5 +66,45 @@ class DataService
         }
         return $return;
     }
+    public function siteMap($data)
+    {
+        $return = [];
+        $siteMapConfig = [
+            1=>[
+            "herodetail"=>['dataType'=>'lolHeroList','page_size'=>100,"fields"=>"hero_id"],
+            "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'team_id'],
+            "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'player_id'],
+            "detail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'id'],
+            ],
+            3=>[
+        "herodetail"=>['dataType'=>'kplHeroList','page_size'=>100,"fields"=>"hero_id"],
+        "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'kpl',"source"=>"cpseo","fields"=>'team_id'],
+        "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'kpl',"source"=>"cpseo","fields"=>'player_id'],
+        "detail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'kpl',"source"=>"cpseo","fields"=>'id'],
+            ],
+            2=>[
+                "detail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'id'],
+            ],
+        ];
+        $menu = $siteMapConfig[$data['site_id']]??[];
+        foreach($menu as $type => $menu_detail)
+        {
+            $return[$type] = [];
+            $page = 1;
+            $count = 1;
+            while($count>0)
+            {
+                $menu_detail['page'] = $page;
+                $dataList = $this->getData([$type=>$menu_detail]);
+                $count = count($dataList[$type]['data']);
+                if($count>0)
+                {
+                    $return[$type] = array_merge($return[$type],array_column($dataList[$type]['data'],$menu_detail['fields']));
+                }
+                $page ++;
+            }
+        }
+        return $return;
+    }
 
 }
