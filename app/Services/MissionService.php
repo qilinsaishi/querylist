@@ -129,10 +129,19 @@ class MissionService
                             $missionList = $class->processMemberList($save['team_id'], $result);
                             foreach ($missionList as $mission) {
                                 $mission = array_merge($mission, ['title' => $mission['title'], 'game' => $result['game'], 'connect_mission_id' => $result['mission_id'], 'source' => $result['source'], 'asign_to' => 1]);
-                                $insert = $missionModel->insertMission($mission);
-                                echo "insertMisson4Member:" . $insert . "\n";
+                                $t = json_decode($mission['detail'],true);
+                                $currentPlayer = $playerModel->getPlayerBySiteId($t['site_id'],$result['game'],$result['source']);
+                                if(!isset($currentPlayer['player_id']))
+                                {
+                                    $insert = $missionModel->insertMission($mission);
+                                    echo "insertMisson4Member:" . $insert . "\n";
+                                }
+                                else
+                                {
+                                    echo "existedMember:" . $t['site_id'] . "\n";
+                                }
+
                             }
-                            //die();
                         } else {
                             echo "no member\n";
                         }
