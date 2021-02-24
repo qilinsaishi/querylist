@@ -185,8 +185,17 @@ class InformationService
         $cdata = [];
         for ($i = 0; $i <= $count; $i++) {
             $m = $i + 1;
-            $url = 'https://www.dota2.com.cn/news/'.$gametype.'/index' . $m . '.htm';
+           // $typeList=['news','gamenews','competition','news_update'];
+            if($gametype=='news'){
+                $url = 'https://www.dota2.com.cn/'.$gametype.'/index' . $m . '.htm';
+            }elseif($gametype=='news_update'){
+                $url = 'https://www.dota2.com.cn/news/gamepost/'.$gametype.'/index' . $m . '.htm';
+            }else{
+                $url = 'https://www.dota2.com.cn/news/'.$gametype.'/index' . $m . '.htm';
+            }
+
             $urlall = QueryList::get($url)->find("#news_lists .panes .active a")->attrs('href')->all();
+
             if ($urlall) {
                 foreach ($urlall as $key => $val) {
                     $title = QueryList::get($url)->find("#news_lists .panes .active a:eq(" . $key . ") .news_msg .title")->text();
