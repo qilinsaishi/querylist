@@ -36,7 +36,9 @@ class IndexController extends Controller
         $redisService = new RedisService();
         $dataType = $this->request->get("dataType","defaultConfig");
         $keyName= $this->request->get("key_name","");
-        $data = $redisService->refreshCache($dataType,[],$keyName);
+        $params= $this->request->get("params",'[]');
+
+        $data = $redisService->refreshCache($dataType,json_decode($params),$keyName);
         $return=[];
         if($data) {
             $return = (new DataService())->getData($data);

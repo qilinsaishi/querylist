@@ -57,7 +57,7 @@ class Mission extends Command
             case "collect":
                 //资讯采集入任务表
                 if($mission_type=='information'){
-                    (new InformationService())->insertData();
+                   // (new InformationService())->insertData();
                 }
                // exit;
                 //采集战队入库

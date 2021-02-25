@@ -2,6 +2,8 @@
 
 namespace App\Services\Data;
 
+use PhpParser\Node\Stmt\Else_;
+
 class RedisService
 {
     //获取各个数据类型的缓存数据
@@ -124,7 +126,6 @@ class RedisService
 
     public function refreshCache($dataType, $params, $keyName = '')
     {
-
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
             $privilegeService = new PrivilegeService();
@@ -142,7 +143,14 @@ class RedisService
             //$functionList = $privilegeService->getFunction($data);
 
             $redis = app("redis.connection");
-            $keyList = $redis->keys($cacheConfig[$dataType]['prefix'] . "_*");
+            if($dataType=="information")
+            {
+                $keyList = $redis->keys($cacheConfig[$dataType]['prefix'] . "_".md5(json_encode($params)));
+            }
+            else
+            {
+                $keyList = $redis->keys($cacheConfig[$dataType]['prefix'] . "_*");
+            }
             $params_list = [];
             foreach ($keyList as $key) {
                 $data = $redis->get($key);
@@ -163,6 +171,12 @@ class RedisService
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
+                    if ($dataType == 'information') {
+
+                        $redis->del($key);
+                        $params_list[] = $data['params'];
+                    }
+
                     /*
                     $d = $class->$function($data['params']);
                     if (!$functionCount || $functionCount == "") {

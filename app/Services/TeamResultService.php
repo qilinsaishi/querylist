@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Libs\AjaxRequest;
 use App\Models\CollectResultModel;
 use App\Models\CollectUrlModel;
 use App\Models\MissionModel;
@@ -14,17 +15,87 @@ class TeamResultService
     public function insertTeamData($mission_type)
     {
         $gameItem = [
-            'lol', 'kpl',// 'dota2', 'csgo'
+             'dota2','lol',  'kpl'//,  'csgo'
         ];
 
         foreach ($gameItem as $val) {
             //采集玩加（www.wanplus.com）战队信息
-            $this->insertWanplusTeam($val,$mission_type);
+            $this->insertWanplus($val,$mission_type);
             //采集cpseo（2cpseo.com）战队信息
-            $this->insertCpseoTeam($val,$mission_type);
+            //$this->insertCpseoTeam($val,$mission_type);
 
         }
         return 'finish';
+    }
+    //玩加电竞（wanplus）
+    public function insertWanplus($game,$mission_type){
+
+        $AjaxModel = new AjaxRequest();
+        $missionModel=new MissionModel();
+        $teamModel=new TeamModel();
+        if($game=='dota2'){
+            $totalPage=24;
+            $gametype=1;
+        }elseif($game=='lol'){
+            $totalPage=17;
+            $gametype=2;
+        }elseif($game=='kpl'){
+            $totalPage=4;
+            $gametype=6;
+        }elseif($game=='csgo'){
+            $totalPage=10;
+            $gametype=4;
+        }
+        for($i=1;$i<=$totalPage;$i++) {
+            $url='https://www.wanplus.com/ajax/detailranking?country=0&type=1&teamPage='.$i.'&game='.$gametype;
+            $list=$AjaxModel->ajaxGetData($url );
+            if(!empty($list) && count($list)>0){
+                foreach ($list as $val){
+                    $team_url='https://www.wanplus.com/'.$game.'/'.$mission_type.'/'.$val['teamid'];
+                    $params = [
+                        'game' => $game,
+                        'mission_type' => $mission_type,
+                        'source_link' => $team_url,
+                    ];
+
+                    $site_id=$val['teamid'] ?? 0;
+                    if($site_id > 0){
+                        $teamInfo=$teamModel->getTeamBySiteId($site_id);
+                        if(empty($teamInfo)){
+                            $result =$missionModel->getMissionCount($params);//过滤已经采集过的文章
+                            $result = $result ?? 0;
+                            $title=$val['teamname'] ?? '';
+                            if ($result <= 0 && $title!='') {
+                                $data = [
+                                    "asign_to"=>1,
+                                    "mission_type"=>$mission_type,
+                                    "mission_status"=>1,
+                                    "game"=>$game,
+                                    "source"=>'wanplus',
+                                    "title"=>$title,
+                                    'source_link'=>$team_url,
+                                    "detail"=>json_encode(
+                                        [
+                                            "url"=>$team_url,
+                                            "game"=>$game,//lol
+                                            "source"=>'wanplus',
+                                            "title"=>$title,
+                                            "country"=>$val['country'] ?? '',
+                                            "teamalias"=>$val['teamalias'] ?? '',
+                                            'site_id'=>$val['teamid']
+                                        ]
+                                    ),
+                                ];
+                                $insert = (new oMission())->insertMission($data);
+                            }
+                        }
+                    }
+
+                }
+            }
+
+        }
+        return true;
     }
     //玩加电竞（wanplus）
     public function insertWanplusTeam($game,$mission_type){
@@ -54,6 +125,7 @@ class TeamResultService
                                 "mission_type"=>$val['mission_type'],
                                 "mission_status"=>1,
                                 "game"=>$val['game'],
+                                "title"=>$val['title'],
                                 "source"=>$val['source'],
                                 'source_link'=>$val['url'],
                                 "detail"=>json_encode(

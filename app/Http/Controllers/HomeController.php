@@ -84,10 +84,11 @@ class HomeController extends Controller
 
     public function index()
     {
-        $url='https://www.dota2.com.cn/resources/jpg/151017/10251445077127238.jpg';
-        if(strpos($url,'https')===false){
-            $url='https:'.$url;
-        }
+        $AjaxModel = new AjaxRequest();
+
+        $url='https://www.wanplus.com/ajax/detailranking?type=1&teamPage=24&game=1';
+
+        $list=$AjaxModel->ajaxGetData($url );print_r($list);exit;
         //dota2资讯
         //$url='https://www.dota2.com.cn/news/gamenews/index1.htm';
 
