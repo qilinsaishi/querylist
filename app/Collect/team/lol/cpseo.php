@@ -126,7 +126,8 @@ class cpseo
         $missionList = [];
         foreach($arr['content']['teamListLink'] as $member)
         {
-            $t = explode("/",$member);
+            $t = explode('/',$member);
+            $site_id = $t[count($t)-1];
             $mission = ['mission_type'=>"player",
                 'mission_status'=>0,
                 'source_link' => $member,
@@ -136,7 +137,8 @@ class cpseo
                     'position'=>"",
                     'logo'=>"",
                     'team_id'=>$team_id,
-                    'current'=>1
+                    'current'=>1,
+                    'site_id'=>$site_id
                 ]),
             ];
             $missionList[] = $mission;

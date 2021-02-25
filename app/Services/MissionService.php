@@ -86,7 +86,7 @@ class MissionService
         return ($mission_list);
     }
 
-    public function process($game = "kpl", $source = "", $mission_type)
+    public function process($game = "kpl", $source = "", $mission_type,$count=2)
     {
         //获取爬取任务列表
         $collectModel = new CollectModel();
@@ -95,7 +95,7 @@ class MissionService
         $playerModel = new PlayerModel();
         $informationModel = new InformationModel();
         $authorModel = new AuthorModel();
-        $result_list = $collectModel->getResult(10, $game, $source, $mission_type);
+        $result_list = $collectModel->getResult($count, $game, $source, $mission_type);
         //初始化空的类库列表
         $classList = [];
         //循环任务列表
@@ -129,10 +129,19 @@ class MissionService
                             $missionList = $class->processMemberList($save['team_id'], $result);
                             foreach ($missionList as $mission) {
                                 $mission = array_merge($mission, ['title' => $mission['title'], 'game' => $result['game'], 'connect_mission_id' => $result['mission_id'], 'source' => $result['source'], 'asign_to' => 1]);
-                                $insert = $missionModel->insertMission($mission);
-                                echo "insertMisson4Member:" . $insert . "\n";
+                                $t = json_decode($mission['detail'],true);
+                                $currentPlayer = $playerModel->getPlayerBySiteId($t['site_id'],$result['game'],$result['source']);
+                                if(!isset($currentPlayer['player_id']))
+                                {
+                                    $insert = $missionModel->insertMission($mission);
+                                    echo "insertMisson4Member:" . $insert . "\n";
+                                }
+                                else
+                                {
+                                    echo "existedMember:" . $t['site_id'] . "\n";
+                                }
+
                             }
-                            //die();
                         } else {
                             echo "no member\n";
                         }
