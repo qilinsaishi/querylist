@@ -94,8 +94,8 @@ class pvp_qq
         //var_dump($arr);
         $arr['content']['target'] = $this->type[$arr['content']['type']];
         $arr['content']['sIMG'] = getImage($arr['content']['sIMG']);
-        $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
-        preg_match($imgpreg,$arr['content']['sContent'],$imgList);
+        $imgpreg = '/\<img.*?src\=\"([\w:\/\.]+)\"/';
+        preg_match_all($imgpreg,$arr['content']['sContent'],$imgList);
         foreach($imgList as $img)
         {
             if(substr($img,0,4)=="http")

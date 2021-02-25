@@ -68,6 +68,8 @@ class wanplus
         {
             foreach($arr['content']['cur_team_members'] as $member)
             {
+                $t = explode('/',$member['link_url']);
+                $site_id = $t[count($t)-1];
                 $mission = ['mission_type'=>"player",
                     'mission_status'=>0,
                     'title'=>$member['name'],
@@ -77,7 +79,8 @@ class wanplus
                         'position'=>$member['position']??"",
                         'logo'=>$member['main_img'],
                         'team_id'=>$team_id,
-                        'current'=>1
+                        'current'=>1,
+                        'site_id'=>$site_id
                     ]),
                 ];
                 $missionList[] = $mission;
@@ -87,6 +90,8 @@ class wanplus
         {
             foreach($arr['content']['old_team_members'] as $member)
             {
+                $t = explode('/',$member['link_url']);
+                $site_id = $t[count($t)-1];
                 $mission = ['mission_type' => "player",
                     'mission_status' => 0,
                     'title'=>$member['name'],
@@ -96,7 +101,8 @@ class wanplus
                         'position' => $member['position']??"",
                         'logo' => $member['main_img'],
                         'team_id' => $team_id,
-                        'current' => 0
+                        'current' => 0,
+                        'site_id'=>$site_id
                     ]),
                 ];
                 $missionList[] = $mission;

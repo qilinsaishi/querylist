@@ -82,8 +82,8 @@ class lol_qq
             $arr['content']['sIMG'] = "http:".$arr['content']['sIMG'];
         }
         $arr['content']['sIMG'] = getImage($arr['content']['sIMG']);
-        $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
-        preg_match($imgpreg,$arr['content']['sContent'],$imgList);
+        $imgpreg = '/\<img.*?src\=\"([\w:\/\.]+)\"/';
+        preg_match_all($imgpreg,$arr['content']['sContent'],$imgList);
         foreach($imgList as $img)
         {
             if(substr($img,0,4)=="http")

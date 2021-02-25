@@ -64,8 +64,8 @@ class kuai8
         $t2 = explode(".",$t[count($t)-1]);
         $arr['content']['site_id'] = $t2['0'];
         $arr['content']['logo'] = getImage($arr['content']['img_url']);
-        $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
-        preg_match($imgpreg,$arr['content']['content'],$imgList);
+        $imgpreg = '/\<img.*?src\=\"([\w:\/\.]+)\"/';
+        preg_match_all($imgpreg,$arr['content']['content'],$imgList);
         foreach($imgList as $img)
         {
             if(substr($img,0,4)=="http")
