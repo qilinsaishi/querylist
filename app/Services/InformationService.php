@@ -185,7 +185,7 @@ class InformationService
     public function insertDota2Information($gametype)
     {
         $missionModel = new MissionModel();
-        $count = 19;
+        $count = 29;
         $cdata = [];
         for ($i = 0; $i <= $count; $i++) {
             $m = $i + 1;
@@ -206,6 +206,9 @@ class InformationService
                     $remark= QueryList::get($url)->find("#news_lists .panes .active a:eq(" . $key . ") .news_msg .content")->text();
                     $create_time= QueryList::get($url)->find("#news_lists .panes .active a:eq(" . $key . ") .news_msg .date")->text();
                     $logo = QueryList::get($url)->find("#news_lists .panes .active a:eq(" . $key . ") .news_logo img")->attr('src');
+                    if(strpos($logo,'https')===false){
+                        $logo='https:'.$logo;
+                    }
                     $params = [
                         'game' => 'dota2',
                         'mission_type' => 'information',
@@ -250,7 +253,7 @@ class InformationService
     //官网攻略
     public function insertDota2Raiders($gametype){
         $missionModel = new MissionModel();
-        $count = 19;
+        $count = 29;
         $cdata = [];
         for ($i = 0; $i <= $count; $i++) {
             $m = $i + 1;
@@ -270,6 +273,9 @@ class InformationService
                     $remark= QueryList::get($url)->find(".content .hd_li li:eq(" . $key . ") .title_right p")->text();
                     $create_time= '';
                     $logo = QueryList::get($url)->find(".content .hd_li li:eq(" . $key . ") .img_left  img")->attr('src');
+                    if(strpos($logo,'https')===false){
+                        $logo='https:'.$logo;
+                    }
                     $params = [
                         'game' => 'dota2',
                         'mission_type' => 'information',

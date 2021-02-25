@@ -84,8 +84,13 @@ class HomeController extends Controller
 
     public function index()
     {
+        $url='https://www.dota2.com.cn/resources/jpg/151017/10251445077127238.jpg';
+        if(strpos($url,'https')===false){
+            $url='https:'.$url;
+        }
         //dota2资讯
         //$url='https://www.dota2.com.cn/news/gamenews/index1.htm';
+
         $count=19;
         $cdata=[];
         for($i=0;$i<=$count;$i++){
