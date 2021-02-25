@@ -310,7 +310,7 @@ if (!function_exists('randStr')) {
     }
 }
 //获取远程图片，并以文件的hash作为文件名保存
-function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type = 0)
+function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type = 1)
 {
     if(substr($url,0,2)=='//')
     {
@@ -385,7 +385,8 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             $timeout = 5;
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+            //curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
             $img = curl_exec($ch);
             curl_close($ch);
         } else {
@@ -416,6 +417,7 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             $redis->expire($fileKey, 86400);
         }
         echo "process time:".(microtime(true)-$start_time)."\n";
+        echo "result:".$upload[0]."\n";
         return $upload[0];
     }
     catch (\Exception $e)

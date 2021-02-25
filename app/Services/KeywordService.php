@@ -17,6 +17,10 @@ class KeywordService
     //爬取数据
     public function information($game = "")
     {
+        if(!in_array($game,['lol','kpl']))
+        {
+            return true;
+        }
         $informationModel = (new InformationModel());
         $keywordMapModel = (new KeywordMapModel());
         $result = [];
@@ -210,6 +214,8 @@ class KeywordService
                 }
             }
             $informationModel->updateInformation($information['id'],['scws'=>0,'scws_list'=> $top]);
+            print_R($top);
+            echo "count:".count($top)."\n";
             $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time']);
         }
     }
