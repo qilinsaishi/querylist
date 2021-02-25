@@ -23,7 +23,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=}';
+    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=}';
 
     /**
      * The console command description.
@@ -49,7 +49,6 @@ class Mission extends Command
      */
     public function handle()
     {
-        $count = $this->option("count")??2;
         $operation = ($this->argument("operation")??"collect");
         $game = ($this->argument("game")??"");
         $mission_type = ($this->argument("mission_type")??"");
@@ -100,7 +99,10 @@ class Mission extends Command
                 }
                 foreach($gameList as $g)
                 {
-                    (new oMission())->process($g,"",$mission_type,$count);
+                    $count = $this->option("count")??2;
+                    $sleepmin = $this->option("sleepmin")??1;
+                    $sleepmax = $this->option("sleepmax")??2;
+                    (new oMission())->process($g,"",$mission_type,$count,$sleepmin,$sleepmax);
                 }
                 if($mission_type == "information")
                 {
@@ -111,15 +113,6 @@ class Mission extends Command
                         $oKeyword->tfIdf($g);
                     }
                 }
-                break;
-            case "fixImg":
-                (new oMission())->fixImg();
-                break;
-            case "upload":
-                $fileArr = ['storage/downloads/385e744509da80c73bbab5542daaab1f.jpg',
-                    'storage/downloads/5f3e9aba60b9131755123e3bc4470d19.png',
-                    'storage/downloads/ebddfdb2f9e8286450ecffdea5c7e4c8.jpg'];
-                (new AliyunService())->upload2Oss($fileArr);
                 break;
             default:
 

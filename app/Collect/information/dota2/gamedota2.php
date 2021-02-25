@@ -110,16 +110,20 @@ class gamedota2
          * site_id：文章id
          *
          */
+        if(substr($arr['content']['logo'],0,1)=='/')
+        {
+            $arr['content']['logo'] = 'https://www.dota2.com.cn/'.$arr['content']['logo'];
+        }
         $arr['content']['logo'] = getImage($arr['content']['logo']);
-        $imgpreg = "/<img.*?src=[\"|\']?(.*?)[\"|\']?\s.*?>/i";
-        preg_match($imgpreg,$arr['content']['content'],$imgList);
-        foreach($imgList as $img)
+        $imgpreg = '/\<img.*?src\=\"([\w:\/\.]+)\"/';
+        preg_match_all($imgpreg,$arr['content']['content'],$imgList);
+        foreach($imgList[1]??[] as $img)
         {
             if(substr($img,0,4)!="<img")
             {
                 if(substr($img,0,1)=='/')
                 {
-                    $img2 = 'https://www.dota2.com.cn/'.$img;
+                    $img2 = 'https://www.dota2.com.cn'.$img;
                 }
                 else
                 {

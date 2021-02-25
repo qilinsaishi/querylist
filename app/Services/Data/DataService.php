@@ -85,6 +85,9 @@ class DataService
             2=>[
                 "detail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'id'],
             ],
+            4=>[
+                "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'dota2',"source"=>"gamedota2","fields"=>'id'],
+            ],
         ];
         $menu = $siteMapConfig[$data['site_id']]??[];
         foreach($menu as $type => $menu_detail)
@@ -95,6 +98,7 @@ class DataService
             while($count>0)
             {
                 $menu_detail['page'] = $page;
+                $menu_detail['recent'] = $data['recent']??3600;
                 $dataList = $this->getData([$type=>$menu_detail]);
                 $count = count($dataList[$type]['data']);
                 if($count>0)

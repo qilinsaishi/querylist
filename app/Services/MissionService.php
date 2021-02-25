@@ -86,7 +86,7 @@ class MissionService
         return ($mission_list);
     }
 
-    public function process($game = "kpl", $source = "", $mission_type,$count=2)
+    public function process($game = "kpl", $source = "", $mission_type,$count=2,$sleepmin = 1,$sleepmax=10)
     {
         //获取爬取任务列表
         $collectModel = new CollectModel();
@@ -375,7 +375,7 @@ class MissionService
                 }
             }
             //随机等待
-            $sleep = rand(1, 2);
+            $sleep = rand($sleepmin, $sleepmax);
             //sleep($sleep);
             //echo $sleep . "\n";
         }
