@@ -114,15 +114,6 @@ class Mission extends Command
                     }
                 }
                 break;
-            case "fixImg":
-                (new oMission())->fixImg();
-                break;
-            case "upload":
-                $fileArr = ['storage/downloads/385e744509da80c73bbab5542daaab1f.jpg',
-                    'storage/downloads/5f3e9aba60b9131755123e3bc4470d19.png',
-                    'storage/downloads/ebddfdb2f9e8286450ecffdea5c7e4c8.jpg'];
-                (new AliyunService())->upload2Oss($fileArr);
-                break;
             default:
 
                 break;
