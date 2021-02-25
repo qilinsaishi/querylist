@@ -8,6 +8,7 @@ use App\Services\AliyunService;
 use App\Services\EquipmentService;
 use App\Services\HeroService;
 use App\Services\InformationService;
+use App\Services\KeywordService as oKeyword;
 use App\Services\InscriptionService;
 use App\Services\RunesService;
 use App\Services\SummonerService;
@@ -22,7 +23,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {operation} {mission_type} {game} ';
+    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=}';
 
     /**
      * The console command description.
@@ -98,7 +99,19 @@ class Mission extends Command
                 }
                 foreach($gameList as $g)
                 {
-                    (new oMission())->process($g,"",$mission_type);
+                    $count = $this->option("count")??2;
+                    $sleepmin = $this->option("sleepmin")??1;
+                    $sleepmax = $this->option("sleepmax")??2;
+                    (new oMission())->process($g,"",$mission_type,$count,$sleepmin,$sleepmax);
+                }
+                if($mission_type == "information")
+                {
+                    $oKeyword = new oKeyword();
+                    foreach($gameList as $g)
+                    {
+                        $oKeyword->information($g);
+                        $oKeyword->tfIdf($g);
+                    }
                 }
                 break;
             case "fixImg":
