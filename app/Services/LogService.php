@@ -24,8 +24,8 @@ class LogService
                 switch ($type){
                     case "daily":
                         //22/Feb/2021
-                        $match = date("d/M/Y",time()-86400);
-                        $file = $logsRoot.$site['domain'].".".date('Y-m-d',time()-86400).".log";
+                        $match = date("d/M/Y",time()+8*3600-86400);
+                        $file = $logsRoot.$site['domain'].".".date('Y-m-d',time()+8*3600-86400).".log";
                         break;
                 }
                 $logs = [];
