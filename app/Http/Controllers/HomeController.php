@@ -84,6 +84,21 @@ class HomeController extends Controller
 
     public function index()
     {
+
+        //print_r($arrData);exit;
+        $qt=QueryList::get('https://www.dota2.com.cn/heroes/index.htm');
+        $item=$qt->find(".black_cont .goods_main .hero_list:eq(0) li ")->htmls()->all();
+print_r($item);exit;
+        $data = QueryList::get('https://www.dota2.com.cn/heroes/index.htm')->rules([
+            'title' => ['.news_msg .title', 'text'],
+            'remark' => ['.news_msg .content', 'text'],
+            'create_time' => ['.news_msg .date', 'text'],
+            'logo' => ['.news_logo img', 'src']
+        ])->range('#news_lists .panes .active a')
+            ->queryData();
+
+
+
         $AjaxModel = new AjaxRequest();
 
         $url='https://www.wanplus.com/ajax/detailranking?type=1&teamPage=24&game=1';
@@ -290,26 +305,7 @@ exit;
         $playData = $AjaxModel->getHistoryMatch($url);//ajax 获取所有历史记录
         print_r($playData);exit;
         $client = new ClientServices();
-        //https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js
-        $arrData=[];
-        $res = curl_get('https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_DATA_18_VIDEO_CH_V3.js');
-        if($res){
-            foreach ($res as $key=>$val){
 
-                if(isset($val['jData']) && $val['jData']){
-                    foreach ($val['jData'] as &$v){
-                        $v['url']='https://pvp.qq.com/v/detail.shtml?G_Biz=18&tid='.$v['iVideoId'];
-                        if(strpos($v['sIMG'],'http') ===false){
-                            $v['sIMG']='http:'.$v['sIMG'];
-                        }
-                        $v['tag_name']=$val['sTag'];
-
-                    }
-                }
-                $arrData[$val['sTag']]=$val['jData'];
-            }
-        }
-        print_r($arrData);exit;
         //攻略
         $client=new ClientServices();
         $data=curl_get('https://gicp.qq.com/wmp/data/js/v3/WMP_PVP_WEBSITE_NEWBEE_DATA_CH_V1.js');
