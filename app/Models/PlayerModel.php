@@ -181,7 +181,7 @@ class PlayerModel extends Model
         {
             $data['aka'] = is_array($data['aka'])?$data['aka']:[$data['aka']];
         }
-        $currentPlayer = $this->getPlayerBySiteId($data['site_id'],$game,$data['source']);
+        $currentPlayer = $this->getPlayerBySiteId($data['site_id'],$game,$data['original_source']);
         if(!isset($currentPlayer['player_id']))
         {
             echo "toInsertPlayer:\n";

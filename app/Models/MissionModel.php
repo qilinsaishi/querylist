@@ -85,19 +85,23 @@ class MissionModel extends Model
     public function insertMission($data)
     {
         $currentMission = $this->getMissionByTitle($data['title'] ??'', $data['mission_type'], $data['game'], $data['source'], $data['asign_to']);
-
-        if (isset($currentMission) && $currentMission ) {
-            return 1;
-        } else {
-            $currentTime = date("Y-m-d H:i:s");
-            if (!isset($data['create_time'])) {
-                $data['create_time'] = $currentTime;
+        try{
+            if (isset($currentMission) && $currentMission ) {
+                return 1;
+            } else {
+                $currentTime = date("Y-m-d H:i:s");
+                if (!isset($data['create_time'])) {
+                    $data['create_time'] = $currentTime;
+                }
+                if (!isset($data['update_time'])) {
+                    $data['update_time'] = $currentTime;
+                }
+                return $this->insertGetId($data);
             }
-            if (!isset($data['update_time'])) {
-                $data['update_time'] = $currentTime;
-            }
-            return $this->insertGetId($data);
+        }catch (\Exception $e){
+            print_r($e->getMessage());exit;
         }
+
 
     }
 

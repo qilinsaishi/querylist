@@ -47,7 +47,7 @@ class MissionService
                         //执行爬取操作
                         $result = $class->collect($mission);
                         //如果爬取成功
-                        if ($result) {
+                        if (count($result) >0) {
                             try {
                                 //保存结果
                                 $rt = $collectModel->insertCollectResult($result);
@@ -64,7 +64,7 @@ class MissionService
                                 return $e->getMessage();
                             }
                         } else {
-                            return false;
+                           continue;
                         }
                     }
                 }
@@ -130,11 +130,18 @@ class MissionService
                             foreach ($missionList as $mission) {
                                 $mission = array_merge($mission, ['title' => $mission['title'], 'game' => $result['game'], 'connect_mission_id' => $result['mission_id'], 'source' => $result['source'], 'asign_to' => 1]);
                                 $t = json_decode($mission['detail'],true);
+
                                 $currentPlayer = $playerModel->getPlayerBySiteId($t['site_id'],$result['game'],$result['source']);
                                 if(!isset($currentPlayer['player_id']))
                                 {
-                                    $insert = $missionModel->insertMission($mission);
-                                    echo "insertMisson4Member:" . $insert . "\n";
+                                    try{
+                                        $insert = $missionModel->insertMission($mission);
+                                        echo "insertMisson4Member:" . $insert . "\n";
+                                    }catch (\Exception $e){
+                                        return $e->getMessage();
+
+                                    }
+
                                 }
                                 else
                                 {

@@ -22,7 +22,7 @@ class TeamResultService
             //采集玩加（www.wanplus.com）战队信息
             $this->insertWanplus($val,$mission_type);
             //采集cpseo（2cpseo.com）战队信息
-            //$this->insertCpseoTeam($val,$mission_type);
+            $this->insertCpseoTeam($val,$mission_type);
 
         }
         return 'finish';

@@ -56,7 +56,7 @@ class Mission extends Command
             case "collect":
                 //资讯采集入任务表
                 if($mission_type=='information'){
-                   // (new InformationService())->insertData();
+                    (new InformationService())->insertData();
                 }
                // exit;
                 //采集战队入库
@@ -86,7 +86,7 @@ class Mission extends Command
 
 
 
-                (new oMission())->collect("","",$mission_type);
+                (new oMission())->collect($game,"",$mission_type);
                 break;
             case "process":
                 if($game != "all")
@@ -95,7 +95,7 @@ class Mission extends Command
                 }
                 else
                 {
-                    $gameList = ['lol','kpl'];
+                    $gameList = ['lol','kpl','dota2','csgo'];
                 }
                 foreach($gameList as $g)
                 {
