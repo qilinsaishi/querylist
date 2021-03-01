@@ -74,11 +74,9 @@ class RedisService
             if ($exists) {
                 $data = json_decode($redis->get($keyConfig), true);
                 if (is_array($data)) {
-
                     if (isset($data['data'])) {
                         $data = $data['data'];
                     }
-                    //echo "key:".$keyConfig."exists\n";
                     return $data;
                 } else {
                     return false;
@@ -151,18 +149,19 @@ class RedisService
             {
                 $keyList = $redis->keys($cacheConfig[$dataType]['prefix'] . "_*");
             }
+
             $params_list = [];
             foreach ($keyList as $key) {
                 $data = $redis->get($key);
                 $data = json_decode($data, true);
                 //有参数，尝试刷新数据
-
                 if (isset($data['params'])) {
                     $data['params']['dataType']=$dataType;
-                    if ($dataType == 'defaultConfig' ) {
+                    if ($data['params']['dataType'] == 'defaultConfig' ) {
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
+
                     if ($dataType == 'imageList' ) {
                         $redis->del($key);
                         $params_list[] = $data['params'];
@@ -177,30 +176,15 @@ class RedisService
                         $params_list[] = $data['params'];
                     }
 
-                    /*
-                    $d = $class->$function($data['params']);
-                    if (!$functionCount || $functionCount == "") {
-                        $count = 0;
-                    } else {
-
-                        $count = $class->$functionCount($data['params']);
-                    }
-                    if ($functionProcess != "") {
-                        $d = $privilegeService->$functionProcess($d, $functionList);
-                    }
-
-
-                    $dataArr = ['data' => $d, 'count' => $count];
-                    $this->saveCache($dataType, $params, $dataArr);
-                    */
-                    return $params_list;
 
                 } else//没有，删除等待重建
                 {
-                    echo "toDelete:" . $key;
                     $redis->del($key);
                 }
+
             }
+            return $params_list;
+
         }
     }
 

@@ -55,7 +55,7 @@ class DefaultConfig extends Model
         $data = [];
         if (isset($default_config_list) && !empty($default_config_list)) {
             foreach ($default_config_list as $val) {
-                $data[$val['key']] = $val;
+                $data[$val['key']] =$val;
             }
         }
 

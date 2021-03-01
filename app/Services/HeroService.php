@@ -14,7 +14,7 @@ class HeroService
     public function insertHeroData()
     {
         $gameItem = [
-            'lol', 'kpl', 'dota2', 'csgo'
+            'lol', 'kpl', 'dota2'//, 'csgo'
         ];
 
         foreach ($gameItem as $val) {
