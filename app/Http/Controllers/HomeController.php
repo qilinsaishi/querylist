@@ -88,7 +88,7 @@ class HomeController extends Controller
         //print_r($arrData);exit;
         $qt=QueryList::get('https://www.dota2.com.cn/heroes/index.htm');
         $item=$qt->find(".black_cont .goods_main .hero_list:eq(0) li ")->htmls()->all();
-print_r($item);exit;
+print_r(count($item));exit;
         $data = QueryList::get('https://www.dota2.com.cn/heroes/index.htm')->rules([
             'title' => ['.news_msg .title', 'text'],
             'remark' => ['.news_msg .content', 'text'],

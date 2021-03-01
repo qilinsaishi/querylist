@@ -15,14 +15,14 @@ class TeamResultService
     public function insertTeamData($mission_type)
     {
         $gameItem = [
-             'dota2','lol',  'kpl'//,  'csgo'
+             'lol',  'kpl','dota2'//,  'csgo'
         ];
 
         foreach ($gameItem as $val) {
             //采集玩加（www.wanplus.com）战队信息
             $this->insertWanplus($val,$mission_type);
             //采集cpseo（2cpseo.com）战队信息
-            $this->insertCpseoTeam($val,$mission_type);
+           // $this->insertCpseoTeam($val,$mission_type);
 
         }
         return 'finish';
@@ -89,6 +89,8 @@ class TeamResultService
                                 $insert = (new oMission())->insertMission($data);
                             }
                         }
+                    }else{
+                        continue;
                     }
 
                 }
@@ -169,56 +171,62 @@ class TeamResultService
                 $url = 'http://www.2cpseo.com/teams/lol/p-' . $m;
             }elseif($game=='kpl'){
                 $url = 'http://www.2cpseo.com/teams/kog/p-' . $m;
-            }/*elseif($game=='dota2'){
+            }elseif($game=='dota2'){
+                $url = 'http://www.2cpseo.com/teams/dota2/p-' . $m;
                 $count=10;
-            }elseif($game=='csgo'){
+            }/*elseif($game=='csgo'){
                 $count=12;
             }*/
 
-            $ql = QueryList::get($url);
-            $links = $ql->find('.team-list a')->attrs('href')->all();
-            if (isset($links) && $links) {
-                $missionModel=new MissionModel();
-                $teamModel=new TeamModel();
-                foreach ($links as $v) {
-                    $params=[
-                        'game'=>$game,
-                        'mission_type'=>$mission_type,
-                        'source_link'=>$v,
-                    ];
-                    $urlArr=explode('team/',$v);
-                    $site_id=$urlArr[1] ?? 0;
-                    if($site_id>0) {
-                        $teamInfo = $teamModel->getTeamBySiteId($site_id);//过滤已经采集过的数据
-                        if (empty($teamInfo)) {
-                            $result=$missionModel->getMissionCount($params);//过滤已经加入过的任务
-                            $result=$result ?? 0;
-                            if($result <=0){
-                                $data = [
-                                    "asign_to" => 1,
-                                    "mission_type" => $mission_type,//赛事
-                                    "mission_status" => 1,
-                                    "game" => $game,
-                                    "source" => 'cpseo',//
-                                    'source_link'=>$v,
-                                    "detail" => json_encode(
-                                        [
-                                            "url" => $v,
-                                            "game" => $game,
-                                            "source" => 'cpseo',
-                                        ]
-                                    ),
-                                ];
-                                if($data){
-                                    $insert = (new oMission())->insertMission($data);
-                                    //echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+
+            if(isset($url)){
+                $ql = QueryList::get($url);
+                $links = $ql->find('.team-list a')->attrs('href')->all();
+                if (isset($links) && $links) {
+                    $missionModel=new MissionModel();
+                    $teamModel=new TeamModel();
+                    foreach ($links as $v) {
+                        $params=[
+                            'game'=>$game,
+                            'mission_type'=>$mission_type,
+                            'source_link'=>$v,
+                        ];
+                        $urlArr=explode('team/',$v);
+                        $site_id=$urlArr[1] ?? 0;
+                        if($site_id>0) {
+                            $teamInfo = $teamModel->getTeamBySiteId($site_id);//过滤已经采集过的数据
+                            if (empty($teamInfo)) {
+                                $result=$missionModel->getMissionCount($params);//过滤已经加入过的任务
+                                $result=$result ?? 0;
+                                if($result <=0){
+                                    $data = [
+                                        "asign_to" => 1,
+                                        "mission_type" => $mission_type,//赛事
+                                        "mission_status" => 1,
+                                        "game" => $game,
+                                        "source" => 'cpseo',//
+                                        'source_link'=>$v,
+                                        "detail" => json_encode(
+                                            [
+                                                "url" => $v,
+                                                "game" => $game,
+                                                "source" => 'cpseo',
+                                            ]
+                                        ),
+                                    ];
+                                    if($data){
+                                        $insert = (new oMission())->insertMission($data);
+                                        //echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+                                    }
                                 }
                             }
                         }
+
+
                     }
-
-
                 }
+            }else{
+                echo $url;exit;
             }
 
         }

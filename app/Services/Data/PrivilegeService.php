@@ -916,7 +916,7 @@ class PrivilegeService
         {
             if(isset($value['content']))
             {
-                $data[$key]['content'] = string_split(strip_tags($value['content']),100);
+                $data[$key]['content'] = string_split(strip_tags(html_entity_decode($value['content'])),100);
             }
         }
         return $data;
