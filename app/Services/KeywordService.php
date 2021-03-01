@@ -11,6 +11,8 @@ use App\Models\PlayerModel as PlayerModel;
 use App\Models\KeywordsModel as KeywordsModel;
 use App\Models\Hero\lolModel as lolHeroModel;
 use App\Models\Hero\kplModel as kplHeroModel;
+use App\Services\Data\RedisService;
+
 
 class KeywordService
 {
@@ -21,6 +23,7 @@ class KeywordService
         {
             return true;
         }
+        $redisService = new RedisService();
         $informationModel = (new InformationModel());
         $keywordMapModel = (new KeywordMapModel());
         $result = [];
@@ -83,6 +86,7 @@ class KeywordService
             $result[$information['id']]['hero'] = $hero;
             $informationModel->updateInformation($information['id'],['keywords'=>0,'keywords_list'=> $result[$information['id']]]);
             $keywordMapModel->saveMap($information['id'],$game,"information", $result[$information['id']],$information['create_time']);
+            $data = $redisService->refreshCache("information",[$information['id']]);
         }
     }
 
@@ -192,6 +196,7 @@ class KeywordService
     //爬取数据
     public function tfIdf($game = "")
     {
+        $redisService = new RedisService();
         $informationModel = (new InformationModel());
         $scwsMapModel = (new ScwsMapModel());
         $scwsKeywordMapModel = (new ScwsKeywordMapModel());
@@ -217,6 +222,7 @@ class KeywordService
             print_R($top);
             echo "count:".count($top)."\n";
             $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time']);
+            $data = $redisService->refreshCache("information",[$information['id']]);
         }
     }
 }
