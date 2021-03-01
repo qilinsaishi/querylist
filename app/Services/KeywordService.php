@@ -86,7 +86,7 @@ class KeywordService
             $result[$information['id']]['hero'] = $hero;
             $informationModel->updateInformation($information['id'],['keywords'=>0,'keywords_list'=> $result[$information['id']]]);
             $keywordMapModel->saveMap($information['id'],$game,"information", $result[$information['id']],$information['create_time']);
-            $data = $redisService->refreshCache("information",[$information['id']]);
+            $data = $redisService->refreshCache("information",[strval($information['id'])]);
         }
     }
 
@@ -222,7 +222,7 @@ class KeywordService
             print_R($top);
             echo "count:".count($top)."\n";
             $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time']);
-            $data = $redisService->refreshCache("information",[$information['id']]);
+            $data = $redisService->refreshCache("information",[strval($information['id'])]);
         }
     }
 }

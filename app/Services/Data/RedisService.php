@@ -55,7 +55,7 @@ class RedisService
         if (isset($cacheConfig[$dataType])) {
             $redis = app("redis.connection");
             ksort($params);
-//如果接口指定了缓存时间
+            //如果接口指定了缓存时间
             if(isset($params['cache_time']))
             {
                 $expire = $params['cache_time'];
@@ -135,11 +135,8 @@ class RedisService
                 //$params = $data[$dataType];
                 $functionCount = $functionInfo['functionCount'];
                 $functionProcess = $functionInfo['functionProcess'] ?? "";
-
             }
-
             //$functionList = $privilegeService->getFunction($data);
-
             $redis = app("redis.connection");
             if($dataType=="information")
             {
@@ -149,7 +146,6 @@ class RedisService
             {
                 $keyList = $redis->keys($cacheConfig[$dataType]['prefix'] . "_*");
             }
-
             $params_list = [];
             foreach ($keyList as $key) {
                 $data = $redis->get($key);
@@ -161,7 +157,6 @@ class RedisService
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
-
                     if ($dataType == 'imageList' ) {
                         $redis->del($key);
                         $params_list[] = $data['params'];
@@ -175,8 +170,6 @@ class RedisService
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
-
-
                 } else//没有，删除等待重建
                 {
                     $redis->del($key);
