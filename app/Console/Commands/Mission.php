@@ -11,6 +11,7 @@ use App\Services\InformationService;
 use App\Services\KeywordService as oKeyword;
 use App\Services\InscriptionService;
 use App\Services\RunesService;
+use App\Services\ScheduleService;
 use App\Services\SummonerService;
 use App\Services\TeamResultService;
 use Illuminate\Console\Command;
@@ -82,6 +83,10 @@ class Mission extends Command
                 //采集kpl铭文入库
                 if($mission_type=='inscription'){
                     (new InscriptionService())->insertInscriptionData();
+                }
+                //采集赛事入库
+                if($mission_type=='schedule'){
+                    (new ScheduleService())->insertScheduleData();
                 }
 
 
