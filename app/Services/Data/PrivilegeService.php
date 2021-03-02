@@ -1021,7 +1021,7 @@ class PrivilegeService
         $function = $functionList["information"]['function'];
         foreach($data as $key => $value)
         {
-            $information = $modelClass->$function($value['content_id'],["id","title","logo","create_time","site_time","content"]);
+            $information = $modelClass->$function($value['content_id'],["id","title","logo","create_time","site_time","content","type"]);
             if(isset($information['id']))
             {
                 $information['content'] = string_split(strip_tags($information['content']),100);
