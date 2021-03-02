@@ -23,70 +23,14 @@ class KeywordService
         {
             return true;
         }
-        $redisService = new RedisService();
+        //$redisService = new RedisService();
         $informationModel = (new InformationModel());
-        $keywordMapModel = (new KeywordMapModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["game"=>$game,"keywords"=>1,"fields"=>"content,id,create_time","page_size"=>300]);
-        $anotherKeywords = $this->anotherKeywords(1);
-        $teamKeywords = $this->teamKeywords($game,1);
-        $playerKeywords = $this->playerKeywords($game,1);
-        $heroKeywords = $this->heroKeywords($game,1);
-        foreach($informationList as $information)
+        $informationList = $informationModel->getInformationList(["game"=>$game,"keywords"=>1,"fields"=>"id"/*"content,id,create_time"*/,"page_size"=>1000]);
+        $informationList = array_column($informationList,"id");
+        foreach($informationList as $id)
         {
-            $team = [];$player = [];$hero = [];$another = [];
-            //echo strlen(strip_tags($information['content']))."\n";
-            foreach($anotherKeywords as $keyword => $id)
-            {
-                if(strlen($keyword)>=3)
-                {
-                    $count = substr_count(strip_tags($information['content']),$keyword);
-                    if($count>0)
-                    {
-                        $another[$keyword] = ["id"=>$id,"count"=>$count] ;
-                    }
-                }
-            }
-            foreach($teamKeywords as $keyword => $team_id)
-            {
-                if(strlen($keyword)>=3)
-                {
-                    $count = substr_count(strip_tags($information['content']),$keyword);
-                    if($count>0)
-                    {
-                        $team[$keyword] = ["id"=>$team_id,"count"=>$count] ;
-                    }
-                }
-            }
-            foreach($playerKeywords as $keyword => $player_id)
-            {
-                if(strlen($keyword)>=3)
-                {
-                    $count = substr_count(strip_tags($information['content']), $keyword);
-                    if ($count > 0)
-                    {
-                        $player[$keyword] = ["id" => $player_id, "count" => $count];
-                    }
-                }
-            }
-            foreach($heroKeywords as $keyword => $hero_id)
-            {
-                if(strlen($keyword)>=3)
-                {
-                    $count = substr_count(strip_tags($information['content']), $keyword);
-                    if ($count > 0)
-                    {
-                        $hero[$keyword] = ["id" => $hero_id, "count" => $count];
-                    }
-                }
-            }
-            $result[$information['id']]['another'] = $another;
-            $result[$information['id']]['team'] = $team;
-            $result[$information['id']]['player'] = $player;
-            $result[$information['id']]['hero'] = $hero;
-            $informationModel->updateInformation($information['id'],['keywords'=>0,'keywords_list'=> $result[$information['id']]]);
-            $keywordMapModel->saveMap($information['id'],$game,"information", $result[$information['id']],$information['create_time']);
-            $data = $redisService->refreshCache("information",[strval($information['id'])]);
+            $this->processKeyword($id,$informationModel);
         }
     }
 
@@ -99,7 +43,7 @@ class KeywordService
         $cache = json_decode($cache,true);
         if(is_array($cache) && count($cache)>0 && $force == 0)
         {
-            echo "cached\n";
+            //echo "cached\n";
             $return = $cache;
         }
         else
@@ -123,7 +67,7 @@ class KeywordService
         $cache = json_decode($cache,true);
         if(is_array($cache) && count($cache)>0 && $force ==0)
         {
-            echo "cached\n";
+            //echo "cached\n";
             $return = $cache;
         }
         else
@@ -147,7 +91,7 @@ class KeywordService
         $cache = json_decode($cache,true);
         if(is_array($cache) && count($cache)>0 && $force ==0)
         {
-            echo "cached\n";
+            //echo "cached\n";
             $return = $cache;
         }
         else
@@ -178,7 +122,7 @@ class KeywordService
         $cache = json_decode($cache,true);
         if(is_array($cache) && count($cache)>0 && $force ==0)
         {
-            echo "cached\n";
+            //echo "cached\n";
             $return = $cache;
         }
         else
@@ -196,33 +140,109 @@ class KeywordService
     //爬取数据
     public function tfIdf($game = "")
     {
-        $redisService = new RedisService();
+//        $redisService = new RedisService();
         $informationModel = (new InformationModel());
-        $scwsMapModel = (new ScwsMapModel());
-        $scwsKeywordMapModel = (new ScwsKeywordMapModel());
+ //       $scwsMapModel = (new ScwsMapModel());
+ //       $scwsKeywordMapModel = (new ScwsKeywordMapModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["scws"=>1,"fields"=>"content,id,type,game,create_time","page_size"=>300]);
-        $sh = scws_open();
-        scws_set_charset($sh, 'utf8');
-        foreach($informationList as $information)
+        $informationList = $informationModel->getInformationList(["scws"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = array_column($informationList,"id");
+
+        foreach($informationList as $content_id)
         {
-            echo "start_to_process:".$information['id']."\n";
-            $text = strip_tags($information['content']);
-            scws_send_text($sh, $text);
-            $top = scws_get_tops($sh,10);
-            $keywordMap = $scwsKeywordMapModel->saveMap($top);
-            foreach($top as $key => $wordInfo)
+            $this->processScws($content_id,$informationModel);
+        }
+    }
+    public function processKeyword($content_id,$informationModel)
+    {
+        echo "start to process:".$content_id."\n";
+        $redisService = new RedisService();
+        //$informationModel = (new InformationModel());
+        $keywordMapModel = (new KeywordMapModel());
+        $information = $informationModel->getInformationById($content_id,["content","game","id","create_time"]);
+        $anotherKeywords = $this->anotherKeywords(0);
+        $teamKeywords = $this->teamKeywords($information["game"],0);
+        $playerKeywords = $this->playerKeywords($information["game"],0);
+        $heroKeywords = $this->heroKeywords($information["game"],0);
+        $team = [];$player = [];$hero = [];$another = [];
+        //echo strlen(strip_tags($information['content']))."\n";
+        foreach($anotherKeywords as $keyword => $id)
+        {
+            if(strlen($keyword)>=3)
             {
-                if(isset($keywordMap[$wordInfo['word']]))
+                $count = substr_count(strip_tags($information['content']),$keyword);
+                if($count>0)
                 {
-                    $top[$key]['keyword_id'] = $keywordMap[$wordInfo['word']];
+                    $another[$keyword] = ["id"=>$id,"count"=>$count] ;
                 }
             }
-            $informationModel->updateInformation($information['id'],['scws'=>0,'scws_list'=> $top]);
-            print_R($top);
-            echo "count:".count($top)."\n";
-            $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time']);
-            $data = $redisService->refreshCache("information",[strval($information['id'])]);
         }
+        foreach($teamKeywords as $keyword => $team_id)
+        {
+            if(strlen($keyword)>=3)
+            {
+                $count = substr_count(strip_tags($information['content']),$keyword);
+                if($count>0)
+                {
+                    $team[$keyword] = ["id"=>$team_id,"count"=>$count] ;
+                }
+            }
+        }
+        foreach($playerKeywords as $keyword => $player_id)
+        {
+            if(strlen($keyword)>=3)
+            {
+                $count = substr_count(strip_tags($information['content']), $keyword);
+                if ($count > 0)
+                {
+                    $player[$keyword] = ["id" => $player_id, "count" => $count];
+                }
+            }
+        }
+        foreach($heroKeywords as $keyword => $hero_id)
+        {
+            if(strlen($keyword)>=3)
+            {
+                $count = substr_count(strip_tags($information['content']), $keyword);
+                if ($count > 0)
+                {
+                    $hero[$keyword] = ["id" => $hero_id, "count" => $count];
+                }
+            }
+        }
+        $result[$information['id']]['another'] = $another;
+        $result[$information['id']]['team'] = $team;
+        $result[$information['id']]['player'] = $player;
+        $result[$information['id']]['hero'] = $hero;
+        $informationModel->updateInformation($information['id'],['keywords'=>0,'keywords_list'=> $result[$information['id']]]);
+        $keywordMapModel->saveMap($information['id'],$information["game"],"information", $result[$information['id']],$information['create_time']);
+        $data = $redisService->refreshCache("information",[strval($information['id'])]);
+        echo "end to process:".$content_id."\n";
+    }
+    public function processScws($content_id,$informationModel)
+    {
+        $redisService = new RedisService();
+        $scwsMapModel = new ScwsMapModel();
+        $scwsKeywordMapModel = new ScwsKeywordMapModel();
+        $sh = scws_open();
+        scws_set_charset($sh, 'utf8');
+        $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time"]);
+        echo "start_to_process:".$information['id']."\n";
+        $text = strip_tags($information['content']);
+        scws_send_text($sh, $text);
+        $top = scws_get_tops($sh,10);
+        $keywordMap = $scwsKeywordMapModel->saveMap($top);
+        foreach($top as $key => $wordInfo)
+        {
+            if(isset($keywordMap[$wordInfo['word']]))
+            {
+                $top[$key]['keyword_id'] = $keywordMap[$wordInfo['word']];
+            }
+        }
+        $informationModel->updateInformation($information['id'],['scws'=>0,'scws_list'=> $top]);
+        print_R($top);
+        echo "count:".count($top)."\n";
+        $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time']);
+        $data = $redisService->refreshCache("information",[strval($information['id'])]);
     }
 }
