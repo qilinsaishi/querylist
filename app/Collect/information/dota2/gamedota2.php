@@ -117,7 +117,7 @@ class gamedota2
         $arr['content']['logo'] = getImage($arr['content']['logo']);
         $imgpreg = '/\<img.*?src\=\"([\w:\/\.]+)\"/';
         preg_match_all($imgpreg,$arr['content']['content'],$imgList);
-        foreach($imgList[1]??[] as $img)
+        foreach($imgList['1']??[] as $img)
         {
             if(substr($img,0,4)!="<img")
             {
