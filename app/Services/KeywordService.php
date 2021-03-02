@@ -145,7 +145,7 @@ class KeywordService
  //       $scwsMapModel = (new ScwsMapModel());
  //       $scwsKeywordMapModel = (new ScwsKeywordMapModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["scws"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = $informationModel->getInformationList(["game"=>$game,"scws"=>1,"fields"=>"id","page_size"=>1000]);
         $informationList = array_column($informationList,"id");
 
         foreach($informationList as $content_id)
