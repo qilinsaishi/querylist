@@ -161,6 +161,27 @@ class HomeController extends Controller
             'explain' => array('.talent-explain','texts')
         ))->range('.talent_ul li')->queryData();
 
+        //技能
+        $skill_box_html=$qt->find('.item_right  .skill_box')->html();
+        $skill_box= QueryList::html($skill_box_html)->rules(array(
+            'skill_img' => array('.skill_wrap img','src'),
+            'title' => array('.skill_wrap .skill_intro span','text'),//标题
+            'skill_intro' => array('.skill_wrap .skill_intro','text'),//技能描述
+            'icon_xh' => array('.skill_wrap .xiaohao_wrap .icon_xh','text'),//魔法消耗
+            'icon_lq' => array('.skill_wrap .xiaohao_wrap .icon_lq','text'),//冷却时间
+            'skill_bot' => array(' .skill_bot','text'),
+            'list' => array('.skill_ul','html')
+        ))->range('#focus_dl dd')->queryData();print_r($skill_box);exit;
+        /**
+         * function($item){
+        // 注意这里的QueryList对象与上面的QueryList对象是同一个对象
+        // 所以这里要重置range()参数，否则会共用前面的range()参数，导致出现采集不到结果的诡异现象
+        $item['list'] = QueryList::html($item['list'])->rules(array(
+        'skill_ul' => array('.item','texts')
+        ))->range('li')->queryData();
+        return $item;
+        }
+         */
 
         $heroInfo=[
             'hero_name'=>$hero_name,//英雄名称
@@ -178,7 +199,7 @@ class HomeController extends Controller
             'story_pic'=>$story_pic,//背景故事图片
             'talent_box'=>$talent_box,//天赋树
             'pro_box'=>$pro_box//英雄属性
-        ];print_r($heroInfo);exit;
+        ];//print_r($heroInfo);exit;
         //
 
 
