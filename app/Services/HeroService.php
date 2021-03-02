@@ -8,6 +8,7 @@ use App\Models\Hero\kplModel;
 use App\Models\Hero\lolModel;
 use App\Models\MissionModel;
 use App\Services\MissionService as oMission;
+use QL\QueryList;
 
 class HeroService
 {
@@ -26,7 +27,7 @@ class HeroService
                     $this->insertKplHero();
                     break;
                 case "dota2":
-
+                    $this->insertDota2Hero();
                     break;
                 case "csgo":
 
@@ -142,5 +143,110 @@ class HeroService
             }
         }
         return true;
+    }
+    public function insertDota2Hero(){
+        $missionModel=new MissionModel();
+        $heroDota2=$this->getHeroDota2();
+        $item=$heroDota2['item']??[];
+        $typeItem=$heroDota2['typeItem']??[];
+        foreach ($item as $key=>$val){
+            if(empty($heroInfo)){
+                $params=[
+                    'game'=>'dota2',
+                    'mission_type'=>'hero',
+                    'source_link'=>$val,
+                ];
+                $result =$missionModel->getMissionCount($params);//过滤已经采集过的数据
+                $result=$result ?? 0;
+                if($result <=0) {
+
+                    $data = [
+                        "asign_to" => 1,
+                        "mission_type" => 'hero',//dota2-英雄
+                        "mission_status" => 1,
+                        "game" => 'dota2',
+                        "source" => 'gamedota2',//英雄
+                        'source_link'=>$val,
+                        "detail" => json_encode(
+                            [
+                                "url" => $val,
+                                "game" => 'dota2',//dota2
+                                "source" => 'gamedota2',//dota2官网
+                                'hero_type'=>$typeItem[$key] ?? '',
+
+                            ]
+                        ),
+                    ];
+                    $insert = (new oMission())->insertMission($data);
+                    echo "insert:" . $insert . ' lenth:' . strlen($data['detail']);
+                }else{
+                    continue;
+                }
+
+            }
+        }
+        return true;
+
+    }
+    public function getHeroDota2(){
+        $item=[];
+        $typeItem=[];
+        //dota2英雄
+        $qt=QueryList::get('https://www.dota2.com.cn/heroes/index.htm');
+        $item=[];
+        $typeItem=[];
+        //力量
+        $item0=$qt->find(".black_cont .goods_main .hero_list:eq(0) li a")->attrs('href');
+        $item3=$qt->find(".black_cont .goods_main .hero_list:eq(3) li a")->attrs('href');
+        if(count($item0) >0){
+            foreach ($item0 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'str');
+            }
+        }
+        if(count($item3) >0){
+            foreach ($item3 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'str');
+            }
+        }
+
+
+        //敏捷
+        $item1=$qt->find(".black_cont .goods_main .hero_list:eq(1) li a")->attrs('href');
+        $item4=$qt->find(".black_cont .goods_main .hero_list:eq(4) li a")->attrs('href');
+        if(count($item1) >0){
+            foreach ($item1 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'agi');
+            }
+        }
+        if(count($item4) >0){
+            foreach ($item4 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'agi');
+            }
+        }
+
+        //智力
+        $item2=$qt->find(".black_cont .goods_main .hero_list:eq(2) li a")->attrs('href');
+        $item5=$qt->find(".black_cont .goods_main .hero_list:eq(5) li a")->attrs('href');
+        if(count($item2) >0){
+            foreach ($item2 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'int');
+            }
+        }
+        if(count($item5) >0){
+            foreach ($item5 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'int');
+            }
+        }
+        $data=[
+            'item'=>$item,
+            'typeItem'=>$typeItem,
+        ];
+        return $data;
     }
 }

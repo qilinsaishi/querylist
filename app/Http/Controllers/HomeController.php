@@ -84,12 +84,159 @@ class HomeController extends Controller
 
     public function index()
     {
-
         //dota2英雄
-       /* $qt=QueryList::get('https://www.dota2.com.cn/heroes/index.htm');
-        $item=$qt->find(".black_cont .goods_main .hero_list:eq(0) li ")->htmls()->all();
-print_r(count($item));exit;
-        $data = QueryList::get('https://www.dota2.com.cn/heroes/index.htm')->rules([
+        $qt=QueryList::get('https://www.dota2.com.cn/hero/anti_mage/');
+        $logo_small=$qt->find(".id_div .top_hero_card img")->attr('src');
+        $logo_small='https://www.dota2.com.cn'.$logo_small;
+        $herotitle=$qt->find(".id_div .top_hero_card p")->text();
+        $logo_big=$qt->find(".item_left .hero_info .hero_b")->attr('src');
+        $logo_big='https://www.dota2.com.cn'.$logo_big;
+        $logo_icon=$qt->find(".item_left .hero_info .hero_name img")->attr('src');
+        $logo_icon='https://www.dota2.com.cn'.$logo_icon;
+        $hero_name=$qt->find(".item_left .hero_info .hero_name ")->text();
+        $hero_en_name=str_replace($hero_name,'',$herotitle);
+        //攻击类型
+        $atk=$qt->find(".item_left .hero_info .info_ul li:eq(0) .info_p")->text();
+        //定位
+        $roles=$qt->find(".item_left .hero_info .info_ul li:eq(1) .info_p")->text();
+        $roles=rtrim($roles, "-");
+        $roles=explode('-',$roles);
+        if(count($roles)>0){
+            foreach ($roles as &$val){
+                $val=trim($val);
+            }
+        }
+        $roles=$roles;
+        //阵营
+        $radiant=$qt->find(".item_left .hero_info .info_ul li:eq(2) .info_p")->text();//阵营名称
+        $radiant_logo=$qt->find(".item_left .hero_info .info_ul li:eq(2) .info_p img")->attr('src');
+        if(strpos($radiant_logo,'https') ===false){
+            $radiant_logo='https:'.$radiant_logo;
+        }
+        //其他简称
+        $other_name=$qt->find(".item_left .hero_info .info_ul li:eq(3) .info_p")->text();//阵营名称
+        $other_name=explode('、',$other_name);
+        $aka=$other_name;
+        //英雄属性
+        $pro_box=[
+            [
+                'property_img'=>'https://www.dota2.com.cn/images/heropedia/overviewicon_str.png',
+                'property_title'=>$qt->find(".item_left .property_box .pro6_box li:eq(0) .pop_property_t")->text(),
+                'property_cont'=>$qt->find(".item_left .property_box .pro6_box li:eq(0) .pop_property_cont")->html(),
+            ],
+            [
+                'property_img'=>'https://www.dota2.com.cn/images/heropedia/overviewicon_agi.png',
+                'property_title'=>$qt->find(".item_left .property_box .pro6_box li:eq(1) .pop_property_t")->text(),
+                'property_cont'=>$qt->find(".item_left .property_box .pro6_box li:eq(1) .pop_property_cont")->html(),
+            ],
+            [
+                'property_img'=>'https://www.dota2.com.cn/images/heropedia/overviewicon_int.png',
+                'property_title'=>$qt->find(".item_left .property_box .pro6_box li:eq(2) .pop_property_t")->text(),
+                'property_cont'=>$qt->find(".item_left .property_box .pro6_box li:eq(2) .pop_property_cont")->html(),
+            ],
+            [
+                'property_img'=>'https://www.dota2.com.cn/event/201401/herodata/images/pro4.png',
+                'property_title'=>$qt->find(".item_left .property_box .pro6_box li:eq(3) .pop_property_t")->text(),
+                'property_cont'=>$qt->find(".item_left .property_box .pro6_box li:eq(3) .pop_property_cont")->html(),
+            ],
+            [
+                'property_img'=>'https://www.dota2.com.cn/event/201401/herodata/images/pro5.png',
+                'property_title'=>$qt->find(".item_left .property_box .pro6_box li:eq(4) .pop_property_t")->text(),
+                'property_cont'=>$qt->find(".item_left .property_box .pro6_box li:eq(4) .pop_property_cont")->html(),
+            ],
+            [
+                'property_img'=>'https://www.dota2.com.cn/event/201401/herodata/images/pro6.png',
+                'property_title'=>'',
+                'property_cont'=>'',
+            ],
+        ];
+        //背景故事
+        $story_box=$qt->find(".item_right .story_box")->text();
+        $story_pic=$qt->find(".item_right .story_box .story_pic img")->attr('src');
+        $story_pic='https://www.dota2.com.cn'.$story_pic;
+        //天赋树
+        $talent_box_html=$qt->find('.item_right  .talent_box')->html();
+        $talent_box=QueryList::html($talent_box_html)->rules(array(
+            'level' => array('.level-interior','text'),
+            'explain' => array('.talent-explain','texts')
+        ))->range('.talent_ul li')->queryData();
+
+
+        $heroInfo=[
+            'hero_name'=>$hero_name,//英雄名称
+            'hero_cn_name'=>$hero_name,//中文名称
+            'hero_en_name'=>$hero_en_name,//英文名称
+            'aka'=>$aka,//其他简称
+            'logo_small'=>$logo_small,//小图片
+            'logo_big'=>$logo_big,//大图片
+            'logo_icon'=>$logo_icon,//icon
+            'atk'=>$atk,//攻击类型
+            'roles'=>$roles,//定位
+            'radiant'=>$radiant,//阵营名称
+            'radiant_logo'=>$radiant_logo,//别名，其他简称
+            'story_box'=>$story_box,//背景故事
+            'story_pic'=>$story_pic,//背景故事图片
+            'talent_box'=>$talent_box,//天赋树
+            'pro_box'=>$pro_box//英雄属性
+        ];print_r($heroInfo);exit;
+        //
+
+
+
+
+        //==========================================
+        $item=[];
+        $typeItem=[];
+        //力量
+        $item0=$qt->find(".black_cont .goods_main .hero_list:eq(0) li a")->attrs('href');
+        $item3=$qt->find(".black_cont .goods_main .hero_list:eq(3) li a")->attrs('href');
+        if(count($item0) >0){
+            foreach ($item0 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'str');
+            }
+        }
+        if(count($item3) >0){
+            foreach ($item3 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'str');
+            }
+        }
+
+
+        //敏捷
+        $item1=$qt->find(".black_cont .goods_main .hero_list:eq(1) li a")->attrs('href');
+        $item4=$qt->find(".black_cont .goods_main .hero_list:eq(4) li a")->attrs('href');
+        if(count($item1) >0){
+            foreach ($item1 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'agi');
+            }
+        }
+        if(count($item4) >0){
+            foreach ($item4 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'agi');
+            }
+        }
+
+        //智力
+        $item2=$qt->find(".black_cont .goods_main .hero_list:eq(2) li a")->attrs('href');
+        $item5=$qt->find(".black_cont .goods_main .hero_list:eq(5) li a")->attrs('href');
+        if(count($item2) >0){
+            foreach ($item2 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'int');
+            }
+        }
+        if(count($item5) >0){
+            foreach ($item5 as $k=>$v){
+                array_push($item,$v);
+                array_push($typeItem,'int');
+            }
+        }
+        print_r($item);print_r($typeItem);exit;
+      /*  $data = QueryList::get('https://www.dota2.com.cn/heroes/index.htm')->rules([
             'title' => ['.news_msg .title', 'text'],
             'remark' => ['.news_msg .content', 'text'],
             'create_time' => ['.news_msg .date', 'text'],
@@ -134,8 +281,6 @@ print_r(count($item));exit;
         $data_gametype=$ql->find('.slide-list li')->attrs('data-gametype')->all();
         $data_texts=$ql->find('.slide-list li')->texts()->all();
 print_r( $data_eid);exit;*/
-
-
         //$list_url='http://www.wanplus.com/ajax/schedule/list';
         //print_r($slide_list);exit;
 

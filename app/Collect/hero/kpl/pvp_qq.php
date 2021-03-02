@@ -50,12 +50,7 @@ class pvp_qq
         $res['title'] = $arr['detail']['title'] ?? '';
         //一个英雄可以对应多个选择类型
         $res['hero_type'] = $arr['detail']['hero_type'] ?? '';
-        $res['hero_type2'] = $arr['detail']['hero_type2'] ?? '';
-        $res['logo'] = $arr['detail']['logo'] ?? '';
-        $res['item_id'] = $itemId;
-        $kplModel=new kplModel();
-        $heroInfo=$kplModel->getHeroInfoById($itemId);
-        if(empty($heroInfo)){
+
             if (!empty($res)) {
                 $cdata = [
                     'mission_id' => $arr['mission_id'],
@@ -70,7 +65,7 @@ class pvp_qq
                 ];
 
             }
-        }
+
         return $cdata;
     }
 
