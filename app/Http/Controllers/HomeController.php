@@ -157,8 +157,8 @@ class HomeController extends Controller
         //天赋树
         $talent_box_html=$qt->find('.item_right  .talent_box')->html();
         $talent_box=QueryList::html($talent_box_html)->rules(array(
-            'level' => array('.level-interior','text'),
-            'explain' => array('.talent-explain','texts')
+            'level' => array('.level-interior','text'),//等级
+            'explain' => array('.talent-explain','texts')//介绍
         ))->range('.talent_ul li')->queryData();
 
         //技能
@@ -170,19 +170,28 @@ class HomeController extends Controller
             'icon_xh' => array('.skill_wrap .xiaohao_wrap .icon_xh','text'),//魔法消耗
             'icon_lq' => array('.skill_wrap .xiaohao_wrap .icon_lq','text'),//冷却时间
             'skill_bot' => array(' .skill_bot','text'),
-            'list' => array('.skill_ul','html')
-        ))->range('#focus_dl dd')->queryData();print_r($skill_box);exit;
-        /**
-         * function($item){
-        // 注意这里的QueryList对象与上面的QueryList对象是同一个对象
-        // 所以这里要重置range()参数，否则会共用前面的range()参数，导致出现采集不到结果的诡异现象
-        $item['list'] = QueryList::html($item['list'])->rules(array(
-        'skill_ul' => array('.item','texts')
-        ))->range('li')->queryData();
-        return $item;
-        }
-         */
-
+            'skill_list' => array('.skill_ul','html')
+        ))->range('#focus_dl dd')->queryData(function($item){
+            $item['skill_img']='https://www.dota2.com.cn'.$item['skill_img'];
+            $item['skill_intro']=trim(str_replace($item['title'],'',$item['skill_intro']));
+            $skill_ul=QueryList::html($item['skill_list'])->find('li')->texts()->all();//技能属性
+            $item['skill_list'] = $skill_ul;
+            return $item;
+        });
+        //装备选择
+        $equip_wrap=$qt->find(".item_right .equip_wrap")->html();
+        $equip_box= QueryList::html($equip_wrap)->rules(array(
+            'equip_type' => array('.equip_t','text'),
+            'equip_info' => array('.equip_ul','html'),//x
+        ))->range('.equip_one')->queryData(function($item){print_r($item['equip_info']);exit;
+            /*$item['skill_img']='https://www.dota2.com.cn'.$item['skill_img'];
+            $item['skill_intro']=trim(str_replace($item['title'],'',$item['skill_intro']));
+            $skill_ul=QueryList::html($item['skill_list'])->find('li')->texts()->all();//技能属性
+            $item['skill_list'] = $skill_ul;*/
+            return $item;
+        });
+        print_r($equip_wrap);exit;
+//print_r($equip_wrap);exit;
         $heroInfo=[
             'hero_name'=>$hero_name,//英雄名称
             'hero_cn_name'=>$hero_name,//中文名称
@@ -198,8 +207,9 @@ class HomeController extends Controller
             'story_box'=>$story_box,//背景故事
             'story_pic'=>$story_pic,//背景故事图片
             'talent_box'=>$talent_box,//天赋树
-            'pro_box'=>$pro_box//英雄属性
-        ];//print_r($heroInfo);exit;
+            'pro_box'=>$pro_box,//英雄属性
+            'skill_box'=>$skill_box,//技能介绍
+        ];print_r($heroInfo);exit;
         //
 
 
