@@ -96,7 +96,7 @@ class pvp_qq
         $arr['content']['sIMG'] = getImage($arr['content']['sIMG']);
         $imgpreg = '/\<img.*?src\=\"([\w:\/\.]+)\"/';
         preg_match_all($imgpreg,$arr['content']['sContent'],$imgList);
-        foreach($imgList as $img)
+        foreach($imgList['1']??[] as $img)
         {
             if(substr($img,0,4)=="http")
             {

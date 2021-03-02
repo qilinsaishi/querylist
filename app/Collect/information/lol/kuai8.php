@@ -66,7 +66,7 @@ class kuai8
         $arr['content']['logo'] = getImage($arr['content']['img_url']);
         $imgpreg = '/\<img.*?src\=\"([\w:\/\.]+)\"/';
         preg_match_all($imgpreg,$arr['content']['content'],$imgList);
-        foreach($imgList as $img)
+        foreach($imgList['1']??[] as $img)
         {
             if(substr($img,0,4)=="http")
             {
