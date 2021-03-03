@@ -81,9 +81,32 @@ class HomeController extends Controller
         print_r($cdata);exit;
 
     }
+    public function getLevelData(){
+        $levelData=[];
+        $neutralitems='https://www.dota2.com.cn/neutralitems/json';
+        $itemData=curl_get($neutralitems);
+        foreach ($itemData as $k=>$v){
+            foreach ($v as $v1){
+                $levelData[$v1]=str_replace('level_','',$k);
+            }
+
+        }
+        return $levelData;
+    }
 
     public function index()
     {
+        //print_r($this->getLevelData());exit;
+        //物品
+        $item_url='https://www.dota2.com.cn/items/json';
+        $itemData=curl_get($item_url);
+        if($itemData){
+            foreach ( $itemData['itemdata'] as $key=>$val) {
+                $val['en_name']=$key;
+            }
+        }
+        print_r($itemData);exit;
+
         //dota2英雄
         $qt=QueryList::get('https://www.dota2.com.cn/hero/anti_mage/');
         $logo_small=$qt->find(".id_div .top_hero_card img")->attr('src');
