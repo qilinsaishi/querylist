@@ -150,6 +150,19 @@ class HomeController extends Controller
                 'property_cont'=>'',
             ],
         ];
+        if($pro_box){
+            foreach ($pro_box as &$val){
+                if($val['property_cont']){
+                    $val['property_cont']=explode('<br>',$val['property_cont']);
+                    foreach ($val['property_cont'] as &$v){
+                        $v=trim($v);
+                    }
+                }else{
+                    $val['property_cont']=[];
+                }
+
+            }
+        }
         //背景故事
         $story_box=$qt->find(".item_right .story_box")->text();
         $story_pic=$qt->find(".item_right .story_box .story_pic img")->attr('src');
@@ -183,15 +196,25 @@ class HomeController extends Controller
         $equip_box= QueryList::html($equip_wrap)->rules(array(
             'equip_type' => array('.equip_t','text'),
             'equip_info' => array('.equip_ul','html'),//x
-        ))->range('.equip_one')->queryData(function($item){print_r($item['equip_info']);exit;
-            /*$item['skill_img']='https://www.dota2.com.cn'.$item['skill_img'];
-            $item['skill_intro']=trim(str_replace($item['title'],'',$item['skill_intro']));
-            $skill_ul=QueryList::html($item['skill_list'])->find('li')->texts()->all();//技能属性
-            $item['skill_list'] = $skill_ul;*/
+        ))->range('.equip_one')->queryData(function($item){
+            $item['equip_info'] = QueryList::html($item['equip_info'])->rules(array(
+                'equip_imgs' => array('img','src'),//装备缩略图
+                'equip_title' => array('.pop_box .equip_item_r span','text'),//标题
+                'equip_money' => array('.pop_box .equip_item_r  .equip_money','text'),//价格
+                'use'=>array('.pop_box h1','texts'),//使用说明
+                'pop_skill_p'=>array('.pop_box .pop_skill_p','texts'),//属性
+                'pop_skill_s'=>array('.pop_box .pop_skill_s','text'),//描述
+            ))->range('li')->queryData(function($item1){
+                unset($item1['pop_skill_p'][0]);
+                if(strpos($item1['equip_imgs'],'https')===false){
+                    $item1['equip_imgs']='https:'.$item1['equip_imgs'];
+                }
+
+                return $item1;
+            });
             return $item;
         });
-        print_r($equip_wrap);exit;
-//print_r($equip_wrap);exit;
+
         $heroInfo=[
             'hero_name'=>$hero_name,//英雄名称
             'hero_cn_name'=>$hero_name,//中文名称
@@ -209,7 +232,9 @@ class HomeController extends Controller
             'talent_box'=>$talent_box,//天赋树
             'pro_box'=>$pro_box,//英雄属性
             'skill_box'=>$skill_box,//技能介绍
-        ];print_r($heroInfo);exit;
+            'equip_box'=>$equip_box,//装备选择
+        ];
+        print_r($heroInfo);exit;
         //
 
 
