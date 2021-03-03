@@ -85,8 +85,8 @@ class HomeController extends Controller
     public function index()
     {
 
-        //print_r($arrData);exit;
-        $qt=QueryList::get('https://www.dota2.com.cn/heroes/index.htm');
+        //dota2英雄
+       /* $qt=QueryList::get('https://www.dota2.com.cn/heroes/index.htm');
         $item=$qt->find(".black_cont .goods_main .hero_list:eq(0) li ")->htmls()->all();
 print_r(count($item));exit;
         $data = QueryList::get('https://www.dota2.com.cn/heroes/index.htm')->rules([
@@ -95,59 +95,17 @@ print_r(count($item));exit;
             'create_time' => ['.news_msg .date', 'text'],
             'logo' => ['.news_logo img', 'src']
         ])->range('#news_lists .panes .active a')
-            ->queryData();
+            ->queryData();*/
 
 
 
-        $AjaxModel = new AjaxRequest();
-
-        $url='https://www.wanplus.com/ajax/detailranking?type=1&teamPage=24&game=1';
-
-        $list=$AjaxModel->ajaxGetData($url );print_r($list);exit;
-        //dota2资讯
-        //$url='https://www.dota2.com.cn/news/gamenews/index1.htm';
-
-        $count=19;
-        $cdata=[];
-        for($i=0;$i<=$count;$i++){
-            $m=$i+1;
-            $url='https://www.dota2.com.cn/news/gamenews/index'.$m.'.htm';
-            $urlall=QueryList::get($url)->find("#news_lists .panes .active a")->attrs('href')->all();
-            if($urlall){
-                foreach ($urlall as $key=>$val){
-                    $cdata[$i][$key]['link']=$val;
-                    $cdata[$i][$key]['title']=QueryList::get($url)->find("#news_lists .panes .active a:eq(".$key.") .news_msg .title")->text();
-                    $cdata[$i][$key]['remark']=QueryList::get($url)->find("#news_lists .panes .active a:eq(".$key.") .news_msg .content")->text();
-                    $cdata[$i][$key]['create_time']=QueryList::get($url)->find("#news_lists .panes .active a:eq(".$key.") .news_msg .date")->text();
-                    $cdata[$i][$key]['logo']=QueryList::get($url)->find("#news_lists .panes .active a:eq(".$key.") .news_logo img")->attr('src');
-
-
-                }
-            }
-            /*$cdata[$i] = QueryList::get($url)->rules([
-                'title' => ['.news_msg .title', 'text'],
-                'remark' => ['.news_msg .content', 'text'],
-                'create_time' => ['.news_msg .date', 'text'],
-                'logo' => ['.news_logo img', 'src'],
-
-            ])->range('#news_lists .panes .active a')
-                ->queryData();*/
-        }print_r($cdata);exit;
-
-
-        $data = QueryList::get($url)->rules([
-            'title' => ['.news_msg .title', 'text'],
-            'remark' => ['.news_msg .content', 'text'],
-            'create_time' => ['.news_msg .date', 'text'],
-            'logo' => ['.news_logo img', 'src']
-        ])->range('#news_lists .panes .active a')
-            ->queryData();
 
 
 
         $AjaxModel = new AjaxRequest();
         //比赛列表
         //获取每周的周一时间;
+        /*$AjaxModel = new AjaxRequest();
         $weekday=date("w");
         $weekday=($weekday + 6) % 7;
         $date=strtotime(date('Y-m-d',strtotime("-{$weekday} day")));
@@ -158,6 +116,18 @@ print_r(count($item));exit;
             'eids'=>''
         ];
         $list=$AjaxModel->getMatchList($url, $param );
+        if(isset($list['scheduleList'])){
+            foreach($list['scheduleList'] as $val) {
+                //https://www.wanplus.com/schedule/68605.html
+                if(isset($val['list'])){
+                    foreach ($val['list'] as $v){
+                        $url='https://www.wanplus.com/schedule/'.$v['scheduleid'].'.html';
+                        echo $url;
+                        print_r($v);exit;
+                    }
+                }
+            }
+        }*/
         /*$schedule_url='http://www.wanplus.com/lol/schedule';
         $ql = QueryList::get($schedule_url);
         $data_eid=$ql->find('.slide-list li')->attrs('data-eid')->all();
@@ -166,11 +136,11 @@ print_r(count($item));exit;
 print_r( $data_eid);exit;*/
 
 
-        $list_url='http://www.wanplus.com/ajax/schedule/list';
+        //$list_url='http://www.wanplus.com/ajax/schedule/list';
         //print_r($slide_list);exit;
 
         //比赛详情
-        $url='http://www.wanplus.com/schedule/68001.html';
+        $url='https://www.wanplus.com/schedule/68605.html';
         $ql = QueryList::get($url);
         $event_title=$ql->find('.box h1')->text();
         $event_url=$ql->find('.box h1 a')->attr('href');
@@ -187,13 +157,12 @@ print_r( $data_eid);exit;*/
         ];
         $data['matchInfo']=$matchInfo;
 
-        $matchInfo=[];
         $score=$ql->find('.box .team-detail li:eq(1) p')->text();
         $matchInfo['status']=$ql->find('.box .team-detail li:eq(1) .end')->text();
         $matchInfo['time']=$ql->find('.box .team-detail li:eq(1) .time')->text();
 
 
-        $url='http://www.wanplus.com/ajax/matchdetail/72706';
+        $url='http://www.wanplus.com/ajax/matchdetail/'.$game_matchid;
         $playData= $AjaxModel->getHistoryMatch($url);
         //期间
         $matchInfo['match_duration']=$playData['info']['duration'];
@@ -268,7 +237,7 @@ print_r( $data_eid);exit;*/
             }
         }
         $data['matchInfo']=$matchInfo;
-print_r($data);exit;
+print_r($matchInfo);exit;
 $url= 'https://static.wanplus.com/data/lol/hero/square/'.$playData['bpList']['bans'][0][0]['cpherokey'].'.'.$playData['info']['heroImgSuffix'];
 echo $url;exit;
         print_r($playData['bpList']['bans']);exit;

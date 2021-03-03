@@ -45,9 +45,9 @@ class wanplus
                 'status' => 1,
             ];
             //处理战队采集数据
-            $return = $cdata;
+
         }
-        return $return;
+        return $cdata;
 
     }
     public function process($arr)

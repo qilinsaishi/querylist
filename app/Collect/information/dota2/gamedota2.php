@@ -17,14 +17,15 @@ class gamedota2
             "source"=>['path'=>"",'default'=>"gamedota2"],//来源
             "title"=>['path'=>"title",'default'=>''],//标题
             "content"=>['path'=>"content",'default'=>''],//内容
-            "type"=>['path'=>"target",'default'=>1],//类型
+            "type"=>['path'=>"type",'default'=>1],//类型
             "site_time"=>['path'=>"create_time",'default'=>""]//来源站点的时间
             ];
     protected $type = [
         1=>1,//'综合',
         2=>1,//'公告',
         3=>3,//'赛事',
-        4=>2,//'攻略',
+        4=>2,
+        5=>4,//'攻略',
     ];
     public function collect($arr)
     {
@@ -92,9 +93,6 @@ class gamedota2
 
                 }
             }
-
-
-
         return $cdata;
     }
 
@@ -110,6 +108,7 @@ class gamedota2
          * site_id：文章id
          *
          */
+        $arr['content']['type'] = $this->type[$arr['content']['type']];
         if(substr($arr['content']['logo'],0,1)=='/')
         {
             $arr['content']['logo'] = 'https://www.dota2.com.cn/'.$arr['content']['logo'];
