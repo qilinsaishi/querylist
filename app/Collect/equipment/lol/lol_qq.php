@@ -70,7 +70,6 @@ class lol_qq
         $res = curl_get($url);
         $res = $res['items'] ?? [];
         if (!empty($res)) {
-
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
@@ -82,8 +81,9 @@ class lol_qq
                 'status' => 1,
                 'update_time' => date("Y-m-d H:i:s")
             ];
-            return $cdata;
+
         }
+        return $cdata;
     }
 
     public function process($arr)

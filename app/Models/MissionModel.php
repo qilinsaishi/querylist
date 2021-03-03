@@ -118,6 +118,7 @@ class MissionModel extends Model
         $game=$params['game'] ?? '';
         $mission_type=$params['mission_type'] ?? '';
         $source_link=$params['source_link'] ?? '';
+        $title=$params['title'] ?? '';
         //游戏
         if($game!="")
         {
@@ -133,6 +134,11 @@ class MissionModel extends Model
         if($source_link!="")
         {
             $missionModel = $missionModel->where("source_link",$source_link);
+        }
+        //标题
+        if($title!="")
+        {
+            $missionModel = $missionModel->where("title",$title);
         }
 
 

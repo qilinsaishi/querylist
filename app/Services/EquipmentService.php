@@ -13,7 +13,7 @@ class EquipmentService
     public function insertEquipmentData()
     {
         $gameItem = [
-            'lol', 'kpl', 'dota2', 'csgo'
+            'lol', 'kpl', 'dota2'//, 'csgo'
         ];
 
         foreach ($gameItem as $val) {
@@ -26,7 +26,7 @@ class EquipmentService
                     $this->insertKplEquipment();
                     break;
                 case "dota2":
-
+                    $this->insertDota2Equipment();
                     break;
                 case "csgo":
 
@@ -112,6 +112,47 @@ class EquipmentService
             }
 
         }
+        return true;
+    }
+
+    //dota2装备采集
+    public function insertDota2Equipment()
+    {
+        $missionModel=new MissionModel();
+        //物品
+        $item_url='https://www.dota2.com.cn/items/json';
+        $itemData=curl_get($item_url);
+        if(isset($itemData['itemdata'])){
+            foreach ( $itemData['itemdata'] as $key=>$val) {
+                $val['en_name']=$key;
+                $val['game']='dota2';
+                $val['source']='gamedota2';
+                $val['img']='https://www.dota2.com.cn/items/images/'.$val['img'];
+                $params=[
+                    'game'=>'dota2',
+                    'mission_type'=>'equipment',
+                    'title'=>$key,
+                ];
+                $result =$missionModel->getMissionCount($params);//过滤已经采集过的数据
+                $result=$result ?? 0;
+                if($result ==0) {
+                    $data = [
+                        "asign_to" => 1,
+                        "mission_type" => 'equipment',//装备
+                        "mission_status" => 1,
+                        "game" => 'dota2',
+                        "source" => 'gamedota2',//装备
+                        'source_link'=>'',
+                        'title'=>$key,
+                        "detail" => json_encode($val),
+                    ];
+                    $insert = (new oMission())->insertMission($data);
+                    echo "lol-equipment-insert:".$insert.' lenth:'.strlen($data['detail']). "\n";
+                }
+
+            }
+        }
+
         return true;
     }
 }
