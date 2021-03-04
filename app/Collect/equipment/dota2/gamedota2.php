@@ -14,15 +14,17 @@ class gamedota2
     {
         $cdata = [];
         $res = $arr['detail'] ?? [];
-        $level=$this->getLevelData('recipe_gungir');
-        $typeData=$this->getTypeData('mysterious_hat');print_r(count($typeData));exit;
+        $level=$this->getLevelData($res['en_name']);//中立物品-等级
+        $typeData=$this->getTypeData($res['en_name']);//商店物品
+        $res['type']=$typeData['type'] ?? '';
+        $res['typename']=$typeData['typename'] ?? '';
         $res['level']=$level ?? 0;
-        if (count($res)>0) {print_r($res);exit;
+        if (count($res)>0) {
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
                 'game' => $arr['game'],
-                'source_link' => $url,
+                'source_link' => '',
                 'title' => $arr['detail']['title'] ?? '',
                 'mission_type' => $arr['mission_type'],
                 'source' => $arr['source'],
