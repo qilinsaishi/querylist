@@ -17,6 +17,7 @@ class gamedota2
             "logo_small"=>['path'=>"logo_small",'default'=>''],
             "logo_icon"=>['path'=>"logo_icon",'default'=>''],
             "logo_rediant"=>['path'=>"logo_rediant",'default'=>''],
+            "attack_type"=>['path'=>"attack_type",'default'=>''],
             "hero_type"=>['path'=>"hero_type",'default'=>''],
             "rediant"=>['path'=>"radiant",'default'=>''],
             "id"=>['path'=>"item_id",'default'=>0],
@@ -32,16 +33,21 @@ class gamedota2
         'str'=>'力量',
     ];
     public $role_type = [
-            'Carry'=>'核心',
-            'Disabler'=>'控制',
-            'Initiator'=>'先手',
-            'Jungler'=>'打野',
-            'Support'=>'辅助',
-            'Durable'=>'耐久',
-            'Nuker'=>'爆发',
-            'Pusher'=>'推进',
-            'Escape'=>'逃生',
+        'Carry'=>'核心',
+        'Disabler'=>'控制',
+        'Initiator'=>'先手',
+        'Jungler'=>'打野',
+        'Support'=>'辅助',
+        'Durable'=>'耐久',
+        'Nuker'=>'高爆发',
+        'Pusher'=>'推进',
+        'Escape'=>'逃生',
+        "LaneSupport"=>'对线辅助'
     ];
+    public $attack_type = [
+        "melee"=>"近战",
+        "ranged"=>"远程"
+        ];
     public function collect($arr)
     {
         $url = $arr['detail']['url'] ?? '';
@@ -89,6 +95,11 @@ class gamedota2
         $arr['content']['logo_small']  = getImage($arr['content']['logo_small']);
         $arr['content']['logo_rediant']  = getImage($arr['content']['radiant_logo']);
         $arr['content']['logo_desc']  = getImage($arr['content']['story_pic']);
+        $arr['content']['attack_type'] = array_flip($this->attack_type)[$arr['content']["atk"]];
+        foreach($arr['content']['roles'] as $key => $role)
+        {
+            $arr['content']['roles'][$key] = array_flip($this->role_type)[$role];
+        }
         foreach($arr['content']['pro_box'] as $key => $stat)
         {
             $arr['content']['pro_box'][$key]['stat_logo'] = getImage($stat['property_img']);
@@ -100,8 +111,7 @@ class gamedota2
             unset($arr['content']['skill_box'][$key]['skill_img']);
         }
         $data = getDataFromMapping($this->data_map,$arr['content']);
-        var_dump($data);
-        die();
+        return $data;
     }
     public function getHeroInfo($url){
         $qt=QueryList::get($url);
