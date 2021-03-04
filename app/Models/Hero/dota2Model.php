@@ -48,6 +48,11 @@ class dota2Model extends Model
     {
         $fields = isset($params['fields'])?explode(",",$params['fields']):['hero_id', 'hero_name', 'cn_name', 'hero_type','logo'];
         $hero_list =$this->select($fields);
+        //英雄类型
+        if(isset($params['hero_type']) && strlen($params['hero_type'])>=2)
+        {
+            $hero_list = $hero_list->where("hero_type",$params['hero_type']);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         if(isset($params['rand']) && $params['rand'] >0)
@@ -178,6 +183,11 @@ class dota2Model extends Model
     }
     public function getHeroCount($params=[]){
         $hero_count = $this;
+        //英雄类型
+        if(isset($params['hero_type']) && strlen($params['hero_type'])>=2)
+        {
+            $hero_count = $hero_count->where("hero_type",$params['hero_type']);
+        }
         $keys = $params['keys'] ?? [];
         if (!empty($keys)) {
             if (!empty($keys)) {
