@@ -90,6 +90,7 @@ class gamedota2
             'pro_box'=>$pro_box,//英雄属性
             'skill_box'=>$skill_box,//技能介绍
             'equip_box'=>$equip_box,//装备选择*/
+        $arr['content']['aka'] = $arr['content']['aka']['0']??"";
         $arr['content']['logo']  = getImage($arr['content']['logo_big']);
         $arr['content']['logo_icon']  = getImage($arr['content']['logo_icon']);
         $arr['content']['logo_small']  = getImage($arr['content']['logo_small']);
