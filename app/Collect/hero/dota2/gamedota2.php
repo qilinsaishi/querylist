@@ -8,13 +8,46 @@ class gamedota2
 {
     protected $data_map =
         [
-        ];
+            "hero_name"=>['path'=>"hero_name",'default'=>''],
+            "cn_name"=>['path'=>"hero_cn_name",'default'=>''],
+            "en_name"=>['path'=>'hero_en_name','default'=>''],
+            "aka"=>['path'=>"aka",'default'=>""],//别名
+            "description"=>['path'=>"story_box",'default'=>'暂无'],
+            "logo"=>['path'=>"logo",'default'=>''],
+            "logo_small"=>['path'=>"logo_small",'default'=>''],
+            "logo_icon"=>['path'=>"logo_icon",'default'=>''],
+            "logo_rediant"=>['path'=>"logo_rediant",'default'=>''],
+            "attack_type"=>['path'=>"attack_type",'default'=>''],
+            "hero_type"=>['path'=>"hero_type",'default'=>''],
+            "rediant"=>['path'=>"radiant",'default'=>''],
+            "id"=>['path'=>"item_id",'default'=>0],
+            "roles"=>['path'=>"roles",'default'=>[]],
+            "stat"=>['path'=>"pro_box",'default'=>[]],
+            "skill"=>['path'=>"talent_box",'default'=>[]],
+            "talent"=>['path'=>"skill_box",'default'=>[]],
+            "equipment"=>['path'=>"equip_box",'default'=>[]],
+            ];
     public $hero_type = [
         'int'=>'智力',
         'agi'=>'敏捷',
         'str'=>'力量',
-
     ];
+    public $role_type = [
+        'Carry'=>'核心',
+        'Disabler'=>'控制',
+        'Initiator'=>'先手',
+        'Jungler'=>'打野',
+        'Support'=>'辅助',
+        'Durable'=>'耐久',
+        'Nuker'=>'高爆发',
+        'Pusher'=>'推进',
+        'Escape'=>'逃生',
+        "LaneSupport"=>'对线辅助'
+    ];
+    public $attack_type = [
+        "melee"=>"近战",
+        "ranged"=>"远程"
+        ];
     public function collect($arr)
     {
         $url = $arr['detail']['url'] ?? '';
@@ -57,7 +90,29 @@ class gamedota2
             'pro_box'=>$pro_box,//英雄属性
             'skill_box'=>$skill_box,//技能介绍
             'equip_box'=>$equip_box,//装备选择*/
-        var_dump($arr);
+        $arr['content']['aka'] = $arr['content']['aka']['0']??"";
+        $arr['content']['logo']  = getImage($arr['content']['logo_big']);
+        $arr['content']['logo_icon']  = getImage($arr['content']['logo_icon']);
+        $arr['content']['logo_small']  = getImage($arr['content']['logo_small']);
+        $arr['content']['logo_rediant']  = getImage($arr['content']['radiant_logo']);
+        $arr['content']['logo_desc']  = getImage($arr['content']['story_pic']);
+        $arr['content']['attack_type'] = array_flip($this->attack_type)[$arr['content']["atk"]];
+        foreach($arr['content']['roles'] as $key => $role)
+        {
+            $arr['content']['roles'][$key] = array_flip($this->role_type)[$role];
+        }
+        foreach($arr['content']['pro_box'] as $key => $stat)
+        {
+            $arr['content']['pro_box'][$key]['stat_logo'] = getImage($stat['property_img']);
+            unset($arr['content']['pro_box'][$key]['property_img']);
+        }
+        foreach($arr['content']['skill_box'] as $key => $stat)
+        {
+            $arr['content']['skill_box'][$key]['skill_logo'] = getImage($stat['skill_img']);
+            unset($arr['content']['skill_box'][$key]['skill_img']);
+        }
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
     public function getHeroInfo($url){
         $qt=QueryList::get($url);
