@@ -53,7 +53,6 @@ class ScheduleService
         if(isset($list['scheduleList'])){
             foreach($list['scheduleList'] as $val) {
                 //https://www.wanplus.com/schedule/68605.html
-
                 if($val['list']){
                     foreach ($val['list'] as $v){
                         $url='https://www.wanplus.com/schedule/'.$v['scheduleid'].'.html';

@@ -56,7 +56,6 @@ class lol_qq
         $res['spells']=$data['spells'] ?? [];
 
         if (!empty($res)) {
-            //$res['show_list_img'] = 'https://game.gtimg.cn/images/lol/act/img/champion/' . $res['alias'] . '.png';
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),

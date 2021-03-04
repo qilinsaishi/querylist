@@ -48,8 +48,7 @@ class gamedota2
             $type = 4;//公告
         } elseif ($type == 'raiders') {
             $type = 5;//攻略
-        }
-        else {
+        }else {
             $type = 1;//综合新闻
         }
         $res = $arr['detail'] ?? [];
