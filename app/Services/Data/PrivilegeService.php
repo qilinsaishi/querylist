@@ -4,7 +4,7 @@ namespace App\Services\Data;
 
 class PrivilegeService
 {
-    public $hero_type = [
+    public $kpl_hero_type = [
         1=>'战士',
         2=>'法师',
         3=>'坦克',
@@ -357,6 +357,24 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getInscriptionById",
                 'functionSingle' => "getInscriptionById",
+            ],
+            "dota2HeroList" => [//王者荣耀英雄列表
+                'list' => [
+                    ['model' => 'App\Models\Hero\dota2Model', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getHeroList",
+                'functionCount' => "getHeroCount",
+                'functionSingle' => "getHeroById",
+            ],
+            "kplHero" => [//dota2英雄详情
+                'list' => [
+                    ['model' => 'App\Models\Hero\dota2Model', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getHeroById",
+                'functionSingle' => "getHeroById",
+                'functionProcess' => "processDota2Hero",
             ],
         ];
         return $privilegeList;
@@ -843,8 +861,8 @@ class PrivilegeService
                 }
             }
         }
-        $hero_type=$this->hero_type;
-        $data['type_name']=$hero_type[$data['type']] ?? '';
+        $kpl_hero_type=$this->kpl_hero_type;
+        $data['type_name']=$kpl_hero_type[$data['type']] ?? '';
 
         return $data;
     }
