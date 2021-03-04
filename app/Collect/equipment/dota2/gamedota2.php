@@ -14,25 +14,27 @@ class gamedota2
     {
         $cdata = [];
         $res = $arr['detail'] ?? [];
-        $level=$this->getLevelData($res['en_name']);//中立物品-等级
-        $typeData=$this->getTypeData($res['en_name']);//商店物品
-        $res['type']=$typeData['type'] ?? '';
-        $res['typename']=$typeData['typename'] ?? '';
-        $res['level']=$level ?? 0;
-        if (count($res)>0) {
-            $cdata = [
-                'mission_id' => $arr['mission_id'],
-                'content' => json_encode($res),
-                'game' => $arr['game'],
-                'source_link' => '',
-                'title' => $arr['detail']['title'] ?? '',
-                'mission_type' => $arr['mission_type'],
-                'source' => $arr['source'],
-                'status' => 1,
-                'update_time' => date("Y-m-d H:i:s")
-            ];
-
+        if(!empty($res['dname'])){
+            $level=$this->getLevelData($res['en_name']);//中立物品-等级
+            $typeData=$this->getTypeData($res['en_name']);//商店物品
+            $res['type']=$typeData['type'] ?? '';
+            $res['typename']=$typeData['typename'] ?? '';
+            $res['level']=$level ?? 0;
+            if (count($res)>0) {
+                $cdata = [
+                    'mission_id' => $arr['mission_id'],
+                    'content' => json_encode($res),
+                    'game' => $arr['game'],
+                    'source_link' => '',
+                    'title' => $arr['title'] ?? '',
+                    'mission_type' => $arr['mission_type'],
+                    'source' => $arr['source'],
+                    'status' => 1,
+                    'update_time' => date("Y-m-d H:i:s")
+                ];
+            }
         }
+
         return $cdata;
     }
 
@@ -68,16 +70,19 @@ class gamedota2
     //中立物品等级
     public function getLevelData($en_name){
         $levelData=[];
+        $level=0;
         $neutralitems='https://www.dota2.com.cn/neutralitems/json';
         $itemData=curl_get($neutralitems);
-        foreach ($itemData as $k=>$v){
-            foreach ($v as $v1){
-                $levelData[$v1]=str_replace('level_','',$k);
+        if(isset($itemData)){
+            foreach ($itemData as $k=>$v){
+                foreach ($v as $v1){
+                    $levelData[$v1]=str_replace('level_','',$k);
+                }
             }
-        }
-        $level=0;
-        if(isset($levelData[$en_name])){
-            $level=$levelData[$en_name];
+
+            if(isset($levelData[$en_name])){
+                $level=$levelData[$en_name] ?? 0;
+            }
         }
 
         return $level;

@@ -121,7 +121,7 @@ class HomeController extends Controller
             }
 
         }
-        print_r($typeList['black_king_bar']);exit;
+        print_r(count($typeList));exit;
         //物品
         $item_url='https://www.dota2.com.cn/items/json';
         $itemData=curl_get($item_url);
