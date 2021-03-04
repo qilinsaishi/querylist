@@ -229,21 +229,18 @@ class gamedota2
             $item['equip_info'] = QueryList::html($item['equip_info'])->rules(array(
                 'equip_imgs' => array('img','src'),//装备缩略图
                 'equip_title' => array('.pop_box .equip_item_r span','text'),//标题
-                'equip_money' => array('.pop_box .equip_item_r  .equip_money','text'),//价格
-                'use'=>array('.pop_box h1','texts'),//使用说明
-                'pop_skill_p'=>array('.pop_box .pop_skill_p','texts'),//属性
-                'pop_skill_s'=>array('.pop_box .pop_skill_s','text'),//描述
+
             ))->range('li')->queryData(function($item1){
-                unset($item1['pop_skill_p'][0]);
+                $en_name=str_replace(array('//www.dota2.com.cn/images/items/','_lg.png'),'',$item1['equip_imgs']);
                 if(strpos($item1['equip_imgs'],'https')===false){
                     $item1['equip_imgs']='https:'.$item1['equip_imgs'];
                 }
+                $item1['en_name']=$en_name;
 
                 return $item1;
             });
             return $item;
         });
-
         $heroInfo=[
             'hero_name'=>$hero_name,//英雄名称
             'hero_cn_name'=>$hero_name,//中文名称

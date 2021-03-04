@@ -96,7 +96,32 @@ class HomeController extends Controller
 
     public function index()
     {
-        //print_r($this->getLevelData());exit;
+       // $qt=QueryList::get('https://www.dota2.com.cn/items/index.htm');
+        $item=QueryList::get('https://www.dota2.com.cn/items/index.htm')->rules(array(
+            'typename' => array('h4','text'),//类型名称
+            'type' => array('img','src'),//类型名称
+            'typeList' => array('.floatItemImage ','htmls')//介绍
+        ))->range('#itemPickerInner .shopColumn')->queryData(function($item){
+            $item['type']=str_replace(array('./images/itemcat_','.png'),'',$item['type']);
+            foreach($item['typeList'] as &$val) {
+                $img=QueryList::html($val)->find('img')->attr('src');
+                $img=str_replace(array('./images/','_lg.png'),'',$img);
+                $val=$img;
+            }
+            return $item;
+        });
+        $typeList=[];
+        foreach ($item as $val){
+            foreach ($val['typeList'] as $v){
+                $typeList[$v]=[
+                    'type'=>$val['type'],
+                    'typename'=>$val['typename']
+
+                ];
+            }
+
+        }
+        print_r($typeList['black_king_bar']);exit;
         //物品
         $item_url='https://www.dota2.com.cn/items/json';
         $itemData=curl_get($item_url);
@@ -105,7 +130,7 @@ class HomeController extends Controller
                 $val['en_name']=$key;
             }
         }
-        print_r($itemData);exit;
+        print_r(count($itemData['itemdata']));exit;
 
         //dota2英雄
         $qt=QueryList::get('https://www.dota2.com.cn/hero/anti_mage/');
