@@ -62,6 +62,16 @@ class PlayerModel extends Model
         {
             $player_list = $player_list->where("team_id",$params['team_id']);
         }
+        //不所属战队
+        if(isset($params['except_team']) && $params['except_team']>0)
+        {
+            $player_list = $player_list->where("team_id","!=",$params['except_team']);
+        }
+        //不是队员
+        if(isset($params['except_player']) && $params['except_player']>0)
+        {
+            $player_list = $player_list->where("player_id","!=",$params['except_player']);
+        }
         //战队名称
         if(isset($params['player_name']) && strlen($params['player_name'])>=3)
         {
@@ -266,7 +276,17 @@ class PlayerModel extends Model
         //所属战队
         if(isset($params['team_id']) && $params['team_id']>0)
         {
-            $player_list = $player_count->where("team_id",$params['team_id']);
+            $player_count = $player_count->where("team_id",$params['team_id']);
+        }
+        //不所属战队
+        if(isset($params['except_team']) && $params['except_team']>0)
+        {
+            $player_count = $player_count->where("team_id","!=",$params['except_team']);
+        }
+        //不是队员
+        if(isset($params['except_player']) && $params['except_player']>0)
+        {
+            $player_count = $player_count->where("player_id","!=",$params['except_player']);
         }
         //战队名称
         if(isset($params['player_name']) && strlen($params['player_name'])>=3)
