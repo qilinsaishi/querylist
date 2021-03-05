@@ -132,11 +132,17 @@ class TeamModel extends Model
         }
         return $team_info;
     }
-    public function getTeamBySiteId($team_id)
+    public function getTeamBySiteId($team_id,$original_source='',$game='')
     {
-        $team_info =$this->select("*")
-            ->where("site_id",$team_id)
-            ->get()->first();
+        $team_obj =$this->select("*")
+            ->where("site_id",$team_id);
+        if($original_source !=''){
+            $team_obj=$team_obj->where("original_source",$original_source);
+        }
+        if($game !=''){
+            $team_obj=$team_obj->where("game",$game);
+        }
+        $team_info=$team_obj->get()->first();
         if(isset($team_info->team_id))
         {
             $team_info = $team_info->toArray();
