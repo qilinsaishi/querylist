@@ -11,6 +11,7 @@ use App\Models\PlayerModel as PlayerModel;
 use App\Models\KeywordsModel as KeywordsModel;
 use App\Models\Hero\lolModel as lolHeroModel;
 use App\Models\Hero\kplModel as kplHeroModel;
+use App\Models\Hero\dota2Model as dota2HeroModel;
 use App\Services\Data\RedisService;
 
 
@@ -19,14 +20,14 @@ class KeywordService
     //爬取数据
     public function information($game = "")
     {
-        if(!in_array($game,['lol','kpl']))
+        if(!in_array($game,['lol','kpl','dota2']))
         {
             return true;
         }
         //$redisService = new RedisService();
         $informationModel = (new InformationModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["game"=>$game,"keywords"=>1,"fields"=>"id"/*"content,id,create_time"*/,"page_size"=>1000]);
+        $informationList = $informationModel->getInformationList(["game"=>$game,"keywords"=>1,"fields"=>"id","page_size"=>1000]);
         $informationList = array_column($informationList,"id");
         foreach($informationList as $id)
         {
@@ -104,6 +105,10 @@ class KeywordService
             {
                 $heroKeywords = (new kplHeroModel())->getAllKeywords($game);
             }
+            elseif($game=="dota2")
+            {
+                $heroKeywords = (new dota2HeroModel())->getAllKeywords($game);
+            }
             if(count($heroKeywords)>0)
             {
                 $return = $heroKeywords;
@@ -171,7 +176,7 @@ class KeywordService
             if(strlen($keyword)>=3)
             {
                 $count = substr_count(strip_tags($information['content']),$keyword);
-                if($count>0)
+                if($count >= 1)
                 {
                     $another[$keyword] = ["id"=>$id,"count"=>$count] ;
                 }
@@ -182,38 +187,42 @@ class KeywordService
             if(strlen($keyword)>=3)
             {
                 $count = substr_count(strip_tags($information['content']),$keyword);
-                if($count>0)
+                if($count >= 1)
                 {
                     $team[$keyword] = ["id"=>$team_id,"count"=>$count] ;
                 }
             }
+            $team = sort_split_array($team,"count",5);
         }
         foreach($playerKeywords as $keyword => $player_id)
         {
             if(strlen($keyword)>=3)
             {
                 $count = substr_count(strip_tags($information['content']), $keyword);
-                if ($count > 0)
+                if ($count >= 1)
                 {
                     $player[$keyword] = ["id" => $player_id, "count" => $count];
                 }
             }
+            $player = sort_split_array($player,"count",5);
         }
         foreach($heroKeywords as $keyword => $hero_id)
         {
             if(strlen($keyword)>=3)
             {
                 $count = substr_count(strip_tags($information['content']), $keyword);
-                if ($count > 0)
+                if ($count >= 1)
                 {
                     $hero[$keyword] = ["id" => $hero_id, "count" => $count];
                 }
             }
+            $hero = sort_split_array($hero,"count",5);
         }
         $result[$information['id']]['another'] = $another;
         $result[$information['id']]['team'] = $team;
         $result[$information['id']]['player'] = $player;
         $result[$information['id']]['hero'] = $hero;
+
         $informationModel->updateInformation($information['id'],['keywords'=>0,'keywords_list'=> $result[$information['id']]]);
         $keywordMapModel->saveMap($information['id'],$information["game"],"information", $result[$information['id']],$information['create_time']);
         $data = $redisService->refreshCache("information",[strval($information['id'])]);
