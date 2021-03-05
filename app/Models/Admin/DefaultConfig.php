@@ -58,7 +58,6 @@ class DefaultConfig extends Model
                 $data[$val['key']] =$val;
             }
         }
-
         return $data;
     }
 

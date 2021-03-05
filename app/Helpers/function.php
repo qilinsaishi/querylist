@@ -409,6 +409,13 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         }
         unset($img/*, $url*/);
         $root =  $save_dir . $new_name;
+        $fileSize = filesize($root);
+        if($fileSize<=100)
+        {
+            echo "get img FileSize error:".$url."\n";
+            echo "process time:".(microtime(true)-$start_time)."\n";
+            return $url;
+        }
         $upload = (new AliyunService())->upload2Oss([$root]);
         //存储到redis,一天内不再重新获取
         if(strlen($upload[0])>10)
@@ -442,6 +449,19 @@ function string_split($str,$split_length=1,$charset="UTF-8")
     if ($split_length < 1) return false;
     $len = mb_strlen($str, $charset);
     return mb_substr($str,0,$split_length,$charset);
+}
+function sort_split_array($array = [],$sort = "count",$count = 5)
+{
+    if(count($array)<=$count)
+    {
+        return $array;
+    }
+    else
+    {
+        array_multisort(array_column($array,$sort),SORT_DESC,$array);
+        $array = array_slice($array,0,$count);
+        return $array;
+    }
 }
 
 
