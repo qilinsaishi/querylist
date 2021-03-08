@@ -94,8 +94,6 @@ class Mission extends Command
                     (new MatchService())->insertMatchData();
                 }
 
-
-
                 (new oMission())->collect($game,"",$mission_type);
                 break;
             case "process":

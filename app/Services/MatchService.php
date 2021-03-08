@@ -37,12 +37,13 @@ class MatchService
             foreach ($cdata as $val){
                 $params1 = [
                     'game' => $game,
-                    'mission_type' => 'schedule',
+                    'mission_type' => 'match',
                     'title' => $val['id'],
                 ];
 
                 $val['game']=$game;
-                $val['source']='pwesports';
+                $val['source']='gamedota2';
+                $val['type']='match';
                 $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                 $result = $result ?? 0;
                 if ($result == 0) {
@@ -51,7 +52,7 @@ class MatchService
                         "mission_type" => 'match',//赛事
                         "mission_status" => 1,
                         "game" => $game,
-                        "source" => 'pwesports',//
+                        "source" => 'gamedota2',//
                         'title' => $val['id'],
                         'source_link' => '',
                         "detail" => json_encode($val),

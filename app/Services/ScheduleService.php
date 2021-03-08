@@ -112,21 +112,22 @@ class ScheduleService
                         $val['link']=$detail_url;
                         $params1 = [
                             'game' => $game,
-                            'mission_type' => 'schedule',
+                            'mission_type' => 'match',
                             'title' => $val['title'],
                         ];
 
                         $val['game']=$game;
-                        $val['source']='pwesports';
+                        $val['source']='gamedota2';
+                        $val['type']='tournament';
                         $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                         $result = $result ?? 0;
                         if ($result == 0) {
                             $data = [
                                 "asign_to" => 1,
-                                "mission_type" => 'schedule',//赛事
+                                "mission_type" => 'match',//赛事
                                 "mission_status" => 1,
                                 "game" => $game,
-                                "source" => 'pwesports',//
+                                "source" => 'gamedota2',//
                                 'title' => $val['title'],
                                 'source_link' => $val['link'],
                                 "detail" => json_encode($val),
@@ -151,21 +152,22 @@ class ScheduleService
             foreach ($cdata as $val){
                 $params1 = [
                     'game' => $game,
-                    'mission_type' => 'schedule',
+                    'mission_type' => 'match',
                     'title' => $val['id'],
                 ];
 
                 $val['game']=$game;
-                $val['source']='pwesports';
+                $val['source']='gamedota2';
+                $val['type']='tournament';
                 $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                 $result = $result ?? 0;
                 if ($result == 0) {
                     $data = [
                         "asign_to" => 1,
-                        "mission_type" => 'schedule',//赛事
+                        "mission_type" => 'match',//赛事
                         "mission_status" => 1,
                         "game" => $game,
-                        "source" => 'pwesports',//
+                        "source" => 'gamedota2',//
                         'title' => $val['id'],
                         'source_link' => '',
                         "detail" => json_encode($val),
