@@ -16,6 +16,26 @@ class gamedota2
                 'pic'=>['path'=>"logo",'default'=>''],//关联图片
                 'game_logo'=>['path'=>"",'default'=>''],//关联游戏图片
             ],
+            'team'=>[
+                'game'=>['path'=>"",'default'=>"dota2"],//游戏
+                'site_id'=>['path'=>"id",'default'=>0],//队伍ID
+                'team_name'=>['path'=>"name",'default'=>0],//队伍名称
+                'logo'=>['path'=>"logo",'default'=>''],//logo
+                'original_source'=>['path'=>"",'default'=>'gamedota2'],//初始来源
+                'aka'=>['path'=>"",'default'=>''],//别名
+            ],
+            'list'=>[
+                'match_id'=>['path'=>"id",'default'=>0],//比赛唯一ID
+                'game'=>['path'=>"",'default'=>"dota2"],//游戏
+                'home_score'=>['path'=>"team1.score",'default'=>0],//主队得分
+                'away_score'=>['path'=>"team2.score",'default'=>0],//客队得分
+                'home_id'=>['path'=>"team1.id",'default'=>0],//主队id
+                'away_id'=>['path'=>"team2.id",'default'=>0],//客队id
+                'logo'=>['path'=>"game_icon",'default'=>""],//logo
+                "tournament_id"=>['path'=>"tournament_id",'default'=>""],//赛事唯一ID
+                "extra"=>['path'=>"extra",'default'=>[]],//额外信息
+                "start_time"=>['path'=>"timestamp",'default'=>[]],//开始时间
+            ],
         ];
 
     public function collect($arr)
@@ -42,16 +62,26 @@ class gamedota2
     }
     public function process($arr)
     {
-        $data = ['match_list'=>[],'tournament'=>[]];
+        $data = ['match_list'=>[],'team'=>[],'tournament'=>[]];
         if($arr['content']['type']=="tournament")
         {
             $arr['content']['tournament_id'] = md5($arr['content']['link']);
             $arr['content']['logo'] = getImage($arr['content']['logo']);
             $data['tournament'][] = getDataFromMapping($this->data_map['tournament'],$arr['content']);
         }
-        else
+        elseif($arr['content']['type']=="match")
         {
-            return [];
+            $arr['content']['team1']['logo'] = getImage($arr['content']['team1']['logo']);
+            $arr['content']['team2']['logo'] = getImage($arr['content']['team2']['logo']);
+            $data['team'][] = getDataFromMapping($this->data_map['team'],$arr['content']['team1']);
+            $data['team'][] = getDataFromMapping($this->data_map['team'],$arr['content']['team2']);
+            $arr['content']['tournament_id'] = md5($arr['content']['link']);
+            $arr['content']['extra'] = [
+                "home"=> ['prize'=>$arr['content']['team1']['win_prize_num']??0,'title'=>$arr['content']['team1']['match_phase_title']??""],
+                "away"=> ['prize'=>$arr['content']['team2']['win_prize_num']??0,'title'=>$arr['content']['team2']['match_phase_title']??""],
+            ];
+            $arr['content']['timestamp'] = $arr['content']['date']." ".$arr['content']['time'];
+            $data['match_list'][] = getDataFromMapping($this->data_map['list'],$arr['content']);
         }
         return $data;
     }

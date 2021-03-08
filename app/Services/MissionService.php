@@ -186,7 +186,6 @@ class MissionService
                             foreach($skinList as $skinInfo)
                             {
                                 $saveSkin = $skinModelClass->saveSkin($skinInfo);
-
                             }
                         }
                         if (method_exists($class, "processSpells"))
@@ -269,15 +268,29 @@ class MissionService
                             {
                                 $save = true;
                             }
-                            if (isset($processResult['team'])) {
-                                $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\teamModel';
-                                $classList = $this->getClass($classList, $ModelClassName);
-                                $ModelClass = $classList[$ModelClassName];
-                                foreach($processResult['team'] as $key => $value)
+                            if (isset($processResult['team']) && count($processResult['team'])>0)
+                            {
+                                if($result['source'] == "gamedota2")
                                 {
-                                    $saveTeam = $ModelClass->saveTeam($value);
-                                    echo "saveTeam:".$saveTeam."\n";
+                                    $ModelClass = $teamModel;
+                                    foreach($processResult['team'] as $key => $value)
+                                    {
+                                        $saveTeam = $ModelClass->saveTeam($value['game'],$value);
+                                        echo "saveTeam:".$saveTeam['result']."\n";
+                                    }
                                 }
+                                else
+                                {
+                                    $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\teamModel';
+                                    $classList = $this->getClass($classList, $ModelClassName);
+                                    $ModelClass = $classList[$ModelClassName];
+                                    foreach($processResult['team'] as $key => $value)
+                                    {
+                                        $saveTeam = $ModelClass->saveTeam($value);
+                                        echo "saveTeam:".$saveTeam."\n";
+                                    }
+                                }
+
                             }
                             if (isset($processResult['tournament']) && count($processResult['tournament'])>0) {
                                 $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
