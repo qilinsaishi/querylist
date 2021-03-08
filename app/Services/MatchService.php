@@ -76,9 +76,8 @@ class MatchService
             $data=$return['data'] ?? [];
             if(count($data) > 0){
                 foreach ($data as $k=>&$v){
-                    $v['type']=$type;
+                    $v['link']='https://esports.wanmei.com/'.$type.'-match/latest';
                     $v['season']=$current_season;
-
                 }
             }
 
