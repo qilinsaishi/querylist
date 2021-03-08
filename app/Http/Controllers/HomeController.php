@@ -93,9 +93,79 @@ class HomeController extends Controller
         }
         return $levelData;
     }
+    //dota2官网赛事
+    public function getGmaeDotaMatch($url,$type){
+        $data=[];
+        $dpcList=curl_get($url);
+        if($dpcList['status']=='success'){
+            $return=$dpcList['result'] ?? [];
+            $current_season=$return['current_season'] ?? 0;//当前赛季
+            $selected_phase=$return['selected_phase'] ?? '';//所有阶段
+            $data=$return['data'] ?? [];
+            if(count($data) > 0){
+                foreach ($data as $k=>&$v){
+                    $v['type']=$type;
+                    $v['season']=$current_season;
+
+                }
+            }
+
+        }
+        return $data;
+    }
 
     public function index()
     {
+        $data1=$this->getGmaeDotaMatch('https://esports.wanmei.com/dpc-match/latest','dpc');
+        $data2=$this->getGmaeDotaMatch('https://esports.wanmei.com/pwl-match/latest','pwl');
+        $data=array_merge($data1,$data2);
+
+        print_r($data);exit;
+
+
+$data1=[];
+        $pwlList=curl_get('https://esports.wanmei.com/pwl-match/latest');
+      /*  if($dpcList['status']=='success'){
+            $return=$dpcList['result'] ?? [];
+            $current_season=$return['current_season'] ?? 0;//当前赛季
+            $selected_phase=$return['selected_phase'] ?? '';//所有阶段
+            $data=$return['data'] ?? [];
+            $type='dpc';
+            if(count($data) > 0){
+                foreach ($data as $k=>&$v){
+
+                    $v['type']=$type;
+                    $v['season']=$current_season;
+
+                }
+            }
+
+        }*/
+
+
+        $qt=QueryList::get($url);
+        $link=$qt->find('.content .activity a')->attrs('href')->all();
+
+
+        if(count($link) >0){
+            foreach ($link as $val){
+                if(strpos($val,'pwesports.cn')!==false) {
+                    if($val=='https://dpc.pwesports.cn/'){
+
+
+
+                    }elseif($val=='https://pwl.pwesports.cn/'){
+                        $type='pwl';
+
+                    }
+
+                    echo $val."\n";
+                }
+            }
+        }
+print_r($arr);exit;
+exit;
+
        // $qt=QueryList::get('https://www.dota2.com.cn/items/index.htm');
         $item=QueryList::get('https://www.dota2.com.cn/items/index.htm')->rules(array(
             'typename' => array('h4','text'),//类型名称
