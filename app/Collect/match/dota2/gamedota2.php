@@ -6,7 +6,18 @@ class gamedota2
 {
     protected $data_map =
         [
+            'tournament'=>[
+                'game'=>['path'=>"",'default'=>"dota2"],//游戏
+                'tournament_id'=>['path'=>"tournament_id",'default'=>''],//赛事ID
+                'tournament_name'=>['path'=>"title",'default'=>''],//赛事名称
+                'start_time'=>['path'=>"",'default'=>0],//开始时间
+                'end_time'=>['path'=>"",'default'=>0],//开始时间
+                'logo'=>['path'=>"logo",'default'=>''],//logo
+                'pic'=>['path'=>"logo",'default'=>''],//关联图片
+                'game_logo'=>['path'=>"",'default'=>''],//关联游戏图片
+            ],
         ];
+
     public function collect($arr)
     {
         $cdata = [];
@@ -31,6 +42,17 @@ class gamedota2
     }
     public function process($arr)
     {
-        var_dump($arr);
+        $data = ['match_list'=>[],'tournament'=>[]];
+        if($arr['content']['type']=="tournament")
+        {
+            $arr['content']['tournament_id'] = md5($arr['content']['link']);
+            $arr['content']['logo'] = getImage($arr['content']['logo']);
+            $data['tournament'][] = getDataFromMapping($this->data_map['tournament'],$arr['content']);
+        }
+        else
+        {
+            return [];
+        }
+        return $data;
     }
 }

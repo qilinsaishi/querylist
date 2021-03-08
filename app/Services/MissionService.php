@@ -255,7 +255,7 @@ class MissionService
                         }
                     }
                     elseif ($result['mission_type'] == "match") {
-                        if (isset($processResult['match_list'])) {
+                        if (isset($processResult['match_list']) && count($processResult['match_list'])>0) {
                                 $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\matchListModel';
                                 $classList = $this->getClass($classList, $ModelClassName);
                                 $ModelClass = $classList[$ModelClassName];
@@ -279,7 +279,7 @@ class MissionService
                                     echo "saveTeam:".$saveTeam."\n";
                                 }
                             }
-                            if (isset($processResult['tournament'])) {
+                            if (isset($processResult['tournament']) && count($processResult['tournament'])>0) {
                                 $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
                                 $classList = $this->getClass($classList, $ModelClassName);
                                 $ModelClass = $classList[$ModelClassName];
