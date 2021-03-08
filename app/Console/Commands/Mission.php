@@ -10,6 +10,7 @@ use App\Services\HeroService;
 use App\Services\InformationService;
 use App\Services\KeywordService as oKeyword;
 use App\Services\InscriptionService;
+use App\Services\MatchService;
 use App\Services\RunesService;
 use App\Services\ScheduleService;
 use App\Services\SummonerService;
@@ -87,6 +88,10 @@ class Mission extends Command
                 //采集赛事入库
                 if($mission_type=='schedule'){
                     (new ScheduleService())->insertScheduleData();
+                }
+                //采集赛事详情入库
+                if($mission_type=='match'){
+                    (new MatchService())->insertMatchData();
                 }
 
 

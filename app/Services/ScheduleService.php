@@ -21,7 +21,7 @@ class ScheduleService
         foreach ($gameItem as $val) {
             $this->insertWanplusSchedule($val);
             if($val=='dota2'){
-                $this->pwesports($val);
+                $this->tournament($val);
             }
         }
         return 'finish';
@@ -90,6 +90,56 @@ class ScheduleService
             }
         }
         return true;
+    }
+
+    public function tournament($game){
+        $data=[];
+        $missionModel = new MissionModel();
+        $count=5;
+        for($i=1;$i<=$count;$i++){
+            $url='https://www.dota2.com.cn/Activity/gamematch/index'.$i.'.htm';
+            $item=QueryList::get($url)->rules(array(
+                'title' => array('.brief h3','text'),//标题
+                'desc' => array('.brief p','text'),//描述
+                'logo' => array('img','src'),//图片
+                'link' => array('a ','href')//链接
+            ))->range('.content .activities  .activity')->queryData();
+            if(count($item) >0){
+                foreach ($item as $key=>$val){
+                    if(strpos($val['link'],'pwesports.cn')!==false) {
+                        $type=str_replace(array('https://','.pwesports.cn/'),'',$val['link']);
+                        $detail_url='https://esports.wanmei.com/'.$type.'-match/latest';
+                        $val['link']=$detail_url;
+                        $params1 = [
+                            'game' => $game,
+                            'mission_type' => 'schedule',
+                            'title' => $val['title'],
+                        ];
+
+                        $val['game']=$game;
+                        $val['source']='pwesports';
+                        $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                        $result = $result ?? 0;
+                        if ($result == 0) {
+                            $data = [
+                                "asign_to" => 1,
+                                "mission_type" => 'schedule',//赛事
+                                "mission_status" => 1,
+                                "game" => $game,
+                                "source" => 'pwesports',//
+                                'title' => $val['title'],
+                                'source_link' => $val['link'],
+                                "detail" => json_encode($val),
+                            ];
+                            $insert = (new oMission())->insertMission($data);
+                        }
+
+                    }
+                }
+            }
+
+        }
+
     }
 
     public function pwesports($game){

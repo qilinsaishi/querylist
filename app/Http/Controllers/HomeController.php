@@ -116,55 +116,35 @@ class HomeController extends Controller
 
     public function index()
     {
-        $data1=$this->getGmaeDotaMatch('https://esports.wanmei.com/dpc-match/latest','dpc');
-        $data2=$this->getGmaeDotaMatch('https://esports.wanmei.com/pwl-match/latest','pwl');
-        $data=array_merge($data1,$data2);
-
-        print_r($data);exit;
-
-
-$data1=[];
-        $pwlList=curl_get('https://esports.wanmei.com/pwl-match/latest');
-      /*  if($dpcList['status']=='success'){
-            $return=$dpcList['result'] ?? [];
-            $current_season=$return['current_season'] ?? 0;//当前赛季
-            $selected_phase=$return['selected_phase'] ?? '';//所有阶段
-            $data=$return['data'] ?? [];
-            $type='dpc';
-            if(count($data) > 0){
-                foreach ($data as $k=>&$v){
-
-                    $v['type']=$type;
-                    $v['season']=$current_season;
-
-                }
-            }
-
-        }*/
-
-
-        $qt=QueryList::get($url);
-        $link=$qt->find('.content .activity a')->attrs('href')->all();
-
-
-        if(count($link) >0){
-            foreach ($link as $val){
-                if(strpos($val,'pwesports.cn')!==false) {
-                    if($val=='https://dpc.pwesports.cn/'){
-
-
-
-                    }elseif($val=='https://pwl.pwesports.cn/'){
-                        $type='pwl';
-
+        $data=[];
+        $count=5;
+        for($i=1;$i<=$count;$i++){
+            $url='https://www.dota2.com.cn/Activity/gamematch/index'.$i.'.htm';
+            $item=QueryList::get($url)->rules(array(
+                'title' => array('.brief h3','text'),//标题
+                'desc' => array('.brief p','text'),//描述
+                'logo' => array('img','src'),//图片
+                'link' => array('a ','href')//链接
+            ))->range('.content .activities  .activity')->queryData();
+            if(count($item) >0){
+                foreach ($item as $key=>$val){
+                    if(strpos($val['link'],'pwesports.cn')!==false) {
+                        $type=str_replace(array('https://','.pwesports.cn/'),'',$val['link']);
+                        $detail_url='https://esports.wanmei.com/'.$type.'-match/latest';
+                        $val['detail_url']=$detail_url;print_r($val);
+                        $data[$key]=$val;
+                        echo $type."\n";
                     }
-
-                    echo $val."\n";
                 }
             }
+
         }
-print_r($arr);exit;
-exit;
+
+
+
+        exit;
+
+
 
        // $qt=QueryList::get('https://www.dota2.com.cn/items/index.htm');
         $item=QueryList::get('https://www.dota2.com.cn/items/index.htm')->rules(array(
