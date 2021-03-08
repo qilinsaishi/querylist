@@ -110,7 +110,14 @@ class gamedota2
         $arr['content']['type'] = $this->type[$arr['content']['type']];
         if(substr($arr['content']['logo'],0,1)=='/')
         {
-            $arr['content']['logo'] = 'https://www.dota2.com.cn/'.$arr['content']['logo'];
+            if(substr($arr['content']['logo'],0,5)=='//www')
+            {
+                $arr['content']['logo'] = substr($arr['content']['logo'],2,strlen($arr['content']['logo'])-2);
+            }
+            else
+            {
+                $arr['content']['logo'] = 'https://www.dota2.com.cn/'.$arr['content']['logo'];
+            }
         }
         $arr['content']['logo'] = getImage($arr['content']['logo']);
         $imgpreg = '/\<img.*?src\=\"([\w:\/\.]+)\"/';
@@ -121,6 +128,7 @@ class gamedota2
             {
                 if(substr($img,0,1)=='/')
                 {
+                   // die($img);//&& substr(substr($img,0,19)=='///www.dota2.com.cn')
                     $img2 = 'https://www.dota2.com.cn'.$img;
                 }
                 else

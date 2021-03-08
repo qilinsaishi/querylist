@@ -47,7 +47,7 @@ class InformationModel extends Model
         $fields = $params['fields']??"id,title,author,author_id,logo,create_time,status";
         $information_list =$this->select(explode(",",$fields))->where("status",1);
         //最后更新时间
-        if(isset($params['recent']))
+        if(isset($params['recent']) && $params['recent']>0)
         {
             $time = date("Y-m-d H:i:s",time()-8*3600-$params['recent']);
             $information_list = $information_list->where("update_time", '>=',$time);

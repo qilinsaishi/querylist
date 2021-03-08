@@ -98,7 +98,7 @@ class DataService
             while($count>0)
             {
                 $menu_detail['page'] = $page;
-                $menu_detail['recent'] = $data['recent']??3600;
+                $menu_detail['recent'] = $data['recent']??0;
                 $dataList = $this->getData([$type=>$menu_detail]);
                 $count = count($dataList[$type]['data']);
                 if($count>0)

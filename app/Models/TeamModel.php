@@ -65,6 +65,11 @@ class TeamModel extends Model
         {
             $team_list = $team_list->where("game",$params['game']);
         }
+        //不所属战队
+        if(isset($params['except_team']) && $params['except_team']>0)
+        {
+            $team_list = $team_list->where("team_id","!=",$params['except_team']);
+        }
         //战队名称
         if(isset($params['team_name']) && strlen($params['team_name'])>=3)
         {
@@ -296,6 +301,11 @@ class TeamModel extends Model
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
             $team_count = $team_count->where("game",$params['game']);
+        }
+        //不所属战队
+        if(isset($params['except_team']) && $params['except_team']>0)
+        {
+            $team_count = $team_count->where("team_id","!=",$params['except_team']);
         }
         //战队名称
         if(isset($params['team_name']) && strlen($params['team_name'])>=3)
