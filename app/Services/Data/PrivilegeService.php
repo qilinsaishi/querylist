@@ -2,6 +2,8 @@
 
 namespace App\Services\Data;
 
+use App\Collect\hero\dota2\gamedota2;
+
 class PrivilegeService
 {
     public $team_id_map = ['gamedota2'=>'site_id'];
@@ -377,6 +379,7 @@ class PrivilegeService
                 'withSource' => 0,
                 'function' => "getHeroById",
                 'functionSingle' => "getHeroById",
+                'functionProcess'=>"processDota2Hero",
             ],
         ];
         return $privilegeList;
@@ -835,8 +838,6 @@ class PrivilegeService
                 }
 
             }
-
-
         }
         //英雄-关联装备
         if(isset($data['equipment_tips'])){
@@ -891,7 +892,23 @@ class PrivilegeService
         }
         $kpl_hero_type=$this->kpl_hero_type;
         $data['type_name']=$kpl_hero_type[$data['type']] ?? '';
-
+        return $data;
+    }
+    public function processDota2Hero($data, $functionList)
+    {
+        $className = 'App\Collect\\hero\\dota2\\gamedota2';
+        $collectModel = new $className;
+        $hero_type = $collectModel->hero_type;
+        $attack_type = $collectModel->attack_type;
+        $role_type = $collectModel->role_type;
+        $data['roles'] = json_decode($data['roles'],true);
+        foreach($data["roles"] as $key => $role)
+        {
+            $data["roles"][$key] = $role_type[$role];
+        }
+        $data['hero_type'] = $hero_type[$data['hero_type']];
+        $data['attack_type'] = $attack_type[$data['attack_type']];
+        $data['roles'] = json_encode($data['roles']);
         return $data;
     }
     public function processTeam($data, $functionList)
