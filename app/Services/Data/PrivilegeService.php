@@ -4,6 +4,7 @@ namespace App\Services\Data;
 
 class PrivilegeService
 {
+    public $team_id_map = ['gamedota2'=>'site_id'];
     public $kpl_hero_type = [
         1=>'战士',
         2=>'法师',
@@ -22,6 +23,7 @@ class PrivilegeService
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'cpseo'],
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'chaofan'],
+                    ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'gamedota2'],
                 ],
                 'withSource' => 1,
                 'function' => "getMatchList",//获取数据方法
@@ -32,6 +34,7 @@ class PrivilegeService
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "gamedota2"],
                 ],
                 'withSource' => 1,
                 'function' => "getTournamentList",
@@ -367,14 +370,13 @@ class PrivilegeService
                 'functionCount' => "getHeroCount",
                 'functionSingle' => "getHeroById",
             ],
-            "kplHero" => [//dota2英雄详情
+            "dota2Hero" => [//dota2英雄详情
                 'list' => [
                     ['model' => 'App\Models\Hero\dota2Model', 'source' => ''],
                 ],
                 'withSource' => 0,
                 'function' => "getHeroById",
                 'functionSingle' => "getHeroById",
-                'functionProcess' => "processDota2Hero",
             ],
         ];
         return $privilegeList;
@@ -390,6 +392,15 @@ class PrivilegeService
             $dataType = $params['dataType']??$name;
             //echo "try to find type:".$dataType."\n";
             //echo "currentSource:".$currentSource."\n";
+            $sourceFound = 0;
+            if(isset($priviliegeList[$dataType]["withSource"]) && $priviliegeList[$dataType]["withSource"]==1 && isset($params['source']))
+            {
+                $availableSource = array_column($priviliegeList[$dataType]['list'],"source");
+                if(in_array($params['source'],$availableSource))
+                {
+                    $sourceFound = 1;
+                }
+            }
             //默认没找到
             $found = 0;
             //数据类型出现在优先级列表
@@ -405,6 +416,10 @@ class PrivilegeService
                         $modelName = str_replace("#source#", $detail['source'], $modelName);
                         //初始化
                         $classList = $this->getClass($classList, $modelName);
+                        if($sourceFound == 1 && ($params['source'] != $detail['source']))
+                        {
+                            continue;
+                        }
                         //如果之前没初始化过
                         if (!isset($functionList[$dataType])) {
                             //如果类库初始化成功
@@ -412,6 +427,7 @@ class PrivilegeService
                                 //检查基础function方法存在
                                 if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
                                     //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";
+
                                     $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
                                     if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
                                         $functionList[$dataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
@@ -441,7 +457,7 @@ class PrivilegeService
                             } else {
                                 //echo "class:".$modelName.",not found\n";
                             }
-                            $functionList[$dataType]['source'] = $currentSource;//$priviliegeList[$dataType]['source'];
+                            $functionList[$dataType]['source'] = $sourceFound==1?$params['source']:$currentSource;//$priviliegeList[$dataType]['source'];
                         }
                     }
                 } //已经初始化数据来源 且 当前数据类型需要包含数据来源
@@ -456,6 +472,10 @@ class PrivilegeService
                         $modelName = str_replace("#source#", $currentSource, $modelName);
                         //初始化
                         $classList = $this->getClass($classList, $modelName);
+                        if($sourceFound == 1 && ($params['source'] != $detail['source']))
+                        {
+                            continue;
+                        }
                         //检查方法存在
                         if (method_exists($classList[$modelName] ?? [], $priviliegeList[$dataType]['function'])) {
                             $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
@@ -490,6 +510,10 @@ class PrivilegeService
                             $modelName = $detail['model'];
                             $modelName = str_replace("#source#", $detail['source'], $modelName);
                             $classList = $this->getClass($classList, $modelName);
+                            if($sourceFound == 1 && ($params['source'] != $detail['source']))
+                            {
+                                continue;
+                            }
                             if (!isset($functionList[$dataType])) {
                                 if (isset($classList[$modelName])) {
                                     if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
@@ -535,6 +559,10 @@ class PrivilegeService
                         $modelName = $detail['model'];
                         //$currentSource = $currentSource == "" ? $detail['source'] : $currentSource;
                         $classList = $this->getClass($classList, $modelName);
+                        if($sourceFound == 1 && ($params['source'] != $detail['source']))
+                        {
+                            continue;
+                        }
                         if (!isset($functionList[$dataType])) {
                             if (isset($classList[$modelName])) {
                                 if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
@@ -576,7 +604,7 @@ class PrivilegeService
             if ($found == 0) {
                 //echo "dataType:".$dataType.",function not found\n";
             }
-        }//print_r($functionList);exit;
+        }
         return $functionList;
     }
 
