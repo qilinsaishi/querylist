@@ -45,14 +45,16 @@ class RedisService
                 'prefix' => "totalTeamList",
                 'expire' => 60,
             ],
-            "totalTeamList" => [//赛事总表
+
+            "tournamentList" => [//赛事总表
                 'prefix' => "tournamentList",
                 'expire' => 3600,
             ],
-            "totalTeamList" => [//赛事
+            "tournament" => [//赛事
                 'prefix' => "tournament",
                 'expire' => 3600,
             ],
+
         ];
         return $cacheConfig;
     }

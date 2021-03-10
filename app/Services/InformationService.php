@@ -14,29 +14,28 @@ class InformationService
 {
     public function insertData()
     {
-        $gameItem = [
-            'dota2', 'lol', 'kpl',  'csgo'
-        ];
+        $gameItem = ['lol','dota2','kpl','csgo'];
 
         foreach ($gameItem as $val) {
-            $this->insertWanplusVideo($val);
             switch ($val) {
                 case "lol":
-
+                    $this->insertWanplusVideo($val);
                     $this->insertLolInformation();
                     break;
                 case "kpl":
+                    $this->insertWanplusVideo($val);
                     $this->insertKplInformation();
                     break;
                 case "dota2":
                     $typeList = ['news', 'gamenews', 'competition', 'news_update'];
                     $raidersList = ['raiders', 'newer', 'step', 'skill'];
-                    foreach ($typeList as $val) {
-                        $this->insertDota2Information($val);
+                    foreach ($typeList as $v1) {
+                        $this->insertDota2Information($v1);
                     }
-                    foreach ($raidersList as $val) {
-                        $this->insertDota2Raiders($val);
+                    foreach ($raidersList as $v2) {
+                        $this->insertDota2Raiders($v2);
                     }
+                    $this->insertWanplusVideo($val);
 
                     break;
                 case "csgo":
@@ -341,11 +340,16 @@ class InformationService
             $cdata=$cdata['list'] ?? [];
             if(count($cdata) > 0){
                 foreach ($cdata as $val){
+                    if($game=='kpl'){
+                        $video_url='https://www.wanplus.com/kog/video/'.$val['id'];
+                    }else{
+                        $video_url='https://www.wanplus.com/'.$game.'/video/'.$val['id'];
+                    }
                     $detail=[
-                        'url'=>'https://www.wanplus.com/dota2/video/'.$val['id'],
+                        'url'=>$video_url,
                         'title'=>$val['title'],
                         'author'=>$val['anchor'],
-                        'create_time'=>$val['released'],
+                        'create_time'=>date("Y-m-d H:i:s",$val['created']),
                         'duration'=>$val['duration'],//时长
                         'logo'=>$val['img'],
                         'remark'=>$val['title'],
@@ -382,7 +386,6 @@ class InformationService
             }
 
         }
-
         return true;
     }
 
