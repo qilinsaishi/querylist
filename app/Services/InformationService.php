@@ -340,8 +340,13 @@ class InformationService
             $cdata=$cdata['list'] ?? [];
             if(count($cdata) > 0){
                 foreach ($cdata as $val){
+                    if($game=='kpl'){
+                        $video_url='https://www.wanplus.com/kog/video/'.$val['id'];
+                    }else{
+                        $video_url='https://www.wanplus.com/'.$game.'/video/'.$val['id'];
+                    }
                     $detail=[
-                        'url'=>'https://www.wanplus.com/dota2/video/'.$val['id'],
+                        'url'=>$video_url,
                         'title'=>$val['title'],
                         'author'=>$val['anchor'],
                         'create_time'=>date("Y-m-d H:i:s",$val['created']),
