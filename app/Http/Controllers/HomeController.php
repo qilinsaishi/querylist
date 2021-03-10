@@ -115,22 +115,24 @@ class HomeController extends Controller
     }
 
     public function index()
-    {   $url='https://www.wanplus.com/dota2/video/298391';
+    {   /*$url='https://www.wanplus.com/lol/video/1563559';
         //$url='https://www.wanplus.com/dota2/video/260935';
         $qt=QueryList::get($url);
         $content=$qt->find('.content .ov #video-video')->html();
-        print_r($content);exit;
+        print_r($content);exit;*/
         $AjaxModel = new AjaxRequest();
         $totalpages=62;
-        $gametype=1;
-        $game='dota2';
+        $gametype=2;
+        $game='lol';
         $clist=[];
         for($i=1;$i<=$totalpages;$i++){
+
             $url='https://www.wanplus.com/ajax/video/getlist?gametype='.$gametype.'&page='.$i.'&totalpages=62&type=video&subject=&subSubject=&sort=new';
             $cdata=$AjaxModel->ajaxGetData($url);
             $cdata=$cdata['list'] ?? [];
             if(count($cdata) > 0){
-                foreach ($cdata as $k=>$val){echo $k."\n";
+                foreach ($cdata as $k=>$val){//echo date("Y-m-d H:i:s",$val['created'])."\n";
+
                     $detail=[
                         'url'=>'https://www.wanplus.com/dota2/video/'.$val['id'],
                         'title'=>$val['title'],
