@@ -30,7 +30,7 @@ class PrivilegeService
                 'functionCount' => "getMatchCount",//获取列表方法
                 'functionProcess' => "processMatchList",//格式化的处理方法
             ],
-            "tournament" => [
+            "tournamentList" => [
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
@@ -40,7 +40,15 @@ class PrivilegeService
                 'function' => "getTournamentList",
                 'functionCount' => "getTournamentCount",
                 'functionSingle' => "getTournamentById",
-
+            ],
+            "tournament" => [
+                'list' => [
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "gamedota2"],
+                ],
+                'withSource' => 1,
+                'function' => "getTournamentById",
             ],
             "teamList" => [//团队列表
                 'list' => [
