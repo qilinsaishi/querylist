@@ -45,6 +45,7 @@ class MatchService
                 $val['game']=$game;
                 $val['source']='gamedota2';
                 $val['type']='match';
+                $val['subtype']='gamedota2';
                 $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                 $result = $result ?? 0;
                 if ($result == 0) {

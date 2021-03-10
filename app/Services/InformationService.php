@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\InformationModel;
@@ -14,10 +15,11 @@ class InformationService
     public function insertData()
     {
         $gameItem = [
-            'lol', 'kpl', 'dota2', 'csgo'
+            'dota2', 'lol', 'kpl',  'csgo'
         ];
 
         foreach ($gameItem as $val) {
+            $this->insertWanplusVideo($val);
             switch ($val) {
                 case "lol":
 
@@ -264,7 +266,6 @@ class InformationService
             }
 
             $urlall = QueryList::get($url)->find(".content .hd_li .img_left a")->attrs('href')->all();
-            // print_r($urlall);exit;
 
             if ($urlall) {
                 foreach ($urlall as $key => $val) {
@@ -315,6 +316,74 @@ class InformationService
         }
         return true;
 
+    }
+
+    //视频采集
+    public function insertWanplusVideo($game)
+    {
+        $totalpages=62;
+        if ($game == 'dota2') {
+            $gametype = 1;
+
+        } elseif ($game == 'lol') {
+            $gametype = 2;
+        } elseif ($game == 'kpl') {
+            $gametype = 6;
+        } elseif ($game == 'csgo') {
+            $gametype = 4;
+
+        }
+        $AjaxModel = new AjaxRequest();
+        $missionModel = new MissionModel();
+        for($i=1;$i<=$totalpages;$i++){
+            $url='https://www.wanplus.com/ajax/video/getlist?gametype='.$gametype.'&page='.$i.'&totalpages=62&type=video&subject=&subSubject=&sort=new';
+            $cdata=$AjaxModel->ajaxGetData($url);
+            $cdata=$cdata['list'] ?? [];
+            if(count($cdata) > 0){
+                foreach ($cdata as $val){
+                    $detail=[
+                        'url'=>'https://www.wanplus.com/dota2/video/'.$val['id'],
+                        'title'=>$val['title'],
+                        'author'=>$val['anchor'],
+                        'create_time'=>$val['released'],
+                        'duration'=>$val['duration'],//时长
+                        'logo'=>$val['img'],
+                        'remark'=>$val['title'],
+                        'game'=>$game,
+                        'site_id'=>$val['id'],
+                        'source'=>'wanplus',
+                        'gametype'=>$gametype,
+                        'type'=>'video'
+                    ];
+                    $params1 = [
+                        'game' => $game,
+                        'mission_type' => 'information',
+                        'source_link' => $detail['url'],
+                    ];
+                    $detail['url'] = $detail['url'];
+                    $detail['game'] = $game;
+                    $detail['source'] = 'wanplus';
+                    $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                    $result = $result ?? 0;
+                    if ($result <= 0) {
+                        $data = [
+                            "asign_to" => 1,
+                            "mission_type" => 'information',//赛事
+                            "mission_status" => 1,
+                            "game" => $game,
+                            "source" => 'wanplus',//
+                            'title' => $val['title'] ?? '',
+                            'source_link' => $detail['url'],
+                            "detail" => json_encode($detail),
+                        ];
+                        $insert = (new oMission())->insertMission($data);}
+
+                }
+            }
+
+        }
+
+        return true;
     }
 
 }
