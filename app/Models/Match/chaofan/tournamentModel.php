@@ -182,6 +182,11 @@ class tournamentModel extends Model
             }
         }
     }
+    public function getTournamentCount($params)
+    {
+        $tournament_count =$this->count();
+        return $tournament_count;
+    }
 
 
 }

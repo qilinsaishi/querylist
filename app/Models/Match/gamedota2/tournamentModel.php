@@ -48,9 +48,14 @@ class tournamentModel extends Model
         $tournament_list = $tournament_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("tournament_id")
+            ->orderBy("create_time","desc")
             ->get()->toArray();
         return $tournament_list;
+    }
+    public function getTournamentCount($params)
+    {
+        $tournament_count =$this->count();
+        return $tournament_count;
     }
     public function getTournamentByName($tournament_name,$game)
     {
