@@ -115,7 +115,44 @@ class HomeController extends Controller
     }
 
     public function index()
-    {
+    {   $url='https://www.wanplus.com/dota2/video/298391';
+        //$url='https://www.wanplus.com/dota2/video/260935';
+        $qt=QueryList::get($url);
+        $content=$qt->find('.content .ov #video-video')->html();
+        print_r($content);exit;
+        $AjaxModel = new AjaxRequest();
+        $totalpages=62;
+        $gametype=1;
+        $game='dota2';
+        $clist=[];
+        for($i=1;$i<=$totalpages;$i++){
+            $url='https://www.wanplus.com/ajax/video/getlist?gametype='.$gametype.'&page='.$i.'&totalpages=62&type=video&subject=&subSubject=&sort=new';
+            $cdata=$AjaxModel->ajaxGetData($url);
+            $cdata=$cdata['list'] ?? [];
+            if(count($cdata) > 0){
+                foreach ($cdata as $k=>$val){echo $k."\n";
+                    $detail=[
+                        'url'=>'https://www.wanplus.com/dota2/video/'.$val['id'],
+                        'title'=>$val['title'],
+                        'author'=>$val['anchor'],
+                        'create_time'=>$val['released'],
+                        'duration'=>$val['duration'],//时长
+                        'logo'=>$val['img'],
+                        'remark'=>$val['title'],
+                        'game'=>$game,
+                        'site_id'=>$val['id'],
+                        'source'=>'wanplus',
+                        'gametype'=>$gametype,
+                        'type'=>'video'
+                    ];
+
+                }
+            }
+
+        }exit;exit;
+        //$AjaxModel->ajaxGetData($url, $param = [])
+
+
         $data=[];
         $count=5;
         for($i=1;$i<=$count;$i++){
@@ -403,7 +440,7 @@ class HomeController extends Controller
 
 
 
-        $AjaxModel = new AjaxRequest();
+
         //比赛列表
         //获取每周的周一时间;
         /*$AjaxModel = new AjaxRequest();

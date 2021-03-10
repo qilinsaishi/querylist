@@ -107,7 +107,7 @@ class Information extends Command
             }
 
         }else{
-            (new oMission())->collect('kpl','pvp_qq','information');
+            (new oMission())->collect('dota2','wanplus','information');
         }
     }
 }

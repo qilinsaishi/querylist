@@ -19,8 +19,9 @@ class MatchService
         ];
 
         foreach ($gameItem as $val) {
-            //$this->insertWanplusSchedule($val);
             if($val=='dota2'){
+                $this->getDota2International($val);
+                $this->getBilibiliDota2($val);
                 $this->pwesports($val);
             }
         }
@@ -44,6 +45,7 @@ class MatchService
                 $val['game']=$game;
                 $val['source']='gamedota2';
                 $val['type']='match';
+                $val['subtype']='gamedota2';
                 $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                 $result = $result ?? 0;
                 if ($result == 0) {
@@ -83,6 +85,91 @@ class MatchService
 
         }
         return $data;
+    }
+    //沙星杯
+    public function getBilibiliDota2($game){
+        $data=[];
+        $bilibiList=curl_get('https://api.bilibili.com/x/esports/matchs/top?aid=51&pn=1&ps=44&sort=1&etime=2021-03-08&tp=0');
+        $cdata=$bilibiList['data']['list'] ?? [];
+        $missionModel = new MissionModel();
+        if(count($cdata) >0) {
+            foreach ($cdata as $val){
+                $params1 = [
+                    'game' => $game,
+                    'mission_type' => 'match',
+                    'title' => 'bilibili'.$val['id'],
+                ];
+                $val['season']['logo']='https://i0.hdslb.com/'.$val['season']['logo'];
+                $val['home_team']['logo']='https://i0.hdslb.com/'.$val['home_team']['logo'];
+                $val['away_team']['logo']='https://i0.hdslb.com/'.$val['away_team']['logo'];
+                $val['stime']=date("Y-m-d H:i:s",$val['stime']);
+                $val['etime']=date("Y-m-d H:i:s",$val['etime']);
+                $val['game']=$game;
+                $val['source']='gamedota2';
+                $val['type']='match';
+                $val['link']='https://www.bilibili.com/blackboard/activity-KQm-HYV7F.html?aid=51';
+                $val['subtype']='bilibili';
+                $detail=[];
+                $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                $result = $result ?? 0;
+                if ($result == 0) {
+                    $data = [
+                        "asign_to" => 1,
+                        "mission_type" => 'match',//赛事
+                        "mission_status" => 1,
+                        "game" => $game,
+                        "source" => 'gamedota2',//
+                        'title' => 'bilibili'.$val['id'],
+                        'source_link' => '',
+                        "detail" => json_encode($val),
+                    ];
+                    $insert = (new oMission())->insertMission($data);
+                }
+
+            }
+        }
+        return true;
+
+    }
+    //2019刀塔国际邀请赛
+    public function getDota2International($game){
+        $data=[];
+        $bilibiList=curl_get('https://www.dota2.com.cn/international/2019/rank?task=main_map');
+        $cdata=$bilibiList['result'] ?? [];
+        $missionModel = new MissionModel();
+        if(count($cdata) >0) {
+            foreach ($cdata as $val){
+                $params1 = [
+                    'game' => $game,
+                    'mission_type' => 'match',
+                    'title' => 'international'.$val['win_team_id'],
+                ];
+
+                $val['game']=$game;
+                $val['source']='gamedota2';
+                $val['type']='match';
+                $val['link']='https://www.dota2.com.cn/international/2019/overview';
+                $val['subtype']='international';
+                $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                $result = $result ?? 0;
+                if ($result == 0) {
+                    $data = [
+                        "asign_to" => 1,
+                        "mission_type" => 'match',//赛事
+                        "mission_status" => 1,
+                        "game" => $game,
+                        "source" => 'gamedota2',//
+                        'title' => 'international'.$val['win_team_id'],
+                        'source_link' => '',
+                        "detail" => json_encode($val),
+                    ];
+                    $insert = (new oMission())->insertMission($data);
+                }
+
+            }
+        }
+        return true;
+
     }
 
 }
