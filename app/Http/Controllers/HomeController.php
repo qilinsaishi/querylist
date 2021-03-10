@@ -115,7 +115,35 @@ class HomeController extends Controller
     }
 
     public function index()
-    {   /*$url='https://www.wanplus.com/lol/video/1563559';
+    {
+        $url='https://www.wanplus.com/kog/event';
+        $items=QueryList::get($url)->rules(array(
+            'title' => array('.event-title','text'),//标题
+            'status' => array('.event-pag','text'),//描述
+            'logo' => array('img','src'),//图片
+            'link' => array('a ','href'),//链接
+            'dates' => array('p:eq(1)','text')//链接
+        ))->range('.event-list .ov  li')->queryData(function ($item){
+            $item['link']='https://www.wanplus.com'.$item['link'];
+            if($item['status']=='进行中'){
+                $item['status']=1;
+            }elseif($item['status']=='未开始'){
+                $item['status']=2;
+            }elseif($item['status']=='已结束'){
+                $item['status']=3;
+            }else{
+                $item['status']=0;
+            }
+            $dates=explode(' — ',$item['dates']);
+            $item['start_time']=$dates[0] ?? 0;
+            $item['end_time']=$dates[1] ?? 0;
+            unset($item['dates']);
+
+            //$item['status']='https://www.wanplus.com'.$item['link'];
+            return $item;
+        });print_r($items);exit;
+
+        /*$url='https://www.wanplus.com/lol/video/1563559';
         //$url='https://www.wanplus.com/dota2/video/260935';
         $qt=QueryList::get($url);
         $content=$qt->find('.content .ov #video-video')->html();
