@@ -23,8 +23,8 @@ class gamedota2
             "id"=>['path'=>"item_id",'default'=>0],
             "roles"=>['path'=>"roles",'default'=>[]],
             "stat"=>['path'=>"pro_box",'default'=>[]],
-            "skill"=>['path'=>"talent_box",'default'=>[]],
-            "talent"=>['path'=>"skill_box",'default'=>[]],
+            "talent"=>['path'=>"talent_box",'default'=>[]],
+            "skill"=>['path'=>"skill_box",'default'=>[]],
             "equipment"=>['path'=>"equip_box",'default'=>[]],
             ];
     public $hero_type = [

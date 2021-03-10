@@ -43,6 +43,10 @@ class RedisService
                 'prefix' => "totalTeamList",
                 'expire' => 60,
             ],
+            "tournament" => [//赛事
+                'prefix' => "tournament",
+                'expire' => 3600,
+            ],
 
         ];
         return $cacheConfig;
