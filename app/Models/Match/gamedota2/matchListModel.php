@@ -43,8 +43,11 @@ class matchListModel extends Model
     public function getMatchList($params)
     {
         $match_list =$this->select("*");
-        $pageSizge = $params['page_size']??3;
+        $pageSizge = $params['page_size']??4;
         $page = $params['page']??1;
+        if (isset($params['tournament_id']) && $params['tournament_id']!="") {
+            $match_list = $match_list ->where("tournament_id", $params['tournament_id']);
+        }
         $match_list = $match_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)

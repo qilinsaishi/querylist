@@ -35,7 +35,7 @@ class gamedota2
                     'logo'=>['path'=>"game_icon",'default'=>""],//logo
                     "tournament_id"=>['path'=>"tournament_id",'default'=>""],//赛事唯一ID
                     "extra"=>['path'=>"extra",'default'=>[]],//额外信息
-                    "start_time"=>['path'=>"timestamp",'default'=>[]]
+                    "start_time"=>['path'=>"timestamp",'default'=>[]],
                 ],
                 'bilibili'=>[
                     'match_id'=>['path'=>"id",'default'=>0],//比赛唯一ID
@@ -109,14 +109,13 @@ class gamedota2
                 $arr['content']['extra'] = [
                     "home"=> ['prize'=>$arr['content']['team1']['win_prize_num']??0,'title'=>$arr['content']['team1']['match_phase_title']??""],
                     "away"=> ['prize'=>$arr['content']['team2']['win_prize_num']??0,'title'=>$arr['content']['team2']['match_phase_title']??""],
+                    "function"=>"getTeamBySiteId","source"=>"gamedota2"
                 ];
                 $arr['content']['timestamp'] = $arr['content']['date']." ".$arr['content']['time'];
                 $data['match_list'][] = getDataFromMapping($this->data_map['list']['gamedota2'],$arr['content']);
             }
             elseif($arr['content']['subtype']=="bilibili")
             {
-                //print_R($arr['content']);
-                //die();
                 $arr['content']['home_team']['logo'] = getImage($arr['content']['home_team']['logo']);
                 $arr['content']['away_team']['logo'] = getImage($arr['content']['away_team']['logo']);
                 $arr['content']['home_team']['name'] = $arr['content']['home_team']['title'];
@@ -125,6 +124,9 @@ class gamedota2
                 $data['team'][] = getDataFromMapping($this->data_map['team'],$arr['content']['away_team']);
                 $arr['content']['timestamp'] = date("Y-m-d H:i:s",$arr['content']['stime']);
                 $arr['content']['tournament_id'] = md5($arr['content']['link']);
+                $arr['content']['extra'] = [
+                    "function"=>"getTeamBySiteId","source"=>"gamedota2"
+                ];
                 $data['match_list'][] = getDataFromMapping($this->data_map['list']['bilibili'],$arr['content']);
             }
             elseif($arr['content']['subtype']=="international")
@@ -134,6 +136,9 @@ class gamedota2
                 $data['team'][] = getDataFromMapping($this->data_map['team'],$arr['content']['team1']);
                 $data['team'][] = getDataFromMapping($this->data_map['team'],$arr['content']['team2']);
                 $arr['content']['tournament_id'] = md5($arr['content']['link']);
+                $arr['content']['extra'] = [
+                    "function"=>"getTeamBySiteId","source"=>"gamedota2"
+                ];
                 $data['match_list'][] = getDataFromMapping($this->data_map['list']['international'],$arr['content']);
             }
 
