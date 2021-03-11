@@ -91,6 +91,29 @@ class CollectResultModel extends Model
         return $collectResultModel->count();
     }
 
+    /**
+     * @param string $type kpl,lol,csgo,dota2
+     * @param int $limt
+     * @return mixed
+     */
+    public function getCollectResult($game='',$mission_type='',$source=''){
+        $collerObj=$this->select('mission_type','game','source','mission_type','source_link','title');
+        if($game !=''){
+            $collerObj->where('game',$game);
+        }
+        if($mission_type !=''){
+            $collerObj->where('mission_type',$mission_type);
+        }
+        if($source !=''){
+            $collerObj->where('source',$source);
+        }
+
+        return $collerObj->orderBy('id', 'ASC')
+            //->limit($limt)
+            ->get()
+            ->toArray();
+    }
+
 
 
 

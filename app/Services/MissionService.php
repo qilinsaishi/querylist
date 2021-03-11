@@ -57,8 +57,9 @@ class MissionService
                                     //更新任务状态，以后改成接口模式
                                     $missionModel->updateMission($mission['mission_id'], ['mission_status' => 2]);
                                 } else {
-                                    $return = false;
-                                    return  $return;
+                                    //失败
+                                    $missionModel->updateMission($mission['mission_id'], ['mission_status' => 3]);
+                                    continue;
                                 }
                             } catch (\Exception $e) {
                                 return $e->getMessage();

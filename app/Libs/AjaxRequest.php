@@ -134,7 +134,7 @@ class AjaxRequest
              'cookie' => $paramHeaderData['cookieStr'] ?? ''
          ];*/
         $client = new ClientServices();
-        $data = $client->curlPost($url, $param,$headers);print_r($data);exit;
+        $data = $client->curlPost($url, $param,$headers);
        // $data = $client->curlPost($url, $param);
 
         //$data=siz

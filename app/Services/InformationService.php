@@ -312,7 +312,6 @@ class InformationService
                         echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                     }
 
-
                 }
             }
         }

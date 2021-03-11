@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
+use App\Models\CollectUrlModel;
 use App\Models\InformationModel;
 use App\Models\MissionModel;
 use App\Services\MissionService as oMission;
@@ -19,6 +20,9 @@ class MatchService
         ];
 
         foreach ($gameItem as $val) {
+            if($val=='kpl' || $val=='lol'){
+                $this->scoreggMatch($val);//scoregg 比赛数据
+            }
             if($val=='dota2'){
                 $this->getDota2International($val);
                 $this->getBilibiliDota2($val);
@@ -174,5 +178,109 @@ class MatchService
         return true;
 
     }
+    public function scoreggMatch($game){
+        $collectResultModel=new CollectResultModel();
+        $missionModel = new MissionModel();
+        $collectResult=$collectResultModel->getCollectResult($game,'match','scoregg');
+        if(count($collectResult) > 0) {
+            foreach ($collectResult  as $val){
+                $cdata=curl_get($val['source_link']);
+                if(count($cdata)>0){
+                    foreach ($cdata as $v){
+                        if(count($v['round_son']) >0) {
+                            foreach ($v['round_son'] as $v1){
+                                $url='https://img1.famulei.com/tr_round/'.$v1['id'].'.json';
+                                $arr=curl_get($url);
+                                $arr=$arr ?? [];
+                                if(count($arr) > 0){
+                                    foreach ($arr as $v2){
+                                        $v2['r_type']=$v['r_type'];
+                                        $v2['roundID']=$v['roundID'];
+                                        $v2['round_name']=$v['name'];
+                                        $v2['tournamentID']=$v['tournamentID'];
+                                        $v2['source']='scoregg';
+                                        $v2['type']='match';
+                                        $v2['game']=$game;
+                                        $v2['round_son_id']=$v1['id'];
+                                        $v2['round_son_pid']=$v['roundID'];
+                                        $v2['round_son_name']=$v1['name'];
+                                        ///////////////
+                                        $params1 = [
+                                            'game' => $game,
+                                            'mission_type' => 'match',
+                                            'source_link' =>'https://www.scoregg.com/match/'.$v2['matchID'],
+                                        ];
+                                        $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                                        $result = $result ?? 0;
+                                        if($result==0){
+                                            $cdata = [
+                                                "asign_to" => 1,
+                                                "mission_type" => 'match',//赛事
+                                                "mission_status" => 1,
+                                                "game" => $game,
+                                                "source" => 'scoregg',//
+                                                'title' =>$v['name'].'-'.$v1['name'].$v2['matchID'],
+                                                'source_link' => 'https://www.scoregg.com/match/'.$v2['matchID'],
+                                                "detail" => json_encode($v2),
+                                            ];
+                                            $insert = (new oMission())->insertMission($cdata);
+                                            echo "insert:".$insert.' lenth:'.strlen($cdata['detail'])."\n";
+                                        }
+
+                                    }
+                                }
+
+                            }
+
+                        }else{
+                            $url='https://img1.famulei.com/tr_round/p_'.$v['roundID'].'.json';
+                            $arr=curl_get($url);
+                            if(count($arr) > 0){
+                                foreach ($arr as $v2){
+                                    $v2['r_type']=$v['r_type'];
+                                    $v2['roundID']=$v['roundID'];
+                                    $v2['round_name']=$v['name'];
+                                    $v2['tournamentID']=$v['tournamentID'];
+                                    $v2['source']='scoregg';
+                                    $v2['type']='match';
+                                    $v2['game']=$game;
+                                    $v2['round_son_id']='';
+                                    $v2['round_son_pid']='';
+                                    $v2['round_son_name']='';
+                                    ///////////////
+                                    $params1 = [
+                                        'game' => $game,
+                                        'mission_type' => 'match',
+                                        'source_link' => 'https://www.scoregg.com/match/'.$v2['matchID'],
+                                    ];
+                                    $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                                    $result = $result ?? 0;
+                                    if($result==0){
+                                        $cdata = [
+                                            "asign_to" => 1,
+                                            "mission_type" => 'match',//赛事
+                                            "mission_status" => 1,
+                                            "game" => $game,
+                                            "source" => 'scoregg',//
+                                            'title' =>$game.'-'.$v['name'].'-'.$v2['matchID'],
+                                            'source_link' =>'https://www.scoregg.com/match/'.$v2['matchID'],
+                                            "detail" => json_encode($v2),
+                                        ];
+                                        $insert = (new oMission())->insertMission($cdata);
+                                        echo "insert:".$insert.' lenth:'.strlen($cdata['detail'])."\n";
+                                    }
+
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+
+    }
+
 
 }
