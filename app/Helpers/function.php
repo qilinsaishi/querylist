@@ -78,17 +78,7 @@ function curl_get($url, $referer = '')
 // $postdata 是传输的数据，数组格式
 function curl_post($url = '', $postdata = '')
 {
-    $postdata = [
-        'playerid' => '15263',
-        'gametype' => '2',
-        '_gtk' => '1368290349'
-    ];
-    $url = 'https://www.wanplus.com/ajax/statelist/player';
-    $header = array(
-        'Accept: application/json',
-        "x-requested-with:XMLHttpRequest",
-        "x-csrf-token:1368290349",
-    );
+
     //初始化
     $curl = curl_init();
     //设置抓取的url
@@ -104,7 +94,7 @@ function curl_post($url = '', $postdata = '')
     // curl_setopt($curl, CURLOPT_TIMEOUT_MS, 500);
 
     // 设置请求头
-    curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+   // curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
 
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);

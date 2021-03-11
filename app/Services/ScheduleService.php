@@ -19,10 +19,13 @@ class ScheduleService
         ];
 
         foreach ($gameItem as $val) {
-            $this->insertWanplusSchedule($val);
-            if ($val == 'dota2') {
-                $this->tournament($val);
+            if ($val == 'kpl' || $val == 'lol') {
+                $this->tournamentList($val);
             }
+             $this->insertWanplusSchedule($val);
+             if ($val == 'dota2') {
+                 $this->tournament($val);
+             }
         }
         return 'finish';
     }
@@ -135,12 +138,14 @@ class ScheduleService
                             "detail" => json_encode($val),
                         ];
                         $insert = (new oMission())->insertMission($data);
+                        echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                     }
 
                 }
             }
 
         }
+        return true;
 
     }
 
@@ -175,6 +180,7 @@ class ScheduleService
                         "detail" => json_encode($val),
                     ];
                     $insert = (new oMission())->insertMission($data);
+                    echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                 }
 
 
@@ -205,5 +211,93 @@ class ScheduleService
         }
         return $data;
     }
+
+    //scoregg
+    public function tournamentList($game)
+    {
+        if ($game == 'lol') {
+            $gameId = 1;
+        } elseif ($game == 'kpl') {
+            $gameId = 2;
+        }
+        $list=$this->getEventList($gameId);
+        $missionModel = new MissionModel();
+
+        if (count($list) > 0) {
+            foreach ($list as $v) {
+                if(count($v)>0){
+                    foreach($v as $val){
+                        $params1 = [
+                            'game' => $game,
+                            'mission_type' => 'match',
+                            'source_link' => $val['ajax_url'],
+                        ];
+
+                        $val['game'] = $game;
+                        $val['source'] = 'scoregg';
+                        $val['type'] = 'tournament';
+                        $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                        $result = $result ?? 0;
+                        if ($result == 0) {
+                            $data = [
+                                "asign_to" => 1,
+                                "mission_type" => 'match',//赛事
+                                "mission_status" => 1,
+                                "game" => $game,
+                                "source" => 'scoregg',//
+                                'title' => $val['name'],
+                                'source_link' => $val['ajax_url'],
+                                "detail" => json_encode($val),
+                            ];
+                            $insert = (new oMission())->insertMission($data);
+                            echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                        }
+                    }
+                }
+
+            }
+        }
+
+        return true;
+
+    }
+
+    public function getEventList($gameId)
+    {
+        $url = 'https://www.scoregg.com/services/api_url.php';
+        $limit = 18;
+        $list = [];
+        $param = [
+            'api_path' => '/services/match/web_tournament_group_list.php',
+            'platform' => 'web',
+            'method' => 'GET',
+            'language_id' => 1,
+            'gameID' => $gameId,//2王者荣耀
+            'type' => 'all',
+            'limit' => $limit,
+            'year' => '',
+            'api_version' => '9.9.9'
+        ];
+        $data = curl_post($url, $param);
+        $totalCount = $data['data']['count'] ?? 0;
+        if ($totalCount != 0) {
+            $totalPage = ceil($totalCount / $limit);
+            for ($i = 1; $i <= $totalPage; $i++) {
+                $param['page'] = $i;
+                $cdata = curl_post($url, $param);
+                $list[$i] = $cdata['data']['list'] ?? 0;
+                if (count($list[$i]) > 0) {
+                    foreach ($list[$i] as $k => &$val) {
+                        $ajax_url = 'https://img1.famulei.com/tr/' . $val['tournamentID'] . '.json';
+                        $val['ajax_url'] = $ajax_url;
+
+                    }
+                }
+
+            }
+        }
+        return $list;
+    }
+
 
 }

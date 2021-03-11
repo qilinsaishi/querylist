@@ -167,6 +167,7 @@ class InformationService
                                     ),
                                 ];
                                 $insert = (new oMission())->insertMission($data);
+                                echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                             }
                         } else {
                             continue;
@@ -241,6 +242,7 @@ class InformationService
                             ),
                         ];
                         $insert = (new oMission())->insertMission($data);
+                        echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                     }
 
                 }
@@ -307,6 +309,7 @@ class InformationService
                             ),
                         ];
                         $insert = (new oMission())->insertMission($data);
+                        echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                     }
 
 
@@ -381,7 +384,7 @@ class InformationService
                             "detail" => json_encode($detail),
                         ];
                         $insert = (new oMission())->insertMission($data);}
-
+                        echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                 }
             }
 

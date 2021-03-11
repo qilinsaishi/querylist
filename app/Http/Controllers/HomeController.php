@@ -116,6 +116,42 @@ class HomeController extends Controller
 
     public function index()
     {
+        $url='https://www.scoregg.com/services/api_url.php';
+        $limit=18;
+        $gameId=1;
+        $param=[
+            'api_path'=>'/services/match/tournament_list.php',
+            'platform'=>'web',
+            'method'=>'post',
+            'language_id'=>1,
+            'gameID'=>$gameId,//2王者荣耀
+            'api_version'=>'9.9.9'
+        ];
+        $data=curl_post($url,$param);print_r($data);exit;
+        $totalCount=$data['data']['count'] ?? 0;
+        if($totalCount !=0){
+            $totalPage=ceil($totalCount/$limit);
+            for ($i=1;$i<=$totalPage;$i++){
+                $param['page']=$i;
+                $cdata=curl_post($url,$param);
+                $list[$i]=$cdata['data']['list'] ?? 0;
+                if(count($list[$i])>0){
+                    foreach ($list[$i] as $k=>&$val){
+                        $ajax_url='https://img1.famulei.com/tr/'.$val['tournamentID'].'.json';
+                        $val['ajax_url']=$ajax_url;
+
+                    }
+                }
+
+            }
+        }
+        print_r($list);exit;
+
+        print_r($data);exit;
+
+
+
+        //////////////////////
         $url='https://www.wanplus.com/kog/event';
         $items=QueryList::get($url)->rules(array(
             'title' => array('.event-title','text'),//标题
