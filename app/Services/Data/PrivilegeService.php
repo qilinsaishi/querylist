@@ -6,7 +6,7 @@ use App\Collect\hero\dota2\gamedota2;
 
 class PrivilegeService
 {
-    public $team_id_map = ['gamedota2'=>'site_id'];
+    //public $id_map = ["teamList"=>["dota2"=>""]];
     public $kpl_hero_type = [
         1=>'战士',
         2=>'法师',
@@ -32,7 +32,7 @@ class PrivilegeService
                 'functionCount' => "getMatchCount",//获取列表方法
                 'functionProcess' => "processMatchList",//格式化的处理方法
             ],
-            "tournament" => [
+            "tournamentList" => [
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
@@ -42,7 +42,15 @@ class PrivilegeService
                 'function' => "getTournamentList",
                 'functionCount' => "getTournamentCount",
                 'functionSingle' => "getTournamentById",
-
+            ],
+            "tournament" => [
+                'list' => [
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "gamedota2"],
+                ],
+                'withSource' => 1,
+                'function' => "getTournamentById",
             ],
             "teamList" => [//团队列表
                 'list' => [
@@ -404,11 +412,11 @@ class PrivilegeService
                     $sourceFound = 1;
                 }
             }
+            //echo "sourceFound:".$sourceFound."\n";
             //默认没找到
             $found = 0;
             //数据类型出现在优先级列表
             if (isset($priviliegeList[$dataType])) {
-                //echo "found type:".$dataType."\n";
                 //尚未初始化数据来源 且 当前数据类型需要包含数据来源
                 if ($currentSource == "" && $priviliegeList[$dataType]['withSource'] == 1) {
                     //循环所列的类库列表
@@ -465,6 +473,10 @@ class PrivilegeService
                     }
                 } //已经初始化数据来源 且 当前数据类型需要包含数据来源
                 elseif ($currentSource != "" && $priviliegeList[$dataType]['withSource'] == 1) {
+                    if($sourceFound ==1)
+                    {
+                        $currentSource = $params['source'];
+                    }
                     //调用已有的数据类型
                     $functionList[$dataType]['source'] = $currentSource;
                     //获取当前数据了行的类库列表
@@ -608,6 +620,8 @@ class PrivilegeService
                 //echo "dataType:".$dataType.",function not found\n";
             }
         }
+        //print_R($functionList);
+        //die();
         return $functionList;
     }
 
@@ -651,20 +665,25 @@ class PrivilegeService
         if (isset($functionList['teamList']) && isset($functionList['teamList']['functionSingle'])) {
 
         } else {
-            $f = $this->getFunction(['teamList' => []], $functionList['matchList']['source']);
-            if (isset($f['teamList']['class'])) {
-                $functionList["teamList"] = $f['teamList'];
+            $f = $this->getFunction(['totalTeamList' => []], $functionList['matchList']['source']);
+            if (isset($f['totalTeamList']['class'])) {
+                $functionList["totalTeamList"] = $f['totalTeamList'];
             }
         }
-        if (!isset($functionList["teamList"]["class"]) || !isset($functionList['teamList']['functionSingle'])) {
+        if (!isset($functionList["totalTeamList"]["class"]) || !isset($functionList['totalTeamList']['functionSingle'])) {
             return $data;
         }
-        $modelClass = $functionList["teamList"]["class"];
-        $functionSingle = $functionList["teamList"]['functionSingle'];
+        $modelClass = $functionList["totalTeamList"]["class"];
+        $functionSingle = $functionList["totalTeamList"]['functionSingle'];
 
         $teamList = [];
         $tournament = [];
         foreach ($data as $key => $matchInfo) {
+            if(isset($matchInfo['extra']))
+            {
+                $matchInfo['extra'] = json_decode($matchInfo['extra'],true);
+            }
+            /*
             //赛事信息
             if (!isset($tournament[$matchInfo['tournament_id']])) {
                 $tournamentInfo = $modelTournamentClass->$functionTournamentSingle($matchInfo['tournament_id']);
@@ -672,16 +691,33 @@ class PrivilegeService
                     $tournament[$matchInfo['tournament_id']] = $tournamentInfo;
                 }
             }
+            */
             //战队信息
             if (!isset($teamList[$matchInfo['home_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['home_id']);
+                if(isset($matchInfo['extra']['function']))
+                {
+                    $functionName = $matchInfo['extra']['function'];
+                    $teamInfo = $modelClass->$functionName($matchInfo['home_id'],$matchInfo['extra']['source'],$matchInfo['game']);
+                }
+                else
+                {
+                    $teamInfo = $modelClass->$functionSingle($matchInfo['home_id']);
+                }
                 if (isset($teamInfo['team_id'])) {
                     $teamList[$matchInfo['home_id']] = $teamInfo;
                 }
 
             }
             if (!isset($teamList[$matchInfo['away_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['away_id']);
+                if(isset($matchInfo['extra']['function']))
+                {
+                    $functionName = $matchInfo['extra']['function'];
+                    $teamInfo = $modelClass->$functionName($matchInfo['away_id'],$matchInfo['extra']['source'],$matchInfo['game']);
+                }
+                else
+                {
+                    $teamInfo = $modelClass->$functionSingle($matchInfo['away_id']);
+                }
                 if (isset($teamInfo['team_id'])) {
                     $teamList[$matchInfo['away_id']] = $teamInfo;
                 }

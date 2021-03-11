@@ -10,10 +10,12 @@ class RedisService
     public function getCacheConfig()
     {
         $cacheConfig = [
+            /*
             "matchList" => [
                 'prefix' => "matchList",
                 'expire' => 3600,
             ],
+            */
             "teamList" => [//团队列表
                 'prefix' => "teamList",
                 'expire' => 3600,
@@ -39,9 +41,14 @@ class RedisService
                 'expire' => 60,
             ],
 
-            "totalTeamList" => [//队员总表
+            "totalTeamList" => [//战队总表
                 'prefix' => "totalTeamList",
                 'expire' => 60,
+            ],
+
+            "tournamentList" => [//赛事总表
+                'prefix' => "tournamentList",
+                'expire' => 3600,
             ],
             "tournament" => [//赛事
                 'prefix' => "tournament",
