@@ -182,18 +182,20 @@ class MatchService
         $collectResultModel=new CollectResultModel();
         $missionModel = new MissionModel();
         $collectResult=$collectResultModel->getCollectResult($game,'match','scoregg');
+        $collectResult=$collectResult ?? [];
         if(count($collectResult) > 0) {
             foreach ($collectResult  as $val){
-                $cdata=curl_get($val['source_link']);
+                $cdata=curl_get($val['source_link']);//获取赛事下面的一级分类
+                $cdata=$cdata ?? [];
                 if(count($cdata)>0){
                     foreach ($cdata as $v){
-                        if(count($v['round_son']) >0) {
+                        if(count($v['round_son']) >0) {//如果存在二级分类，则获取二级分类
                             foreach ($v['round_son'] as $v1){
                                 $url='https://img1.famulei.com/tr_round/'.$v1['id'].'.json';
-                                $arr=curl_get($url);
+                                $arr=curl_get($url);//获取比赛的具体数据
                                 $arr=$arr ?? [];
                                 if(count($arr) > 0){
-                                    foreach ($arr as $v2){
+                                    foreach ($arr as $v2){//获取每一个比赛的具体数据
                                         $v2['r_type']=$v['r_type'];
                                         $v2['roundID']=$v['roundID'];
                                         $v2['round_name']=$v['name'];
@@ -232,12 +234,12 @@ class MatchService
 
                             }
 
-                        }else{
+                        }else{//不存在二级分类则只能生成一级分类链接
                             $url='https://img1.famulei.com/tr_round/p_'.$v['roundID'].'.json';
                             $arr=curl_get($url);
                             $arr=$arr ?? [];
                             if(count($arr) > 0){
-                                foreach ($arr as $v2){
+                                foreach ($arr as $v2){//获取比赛的具体数据
                                     $v2['r_type']=$v['r_type'];
                                     $v2['roundID']=$v['roundID'];
                                     $v2['round_name']=$v['name'];
@@ -253,7 +255,7 @@ class MatchService
                                         'game' => $game,
                                         'mission_type' => 'match',
                                         'source_link' => 'https://www.scoregg.com/match/'.$v2['matchID'],
-                                    ];
+                                    ];//过滤已经采集过的数据
                                     $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                                     $result = $result ?? 0;
                                     if($result==0){
