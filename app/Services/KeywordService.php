@@ -17,6 +17,9 @@ use App\Services\Data\RedisService;
 
 class KeywordService
 {
+    public $expect_keywords = [
+        "nbsp","lt","gt","span","quot"
+    ];
     //爬取数据
     public function information($game = "")
     {
@@ -173,7 +176,7 @@ class KeywordService
         //echo strlen(strip_tags($information['content']))."\n";
         foreach($anotherKeywords as $keyword => $id)
         {
-            if(strlen($keyword)>=3)
+            if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
                 $count = substr_count(strip_tags($information['content']),$keyword);
                 if($count >= 1)
@@ -184,7 +187,7 @@ class KeywordService
         }
         foreach($teamKeywords as $keyword => $team_id)
         {
-            if(strlen($keyword)>=3)
+            if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
                 $count = substr_count(strip_tags($information['content']),$keyword);
                 if($count >= 1)
@@ -196,7 +199,7 @@ class KeywordService
         }
         foreach($playerKeywords as $keyword => $player_id)
         {
-            if(strlen($keyword)>=3)
+            if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
                 $count = substr_count(strip_tags($information['content']), $keyword);
                 if ($count >= 1)
@@ -208,7 +211,7 @@ class KeywordService
         }
         foreach($heroKeywords as $keyword => $hero_id)
         {
-            if(strlen($keyword)>=3)
+            if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
                 $count = substr_count(strip_tags($information['content']), $keyword);
                 if ($count >= 1)
