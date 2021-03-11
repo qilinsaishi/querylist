@@ -31,7 +31,7 @@ class scoregg
         return $cdata;
     }
     public function process($arr)
-    {
+    { //status:0表示即将开始，1表示正在进行，2已结结束
         var_dump($arr);
     }
 }

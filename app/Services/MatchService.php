@@ -60,6 +60,7 @@ class MatchService
                         "detail" => json_encode($val),
                     ];
                     $insert = (new oMission())->insertMission($data);
+                    echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                 }
 
             }
@@ -124,6 +125,7 @@ class MatchService
                         "detail" => json_encode($val),
                     ];
                     $insert = (new oMission())->insertMission($data);
+                    echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                 }
 
             }
@@ -164,6 +166,7 @@ class MatchService
                         "detail" => json_encode($val),
                     ];
                     $insert = (new oMission())->insertMission($data);
+                    echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                 }
 
             }
