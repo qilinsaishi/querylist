@@ -235,6 +235,7 @@ class MatchService
                         }else{
                             $url='https://img1.famulei.com/tr_round/p_'.$v['roundID'].'.json';
                             $arr=curl_get($url);
+                            $arr=$arr ?? [];
                             if(count($arr) > 0){
                                 foreach ($arr as $v2){
                                     $v2['r_type']=$v['r_type'];
