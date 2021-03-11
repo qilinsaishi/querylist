@@ -92,6 +92,9 @@ class InformationService
                     ];
                     $insert = (new oMission())->insertMission($data);
                     echo "lol-information-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                }else{
+                    echo "exits"."\n";
+                    continue;
                 }
                 $t2 = microtime(true);
                 //echo '耗时' . round($t2 - $t1, 3) . '秒' . "\n";
@@ -198,7 +201,7 @@ class InformationService
             } else {
                 $url = 'https://www.dota2.com.cn/news/' . $gametype . '/index' . $m . '.htm';
             }
-
+            echo $url."\n";
             $urlall = QueryList::get($url)->find("#news_lists .panes .active a")->attrs('href')->all();
 
             if ($urlall) {
@@ -310,6 +313,9 @@ class InformationService
                         ];
                         $insert = (new oMission())->insertMission($data);
                         echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                    }else{
+                        echo "exits"."\n";
+                        continue;
                     }
 
                 }
