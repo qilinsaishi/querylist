@@ -243,6 +243,13 @@ class KeywordService
         $text = strip_tags($information['content']);
         scws_send_text($sh, $text);
         $top = scws_get_tops($sh,10);
+        foreach($top as $key => $word)
+        {
+            if(in_array($word['word'],$this->expect_keywords))
+            {
+                unset($top[$key]);
+            }
+        }
         $keywordMap = $scwsKeywordMapModel->saveMap($top);
         foreach($top as $key => $wordInfo)
         {
