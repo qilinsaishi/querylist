@@ -620,8 +620,6 @@ class PrivilegeService
                 //echo "dataType:".$dataType.",function not found\n";
             }
         }
-        //print_R($functionList);
-        //die();
         return $functionList;
     }
 
