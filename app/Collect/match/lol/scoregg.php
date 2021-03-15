@@ -61,7 +61,7 @@ class scoregg
              "round_name":"荣耀日",//赛事下面的一级分类名称
              "tournamentID":"186",//赛事id
              "source":"scoregg",//来源
-             "type":"match",//比赛
+             "type":"match",//比赛type=tournament 表示赛程
              "game":"lol",//游戏
              "round_son_id":"",//赛事下面的二级分类id
              "round_son_pid":"",//赛事下面的一级分类id

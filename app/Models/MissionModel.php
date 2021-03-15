@@ -99,7 +99,7 @@ class MissionModel extends Model
                 return $this->insertGetId($data);
             }
         }catch (\Exception $e){
-            print_r($e->getMessage());exit;
+           // print_r($e->getMessage());exit;
         }
 
 

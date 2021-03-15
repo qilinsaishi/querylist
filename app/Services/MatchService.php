@@ -47,12 +47,12 @@ class MatchService
                 ];
 
                 $val['game']=$game;
-                $val['source']='gamedota2';
+                $val['source']='gamedota2';//来源dota2.com.cn
                 $val['type']='match';
-                $val['subtype']='gamedota2';
-                $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                $val['subtype']='gamedota2';//官网
+                $result = $missionModel->getMissionCount($params1);//过滤已经采集过的赛事任务
                 $result = $result ?? 0;
-                if ($result == 0) {
+                if ($result == 0) {//任务表不存在记录则插入数据
                     $data = [
                         "asign_to" => 1,
                         "mission_type" => 'match',//赛事
@@ -98,7 +98,7 @@ class MatchService
     public function getBilibiliDota2($game){
         $data=[];
         $bilibiList=curl_get('https://api.bilibili.com/x/esports/matchs/top?aid=51&pn=1&ps=44&sort=1&etime=2021-03-08&tp=0');
-        $cdata=$bilibiList['data']['list'] ?? [];
+        $cdata=$bilibiList['data']['list'] ?? [];//来源bilibil列表
         $missionModel = new MissionModel();
         if(count($cdata) >0) {
             foreach ($cdata as $val){
@@ -107,20 +107,20 @@ class MatchService
                     'mission_type' => 'match',
                     'title' => 'bilibili'.$val['id'],
                 ];
-                $val['season']['logo']='https://i0.hdslb.com/'.$val['season']['logo'];
-                $val['home_team']['logo']='https://i0.hdslb.com/'.$val['home_team']['logo'];
-                $val['away_team']['logo']='https://i0.hdslb.com/'.$val['away_team']['logo'];
-                $val['stime']=date("Y-m-d H:i:s",$val['stime']);
-                $val['etime']=date("Y-m-d H:i:s",$val['etime']);
+                $val['season']['logo']='https://i0.hdslb.com/'.$val['season']['logo'];//赛事logo
+                $val['home_team']['logo']='https://i0.hdslb.com/'.$val['home_team']['logo'];//主队logo
+                $val['away_team']['logo']='https://i0.hdslb.com/'.$val['away_team']['logo'];//客队logo
+                $val['stime']=date("Y-m-d H:i:s",$val['stime']);//开始时间
+                $val['etime']=date("Y-m-d H:i:s",$val['etime']);//结束时间
                 $val['game']=$game;
-                $val['source']='gamedota2';
+                $val['source']='gamedota2';//官网
                 $val['type']='match';
                 $val['link']='https://www.bilibili.com/blackboard/activity-KQm-HYV7F.html?aid=51';
                 $val['subtype']='bilibili';
                 $detail=[];
                 $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                 $result = $result ?? 0;
-                if ($result == 0) {
+                if ($result == 0) {//表示任务表不存在记录，则插入数据
                     $data = [
                         "asign_to" => 1,
                         "mission_type" => 'match',//赛事
@@ -134,7 +134,7 @@ class MatchService
                     $insert = (new oMission())->insertMission($data);
                     echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                 }else{
-                    echo "exits"."\n";
+                    echo "exits"."\n";//Mission 表存在记录跳过
                     continue;
                 }
 
@@ -146,10 +146,10 @@ class MatchService
     //2019刀塔国际邀请赛
     public function getDota2International($game){
         $data=[];
-        $bilibiList=curl_get('https://www.dota2.com.cn/international/2019/rank?task=main_map');
+        $bilibiList=curl_get('https://www.dota2.com.cn/international/2019/rank?task=main_map');//接口链接
         $cdata=$bilibiList['result'] ?? [];
         $missionModel = new MissionModel();
-        if(count($cdata) >0) {
+        if(count($cdata) >0) {//接口返回数组
             foreach ($cdata as $val){
                 $params1 = [
                     'game' => $game,
@@ -158,13 +158,13 @@ class MatchService
                 ];
 
                 $val['game']=$game;
-                $val['source']='gamedota2';
-                $val['type']='match';
-                $val['link']='https://www.dota2.com.cn/international/2019/overview';
+                $val['source']='gamedota2';//官网
+                $val['type']='match';//赛事
+                $val['link']='https://www.dota2.com.cn/international/2019/overview';//来源链接
                 $val['subtype']='international';
                 $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                 $result = $result ?? 0;
-                if ($result == 0) {
+                if ($result == 0) {//表示Mission 不存在则插入数据
                     $data = [
                         "asign_to" => 1,
                         "mission_type" => 'match',//赛事
@@ -172,13 +172,13 @@ class MatchService
                         "game" => $game,
                         "source" => 'gamedota2',//
                         'title' => 'international'.$val['win_team_id'],
-                        'source_link' => '',
+                        'source_link' => $val['link'],
                         "detail" => json_encode($val),
                     ];
                     $insert = (new oMission())->insertMission($data);
                     echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                 }else{
-                    echo "exits"."\n";
+                    echo "exits"."\n";//表示Mission 任务表不存记录
                     continue;
                 }
 
@@ -187,11 +187,12 @@ class MatchService
         return true;
 
     }
+    //https://www.scoregg.com 赛事
     public function scoreggMatch($game){
         $collectResultModel=new CollectResultModel();
         $missionModel = new MissionModel();
         $collectResult=$collectResultModel->getCollectResult($game,'match','scoregg');
-        $collectResult=$collectResult ?? [];
+        $collectResult=$collectResult ?? [];//赛事结果
         if(count($collectResult) > 0) {
             foreach ($collectResult  as $val){
                 $cdata=curl_get($val['source_link']);//获取赛事下面的一级分类
@@ -205,16 +206,12 @@ class MatchService
                                 $arr=$arr ?? [];
                                 if(count($arr) > 0){
                                     foreach ($arr as $v2){//获取每一个比赛的具体数据
-                                        $v2['r_type']=$v['r_type'];
-                                        $v2['roundID']=$v['roundID'];
-                                        $v2['round_name']=$v['name'];
-                                        $v2['tournamentID']=$v['tournamentID'];
-                                        $v2['source']='scoregg';
-                                        $v2['type']='match';
-                                        $v2['game']=$game;
-                                        $v2['round_son_id']=$v1['id'];
-                                        $v2['round_son_pid']=$v['roundID'];
-                                        $v2['round_son_name']=$v1['name'];
+                                        $cdetail=$this->getMatchDetail($v2['matchID']);
+                                        $cdetail['source']='scoregg';
+                                        $cdetail['type']='match';
+                                        $cdetail['game']=$game;
+                                        $cdetail['r_type']=$v['r_type'];//赛事下面的一级分类类型
+
                                         ///////////////
                                         $params1 = [
                                             'game' => $game,
@@ -232,12 +229,12 @@ class MatchService
                                                 "source" => 'scoregg',//
                                                 'title' =>$v['name'].'-'.$v1['name'].$v2['matchID'],
                                                 'source_link' => 'https://www.scoregg.com/match/'.$v2['matchID'],
-                                                "detail" => json_encode($v2),
+                                                "detail" => json_encode($cdetail),
                                             ];
                                             $insert = (new oMission())->insertMission($cdata);
                                             echo "insert:".$insert.' lenth:'.strlen($cdata['detail'])."\n";
                                         }else{
-                                            echo "exits"."\n";
+                                            echo "exits"."\n";//表示任务表存在记录，跳出继续
                                             continue;
                                         }
 
@@ -252,16 +249,12 @@ class MatchService
                             $arr=$arr ?? [];
                             if(count($arr) > 0){
                                 foreach ($arr as $v2){//获取比赛的具体数据
-                                    $v2['r_type']=$v['r_type'];
-                                    $v2['roundID']=$v['roundID'];
-                                    $v2['round_name']=$v['name'];
-                                    $v2['tournamentID']=$v['tournamentID'];
-                                    $v2['source']='scoregg';
-                                    $v2['type']='match';
-                                    $v2['game']=$game;
-                                    $v2['round_son_id']='';
-                                    $v2['round_son_pid']='';
-                                    $v2['round_son_name']='';
+                                    $cdetail=$this->getMatchDetail($v2['matchID']);
+                                    $cdetail['source']='scoregg';
+                                    $cdetail['type']='match';
+                                    $cdetail['game']=$game;
+                                    $cdetail['r_type']=$v['r_type'];//赛事下面的一级分类类型
+
                                     ///////////////
                                     $params1 = [
                                         'game' => $game,
@@ -279,7 +272,7 @@ class MatchService
                                             "source" => 'scoregg',//
                                             'title' =>$game.'-'.$v['name'].'-'.$v2['matchID'],
                                             'source_link' =>'https://www.scoregg.com/match/'.$v2['matchID'],
-                                            "detail" => json_encode($v2),
+                                            "detail" => json_encode($cdetail),
                                         ];
                                         $insert = (new oMission())->insertMission($cdata);
                                         echo "insert:".$insert.' lenth:'.strlen($cdata['detail'])."\n";
@@ -297,6 +290,22 @@ class MatchService
             }
         }
         return true;
+
+    }
+    //https://www.scoregg.com/services/api_url.php
+    public function getMatchDetail($matchID){
+        $url = 'https://www.scoregg.com/services/api_url.php';
+        $param = [
+            'api_path' => '/services/match/match_info_new.php',
+            'platform' => 'web',
+            'method' => 'post',
+            'language_id' => 1,
+            'matchID' => $matchID,
+            'api_version' => '9.9.9'
+        ];
+        $cdata = curl_post($url, $param);
+        $cdata=$cdata['data'] ?? [];
+        return $cdata;
 
     }
 
