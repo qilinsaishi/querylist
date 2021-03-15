@@ -393,7 +393,7 @@ class InformationService
                     }
                     else
                     {
-                        echo "insert: error"."\n";
+                        echo "insert: exists"."\n";
                     }
                 }
             }
