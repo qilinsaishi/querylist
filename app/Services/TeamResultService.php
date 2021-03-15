@@ -49,10 +49,12 @@ class TeamResultService
             $gametype = 4;
         }
         for ($i = 1; $i <= $totalPage; $i++) {
+            //玩家团队ajax链接
             $url = 'https://www.wanplus.com/ajax/detailranking?country=0&type=1&teamPage=' . $i . '&game=' . $gametype;
             $list = $AjaxModel->ajaxGetData($url);
-            if (!empty($list) && count($list) > 0) {
+            if (!empty($list) && count($list) > 0) {//每页战队数据组
                 foreach ($list as $val) {
+                    //战队url
                     $team_url = 'https://www.wanplus.com/' . $game . '/' . $mission_type . '/' . $val['teamid'];
                     $params = [
                         'game' => $game,
@@ -60,10 +62,10 @@ class TeamResultService
                         'source_link' => $team_url,
                     ];
 
-                    $site_id = $val['teamid'] ?? 0;
+                    $site_id = $val['teamid'] ?? 0;//原平台战队id
                     if ($site_id > 0) {
                         $teamInfo = $teamModel->getTeamBySiteId($site_id, 'wanplus', $game);
-                        if (empty($teamInfo)) {
+                        if (empty($teamInfo)) {//teaminfo表记录不存在
                             $result = $missionModel->getMissionCount($params);//过滤已经采集过的文章
                             $result = $result ?? 0;
                             $title = $val['teamname'] ?? '';
@@ -89,9 +91,14 @@ class TeamResultService
                                     ),
                                 ];
                                 $insert = (new oMission())->insertMission($data);
+                                echo "lol-information-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                            }else{
+                                echo "exits"."\n";//表示任务表存在记录，跳出继续
+                                continue;
                             }
                         }
                     } else {
+                        echo "exits"."\n";//表示teaminfo表记录，跳出继续
                         continue;
                     }
 
@@ -161,10 +168,13 @@ class TeamResultService
                             ),
                         ];
                         $insert = (new oMission())->insertMission($data);
+                        echo "lol-information-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                     } else {
+                        echo "lol-information exits"."\n";//表示任务表存在记录，跳出继续
                         continue;
                     }
                 } else {
+                    echo "team_info exits"."\n";//表示teaminfo表记录，跳出继续
                     continue;
                 }
 

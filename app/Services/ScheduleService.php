@@ -190,6 +190,9 @@ class ScheduleService
                             ];
                             $insert = (new oMission())->insertMission($data);
                             echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                        }else{
+                            echo "exits"."\n";//表示任务表存在记录，跳出继续
+                            continue;
                         }
                     }
                 }
