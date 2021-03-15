@@ -95,7 +95,6 @@ class gamedota2
             $arr['content']['tournament_id'] = md5($arr['content']['link']);
             $arr['content']['logo'] = getImage($arr['content']['logo']);
             $data['tournament'][] = getDataFromMapping($this->data_map['tournament'],$arr['content']);
-
         }
         elseif($arr['content']['type']=="match")
         {
