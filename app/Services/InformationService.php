@@ -173,6 +173,7 @@ class InformationService
                                 echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                             }
                         } else {
+                            echo "exits"."\n";
                             continue;
                         }
 
@@ -246,6 +247,9 @@ class InformationService
                         ];
                         $insert = (new oMission())->insertMission($data);
                         echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                    }else{
+                        echo "exits"."\n";
+                        continue;
                     }
 
                 }
@@ -377,7 +381,7 @@ class InformationService
                     $detail['source'] = 'wanplus';
                     $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                     $result = $result ?? 0;
-                    if ($result <= 0) {
+                    if ($result == 0) {
                         $data = [
                             "asign_to" => 1,
                             "mission_type" => 'information',//赛事
@@ -388,8 +392,13 @@ class InformationService
                             'source_link' => $detail['url'],
                             "detail" => json_encode($detail),
                         ];
-                        $insert = (new oMission())->insertMission($data);}
+                        $insert = (new oMission())->insertMission($data);
                         echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                    }else{
+                        echo "exits"."\n";
+                        continue;
+                    }
+
                 }
             }
 
