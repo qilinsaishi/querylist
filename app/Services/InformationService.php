@@ -388,8 +388,13 @@ class InformationService
                             'source_link' => $detail['url'],
                             "detail" => json_encode($detail),
                         ];
-                        $insert = (new oMission())->insertMission($data);}
+                        $insert = (new oMission())->insertMission($data);
                         echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                    }
+                    else
+                    {
+                        echo "insert: error"."\n";
+                    }
                 }
             }
 
