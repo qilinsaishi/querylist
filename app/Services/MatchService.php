@@ -16,7 +16,7 @@ class MatchService
     public function insertMatchData()
     {
         $gameItem = [
-            'kpl', 'lol',  'dota2'//, 'csgo'
+            'lol','kpl','dota2'//, 'csgo'
         ];
 
         foreach ($gameItem as $val) {
