@@ -65,6 +65,9 @@ class MatchService
                     ];
                     $insert = (new oMission())->insertMission($data);
                     echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                }else{
+                    echo "exits"."\n";
+                    continue;
                 }
 
             }
@@ -130,6 +133,9 @@ class MatchService
                     ];
                     $insert = (new oMission())->insertMission($data);
                     echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                }else{
+                    echo "exits"."\n";
+                    continue;
                 }
 
             }
@@ -171,6 +177,9 @@ class MatchService
                     ];
                     $insert = (new oMission())->insertMission($data);
                     echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                }else{
+                    echo "exits"."\n";
+                    continue;
                 }
 
             }
@@ -227,6 +236,9 @@ class MatchService
                                             ];
                                             $insert = (new oMission())->insertMission($cdata);
                                             echo "insert:".$insert.' lenth:'.strlen($cdata['detail'])."\n";
+                                        }else{
+                                            echo "exits"."\n";
+                                            continue;
                                         }
 
                                     }
@@ -271,6 +283,9 @@ class MatchService
                                         ];
                                         $insert = (new oMission())->insertMission($cdata);
                                         echo "insert:".$insert.' lenth:'.strlen($cdata['detail'])."\n";
+                                    }else{
+                                        echo "exits"."\n";
+                                        continue;
                                     }
 
                                 }
