@@ -398,7 +398,6 @@ class InformationService
                         echo "exits"."\n";
                         continue;
                     }
-
                 }
             }
 
