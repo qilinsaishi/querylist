@@ -86,7 +86,9 @@ class DataService
                 "detail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'id'],
             ],
             4=>[
-                "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'dota2',"source"=>"gamedota2","fields"=>'id'],
+                "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'dota2',"type"=>"1,2,3,4,5","source"=>"gamedota2","fields"=>'id'],
+                "videodetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'dota2',"type"=>"7","source"=>"gamedota2","fields"=>'id'],
+                "tournament"=>["dataType"=>"tournamentList","game"=>'dota2',"page"=>1,"page_size"=>1000,"source"=>"gamedota2","fields"=>'tournament_id'],
             ],
         ];
         $menu = $siteMapConfig[$data['site_id']]??[];
