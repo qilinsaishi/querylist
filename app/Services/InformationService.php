@@ -410,7 +410,6 @@ class InformationService
                         echo "exits"."\n";//已经存在
                         continue;
                     }
-
                 }
             }
 
