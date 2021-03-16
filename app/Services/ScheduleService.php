@@ -22,7 +22,7 @@ class ScheduleService
             if ($val == 'kpl' || $val == 'lol') {
                 $this->tournamentList($val);
             }
-             $this->insertWanplusSchedule($val);
+             //$this->insertWanplusSchedule($val);
              if ($val == 'dota2') {
                  $this->tournament($val);
              }
@@ -59,7 +59,8 @@ class ScheduleService
         if (isset($list['scheduleList'])) {
             foreach ($list['scheduleList'] as $val) {
                 //https://www.wanplus.com/schedule/68605.html
-                if ($val['list']) {
+                $val['list']=$val['list'] ?? [];
+                if (isset($val['list']) && count($val['list'])>0) {
                     foreach ($val['list'] as $v) {
                         $url = 'https://www.wanplus.com/schedule/' . $v['scheduleid'] . '.html';
                         $params1 = [
@@ -84,6 +85,7 @@ class ScheduleService
                                 "detail" => json_encode($v),
                             ];
                             $insert = (new oMission())->insertMission($data);
+                            echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                         }
 
                     }

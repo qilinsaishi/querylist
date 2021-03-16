@@ -62,9 +62,9 @@ class Mission extends Command
                 }
 
                 //采集战队入库
-                if($mission_type=='team'){
-                    (new TeamResultService())->insertTeamData($mission_type);
-                }
+                /*if($mission_type=='team'){
+                    (new TeamResultService())->insertTeamData($mission_type,$game);
+                }*/
                 //采集英雄入库
                 if($mission_type=='hero'){
                     (new HeroService())->insertHeroData();

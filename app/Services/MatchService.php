@@ -277,7 +277,7 @@ class MatchService
                                         $insert = (new oMission())->insertMission($cdata);
                                         echo "insert:".$insert.' lenth:'.strlen($cdata['detail'])."\n";
                                     }else{
-                                        echo "exits"."\n";
+                                        echo "exits"."\n";//任务表已经存在该数据
                                         continue;
                                     }
 

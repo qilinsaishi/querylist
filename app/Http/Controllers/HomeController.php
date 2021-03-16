@@ -116,8 +116,12 @@ class HomeController extends Controller
 
     public function index()
     {
-        $url='https://www.scoregg.com/services/api_url.php';
-        $limit=18;
+        $url='https://www.scoregg.com/big-data/team/5?tournamentID=&type=baike';
+        $qt=QueryList::get($url);
+      /*  $cn_name=$qt->find('.right-content .intro h2')->text();
+        $en_name=$qt->find('.left-content .card-info .player-more-info .text-label')->text();*/
+        /*$url='https://www.scoregg.com/services/api_url.php';
+        $limit=12;
         $gameId=1;
         $param=[
             'api_path'=>'/services/match/tournament_list.php',
@@ -147,7 +151,7 @@ class HomeController extends Controller
         }
         print_r($list);exit;
 
-        print_r($data);exit;
+        print_r($data);exit;*/
 
 
 
