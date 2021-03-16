@@ -271,7 +271,7 @@ class MissionService
                             }
                             if (isset($processResult['team']) && count($processResult['team'])>0)
                             {
-                                if($result['source'] == "gamedota2")
+                                if(in_array($result['source'],  ["scoregg","gamedota2"]))
                                 {
                                     $ModelClass = $teamModel;
                                     foreach($processResult['team'] as $key => $value)

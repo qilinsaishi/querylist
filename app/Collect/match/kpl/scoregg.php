@@ -21,7 +21,7 @@ class scoregg
                 'site_id'=>['path'=>"site_id",'default'=>0],//队伍ID
                 'team_name'=>['path'=>"team_name",'default'=>0],//队伍名称
                 'logo'=>['path'=>"logo",'default'=>''],//logo
-                'original_source'=>['path'=>"",'default'=>'gamedota2'],//初始来源
+                'original_source'=>['path'=>"",'default'=>'scoregg'],//初始来源
                 'aka'=>['path'=>"",'default'=>''],//别名
             ],
             'list'=>[
