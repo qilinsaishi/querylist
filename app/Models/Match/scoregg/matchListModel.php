@@ -131,7 +131,9 @@ class matchListModel extends Model
         if(!isset($currentMatch['match_id']))
         {
             echo "toInsertMatch:"."\n";
-            return $this->insertMatch($data);
+            $insert = $this->insertMatch($data);
+            $insert = ($insert==0)?$data['match_id']:0;
+            return $insert;
         }
         else
         {

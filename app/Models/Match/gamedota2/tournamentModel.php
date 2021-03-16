@@ -137,7 +137,9 @@ class tournamentModel extends Model
         if(!isset($currentTournament['tournament_id']))
         {
             echo "toInsertTournament:"."\n";
-            return $this->insertTournament($data);
+            $insert = $this->insertTournament($data);
+            $insert = ($insert==0)?1:0;
+            return $insert;
         }
         else
         {

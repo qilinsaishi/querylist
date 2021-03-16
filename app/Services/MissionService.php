@@ -386,10 +386,12 @@ class MissionService
                     } else {
                         echo "save:" . $save . "\n";
                         if ($save > 0) {
+                            echo "success\n";
                             $collectModel->updateStatus($result['id'], ['status' => 2]);
                         }
                         else
                         {
+                            echo "fail\n";
                             $collectModel->updateStatus($result['id'], ['status' => 3]);
                         }
                     }
