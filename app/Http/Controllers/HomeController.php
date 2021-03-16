@@ -118,8 +118,58 @@ class HomeController extends Controller
     {
         $url='https://www.scoregg.com/big-data/team/5?tournamentID=&type=baike';
         $qt=QueryList::get($url);
-      /*  $cn_name=$qt->find('.right-content .intro h2')->text();
-        $en_name=$qt->find('.left-content .card-info .player-more-info .text-label')->text();*/
+        $cn_name=$qt->find('.right-content .intro h2')->text();
+        $content=$qt->find('.right-content .baike-content')->html();
+        //荣誉历程
+        $history_honor=$qt->rules(array(
+            'match_time' => array('.td-item:eq(0)','text'),//时间
+            'ranking' => array('.td-item:eq(1)','text'),//荣誉/名词
+            'ranking_icon' => array('.td-item:eq(1) img','src'),//荣誉/名词 rank-icon
+            't_image' => array('.td-item:eq(2) img','src'),//赛事图片
+            't_name' => array('.td-item:eq(2) ','text'),//赛事名称
+            'team_a_image' => array('.td-item:eq(3) .team-a img','src'),//赛事图片
+            'team_name_a' => array('.td-item:eq(3)  .team-a ','html'),//赛事名称
+            'team_win' => array('.td-item:eq(3)  .vs-score ','text'),//赛事名称
+            'team_b_image' => array('.td-item:eq(3)  .team-b img','src'),//赛事图片
+            'team_name_b' => array('.td-item:eq(3)   .team-b ','html'),//赛事名称
+            'bonus' => array('.td-item:eq(4) ','text')//奖金
+    ))->range('.history-honor .article-list .article-table  .border-bottom')->queryData(function ($item){
+            $item['ranking']=trim($item['ranking']);
+            $tempNames_a=explode('alt="',$item['team_name_a']);
+            $tempNames_a=explode('" class="team-logo"',$tempNames_a[1]);
+            $item['team_name_a']=$tempNames_a[0] ?? '';
+            $tempWins=explode(' : ',$item['team_win']);
+            $item['team_a_win']=$tempWins[0] ?? 0;
+            $item['team_b_win']=$tempWins[1] ?? 0;
+            $tempNames_b=explode('alt="',$item['team_name_b']);
+            $tempNames_b=explode('" class="team-logo"',$tempNames_b[1]);
+            $item['team_name_b']=$tempNames_b[0] ?? '';
+            unset($item['team_win']);
+
+        return $item;
+    });
+        //现役队员
+        $play_list=$qt->rules(array(
+            'nickname' => array('td:eq(0) .name','text'),//队员昵称
+            'player_url' => array('td:eq(0)  a','href'),//队员id
+            'player_image' => array('td:eq(0) img','src'),//队员图片
+            'position_name' => array('td:eq(0) .id','text'),//位置
+            'join_time' => array('td:eq(2) ','text'),//加入时间
+            'contract_end_time' => array('td:eq(3)','text'),//合同到期时间
+        ))->range('.left-content .article-table .tr-item')->queryData(function ($item){
+            $playerID=str_replace('/big-data/player/','',$item['player_url']);
+            $item['player_url']='https://www.scoregg.com'.$item['player_url'];
+            $item['playerID']=$playerID;
+            return $item;
+        });
+        $bainfo=[
+            'cn_name'=>$cn_name,
+            'team_history'=>$content,
+            'play_list'=>$play_list,
+            'history_honor'=>$history_honor,
+        ];print_r($bainfo);exit;
+
+        //$en_name=$qt->find('.left-content .card-info .player-more-info .text-label')->text();
         /*$url='https://www.scoregg.com/services/api_url.php';
         $limit=12;
         $gameId=1;

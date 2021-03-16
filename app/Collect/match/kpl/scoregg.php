@@ -41,7 +41,7 @@ class scoregg
     public function collect($arr)
     {
         $cdata = [];
-        $res = $url = $arr['detail'] ?? [];
+        $res =$arr['detail'] ?? [];
         $type = $arr['detail']['type'] ?? '';
         if (!empty($res)) {
             //处理战队采集数据
