@@ -22,6 +22,7 @@ class wanplus
             "race_stat"=>['path'=>"raceStat",'default'=>[]],
             "original_source"=>['path'=>"",'default'=>"wanplus"],
             "site_id"=>['path'=>"site_id",'default'=>0],
+            "team_history"=>['path'=>"team_history",'default'=>"[]"],
         ];
     public function collect($arr)
     {

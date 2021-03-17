@@ -222,13 +222,20 @@ class TeamModel extends Model
                 return $return;
             }
         }
-        $currentTeam = $this->getTeamByName($data['team_name'],$game);
+        if($data['site_id'] != "" || $data['site_id'] != 0)
+        {
+            $currentTeam = $this->getTeamBySiteId($data['site_id'],$data['original_source'],$game);
+        }
+        else
+        {
+            $currentTeam = $this->getTeamByName($data['team_name'],$game);
+        }
         if(!isset($currentTeam['team_id']))
         {
             $return['team_id'] = $this->insertTeam(array_merge($data,["game"=>$game]));
             $return['result'] =  $return['team_id']?1:0;
             $return['site_id'] =  $return['team_id']?$data['site_id']:0;
-
+            return $return;
         }
         else
         {

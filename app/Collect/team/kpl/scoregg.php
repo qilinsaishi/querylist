@@ -8,6 +8,19 @@ class scoregg
 {
     protected $data_map =
         [
+            "team_name"=>['path'=>"team_name",'default'=>''],
+            "en_name"=>['path'=>"en_name",'default'=>''],
+            "aka"=>['path'=>"","default"=>""],
+            "location"=>['path'=>"","default"=>"未知"],
+            "established_date"=>['path'=>"",'default'=>"未知"],
+            "coach"=>['path'=>"",'default'=>"暂无"],
+            "logo"=>['path'=>"team_image",'default'=>''],
+            "description"=>['path'=>"",'default'=>"暂无"],
+            "race_stat"=>['path'=>"raceStat",'default'=>[]],
+            "original_source"=>['path'=>"",'default'=>"scoregg"],
+            "site_id"=>['path'=>"team_id",'default'=>0],
+            "honor_list"=>['path'=>"history_honor",'default'=>[]],
+            "team_history"=>['path'=>"team_history",'default'=>""],
         ];
     public function collect($arr)
     {
@@ -95,7 +108,16 @@ class scoregg
                 team_a_win => 2  //战队a比分
                 team_b_win => 3 //战队b比分
         ],//荣誉信息数组*/
-        var_dump($arr);
+        if(!preg_match('/[\x7f-\xff]/', $arr['content']['team_name']))
+        {
+            $arr['content']['en_name'] = $arr['content']['team_name'];
+        }
+
+        $arr['content']['team_image'] = getImage($arr['content']['team_image']);
+        $arr['content']['raceStat'] = ["win"=>intval($arr['content']['win']??0),"draw"=>0,"lose"=>intval($arr['content']['los']??0)];
+        $arr['content']['team_history'] = json_encode($arr['content']['team_history']??[]);
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
     //获取战队scoregg战队详情
     public function getScoreggInfo($url){
