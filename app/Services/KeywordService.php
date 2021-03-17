@@ -257,6 +257,10 @@ class KeywordService
             {
                 unset($top[$key]);
             }
+            if($word['times']==1)
+            {
+                unset($top[$key]);
+            }
         }
         $keywordMap = $scwsKeywordMapModel->saveMap($top);
         foreach($top as $key => $wordInfo)
