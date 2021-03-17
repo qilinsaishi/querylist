@@ -241,7 +241,7 @@ class KeywordService
         $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time"]);
         echo "start_to_process:".$information['id']."\n";
         $replace_arr = [
-            '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>''
+            '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&rsquo'=>'”'
         ];
         $content = (strip_tags(html_entity_decode($information['content'])));
         foreach($replace_arr as $k => $v)
