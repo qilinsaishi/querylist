@@ -240,7 +240,15 @@ class KeywordService
         scws_set_charset($sh, 'utf8');
         $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time"]);
         echo "start_to_process:".$information['id']."\n";
-        $text = strip_tags($information['content']);
+        $replace_arr = [
+            '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>''
+        ];
+        $content = (strip_tags(html_entity_decode($information['content'])));
+        foreach($replace_arr as $k => $v)
+        {
+            $content = str_replace($k,$v,$content);
+        }
+        $text = strip_tags($content);
         scws_send_text($sh, $text);
         $top = scws_get_tops($sh,10);
         foreach($top as $key => $word)
