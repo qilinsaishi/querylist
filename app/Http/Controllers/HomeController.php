@@ -116,6 +116,12 @@ class HomeController extends Controller
 
     public function index()
     {
+        $url='http://qilingsaishi-01.oss-cn-hangzhou.aliyuncs.com/storage/downloads/0888a90f7b73065e7ace05b692727b52.png';
+        //判断url是否有效
+        $headers=get_headers($url,1);
+        if(!preg_match('/200/',$headers[0])){
+            return  [];
+        }
         /*$url='https://www.scoregg.com/big-data/team/5?tournamentID=&type=baike';
         $qt=QueryList::get($url);
         $cn_name=$qt->find('.right-content .intro h2')->text();
