@@ -18,7 +18,7 @@ use App\Services\Data\RedisService;
 class KeywordService
 {
     public $expect_keywords = [
-        "nbsp","lt","gt","span","quot"
+        "nbsp","lt","gt","span","quot","160"
     ];
     //爬取数据
     public function information($game = "")
@@ -178,7 +178,7 @@ class KeywordService
         {
             if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
-                $count = substr_count(strip_tags($information['content']),$keyword);
+                $count = substr_count(strip_tags(html_entity_decode($information['content'])),$keyword);
                 if($count >= 1)
                 {
                     $another[$keyword] = ["id"=>$id,"count"=>$count] ;
@@ -189,7 +189,7 @@ class KeywordService
         {
             if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
-                $count = substr_count(strip_tags($information['content']),$keyword);
+                $count = substr_count(strip_tags(html_entity_decode($information['content'])),$keyword);
                 if($count >= 1)
                 {
                     $team[$keyword] = ["id"=>$team_id,"count"=>$count] ;
@@ -201,7 +201,7 @@ class KeywordService
         {
             if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
-                $count = substr_count(strip_tags($information['content']), $keyword);
+                $count = substr_count(strip_tags(html_entity_decode($information['content'])),$keyword);
                 if ($count >= 1)
                 {
                     $player[$keyword] = ["id" => $player_id, "count" => $count];
@@ -213,7 +213,7 @@ class KeywordService
         {
             if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
-                $count = substr_count(strip_tags($information['content']), $keyword);
+                $count = substr_count(strip_tags(html_entity_decode($information['content'])),$keyword);
                 if ($count >= 1)
                 {
                     $hero[$keyword] = ["id" => $hero_id, "count" => $count];
@@ -241,7 +241,7 @@ class KeywordService
         $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time"]);
         echo "start_to_process:".$information['id']."\n";
         $replace_arr = [
-            '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&rsquo'=>'”'
+            '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&lsquo'=>"'",'&rsquo'=>"'",'&rdquo'=>'”','&mdash'=>'-'
         ];
         $content = (strip_tags(html_entity_decode($information['content'])));
         foreach($replace_arr as $k => $v)
@@ -254,6 +254,10 @@ class KeywordService
         foreach($top as $key => $word)
         {
             if(in_array($word['word'],$this->expect_keywords))
+            {
+                unset($top[$key]);
+            }
+            if($word['times']==1)
             {
                 unset($top[$key]);
             }
