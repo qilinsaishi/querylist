@@ -18,7 +18,7 @@ use App\Services\Data\RedisService;
 class KeywordService
 {
     public $expect_keywords = [
-        "nbsp","lt","gt","span","quot"
+        "nbsp","lt","gt","span","quot","160"
     ];
     //爬取数据
     public function information($game = "")
