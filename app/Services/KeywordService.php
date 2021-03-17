@@ -178,7 +178,7 @@ class KeywordService
         {
             if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
-                $count = substr_count(strip_tags($information['content']),$keyword);
+                $count = substr_count(strip_tags(html_entity_decode($information['content'])),$keyword);
                 if($count >= 1)
                 {
                     $another[$keyword] = ["id"=>$id,"count"=>$count] ;
@@ -189,7 +189,7 @@ class KeywordService
         {
             if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
-                $count = substr_count(strip_tags($information['content']),$keyword);
+                $count = substr_count(strip_tags(html_entity_decode($information['content'])),$keyword);
                 if($count >= 1)
                 {
                     $team[$keyword] = ["id"=>$team_id,"count"=>$count] ;
@@ -201,7 +201,7 @@ class KeywordService
         {
             if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
-                $count = substr_count(strip_tags($information['content']), $keyword);
+                $count = substr_count(strip_tags(html_entity_decode($information['content'])),$keyword);
                 if ($count >= 1)
                 {
                     $player[$keyword] = ["id" => $player_id, "count" => $count];
@@ -213,7 +213,7 @@ class KeywordService
         {
             if(!in_array($keyword,$this->expect_keywords) && strlen($keyword)>=3 && strlen($keyword)<=20)
             {
-                $count = substr_count(strip_tags($information['content']), $keyword);
+                $count = substr_count(strip_tags(html_entity_decode($information['content'])),$keyword);
                 if ($count >= 1)
                 {
                     $hero[$keyword] = ["id" => $hero_id, "count" => $count];
