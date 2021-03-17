@@ -36,7 +36,7 @@ class MissionModel extends Model
      */
 
     public function getMissionByMachine($asign = 1, $count = 3, $game = '', $source = '', $mission_type = '', $status = [0, 1])
-    {echo 'game:'.$game.',mission_type:'.$mission_type.',source:'.$source."\n";
+    {//echo 'game:'.$game.',mission_type:'.$mission_type.',source:'.$source."\n";
         $mission_list = $this->select("*");
         //接收客户端
         if ($asign > 0) {

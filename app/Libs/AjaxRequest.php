@@ -218,6 +218,11 @@ class AjaxRequest
     public function getCollectWanplusTeam($url='')
     {
         $res=[];
+        //判断url是否有效
+        $headers=get_headers($url,1);
+        if(!preg_match('/200/',$headers[0])){
+            return  [];
+        }
         if ($url && strlen($url)>=6) {
             $ql = QueryList::get($url);
             $res['logo'] = $ql->find('#sharePic')->src;//战队logo

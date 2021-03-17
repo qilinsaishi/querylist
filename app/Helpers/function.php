@@ -425,6 +425,19 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
     }
 
 }
+//判断url是否正常打开
+function httpcode($url){
+    $ch = curl_init();
+    $timeout = 3;
+    curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+    curl_setopt($ch, CURLOPT_HEADER, 1);
+    curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+    curl_setopt($ch,CURLOPT_URL,$url);
+    curl_exec($ch);
+    return $httpcode = curl_getinfo($ch,CURLINFO_HTTP_CODE);
+    curl_close($ch);
+}
 function getAttrFromHTML($html,$attr_name)
 {
     $t = explode($attr_name,$html);

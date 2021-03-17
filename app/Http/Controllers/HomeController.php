@@ -180,7 +180,7 @@ class HomeController extends Controller
             'platform' => 'web',
             'api_version' => '9.9.9',
             'language_id' => 1,
-            'tournament_id' => 191,
+            'tournament_id' => '',
             'type' => 'player',
             'order_type' => 'KDA',
             'order_value' => 'DESC',
@@ -201,8 +201,8 @@ class HomeController extends Controller
                 $list[$i]=$cdata['data']['data']['list'] ?? 0;
                 if(count($list[$i])>0){
                     foreach ($list[$i] as $k=>&$val){
-                        $ajax_url='https://www.scoregg.com/big-data/player/'.$val['player_id'].'?tournamentID=191&type=baike';
-                        $val['ajax_url']=$ajax_url;
+                        $ajax_url='https://www.scoregg.com/big-data/player/'.$val['player_id'].'?tournamentID='.$tournament_id.'&type=baike';
+                        $val['player_url']=$ajax_url;
                     }
                 }
 
