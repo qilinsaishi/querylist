@@ -202,9 +202,7 @@ class HomeController extends Controller
                 if(count($list[$i])>0){
                     foreach ($list[$i] as $k=>&$val){
                         $ajax_url='https://www.scoregg.com/big-data/player/'.$val['player_id'].'?tournamentID=191&type=baike';
-                        print_r($ajax_url);exit;
                         $val['ajax_url']=$ajax_url;
-
                     }
                 }
 
