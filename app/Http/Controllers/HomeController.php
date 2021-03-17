@@ -116,7 +116,7 @@ class HomeController extends Controller
 
     public function index()
     {
-        $url='https://www.scoregg.com/big-data/team/5?tournamentID=&type=baike';
+        /*$url='https://www.scoregg.com/big-data/team/5?tournamentID=&type=baike';
         $qt=QueryList::get($url);
         $cn_name=$qt->find('.right-content .intro h2')->text();
         $content=$qt->find('.right-content .baike-content')->html();
@@ -167,31 +167,42 @@ class HomeController extends Controller
             'team_history'=>$content,
             'play_list'=>$play_list,
             'history_honor'=>$history_honor,
-        ];print_r($bainfo);exit;
+        ];print_r($bainfo);exit;*/
 
         //$en_name=$qt->find('.left-content .card-info .player-more-info .text-label')->text();
-        /*$url='https://www.scoregg.com/services/api_url.php';
-        $limit=12;
+        $url='https://www.scoregg.com/services/api_url.php';
+        //$limit=12;
         $gameId=1;
-        $param=[
-            'api_path'=>'/services/match/tournament_list.php',
-            'platform'=>'web',
-            'method'=>'post',
-            'language_id'=>1,
-            'gameID'=>$gameId,//2王者荣耀
-            'api_version'=>'9.9.9'
+        $tournament_id=191;
+        $param = [
+            'api_path' => '/services/gamingDatabase/match_data_ssdb_list.php',
+            'method' => 'post',
+            'platform' => 'web',
+            'api_version' => '9.9.9',
+            'language_id' => 1,
+            'tournament_id' => 191,
+            'type' => 'player',
+            'order_type' => 'KDA',
+            'order_value' => 'DESC',
+            'team_name' => '',
+            'player_name' => '',
+            'positionID' => '',
+            'page' => 1,
+
         ];
-        $data=curl_post($url,$param);print_r($data);exit;
-        $totalCount=$data['data']['count'] ?? 0;
+        $data=curl_post($url,$param);
+        $totalCount=$data['data']['data']['count'] ?? 0;
+        $pageCount=ceil($totalCount/12);
         if($totalCount !=0){
-            $totalPage=ceil($totalCount/$limit);
+            $totalPage=ceil($totalCount/12);
             for ($i=1;$i<=$totalPage;$i++){
                 $param['page']=$i;
                 $cdata=curl_post($url,$param);
-                $list[$i]=$cdata['data']['list'] ?? 0;
+                $list[$i]=$cdata['data']['data']['list'] ?? 0;
                 if(count($list[$i])>0){
                     foreach ($list[$i] as $k=>&$val){
-                        $ajax_url='https://img1.famulei.com/tr/'.$val['tournamentID'].'.json';
+                        $ajax_url='https://www.scoregg.com/big-data/player/'.$val['player_id'].'?tournamentID=191&type=baike';
+                        print_r($ajax_url);exit;
                         $val['ajax_url']=$ajax_url;
 
                     }
@@ -201,7 +212,7 @@ class HomeController extends Controller
         }
         print_r($list);exit;
 
-        print_r($data);exit;*/
+        print_r($data);exit;
 
 
 
