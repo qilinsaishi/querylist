@@ -69,7 +69,7 @@ class  PlayerService
                                         $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的文章
                                         $missionCount = $missionCount ?? 0;
                                         if ($missionCount !== 0) {
-                                            echo "exits-mission" . $key . '-' . $v['player_url'] . "\n";//表示Mission表记录已存在，跳出继续
+                                            echo "exist-mission" . $key . '-' . $v['player_url'] . "\n";//表示Mission表记录已存在，跳出继续
                                             continue; //表示Mission表记录已存在，跳出继续
                                         } else {
                                             $adata = [
@@ -86,7 +86,7 @@ class  PlayerService
                                             echo $game .$key. $k."-scoregg-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
                                         }
                                     } else {
-                                        echo "exits-playerinfo" . $key . '-' . $v['player_url'] . "\n";//表示playerinfo表记录已存在，跳出继续
+                                        echo "exist-playerinfo" . $key . '-' . $v['player_url'] . "\n";//表示playerinfo表记录已存在，跳出继续
                                         continue;
                                     }
                                 }

@@ -21,7 +21,7 @@ function curl_get($url, $referer = '')
     curl_setopt($curl, CURLOPT_TIMEOUT, 1);
 
     // 超时设置，以毫秒为单位
-    // curl_setopt($curl, CURLOPT_TIMEOUT_MS, 500);
+   curl_setopt($curl, CURLOPT_TIMEOUT_MS, 5000);
 
     // 设置请求头
      curl_setopt($curl, CURLOPT_HTTPHEADER, $header);

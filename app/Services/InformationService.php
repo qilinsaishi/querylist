@@ -19,12 +19,12 @@ class InformationService
         foreach ($gameItem as $val) {
             switch ($val) {
                 case "lol":
-                    $this->insertWanplusVideo($val);
-                    $this->insertLolInformation();
+                    //$this->insertWanplusVideo($val);
+                    //$this->insertLolInformation();
                     break;
                 case "kpl":
-                    $this->insertWanplusVideo($val);
-                    $this->insertKplInformation();
+                   // $this->insertWanplusVideo($val);
+                    //$this->insertKplInformation();
                     break;
                 case "dota2":
                     $typeList = ['news', 'gamenews', 'competition', 'news_update'];
@@ -142,7 +142,7 @@ class InformationService
                         $site_id = $val['iNewsId'] ?? 0;//原地址新闻id
                         $informationModel = new InformationModel();
                         $informationInfo = $informationModel->getInformationBySiteId($site_id, 'kpl', 'pvp_qq');
-                        if (count($informationInfo) <= 0) {//资讯在数据库不存在
+                        if (count($informationInfo) == 0) {//资讯在数据库不存在
                             $detail_url = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=' . $val['iNewsId'];//攻略
                             $params = [
                                 'game' => 'kpl',
@@ -173,11 +173,11 @@ class InformationService
                                 $insert = (new oMission())->insertMission($data);
                                 echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                             }else{
-                                echo "exits"."\n";//表示Mission表 记录存在,跳出继续
+                                echo "exits-mission-source_link".$detail_url."\n";//表示Mission表 记录存在,跳出继续
                                 continue;
                             }
                         } else {
-                            echo "exits"."\n";//表示Mission表 记录存在,跳出继续
+                            echo "exits-site_id".$site_id."\n";//表示Information表 记录存在,跳出继续
                             continue;
                         }
 
@@ -206,7 +206,14 @@ class InformationService
             } else {
                 $url = 'https://www.dota2.com.cn/news/' . $gametype . '/index' . $m . '.htm';
             }
-            echo $url."\n";
+
+            //判断url是否有效
+            $headers=get_headers($url,1);
+            if(!preg_match('/200/',$headers[0])){
+                echo "url:".$url."\n";
+                continue;
+            }
+
             //获取所有的url下面的所有a链接
             $urlall = QueryList::get($url)->find("#news_lists .panes .active a")->attrs('href')->all();
 
@@ -228,6 +235,12 @@ class InformationService
                         'mission_type' => 'information',
                         'source_link' => $val,
                     ];
+                    $site_id = substr($val,strrpos($val,'/')+1,strlen($val)-1);
+                    if(strpos($site_id,'.html')){
+                        $site_id=rtrim($site_id,'.html');
+                    }
+                    $site_id=intval($site_id);
+
                     $result = $missionModel->getMissionCount($params);
                     //过滤已经采集过的文章
                     $result = $result ?? 0;
@@ -257,7 +270,7 @@ class InformationService
                         $insert = (new oMission())->insertMission($data);
                         echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                     }else{
-                        echo "exits"."\n";//表示Mission表 记录存在
+                        echo "mission-exits-source_link:".$val."\n";//表示Mission表 记录存在
                         continue;
                     }
 
@@ -358,6 +371,7 @@ class InformationService
         }
         $AjaxModel = new AjaxRequest();
         $missionModel = new MissionModel();
+        $informationModel=new InformationModel();
         for($i=1;$i<=$totalpages;$i++){
             $url='https://www.wanplus.com/ajax/video/getlist?gametype='.$gametype.'&page='.$i.'&totalpages=62&type=video&subject=&subSubject=&sort=new';
             $cdata=$AjaxModel->ajaxGetData($url);//获取视频每一页数据
@@ -391,25 +405,35 @@ class InformationService
                     $detail['url'] = $detail['url'] ?? '';
                     $detail['game'] = $game;
                     $detail['source'] = 'wanplus';//来源https://www.wanplus.com
-                    $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
-                    $result = $result ?? 0;
-                    if ($result == 0) {//表示任务表不存在，则插入数据
-                        $data = [
-                            "asign_to" => 1,
-                            "mission_type" => 'information',//赛事
-                            "mission_status" => 1,
-                            "game" => $game,
-                            "source" => 'wanplus',//
-                            'title' => $val['title'] ?? '',
-                            'source_link' => $detail['url'],
-                            "detail" => json_encode($detail),
-                        ];
-                        $insert = (new oMission())->insertMission($data);
-                        echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                    $informationInfo=$informationModel->getInformationBySiteId($val['id'],$game,'wanplus');
+                    $informationInfo=$informationInfo ?? [];
+                    if (count($informationInfo) == 0) {
+                        $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                        $result = $result ?? 0;
+                        if ($result == 0) {//表示任务表不存在，则插入数据
+                            $data = [
+                                "asign_to" => 1,
+                                "mission_type" => 'information',//赛事
+                                "mission_status" => 1,
+                                "game" => $game,
+                                "source" => 'wanplus',//
+                                'title' => $val['title'] ?? '',
+                                'source_link' => $detail['url'],
+                                "detail" => json_encode($detail),
+                            ];
+                            $insert = (new oMission())->insertMission($data);
+                            echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                        }else{
+                            //表示Mission表记录已存在，跳出继续
+                            echo "exist-mission" . '-source_link:'.$detail['url']. "\n";
+                            continue;
+                        }
                     }else{
-                        echo "exits"."\n";//已经存在
+                        //表示information表记录已存在，跳出继续
+                        echo "exits-information:" .  '-site_id:' . $val['id'] . "\n";
                         continue;
                     }
+
                 }
             }
 
