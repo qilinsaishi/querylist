@@ -7,9 +7,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class ScwsMapModel extends Model
+class CorewordMapModel extends Model
 {
-    protected $table = "scws_map";
+    protected $table = "coreword_map";
     protected $primaryKey = "id";
     public $timestamps = false;
     protected $connection = "query_list";
@@ -49,25 +49,20 @@ class ScwsMapModel extends Model
     {
         return $this->where('content_id',$id)->delete();
     }
-    public function saveMap($id,$game,$type,$content_type,$mapList,$keywordMapList,$time)
+    public function saveMap($id,$game,$type,$content_type,$mapList,$time)
     {
         echo "content_id:".$id."\n";
         echo "deleted:".$this->deleteByContent($id,$type)."\n";
-        foreach($mapList as $keyword_info)
+        foreach($mapList as $keyword_id => $keyword)
         {
-            {
-                $map = ['keyword'=>$keyword_info['word'],
-                    'keyword_id'=>$keyword_info['keyword_id'],
-                    "weight"=>$keyword_info['weight'],
-                    "attr"=>$keyword_info['attr'],
+                $map = ['keyword'=>$keyword,
+                    'keyword_id'=>$keyword_id,
                     "content_id"=>$id,
-                    "count"=>$keyword_info['times'],
                     "content_time"=>$time,
                     "content_type"=>$content_type,
                     "game"=>$game,
                 ];
                 $this->insert($map);
-            }
         }
         return;
     }
@@ -114,7 +109,7 @@ class ScwsMapModel extends Model
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
             ->groupBy('content_id')
-            ->orderBy("weight","desc")
+            ->orderBy("id","desc")
             ->get()->toArray();
         return $keyword_list;
     }

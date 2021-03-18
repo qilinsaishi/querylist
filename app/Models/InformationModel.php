@@ -62,6 +62,11 @@ class InformationModel extends Model
         {
             $information_list = $information_list->where("scws",$params['scws']>0?1:0);
         }
+        //是否需要处理5118关键字
+        if(isset($params['5118']))
+        {
+            $information_list = $information_list->where("5118_word",$params['5118']>0?1:0);
+        }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
@@ -252,6 +257,11 @@ class InformationModel extends Model
         if(isset($params['scws']))
         {
             $information_count = $information_count->where("scws",$params['scws']>0?1:0);
+        }
+        //是否需要处理关键字
+        if(isset($params['5118']))
+        {
+            $information_count = $information_count->where("5118_word",$params['5118']>0?1:0);
         }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)

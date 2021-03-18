@@ -6,6 +6,8 @@ use App\Models\InformationModel;
 use App\Models\KeywordMapModel;
 use App\Models\ScwsMapModel;
 use App\Models\ScwsKeywordMapModel;
+use App\Models\CorewordModel;
+use App\Models\CorewordMapModel;
 use App\Models\TeamModel as TeamModel;
 use App\Models\PlayerModel as PlayerModel;
 use App\Models\KeywordsModel as KeywordsModel;
@@ -161,6 +163,22 @@ class KeywordService
             $this->processScws($content_id,$informationModel);
         }
     }
+    //爬取数据
+    public function coreword($game = "")
+    {
+//        $redisService = new RedisService();
+        $informationModel = (new InformationModel());
+        //       $scwsMapModel = (new ScwsMapModel());
+        //       $scwsKeywordMapModel = (new ScwsKeywordMapModel());
+        $result = [];
+        $informationList = $informationModel->getInformationList(["game"=>$game,"5118"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = array_column($informationList,"id");
+
+        foreach($informationList as $content_id)
+        {
+            $this->process5118($content_id,$informationModel);
+        }
+    }
     public function processKeyword($content_id,$informationModel)
     {
         echo "start to process:".$content_id."\n";
@@ -275,5 +293,71 @@ class KeywordService
         echo "count:".count($top)."\n";
         $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time']);
         $data = $redisService->refreshCache("information",[strval($information['id'])]);
+    }
+    public function process5118($content_id,$informationModel)
+    {
+        $redisService = new RedisService();
+        $corewordModel = new CorewordModel();
+        $corewordMapModel = new CorewordMapModel();
+        $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time"]);
+        echo "start_to_process:".$information['id']."\n";
+        $replace_arr = [
+            '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&lsquo'=>"'",'&rsquo'=>"'",'&rdquo'=>'”','&mdash'=>'-'
+        ];
+        $content = (strip_tags(html_entity_decode($information['content'])));
+        foreach($replace_arr as $k => $v)
+        {
+            $content = str_replace($k,$v,$content);
+        }
+        $text = strip_tags($content);
+        $return = $this->api_5118($content,"coreword");
+        $return['data'] = $return['data']??[];
+        foreach($return['data'] as $key => $word)
+        {
+            if(in_array($word,$this->expect_keywords))
+            {
+                unset($return['data'][$key]);
+            }
+        }
+        $keywordMap = $corewordModel->saveMap($return['data']);
+
+        $informationModel->updateInformation($information['id'],['5118_word'=>0,'5118_word_list'=> array_flip($keywordMap)]);
+        print_R(array_flip($keywordMap));
+        echo "count:".count($keywordMap)."\n";
+        $corewordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],array_flip($keywordMap),$information['create_time']);
+        $data = $redisService->refreshCache("information",[strval($information['id'])]);
+    }
+    public function api_5118($text,$type="coreword")
+    {
+        if($type=="rewrite")
+        {
+            $data = ["txt"=>$text,"sim"=>1];
+            $path = "/wyc/rewrite";
+            $apikey = config("app.5118.rewrite");
+        }
+        elseif($type=="coreword")
+        {
+            $data = ["txt"=>$text];
+            $path = "/coreword";
+            $apikey = config("app.5118.coreword");
+        }
+        elseif($type=="abstract")
+        {
+            $data = ["txt"=>$text];
+            $path = "/abstract";
+            $apikey = config("app.5118.abstract");
+        }
+        $header = [
+            "Authorization:" . $apikey,
+            "Content-Type".":"."application/x-www-form-urlencoded; charset=UTF-8"
+        ];
+        $host = "https://apis.5118.com";
+        $method = "POST";
+        $headers = array();
+        $querys = "";
+        $bodys = "txt=".urlencode($text);
+        $url = $host . $path;
+        $return = curl_post($url,$bodys,$header);
+        return $return;
     }
 }

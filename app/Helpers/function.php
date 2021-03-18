@@ -76,11 +76,20 @@ function curl_get($url, $referer = '')
 
 // $url 是请求的链接
 // $postdata 是传输的数据，数组格式
-function curl_post($url = '', $postdata = '')
+function curl_post($url = '', $postdata = '',$header = [])
 {
 
     //初始化
     $curl = curl_init();
+    if(count($header)>0)
+    {
+        $headers = array();
+        foreach($header as  $value)
+        {
+            array_push($headers,$value);
+        }
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+    }
     //设置抓取的url
     curl_setopt($curl, CURLOPT_URL, $url);
     //设置头文件的信息作为数据流输出
