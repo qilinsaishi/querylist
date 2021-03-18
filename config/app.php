@@ -16,6 +16,11 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
     'asign' => env('ASIGN', 1),
     'logs_root' => env('LOGS_ROOT'),
+    '5118'=>[
+        'abstract'=>env('5118_abstract_key'),
+        'coreword'=>env('5118_coreword_key'),
+        'rewrite'=>env('5117_rewrite_key'),
+    ],
     /*
     |--------------------------------------------------------------------------
     | Application Environment
