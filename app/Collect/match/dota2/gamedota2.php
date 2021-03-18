@@ -130,6 +130,7 @@ class gamedota2
             }
             elseif($arr['content']['subtype']=="international")
             {
+                $arr['content']['timestamp'] = date("Y-m-d H:i:s");
                 $arr['content']['team1']['logo'] = getImage($arr['content']['team1']['logo']);
                 $arr['content']['team2']['logo'] = getImage($arr['content']['team2']['logo']);
                 $data['team'][] = getDataFromMapping($this->data_map['team'],$arr['content']['team1']);

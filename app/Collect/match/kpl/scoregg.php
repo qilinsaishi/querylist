@@ -21,7 +21,7 @@ class scoregg
                 'site_id'=>['path'=>"site_id",'default'=>0],//队伍ID
                 'team_name'=>['path'=>"team_name",'default'=>0],//队伍名称
                 'logo'=>['path'=>"logo",'default'=>''],//logo
-                'original_source'=>['path'=>"",'default'=>'gamedota2'],//初始来源
+                'original_source'=>['path'=>"",'default'=>'scoregg'],//初始来源
                 'aka'=>['path'=>"",'default'=>''],//别名
             ],
             'list'=>[
@@ -100,6 +100,7 @@ class scoregg
         }
         else
         {
+            /*
             $team = [
                 ['site_id'=>$arr['content']['teamID_a'],'team_name'=>$arr['content']['team_a_name'],'logo'=>getImage($arr['content']['team_a_image'])],
                 ['site_id'=>$arr['content']['teamID_b'],'team_name'=>$arr['content']['team_b_name'],'logo'=>getImage($arr['content']['team_b_image'])],
@@ -108,6 +109,7 @@ class scoregg
             {
                 $team[$key] =  getDataFromMapping($this->data_map['team'],$teamInfo);
             }
+            */
             foreach($arr['content']['result_list'] as $key => $data)
             {
                 if(isset($data['record_list_a']))

@@ -271,7 +271,7 @@ class MissionService
                             }
                             if (isset($processResult['team']) && count($processResult['team'])>0)
                             {
-                                if($result['source'] == "gamedota2")
+                                if(in_array($result['source'],  ["scoregg","gamedota2"]))
                                 {
                                     $ModelClass = $teamModel;
                                     foreach($processResult['team'] as $key => $value)
@@ -386,10 +386,12 @@ class MissionService
                     } else {
                         echo "save:" . $save . "\n";
                         if ($save > 0) {
+                            echo "success\n";
                             $collectModel->updateStatus($result['id'], ['status' => 2]);
                         }
                         else
                         {
+                            echo "fail\n";
                             $collectModel->updateStatus($result['id'], ['status' => 3]);
                         }
                     }
