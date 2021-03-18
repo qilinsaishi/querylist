@@ -24,17 +24,7 @@ class TeamResultService
         //采集cpseo（2cpseo.com）战队信息
          $this->insertCpseoTeam($game, $mission_type);
 
-        /*foreach ($gameItem as $val) {
-            if($val=='kpl'){
-                $this->getScoreggMatchDetail($val);
-            }
-            if($val=='lol'){
-                $this->getScoreggMatchDetail($val);
-                break;
-            }
 
-
-        }*/
         return 'finish';
     }
 

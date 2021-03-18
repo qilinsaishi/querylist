@@ -14,24 +14,24 @@ class InformationService
 {
     public function insertData()
     {
-        $gameItem = ['lol','dota2','kpl','csgo'];
+        $gameItem = ['lol', 'dota2', 'kpl', 'csgo'];
 
         foreach ($gameItem as $val) {
             switch ($val) {
                 case "lol":
-                    //$this->insertWanplusVideo($val);
-                    //$this->insertLolInformation();
+                    $this->insertWanplusVideo($val);
+                    $this->insertLolInformation();
                     break;
                 case "kpl":
-                   // $this->insertWanplusVideo($val);
-                    //$this->insertKplInformation();
+                     $this->insertWanplusVideo($val);
+                    $this->insertKplInformation();
                     break;
                 case "dota2":
                     $typeList = ['news', 'gamenews', 'competition', 'news_update'];
                     $raidersList = ['raiders', 'newer', 'step', 'skill'];
-                    foreach ($typeList as $v1) {
-                        $this->insertDota2Information($v1);
-                    }
+                     foreach ($typeList as $v1) {
+                         $this->insertDota2Information($v1);
+                     }
                     foreach ($raidersList as $v2) {
                         $this->insertDota2Raiders($v2);
                     }
@@ -92,8 +92,8 @@ class InformationService
                     ];
                     $insert = (new oMission())->insertMission($data);
                     echo "lol-information-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
-                }else{
-                    echo "exits"."\n";//表示任务表存在记录，跳出继续
+                } else {
+                    echo "mission-exits-lol-lol_qq-information" . "\n";//表示任务表存在记录，跳出继续
                     continue;
                 }
                 $t2 = microtime(true);
@@ -171,13 +171,13 @@ class InformationService
                                     ),
                                 ];
                                 $insert = (new oMission())->insertMission($data);
-                                echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
-                            }else{
-                                echo "exits-mission-source_link".$detail_url."\n";//表示Mission表 记录存在,跳出继续
+                                echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                            } else {
+                                echo "exits-mission-source_link" . $detail_url . "\n";//表示Mission表 记录存在,跳出继续
                                 continue;
                             }
                         } else {
-                            echo "exits-site_id".$site_id."\n";//表示Information表 记录存在,跳出继续
+                            echo "exits-site_id" . $site_id . "\n";//表示Information表 记录存在,跳出继续
                             continue;
                         }
 
@@ -208,9 +208,9 @@ class InformationService
             }
 
             //判断url是否有效
-            $headers=get_headers($url,1);
-            if(!preg_match('/200/',$headers[0])){
-                echo "url:".$url."\n";
+            $headers = get_headers($url, 1);
+            if (!preg_match('/200/', $headers[0])) {
+                echo "url:" . $url . "\n";
                 continue;
             }
 
@@ -235,42 +235,57 @@ class InformationService
                         'mission_type' => 'information',
                         'source_link' => $val,
                     ];
-                    $site_id = substr($val,strrpos($val,'/')+1,strlen($val)-1);
-                    if(strpos($site_id,'.html')){
-                        $site_id=rtrim($site_id,'.html');
+                    //获取原来资讯id
+                    $site_id = substr($val, strrpos($val, '/') + 1, strlen($val) - 1);
+                    if (strpos($site_id, '.html')) {
+                        $site_id = rtrim($site_id, '.html');
+                        $site_id = intval($site_id);
                     }
-                    $site_id=intval($site_id);
-
-                    $result = $missionModel->getMissionCount($params);
-                    //过滤已经采集过的文章
-                    $result = $result ?? 0;
-                    if ($result <= 0) {//表示Mission 记录不存在
-                        $data = [
-                            "asign_to" => 1,
-                            "mission_type" => 'information',//资讯
-                            "mission_status" => 1,
-                            "game" => 'dota2',
-                            "source" => 'gamedota2',//
-                            'title' => $title ?? '',
-                            'source_link' => $val,
-                            "detail" => json_encode(
-                                [
-                                    "url" => $val,
-                                    "game" => 'dota2',//dota2
-                                    "source" => 'gamedota2',//资讯
-                                    'type' => 'dota2',
-                                    'remark' => $remark,
-                                    'create_time' => $create_time,
-                                    'logo' => $logo,
-                                    'type' => $gametype,//1=>gamenews
-                                    'author' => '官网资讯'
-                                ]
-                            ),
-                        ];
-                        $insert = (new oMission())->insertMission($data);
-                        echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
-                    }else{
-                        echo "mission-exits-source_link:".$val."\n";//表示Mission表 记录存在
+                    $site_id = $site_id ?? 0;
+                    if ($site_id > 0) {
+                        $informationModel = new InformationModel();
+                        $informationInfo = $informationModel->getInformationBySiteId($site_id, 'dota2', 'gamedota2');
+                        $informationInfo = $informationInfo ?? [];
+                        if (count($informationInfo) == 0) {
+                            $result = $missionModel->getMissionCount($params);
+                            //过滤已经采集过的文章
+                            $result = $result ?? 0;
+                            if ($result <= 0) {//表示Mission 记录不存在
+                                $data = [
+                                    "asign_to" => 1,
+                                    "mission_type" => 'information',//资讯
+                                    "mission_status" => 1,
+                                    "game" => 'dota2',
+                                    "source" => 'gamedota2',//
+                                    'title' => $title ?? '',
+                                    'source_link' => $val,
+                                    "detail" => json_encode(
+                                        [
+                                            "url" => $val,
+                                            "game" => 'dota2',//dota2
+                                            "source" => 'gamedota2',//资讯
+                                            //'type' => 'dota2',
+                                            'remark' => $remark,
+                                            'create_time' => $create_time,
+                                            'logo' => $logo,
+                                            'type' => $gametype,//1=>gamenews
+                                            'author' => '官网资讯'
+                                        ]
+                                    ),
+                                ];
+                                $insert = (new oMission())->insertMission($data);
+                                echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                            } else {
+                                echo "mission-exits-dota2-source_link:" . $val . "-type" . $gametype . "\n";//表示Mission表 记录存在
+                                continue;
+                            }
+                        } else {
+                            //表示information表记录已存在，跳出继续
+                            echo "exits-dota2-information-type:" . $gametype . '-site_id:' . $site_id . "\n";
+                            continue;
+                        }
+                    } else {
+                        echo 'site:' . $site_id;
                         continue;
                     }
 
@@ -294,6 +309,12 @@ class InformationService
             } else {
                 $url = 'https://www.dota2.com.cn/raiders/' . $gametype . '/index' . $m . '.htm#hd_li';
             }
+            //判断url是否有效
+            $headers = get_headers($url, 1);
+            if (!preg_match('/200/', $headers[0])) {
+                echo "url:" . $url . "\n";
+                continue;
+            }
             //获取所有的url下面的所有a链接
             $urlall = QueryList::get($url)->find(".content .hd_li .img_left a")->attrs('href')->all();
 
@@ -309,41 +330,61 @@ class InformationService
                     if (strpos($logo, 'https') === false) {
                         $logo = 'https:' . $logo;
                     }
-                    $params = [
-                        'game' => 'dota2',
-                        'mission_type' => 'information',
-                        'source_link' => $val,
-                    ];
-                    $result = $missionModel->getMissionCount($params);
-                    //过滤已经采集过的文章
-                    $result = $result ?? 0;
-                    if ($result == 0) {//表示Mission 记录不存在
-                        $data = [
-                            "asign_to" => 1,
-                            "mission_type" => 'information',//资讯
-                            "mission_status" => 1,
-                            "game" => 'dota2',
-                            "source" => 'gamedota2',//
-                            'title' => $title ?? '',
-                            'source_link' => $val,
-                            "detail" => json_encode(
-                                [
-                                    "url" => $val,
-                                    "game" => 'dota2',//dota2
-                                    "source" => 'gamedota2',//资讯
-                                    'type' => 'dota2',
-                                    'remark' => $remark,
-                                    'create_time' => $create_time,
-                                    'logo' => $logo,
-                                    'type' => 'raiders',//1=>gamenews
-                                    'author' => '官网攻略'
-                                ]
-                            ),
-                        ];
-                        $insert = (new oMission())->insertMission($data);
-                        echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
-                    }else{
-                        echo "exits"."\n";//表示Mission 记录存在
+                    //获取原来资讯id
+                    $site_id = substr($val, strrpos($val, '/') + 1, strlen($val) - 1);
+                    if (strpos($site_id, '.html')) {
+                        $site_id = rtrim($site_id, '.html');
+                        $site_id = intval($site_id);
+                    }
+                    $site_id = $site_id ?? 0;
+                    if ($site_id > 0) {
+                        $informationModel = new InformationModel();
+                        $informationInfo = $informationModel->getInformationBySiteId($site_id, 'dota2', 'gamedota2');
+                        $informationInfo = $informationInfo ?? [];
+                        if (count($informationInfo) == 0) {
+                            $params = [
+                                'game' => 'dota2',
+                                'mission_type' => 'information',
+                                'source_link' => $val,
+                            ];
+                            $result = $missionModel->getMissionCount($params);
+                            //过滤已经采集过的文章
+                            $result = $result ?? 0;
+                            if ($result == 0) {//表示Mission 记录不存在
+                                $data = [
+                                    "asign_to" => 1,
+                                    "mission_type" => 'information',//资讯
+                                    "mission_status" => 1,
+                                    "game" => 'dota2',
+                                    "source" => 'gamedota2',//
+                                    'title' => $title ?? '',
+                                    'source_link' => $val,
+                                    "detail" => json_encode(
+                                        [
+                                            "url" => $val,
+                                            "game" => 'dota2',//dota2
+                                            "source" => 'gamedota2',//资讯
+                                            'remark' => $remark,
+                                            'create_time' => $create_time,
+                                            'logo' => $logo,
+                                            'type' => 'raiders',//1=>gamenews
+                                            'author' => '官网攻略'
+                                        ]
+                                    ),
+                                ];
+                                $insert = (new oMission())->insertMission($data);
+                                echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                            } else {
+                                echo "exits" . "\n";//表示Mission 记录存在
+                                continue;
+                            }
+                        } else {
+                            //表示information表记录已存在，跳出继续
+                            echo "exits-dota2-information-type:" . $gametype . '-site_id:' . $site_id . "\n";
+                            continue;
+                        }
+                    } else {
+                        echo 'site:' . $site_id;
                         continue;
                     }
 
@@ -357,7 +398,7 @@ class InformationService
     //视频采集
     public function insertWanplusVideo($game)
     {
-        $totalpages=62;
+        $totalpages = 62;
         if ($game == 'dota2') {
             $gametype = 1;
 
@@ -371,31 +412,31 @@ class InformationService
         }
         $AjaxModel = new AjaxRequest();
         $missionModel = new MissionModel();
-        $informationModel=new InformationModel();
-        for($i=1;$i<=$totalpages;$i++){
-            $url='https://www.wanplus.com/ajax/video/getlist?gametype='.$gametype.'&page='.$i.'&totalpages=62&type=video&subject=&subSubject=&sort=new';
-            $cdata=$AjaxModel->ajaxGetData($url);//获取视频每一页数据
-            $cdata=$cdata['list'] ?? [];
-            if(count($cdata) > 0){
-                foreach ($cdata as $val){
-                    if($game=='kpl'){//王者荣耀视频详情链接
-                        $video_url='https://www.wanplus.com/kog/video/'.$val['id'];
-                    }else{//除了王者荣耀视频详情链接
-                        $video_url='https://www.wanplus.com/'.$game.'/video/'.$val['id'];
+        $informationModel = new InformationModel();
+        for ($i = 1; $i <= $totalpages; $i++) {
+            $url = 'https://www.wanplus.com/ajax/video/getlist?gametype=' . $gametype . '&page=' . $i . '&totalpages=62&type=video&subject=&subSubject=&sort=new';
+            $cdata = $AjaxModel->ajaxGetData($url);//获取视频每一页数据
+            $cdata = $cdata['list'] ?? [];
+            if (count($cdata) > 0) {
+                foreach ($cdata as $val) {
+                    if ($game == 'kpl') {//王者荣耀视频详情链接
+                        $video_url = 'https://www.wanplus.com/kog/video/' . $val['id'];
+                    } else {//除了王者荣耀视频详情链接
+                        $video_url = 'https://www.wanplus.com/' . $game . '/video/' . $val['id'];
                     }
-                    $detail=[
-                        'url'=>$video_url,
-                        'title'=>$val['title'],//标题
-                        'author'=>$val['anchor'],//作者
-                        'create_time'=>date("Y-m-d H:i:s",$val['created']),
-                        'duration'=>$val['duration'],//时长
-                        'logo'=>$val['img'],//简介
-                        'remark'=>$val['title'],//简介
-                        'game'=>$game,//游戏
-                        'site_id'=>$val['id'],//站点id
-                        'source'=>'wanplus',//来源
-                        'gametype'=>$gametype,//游戏类型
-                        'type'=>'video'//资讯类型
+                    $detail = [
+                        'url' => $video_url,
+                        'title' => $val['title'],//标题
+                        'author' => $val['anchor'],//作者
+                        'create_time' => date("Y-m-d H:i:s", $val['created']),
+                        'duration' => $val['duration'],//时长
+                        'logo' => $val['img'],//简介
+                        'remark' => $val['title'],//简介
+                        'game' => $game,//游戏
+                        'site_id' => $val['id'],//站点id
+                        'source' => 'wanplus',//来源
+                        'gametype' => $gametype,//游戏类型
+                        'type' => 'video'//资讯类型
                     ];
                     $params1 = [
                         'game' => $game,
@@ -405,8 +446,8 @@ class InformationService
                     $detail['url'] = $detail['url'] ?? '';
                     $detail['game'] = $game;
                     $detail['source'] = 'wanplus';//来源https://www.wanplus.com
-                    $informationInfo=$informationModel->getInformationBySiteId($val['id'],$game,'wanplus');
-                    $informationInfo=$informationInfo ?? [];
+                    $informationInfo = $informationModel->getInformationBySiteId($val['id'], $game, 'wanplus');
+                    $informationInfo = $informationInfo ?? [];
                     if (count($informationInfo) == 0) {
                         $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                         $result = $result ?? 0;
@@ -422,15 +463,15 @@ class InformationService
                                 "detail" => json_encode($detail),
                             ];
                             $insert = (new oMission())->insertMission($data);
-                            echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
-                        }else{
+                            echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                        } else {
                             //表示Mission表记录已存在，跳出继续
-                            echo "exist-mission" . '-source_link:'.$detail['url']. "\n";
+                            echo "exist-mission" . '-source_link:' . $detail['url'] . "\n";
                             continue;
                         }
-                    }else{
+                    } else {
                         //表示information表记录已存在，跳出继续
-                        echo "exits-information:" .  '-site_id:' . $val['id'] . "\n";
+                        echo "exits-information:" . '-site_id:' . $val['id'] . "\n";
                         continue;
                     }
 

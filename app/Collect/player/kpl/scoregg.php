@@ -175,9 +175,9 @@ class scoregg
         $baseinfo = [
             'country' => $country ?? '',//国家
             'birthday' => $birthday ?? '',//出生
-            'status' => trim($status) ?? [],//主力状态
-            'position' => $position ?? [],//位置
-            'history_honor' => $history_honor,
+            'status' => trim($status) ?? '',//主力状态
+            'position' => $position ?? '',//位置
+            'history_honor' => $history_honor ?? [],
             'content' => $content,
         ];
         return $baseinfo;

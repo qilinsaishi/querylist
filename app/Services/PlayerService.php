@@ -89,6 +89,9 @@ class  PlayerService
                                         echo "exist-playerinfo" . $key . '-' . $v['player_url'] . "\n";//表示playerinfo表记录已存在，跳出继续
                                         continue;
                                     }
+                                }else{
+                                    echo "player_id:".$v['player_id'];
+                                    continue;
                                 }
 
                             }
