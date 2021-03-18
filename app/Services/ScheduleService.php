@@ -6,6 +6,7 @@ use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\InformationModel;
+use App\Models\Match\scoregg\tournamentModel;
 use App\Models\MissionModel;
 use App\Services\MissionService as oMission;
 use QL\QueryList;
@@ -22,7 +23,7 @@ class ScheduleService
             if ($val == 'kpl' || $val == 'lol') {
                 $this->tournamentList($val);
             }
-             $this->insertWanplusSchedule($val);
+             //$this->insertWanplusSchedule($val);
              if ($val == 'dota2') {
                  $this->tournament($val);
              }
@@ -59,7 +60,8 @@ class ScheduleService
         if (isset($list['scheduleList'])) {
             foreach ($list['scheduleList'] as $val) {
                 //https://www.wanplus.com/schedule/68605.html
-                if ($val['list']) {
+                $val['list']=$val['list'] ?? [];
+                if (isset($val['list']) && count($val['list'])>0) {
                     foreach ($val['list'] as $v) {
                         $url = 'https://www.wanplus.com/schedule/' . $v['scheduleid'] . '.html';
                         $params1 = [
@@ -84,6 +86,7 @@ class ScheduleService
                                 "detail" => json_encode($v),
                             ];
                             $insert = (new oMission())->insertMission($data);
+                            echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
                         }
 
                     }
@@ -161,39 +164,47 @@ class ScheduleService
         }
         $list=$this->getEventList($gameId);
         $missionModel = new MissionModel();
-
+        $tournamentModel=new tournamentModel();
         if (count($list) > 0) {
             foreach ($list as $v) {
                 if(count($v)>0){
-                    foreach($v as $val){
+                    foreach($v as $key=>$val){
                         $params1 = [
                             'game' => $game,
                             'mission_type' => 'match',
                             'source_link' => $val['ajax_url'],
                         ];
-
+                        $tournamentInfo=$tournamentModel->getTournamentById($val['tournamentID']);
+                        $tournamentInfo = $tournamentInfo ?? [];
                         $val['game'] = $game;
                         $val['source'] = 'scoregg';
                         $val['type'] = 'tournament';
-                        $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
-                        $result = $result ?? 0;
-                        if ($result == 0) {
-                            $data = [
-                                "asign_to" => 1,
-                                "mission_type" => 'match',//赛事
-                                "mission_status" => 1,
-                                "game" => $game,
-                                "source" => 'scoregg',//
-                                'title' => $val['name'],
-                                'source_link' => $val['ajax_url'],
-                                "detail" => json_encode($val),
-                            ];
-                            $insert = (new oMission())->insertMission($data);
-                            echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                        if(count($tournamentInfo) == 0){
+                            $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
+                            $result = $result ?? 0;
+                            if ($result == 0) {
+                                $data = [
+                                    "asign_to" => 1,
+                                    "mission_type" => 'match',//赛事
+                                    "mission_status" => 1,
+                                    "game" => $game,
+                                    "source" => 'scoregg',//
+                                    'title' => $val['name'],
+                                    'source_link' => $val['ajax_url'],
+                                    "detail" => json_encode($val),
+                                ];
+                                $insert = (new oMission())->insertMission($data);
+                                echo $game .$key. "-scoregg-match-tournament-mission-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                            }else{
+                                echo "exits-mission" . $key . '-' . $val['ajax_url'] . "\n";//表示Mission表记录已存在，跳出继续
+                                continue;
+                            }
                         }else{
-                            echo "exits"."\n";//表示任务表存在记录，跳出继续
+                            //表示scoregg_tournament_info表记录已存在，跳出继续
+                            echo "exits-scoregg_tournament_info" . $key . '-' . $val['ajax_url'] . "\n";
                             continue;
                         }
+
                     }
                 }
 
@@ -203,6 +214,7 @@ class ScheduleService
         return true;
 
     }
+    //scoregg
 
     public function getEventList($gameId)
     {

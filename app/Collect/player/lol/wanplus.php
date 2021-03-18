@@ -40,6 +40,7 @@ class wanplus
             "logo"=>['path'=>'logo','default'=>0],
             "original_source"=>['path'=>"",'default'=>"wanplus"],
             "site_id"=>['path'=>"site_id",'default'=>0],
+            "description"=>['path'=>"",'default'=>""],
         ];
 
     public function collect($arr)
@@ -124,6 +125,11 @@ class wanplus
      */
     public function getCollectData($url)
     {
+        //判断url是否有效
+        $headers=get_headers($url,1);
+        if(!preg_match('/200/',$headers[0])){
+            return  [];
+        }
         $ql = QueryList::get($url);
         $infos = $ql->find('.f15')->texts();//胜/平/负(历史总战绩)
         $country = $aka = $title = '';

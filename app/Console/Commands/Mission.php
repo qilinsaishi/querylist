@@ -11,6 +11,7 @@ use App\Services\InformationService;
 use App\Services\KeywordService as oKeyword;
 use App\Services\InscriptionService;
 use App\Services\MatchService;
+use App\Services\PlayerService;
 use App\Services\RunesService;
 use App\Services\ScheduleService;
 use App\Services\SummonerService;
@@ -63,7 +64,11 @@ class Mission extends Command
 
                 //采集战队入库
                 if($mission_type=='team'){
-                    (new TeamResultService())->insertTeamData($mission_type);
+                    (new TeamResultService())->insertTeamData($mission_type,$game);
+                }
+                //采集队员入库
+                if($mission_type=='player'){
+                    (new PlayerService())->insertPlayerData($mission_type,$game);
                 }
                 //采集英雄入库
                 if($mission_type=='hero'){

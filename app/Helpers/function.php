@@ -21,7 +21,7 @@ function curl_get($url, $referer = '')
     curl_setopt($curl, CURLOPT_TIMEOUT, 1);
 
     // 超时设置，以毫秒为单位
-    // curl_setopt($curl, CURLOPT_TIMEOUT_MS, 500);
+   curl_setopt($curl, CURLOPT_TIMEOUT_MS, 5000);
 
     // 设置请求头
      curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
@@ -433,6 +433,19 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         return $url;
     }
 
+}
+//判断url是否正常打开
+function httpcode($url){
+    $ch = curl_init();
+    $timeout = 3;
+    curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+    curl_setopt($ch, CURLOPT_HEADER, 1);
+    curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+    curl_setopt($ch,CURLOPT_URL,$url);
+    curl_exec($ch);
+    return $httpcode = curl_getinfo($ch,CURLINFO_HTTP_CODE);
+    curl_close($ch);
 }
 function getAttrFromHTML($html,$attr_name)
 {
