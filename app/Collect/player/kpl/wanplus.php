@@ -22,6 +22,7 @@ class wanplus
             "logo"=>['path'=>'logo','default'=>0],
             "original_source"=>['path'=>"",'default'=>"wanplus"],
             "site_id"=>['path'=>"site_id",'default'=>0],
+            "description"=>['path'=>"",'default'=>""],
         ];
     public function collect($arr)
     {

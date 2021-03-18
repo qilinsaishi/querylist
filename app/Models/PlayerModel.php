@@ -206,6 +206,7 @@ class PlayerModel extends Model
                 $return['player_id'] = 0;
                 $return['result'] = 0;
             }
+            return $return;
         }
         else
         {

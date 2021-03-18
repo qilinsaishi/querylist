@@ -1,14 +1,28 @@
 <?php
 
 namespace App\Collect\player\kpl;
-
+use App\Models\TeamModel;
 use QL\QueryList;
 
 class scoregg
 {
     protected $data_map =
         [
-        ];
+            "player_name"=>['path'=>"player_name",'default'=>''],
+            "cn_name"=>['path'=>"cn_name",'default'=>''],
+            "en_name"=>['path'=>"en_name",'default'=>''],
+            "aka"=>['path'=>"",'default'=>''],
+            "country"=>['path'=>"country",'default'=>''],
+            "position"=>['path'=>"position",'default'=>''],
+            "team_history"=>['path'=>'','default'=>[]],
+            "event_history"=>['path'=>'','default'=>[]],
+            "stat"=>['path'=>'','default'=>[]],
+            "team_id"=>['path'=>'team_id','default'=>0],
+            "logo"=>['path'=>'player_image','default'=>0],
+            "original_source"=>['path'=>"",'default'=>"scoregg"],
+            "site_id"=>['path'=>"player_id",'default'=>0],
+            "description"=>['path'=>"content",'default'=>""],
+            ];
 
     public function collect($arr)
     {
@@ -95,7 +109,26 @@ class scoregg
          *      team_b_win => 3 //战队b比分
          * ]
          */
-        var_dump($arr);
+        $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","kpl");
+        if(isset($teamInfo['team_id']))
+        {
+            $arr['content']['player_image'] = getImage($arr['content']['player_image']);
+            $arr['content']['team_id'] = $teamInfo['team_id'];
+            $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
+            if(!preg_match($patten, $arr['content']['player_name']))
+            {
+                $arr['content']['en_name'] = $arr['content']['player_name'];
+            }else{
+                $arr['content']['cn_name'] = $arr['content']['player_name'];
+            }
+            $arr['content']['position'] = is_array($arr['content']['position'])?$arr['content']['position']['0']??"":$arr['content']['position'];
+            $data = getDataFromMapping($this->data_map,$arr['content']);
+            return $data;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     //获取战队scoregg战队详情
