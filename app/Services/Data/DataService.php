@@ -18,7 +18,22 @@ class DataService
             if(isset($functionList[$dataType]))
             {
                 $toSave = 1;
-                $dataArr = $redisService->processCache($dataType,$data[($params['cacheWith']??"")]??$params);
+                if(isset($params['cacheWith']))
+                {
+                    if(isset($params['cache_time']))
+                    {
+                        $p = array_merge($data[$params['cacheWith']]??[],['cache_time'=>$params['cache_time']]);
+                    }
+                    else
+                    {
+                        $p = $data[$params['cacheWith']]??[];
+                    }
+                }
+                else
+                {
+                    $p = $params;
+                }
+                $dataArr = $redisService->processCache($dataType,$p);
                 if(is_array($dataArr))
                 {
 
