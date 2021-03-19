@@ -22,11 +22,11 @@ class DataService
                 {
                     if(isset($params['cache_time']))
                     {
-                        $p = array_merge($data[$params['cacheWith']]??[],['cache_time'=>$params['cache_time']]);
+                        $p = array_merge($data[$params['cacheWith']]??[],['cache_time'=>$params['cache_time'],"source"=>$params['source']??""]);
                     }
                     else
                     {
-                        $p = $data[$params['cacheWith']]??[];
+                        $p = array_merge($data[$params['cacheWith']]??[],["source"=>$params['source']??""]);
                     }
                 }
                 else
@@ -70,7 +70,23 @@ class DataService
                 }
                 if($toSave==1)
                 {
-                    $redisService->saveCache($dataType,$data[($params['cacheWith']??"")]??$params,$dataArr);
+                    if(isset($params['cacheWith']))
+                    {
+                        if(isset($params['cache_time']))
+                        {
+                            $p = array_merge($data[$params['cacheWith']]??[],['cache_time'=>$params['cache_time'],"source"=>$params['source']??""]);
+                        }
+                        else
+                        {
+                            $p = array_merge($data[$params['cacheWith']]??[],["source"=>$params['source']??""]);
+                        }
+                    }
+                    else
+                    {
+                        $p = $params;
+                    }
+
+                    $redisService->saveCache($dataType,$p,$dataArr);
                 }
                 if(isset($dataType) && $dataType='informationList') {
                     $dataArr["data"] = (new ExtraProcessService())->process($dataType,$dataArr["data"]);
