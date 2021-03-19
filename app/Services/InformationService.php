@@ -12,39 +12,35 @@ use QL\QueryList;
 
 class InformationService
 {
-    public function insertData()
+    public function insertData($game)
     {
-        $gameItem = ['lol', 'dota2', 'kpl', 'csgo'];
+        switch ($game) {
+            case "lol":
+                $this->insertWanplusVideo($game);
+                $this->insertLolInformation();
+                break;
+            case "kpl":
+                $this->insertWanplusVideo($game);
+                $this->insertKplInformation();
+                break;
+            case "dota2":
+                $typeList = ['news', 'gamenews', 'competition', 'news_update'];
+                $raidersList = ['raiders', 'newer', 'step', 'skill'];
+                foreach ($typeList as $v1) {
+                    $this->insertDota2Information($v1);
+                }
+                foreach ($raidersList as $v2) {
+                    $this->insertDota2Raiders($v2);
+                }
+                $this->insertWanplusVideo($val);
 
-        foreach ($gameItem as $val) {
-            switch ($val) {
-                case "lol":
-                    $this->insertWanplusVideo($val);
-                    $this->insertLolInformation();
-                    break;
-                case "kpl":
-                     $this->insertWanplusVideo($val);
-                    $this->insertKplInformation();
-                    break;
-                case "dota2":
-                    $typeList = ['news', 'gamenews', 'competition', 'news_update'];
-                    $raidersList = ['raiders', 'newer', 'step', 'skill'];
-                     foreach ($typeList as $v1) {
-                         $this->insertDota2Information($v1);
-                     }
-                    foreach ($raidersList as $v2) {
-                        $this->insertDota2Raiders($v2);
-                    }
-                    $this->insertWanplusVideo($val);
+                break;
+            case "csgo":
 
-                    break;
-                case "csgo":
+                break;
+            default:
 
-                    break;
-                default:
-
-                    break;
-            }
+                break;
         }
         return 'finish';
     }
@@ -142,6 +138,7 @@ class InformationService
                         $site_id = $val['iNewsId'] ?? 0;//原地址新闻id
                         $informationModel = new InformationModel();
                         $informationInfo = $informationModel->getInformationBySiteId($site_id, 'kpl', 'pvp_qq');
+                        $informationInfo = $informationInfo ?? [];
                         if (count($informationInfo) == 0) {//资讯在数据库不存在
                             $detail_url = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=' . $val['iNewsId'];//攻略
                             $params = [
@@ -373,14 +370,14 @@ class InformationService
                                     ),
                                 ];
                                 $insert = (new oMission())->insertMission($data);
-                                echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                                echo "dota2-gamedota2-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                             } else {
-                                echo "exits" . "\n";//表示Mission 记录存在
+                                echo "dota2-gamedota2-information-mission-exits" . "\n";//表示Mission 记录存在
                                 continue;
                             }
                         } else {
                             //表示information表记录已存在，跳出继续
-                            echo "exits-dota2-information-type:" . $gametype . '-site_id:' . $site_id . "\n";
+                            echo "exits-dota2-information-type:raiders-site_id:" . $site_id . "\n";
                             continue;
                         }
                     } else {
@@ -463,15 +460,15 @@ class InformationService
                                 "detail" => json_encode($detail),
                             ];
                             $insert = (new oMission())->insertMission($data);
-                            echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                            echo $game . "-information-wanplus-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                         } else {
                             //表示Mission表记录已存在，跳出继续
-                            echo "exist-mission" . '-source_link:' . $detail['url'] . "\n";
+                            echo $game . "exist-mission-wanplus" . '-source_link:' . $detail['url'] . "\n";
                             continue;
                         }
                     } else {
                         //表示information表记录已存在，跳出继续
-                        echo "exits-information:" . '-site_id:' . $val['id'] . "\n";
+                        echo $game . "exits-information-wanplus:" . '-site_id:' . $val['id'] . "\n";
                         continue;
                     }
 
