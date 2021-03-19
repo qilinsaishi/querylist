@@ -31,16 +31,13 @@ class Links extends Model
 
     public function getLinkList($params)
     {
-        $game = $params['game'] ?? '';
         $link_list=[];
-        $default_field = ['id', 'name', 'url', 'logo','game'];
+        $default_field = ['id', 'name', 'url', 'logo','site_id'];
         $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
         $link_list = $this->select($field);
         $pageSizge = $params['page_size'] ?? 3;
         $page = $params['page'] ?? 1;
-        if(!empty($game)){
-            $link_list->where('game',$game);
-        }
+
         if(isset($params['site_id']) && $params['site_id']>0){
             $link_list->where('site_id',$params['site_id']);
         }
