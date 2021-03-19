@@ -75,6 +75,7 @@ class RedisService
             {
                 $expire =  $cacheConfig[$dataType]['expire'];
             }
+            //echo "get:".$dataType.":".$expire."\n";
             //如果指定缓存时间为非正整数，跳出，不保存
             if($expire<=0)
             {
@@ -117,6 +118,7 @@ class RedisService
             {
                 $expire =  $cacheConfig[$dataType]['expire'];
             }
+            //echo "set:".$dataType.":".$expire."\n";
             //如果指定缓存时间为非正整数，跳出，不保存
             if($expire<=0)
             {

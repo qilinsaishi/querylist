@@ -17,7 +17,7 @@ class  PlayerService
     public function insertPlayerData($mission_type, $game)
     {
         $gameItem = [
-            'lol', 'kpl', 'dota2'//,  'csgo'
+            'lol', 'kpl',// 'dota2'//,  'csgo'
         ];
         $this->getScoreggPlayerDetail($game);
 
@@ -69,7 +69,7 @@ class  PlayerService
                                         $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的文章
                                         $missionCount = $missionCount ?? 0;
                                         if ($missionCount !== 0) {
-                                            echo "exist-mission" . $key . '-' . $v['player_url'] . "\n";//表示Mission表记录已存在，跳出继续
+                                            echo "exist-mission-scoregg-" . $game . '-' . $v['player_url'] . "\n";//表示Mission表记录已存在，跳出继续
                                             continue; //表示Mission表记录已存在，跳出继续
                                         } else {
                                             $adata = [
@@ -83,10 +83,10 @@ class  PlayerService
                                                 "detail" => json_encode($v),
                                             ];
                                             $insert = (new oMission())->insertMission($adata);
-                                            echo $game .$key. $k."-scoregg-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
+                                            echo $game .$key. $k."-scoregg-player-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
                                         }
                                     } else {
-                                        echo "exist-playerinfo" . $key . '-' . $v['player_url'] . "\n";//表示playerinfo表记录已存在，跳出继续
+                                        echo "exist-playerinfo-scoregg-" . $game . '-' . $v['player_url'] . "\n";//表示playerinfo表记录已存在，跳出继续
                                         continue;
                                     }
                                 }else{
@@ -96,8 +96,12 @@ class  PlayerService
 
                             }
 
+                        }else{
+                            continue;
                         }
                     }
+                }else{
+                    continue;
                 }
 
             }
@@ -137,7 +141,7 @@ class  PlayerService
             for ($i = 1; $i <= $totalPage; $i++) {
                 $param['page'] = $i;
                 $cdata = curl_post($url, $param);
-                $list[$i] = $cdata['data']['data']['list'] ?? 0;
+                $list[$i] = $cdata['data']['data']['list'] ?? [];
                 if (count($list[$i]) > 0) {
                     foreach ($list[$i] as $k => &$val) {
                         $ajax_url = 'https://www.scoregg.com/big-data/player/' . $val['player_id'] . '?tournamentID=&type=baike';

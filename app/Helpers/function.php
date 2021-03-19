@@ -97,7 +97,7 @@ function curl_post($url = '', $postdata = '',$header = [])
     //设置获取的信息以文件流的形式返回，而不是直接输出。
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
     // 超时设置
-    curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 15000);
 
     // 超时设置，以毫秒为单位
     // curl_setopt($curl, CURLOPT_TIMEOUT_MS, 500);
