@@ -190,7 +190,6 @@ class AjaxRequest
         $play_url = 'https://www.wanplus.com/ajax/statelist/player';
         $paramHeaderData = $this->getHeaderInfo($play_url);//
 
-
         $headers = [
             'x-requested-with' => 'XMLHttpRequest',
             'x-csrf-token' => $paramHeaderData['token'] ?? '',
@@ -199,12 +198,16 @@ class AjaxRequest
         $client = new ClientServices();
         $data = $client->curlGet($url, $param,$headers);
 
-        //$data=siz
-        if ($data['ret'] == 0) {
-            $list = $data['data'] ?? [];
-        } else {
-            return $data['msg'];
+        try{
+            if ($data['ret'] == 0) {
+                $list = $data['data'] ?? [];
+            } else {
+                return $data['msg'] ?? '';
+            }
+        }catch (\Exception $e){
+            print_r($e->getMessage());
         }
+
 
         return $list;
     }

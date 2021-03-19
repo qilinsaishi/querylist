@@ -142,14 +142,20 @@ class scoregg
         ))->range('.history-honor .article-list .article-table  .border-bottom')->queryData(function ($item){
             $item['ranking']=trim($item['ranking']);
             $tempNames_a=explode('alt="',$item['team_name_a']);
-            $tempNames_a=explode('" class="team-logo"',$tempNames_a[1]);
-            $item['team_name_a']=$tempNames_a[0] ?? '';
+            if(isset($tempNames_a[1])){
+                $tempNames_a=explode('" class="team-logo"',$tempNames_a[1]);
+                $item['team_name_a']=$tempNames_a[0] ?? '';
+            }
+
             $tempWins=explode(' : ',$item['team_win']);
             $item['team_a_win']=$tempWins[0] ?? 0;
             $item['team_b_win']=$tempWins[1] ?? 0;
             $tempNames_b=explode('alt="',$item['team_name_b']);
-            $tempNames_b=explode('" class="team-logo"',$tempNames_b[1]);
-            $item['team_name_b']=$tempNames_b[0] ?? '';
+            if(isset($tempNames_b[1])){
+                $tempNames_b=explode('" class="team-logo"',$tempNames_b[1]);
+                $item['team_name_b']=$tempNames_b[0] ?? '';
+            }
+
             unset($item['team_win']);
 
             return $item;

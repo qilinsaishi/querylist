@@ -59,7 +59,7 @@ class Mission extends Command
             case "collect":
                 //资讯采集入任务表
                 if($mission_type=='information'){
-                    (new InformationService())->insertData();
+                    (new InformationService())->insertData($game);
                 }
 
                 //采集战队入库
@@ -92,11 +92,11 @@ class Mission extends Command
                 }
                 //采集赛事入库
                 if($mission_type=='schedule'){
-                    (new ScheduleService())->insertScheduleData();
+                    (new ScheduleService())->insertScheduleData($game);
                 }
                 //采集赛事详情入库
                 if($mission_type=='match'){
-                    (new MatchService())->insertMatchData();
+                    (new MatchService())->insertMatchData($game);
                 }
 
                 (new oMission())->collect($game,"",$mission_type);

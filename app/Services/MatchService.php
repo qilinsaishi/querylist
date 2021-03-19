@@ -14,22 +14,18 @@ use QL\QueryList;
 
 class MatchService
 {
-    public function insertMatchData()
+    public function insertMatchData($game)
     {
-        $gameItem = [
-            'lol', 'kpl', 'dota2'//, 'csgo'
-        ];
 
-        foreach ($gameItem as $val) {
-            if ($val == 'kpl' || $val == 'lol') {
-                $this->scoreggMatch($val);//scoregg 比赛数据
-            }
-            if($val=='dota2'){
-                $this->getDota2International($val);
-                $this->getBilibiliDota2($val);
-                $this->pwesports($val);
-            }
+        if ($game == 'kpl' || $game == 'lol') {
+            $this->scoreggMatch($game);//scoregg 比赛数据
         }
+        if ($game == 'dota2') {
+            $this->getDota2International($game);
+            $this->getBilibiliDota2($game);
+            $this->pwesports($game);
+        }
+
         return 'finish';
     }
 
@@ -66,9 +62,9 @@ class MatchService
                         "detail" => json_encode($val),
                     ];
                     $insert = (new oMission())->insertMission($data);
-                    echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                    echo $game . "match-gamedota2-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                 } else {
-                    echo "exits" . "\n";
+                    echo "exits-match-gamedota2-" . $val['id'] . "\n";
                     continue;
                 }
 

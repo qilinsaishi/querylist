@@ -15,10 +15,7 @@ class TeamResultService
 {
     public function insertTeamData($mission_type,$game)
     {
-        $gameItem = [
-            'lol','kpl','dota2'//,  'csgo'
-        ];
-        $this->getScoreggMatchDetail($game);
+        $this->getScoreggTeamDetail($game);
         //采集玩加（www.wanplus.com）战队信息
          $this->insertWanplus($game, $mission_type);
         //采集cpseo（2cpseo.com）战队信息
@@ -28,7 +25,7 @@ class TeamResultService
         return 'finish';
     }
 
-    public function getScoreggMatchDetail($game){
+    public function getScoreggTeamDetail($game){
         $teamModel = new TeamModel();
         $missionModel = new MissionModel();
         if($game=='kpl'){
@@ -94,7 +91,7 @@ class TeamResultService
                                 $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的文章
                                 $missionCount = $missionCount ?? 0;
                                 if($missionCount!==0){
-                                    echo "exits-mission".$i.'-'.$team_url. "\n";//表示Mission表记录已存在，跳出继续
+                                    echo "exits-mission-".$game.'-'.$team_url. "\n";//表示Mission表记录已存在，跳出继续
                                     continue; //表示Mission表记录已存在，跳出继续
                                 }else{
                                     $adata = [
@@ -108,10 +105,10 @@ class TeamResultService
                                         "detail" => json_encode($v),
                                     ];
                                     $insert = (new oMission())->insertMission($adata);
-                                    echo "lol-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
+                                    echo $game."-scoregg-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
                                 }
                             }else{
-                                echo "exits-teaminfo".$i.'-'.$team_url. "\n";//表示teaminfo表记录已存在，跳出继续
+                                echo "exits-teaminfo-scoregg-".$game.'-'.$team_url. "\n";//表示teaminfo表记录已存在，跳出继续
                                 continue;
                             }
                         }
@@ -148,6 +145,7 @@ class TeamResultService
             //玩家团队ajax链接
             $url = 'https://www.wanplus.com/ajax/detailranking?country=0&type=1&teamPage=' . $i . '&game=' . $gametype;
             $list = $AjaxModel->ajaxGetData($url);
+            $list=$list ?? [];
             if (!empty($list) && count($list) > 0) {//每页战队数据组
                 foreach ($list as $val) {
                     //战队url
@@ -187,18 +185,20 @@ class TeamResultService
                                     ),
                                 ];
                                 $insert = (new oMission())->insertMission($data);
-                                echo "lol-information-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                                echo $game."-information-wanplus-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                             }else{
-                                echo "exits"."\n";//表示任务表存在记录，跳出继续
+                                echo $game."exits-Mission-wanplus".$site_id."\n";//表示任务表存在记录，跳出继续
                                 continue;
                             }
                         }
                     } else {
-                        echo "exits"."\n";//表示teaminfo表记录，跳出继续
+                        echo $game."exits-information-wanplus-".$site_id."\n";//表示teaminfo表记录，跳出继续
                         continue;
                     }
 
                 }
+            }else{
+                continue;
             }
 
         }
@@ -264,13 +264,13 @@ class TeamResultService
                             ),
                         ];
                         $insert = (new oMission())->insertMission($data);
-                        echo "lol-information-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                        echo "lol-information-cpseo-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                     } else {
-                        echo "lol-information exits"."\n";//表示任务表存在记录，跳出继续
+                        echo "lol-Mission-cpseo exits"."\n";//表示任务表存在记录，跳出继续
                         continue;
                     }
                 } else {
-                    echo "team_info exits"."\n";//表示teaminfo表记录，跳出继续
+                    echo "team_info-cpseo-exits".$site_id."\n";//表示teaminfo表记录，跳出继续
                     continue;
                 }
 
