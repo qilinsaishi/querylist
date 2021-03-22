@@ -12,7 +12,7 @@ class Rewrite extends Command
      *
      * @var string
      */
-    protected $signature = 'keyword:tfidf {game}';
+    protected $signature = 'keyword:rewrite {game}';
 
     /**
      * The console command description.

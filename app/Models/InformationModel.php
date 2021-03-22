@@ -46,6 +46,11 @@ class InformationModel extends Model
     {
         $fields = $params['fields']??"id,title,author,author_id,logo,create_time,status";
         $information_list =$this->select(explode(",",$fields))->where("status",1);
+        //排除的来源
+        if(isset($params['except_source']) && strlen($params['except_source'])>0)
+        {
+            $information_list = $information_list->where("source", '!=',$params['except_source']);
+        }
         //最后更新时间
         if(isset($params['recent']) && $params['recent']>0)
         {
@@ -144,6 +149,8 @@ class InformationModel extends Model
     }
     public function insertInformation($data)
     {
+        //需要进行伪原创
+        $data['status'] = 4;
         foreach($this->attributes as $key => $value)
         {
             if(!isset($data[$key]))
@@ -159,7 +166,7 @@ class InformationModel extends Model
                 $data[$key] = json_encode($data[$key]);
             }
         }
-        $currentTime = date("Y-m-d H:i:s");
+        $currentTime = getInformationList("Y-m-d H:i:s");
         if(!isset($data['create_time']))
         {
             $data['create_time'] = $currentTime;
@@ -253,6 +260,11 @@ class InformationModel extends Model
     public function getInformationCount($params=[])
     {
         $information_count =$this;
+        //排除的来源
+        if(isset($params['except_source']) && strlen($params['except_source'])>0)
+        {
+            $information_count = $information_count->where("source", '!=',$params['except_source']);
+        }
         //是否需要处理关键字
         if(isset($params['keywords']))
         {

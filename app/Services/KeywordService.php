@@ -14,6 +14,7 @@ use App\Models\KeywordsModel as KeywordsModel;
 use App\Models\Hero\lolModel as lolHeroModel;
 use App\Models\Hero\kplModel as kplHeroModel;
 use App\Models\Hero\dota2Model as dota2HeroModel;
+use App\Models\InformationContentModel as contentModel;
 use App\Services\Data\RedisService;
 
 
@@ -155,7 +156,7 @@ class KeywordService
  //       $scwsMapModel = (new ScwsMapModel());
  //       $scwsKeywordMapModel = (new ScwsKeywordMapModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["game"=>$game,"scws"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = $informationModel->getInformationList(["game"=>$game,"scws"=>1,"status"=>1,"fields"=>"id","page_size"=>1000]);
         $informationList = array_column($informationList,"id");
 
         foreach($informationList as $content_id)
@@ -168,7 +169,7 @@ class KeywordService
     {
         $informationModel = (new InformationModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["game"=>$game,"5118_word"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = $informationModel->getInformationList(["game"=>$game,"5118_word"=>1,"status"=>1,"fields"=>"id","page_size"=>1000]);
         $informationList = array_column($informationList,"id");
         foreach($informationList as $content_id)
         {
@@ -179,12 +180,13 @@ class KeywordService
     public function rewrite($game = "")
     {
         $informationModel = (new InformationModel());
+        $informationContentModel = (new contentModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["game"=>$game,"5118_rewrite"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = $informationModel->getInformationList(["game"=>$game,"except_source"=>"index","5118_rewrite"=>1,"fields"=>"id","page_size"=>1000]);
         $informationList = array_column($informationList,"id");
         foreach($informationList as $content_id)
         {
-            $this->process5118Rewrite($content_id,$informationModel);
+            $this->process5118Rewrite($content_id,$informationModel,$informationContentModel);
         }
     }
     public function processKeyword($content_id,$informationModel)
@@ -312,7 +314,7 @@ class KeywordService
         $replace_arr = [
             '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&lsquo'=>"'",'&rsquo'=>"'",'&rdquo'=>'”','&mdash'=>'-'
         ];
-        $content = (strip_tags(html_entity_decode($information['content'])));
+        $content = (html_entity_decode($information['content']));
         foreach($replace_arr as $k => $v)
         {
             $content = str_replace($k,$v,$content);
@@ -335,40 +337,63 @@ class KeywordService
         $corewordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],array_flip($keywordMap),$information['create_time']);
         $data = $redisService->refreshCache("information",[strval($information['id'])]);
     }
-    public function process5118Rewrite($content_id,$informationModel)
+    public function process5118Rewrite($content_id,$informationModel,$informationContentModel)
     {
         $redisService = new RedisService();
-        $corewordModel = new CorewordModel();
-        $corewordMapModel = new CorewordMapModel();
         $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time"]);
         echo "start_to_process:".$information['id']."\n";
         $replace_arr = [
             '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&lsquo'=>"'",'&rsquo'=>"'",'&rdquo'=>'”','&mdash'=>'-'
         ];
-        $content = (strip_tags(html_entity_decode($information['content'])));
+        $imgpreg = '/<\s*img\s+[^>]*?src\s*=\s*(\'|\")(.*?)\\1[^>]*?\/?\s*>/i';
+        $content = (html_entity_decode($information['content']));
+        $saveContent = $informationContentModel->saveContent(['id'=>$information['id'],'content'=>$information['content']]);
+        if(!$saveContent)
+        {
+            return false;
+        }
+        $content = $informationContentModel->getContentById($information['id'])['content'];
+        $content = (html_entity_decode($information['content']));
         foreach($replace_arr as $k => $v)
         {
             $content = str_replace($k,$v,$content);
         }
-        print_R($text);
-        die();
-        $text = strip_tags($content);
-        $return = $this->api_5118($content,"coreword");
-        $return['data'] = $return['data']??[];
-        foreach($return['data'] as $key => $word)
+        preg_match_all($imgpreg,$content,$imgList);
+        $i = 0;$replace_arr = [];
+        if(isset($imgList['0']) && count($imgList['0']))
         {
-            if(in_array($word,$this->expect_keywords))
+            foreach($imgList['0'] as $key => $img)
             {
-                unset($return['data'][$key]);
+                //echo "replace:"."###".sprintf("%03d",$key)."###"."\n";
+                $content = str_replace($img,"###".sprintf("%03d",$key)."###",$content);
+                $replace_arr[$key] = $img;
             }
         }
-        $keywordMap = $corewordModel->saveMap($return['data']);
-
-        $informationModel->updateInformation($information['id'],['5118_word'=>0,'5118_word_list'=> array_flip($keywordMap)]);
-        print_R(array_flip($keywordMap));
-        echo "count:".count($keywordMap)."\n";
-        $corewordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],array_flip($keywordMap),$information['create_time']);
-        $data = $redisService->refreshCache("information",[strval($information['id'])]);
+        sleep(1);
+        $content = strip_tags($content);
+        //echo $content."\n";
+        $return = $this->api_5118(urlencode($content),"rewrite");
+        $return['data'] = $return['data']??[];
+        if($return['errcode']!=0)
+        {
+            //伪原创状态置为不需要处理，文章状态置为显示
+            $informationModel->updateInformation($information['id'],['5118_rewrite'=>0,'status'=>1,'content'=>$content]);
+            $data = $redisService->refreshCache("information",[strval($information['id'])]);
+        }
+        else
+        {
+            $content = $return['data'];
+            echo "------------------rewrited---------------------\n";
+            foreach($replace_arr as $key => $img)
+            {
+                echo "###".sprintf("%03d",$key)."###"."\n";
+                $content = str_replace("###".sprintf("%03d",$key)."###",$img,$content);
+                $content = str_replace("###".sprintf("%02d",$key)."###",$img,$content);
+            }
+            //伪原创状态置为不需要处理，文章状态置为显示
+            $informationModel->updateInformation($information['id'],['5118_rewrite'=>0,'status'=>1,'content'=>$content]);
+            $data = $redisService->refreshCache("information",[strval($information['id'])]);
+        }
     }
     public function api_5118($text,$type="coreword")
     {
