@@ -353,6 +353,7 @@ class KeywordService
             return false;
         }
         $content = $informationContentModel->getContentById($information['id'])['content'];
+        $original_content = $content;
         $content = (html_entity_decode($information['content']));
         foreach($replace_arr as $k => $v)
         {
@@ -377,7 +378,7 @@ class KeywordService
         if($return['errcode']!=0)
         {
             //伪原创状态置为不需要处理，文章状态置为显示
-            $informationModel->updateInformation($information['id'],['5118_rewrite'=>0,'status'=>1,'content'=>$content]);
+            $informationModel->updateInformation($information['id'],['5118_rewrite'=>0,'status'=>1,'content'=>$original_content]);
             $data = $redisService->refreshCache("information",[strval($information['id'])]);
         }
         else
