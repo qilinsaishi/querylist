@@ -166,17 +166,25 @@ class KeywordService
     //爬取数据
     public function coreword($game = "")
     {
-//        $redisService = new RedisService();
         $informationModel = (new InformationModel());
-        //       $scwsMapModel = (new ScwsMapModel());
-        //       $scwsKeywordMapModel = (new ScwsKeywordMapModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["game"=>$game,"5118"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = $informationModel->getInformationList(["game"=>$game,"5118_word"=>1,"fields"=>"id","page_size"=>1000]);
         $informationList = array_column($informationList,"id");
-
         foreach($informationList as $content_id)
         {
-            $this->process5118($content_id,$informationModel);
+            $this->process5118Coreword($content_id,$informationModel);
+        }
+    }
+    //爬取数据
+    public function rewrite($game = "")
+    {
+        $informationModel = (new InformationModel());
+        $result = [];
+        $informationList = $informationModel->getInformationList(["game"=>$game,"5118_rewrite"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = array_column($informationList,"id");
+        foreach($informationList as $content_id)
+        {
+            $this->process5118Rewrite($content_id,$informationModel);
         }
     }
     public function processKeyword($content_id,$informationModel)
@@ -294,7 +302,7 @@ class KeywordService
         $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time']);
         $data = $redisService->refreshCache("information",[strval($information['id'])]);
     }
-    public function process5118($content_id,$informationModel)
+    public function process5118Coreword($content_id,$informationModel)
     {
         $redisService = new RedisService();
         $corewordModel = new CorewordModel();
@@ -309,6 +317,41 @@ class KeywordService
         {
             $content = str_replace($k,$v,$content);
         }
+        $text = strip_tags($content);
+        $return = $this->api_5118($content,"coreword");
+        $return['data'] = $return['data']??[];
+        foreach($return['data'] as $key => $word)
+        {
+            if(in_array($word,$this->expect_keywords))
+            {
+                unset($return['data'][$key]);
+            }
+        }
+        $keywordMap = $corewordModel->saveMap($return['data']);
+
+        $informationModel->updateInformation($information['id'],['5118_word'=>0,'5118_word_list'=> array_flip($keywordMap)]);
+        print_R(array_flip($keywordMap));
+        echo "count:".count($keywordMap)."\n";
+        $corewordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],array_flip($keywordMap),$information['create_time']);
+        $data = $redisService->refreshCache("information",[strval($information['id'])]);
+    }
+    public function process5118Rewrite($content_id,$informationModel)
+    {
+        $redisService = new RedisService();
+        $corewordModel = new CorewordModel();
+        $corewordMapModel = new CorewordMapModel();
+        $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time"]);
+        echo "start_to_process:".$information['id']."\n";
+        $replace_arr = [
+            '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&lsquo'=>"'",'&rsquo'=>"'",'&rdquo'=>'”','&mdash'=>'-'
+        ];
+        $content = (strip_tags(html_entity_decode($information['content'])));
+        foreach($replace_arr as $k => $v)
+        {
+            $content = str_replace($k,$v,$content);
+        }
+        print_R($text);
+        die();
         $text = strip_tags($content);
         $return = $this->api_5118($content,"coreword");
         $return['data'] = $return['data']??[];
