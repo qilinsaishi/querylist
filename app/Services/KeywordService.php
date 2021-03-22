@@ -390,6 +390,7 @@ class KeywordService
                 echo "###".sprintf("%03d",$key)."###"."\n";
                 $content = str_replace("###".sprintf("%03d",$key)."###",$img,$content);
                 $content = str_replace("###".sprintf("%02d",$key)."###",$img,$content);
+                $content = str_replace("###".sprintf("%03d",$key)."##",$img,$content);
             }
             //伪原创状态置为不需要处理，文章状态置为显示
             $informationModel->updateInformation($information['id'],['5118_rewrite'=>0,'status'=>1,'content'=>$content]);
