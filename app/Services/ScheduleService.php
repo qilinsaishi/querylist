@@ -13,21 +13,17 @@ use QL\QueryList;
 
 class ScheduleService
 {
-    public function insertScheduleData()
+    public function insertScheduleData($game)
     {
-        $gameItem = [
-            'kpl', 'lol', 'dota2'//, 'csgo'
-        ];
 
-        foreach ($gameItem as $val) {
-            if ($val == 'kpl' || $val == 'lol') {
-                $this->tournamentList($val);
-            }
-             //$this->insertWanplusSchedule($val);
-             if ($val == 'dota2') {
-                 $this->tournament($val);
-             }
+        if ($game == 'kpl' || $game == 'lol') {
+            $this->tournamentList($game);
         }
+        $this->insertWanplusSchedule($game);
+        if ($game == 'dota2') {
+            $this->tournament($game);
+        }
+
         return 'finish';
     }
 
@@ -60,8 +56,8 @@ class ScheduleService
         if (isset($list['scheduleList'])) {
             foreach ($list['scheduleList'] as $val) {
                 //https://www.wanplus.com/schedule/68605.html
-                $val['list']=$val['list'] ?? [];
-                if (isset($val['list']) && count($val['list'])>0) {
+                $val['list'] = $val['list'] ?? [];
+                if (isset($val['list']) && count($val['list']) > 0) {
                     foreach ($val['list'] as $v) {
                         $url = 'https://www.wanplus.com/schedule/' . $v['scheduleid'] . '.html';
                         $params1 = [
@@ -86,7 +82,7 @@ class ScheduleService
                                 "detail" => json_encode($v),
                             ];
                             $insert = (new oMission())->insertMission($data);
-                            echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                            echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                         }
 
                     }
@@ -141,7 +137,7 @@ class ScheduleService
                             "detail" => json_encode($val),
                         ];
                         $insert = (new oMission())->insertMission($data);
-                        echo "insert:".$insert.' lenth:'.strlen($data['detail'])."\n";
+                        echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                     }
 
                 }
@@ -153,7 +149,6 @@ class ScheduleService
     }
 
 
-
     //scoregg
     public function tournamentList($game)
     {
@@ -162,24 +157,24 @@ class ScheduleService
         } elseif ($game == 'kpl') {
             $gameId = 2;
         }
-        $list=$this->getEventList($gameId);
+        $list = $this->getEventList($gameId);
         $missionModel = new MissionModel();
-        $tournamentModel=new tournamentModel();
+        $tournamentModel = new tournamentModel();
         if (count($list) > 0) {
             foreach ($list as $v) {
-                if(count($v)>0){
-                    foreach($v as $key=>$val){
+                if (count($v) > 0) {
+                    foreach ($v as $key => $val) {
                         $params1 = [
                             'game' => $game,
                             'mission_type' => 'match',
                             'source_link' => $val['ajax_url'],
                         ];
-                        $tournamentInfo=$tournamentModel->getTournamentById($val['tournamentID']);
+                        $tournamentInfo = $tournamentModel->getTournamentById($val['tournamentID']);
                         $tournamentInfo = $tournamentInfo ?? [];
                         $val['game'] = $game;
                         $val['source'] = 'scoregg';
                         $val['type'] = 'tournament';
-                        if(count($tournamentInfo) == 0){
+                        if (count($tournamentInfo) == 0) {
                             $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                             $result = $result ?? 0;
                             if ($result == 0) {
@@ -194,12 +189,12 @@ class ScheduleService
                                     "detail" => json_encode($val),
                                 ];
                                 $insert = (new oMission())->insertMission($data);
-                                echo $game .$key. "-scoregg-match-tournament-mission-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
-                            }else{
-                                echo "exits-mission" . $key . '-' . $val['ajax_url'] . "\n";//表示Mission表记录已存在，跳出继续
+                                echo $game . $key . "-scoregg-match-tournament-mission-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                            } else {
+                                echo "exits--scoregg-match-tournament-mission" . $key . '-' . $val['ajax_url'] . "\n";//表示Mission表记录已存在，跳出继续
                                 continue;
                             }
-                        }else{
+                        } else {
                             //表示scoregg_tournament_info表记录已存在，跳出继续
                             echo "exits-scoregg_tournament_info" . $key . '-' . $val['ajax_url'] . "\n";
                             continue;
@@ -214,6 +209,7 @@ class ScheduleService
         return true;
 
     }
+
     //scoregg
 
     public function getEventList($gameId)
@@ -239,7 +235,7 @@ class ScheduleService
             for ($i = 1; $i <= $totalPage; $i++) {
                 $param['page'] = $i;
                 $cdata = curl_post($url, $param);
-                $list[$i] = $cdata['data']['list'] ?? 0;
+                $list[$i] = $cdata['data']['list'] ?? [];
                 if (count($list[$i]) > 0) {
                     foreach ($list[$i] as $k => &$val) {
                         $ajax_url = 'https://img1.famulei.com/tr/' . $val['tournamentID'] . '.json';
