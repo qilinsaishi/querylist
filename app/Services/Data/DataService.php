@@ -108,8 +108,8 @@ class DataService
             "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'id'],
             ],
             3=>[
-            "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'kpl',"source"=>"cpseo","fields"=>'team_id'],
-            "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'kpl',"source"=>"cpseo","fields"=>'player_id'],
+            "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'kpl',"source"=>"scoregg","fields"=>'team_id'],
+            "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'kpl',"source"=>"scoregg","fields"=>'player_id'],
             "herodetail"=>['dataType'=>'kplHeroList','page_size'=>100,"fields"=>"hero_id"],
             "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'kpl',"source"=>"cpseo","fields"=>'id'],
             ],
