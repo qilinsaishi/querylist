@@ -112,6 +112,8 @@ class InformationContentModel extends Model
         }
         else
         {
+            return $currentContent['id'];
+            /*
             echo "toUpdateContent:".$currentContent['id']."\n";
             //校验原有数据
             foreach($data as $key => $value)
@@ -152,6 +154,7 @@ class InformationContentModel extends Model
             {
                 return true;
             }
+            */
         }
     }
 }
