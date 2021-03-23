@@ -41,7 +41,7 @@ class Intergration extends Command
      */
     public function handle()
     {
-        $id = $this->option("id")??1;
+        $id = $this->option("id")??0;
         $mission_type = ($this->argument("mission_type")??"");
         switch ($mission_type) {
             case "team":
