@@ -51,7 +51,7 @@ class TotalTeamModel extends Model
         $team_info =$this->select(explode(",",$fields))
             ->where("tid",$team_id)
             ->get()->first();
-        if(isset($team_info->team_id))
+        if(isset($team_info->tid))
         {
             $team_info = $team_info->toArray();
         }

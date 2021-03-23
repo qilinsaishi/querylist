@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class TeamNameMapModel extends Model
 {
     protected $table = "team_name_map";
-    //protected $primaryKey = "tid";
+    protected $primaryKey = "id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -50,7 +50,7 @@ class TeamNameMapModel extends Model
             ->where("game",$game)
             ->where("name_hash",$name_hash)
             ->get()->first();
-        if(isset($team_info->team_id))
+        if(isset($team_info->id))
         {
             $team_info = $team_info->toArray();
         }
@@ -109,14 +109,13 @@ class TeamNameMapModel extends Model
         $currentMap = $this->getTeamByNameHash($data['name_hash'],$data['game']);
         if(isset($currentMapp['tid']))
         {
-            echo "insert";
-            print_R($data);
+            //echo "insert";
             //已经存在
             return true;
         }
         else
         {
-            echo "existed";
+            //echo "existed";
             $insert = $this->insertMap($data);
             if(!$insert)
             {

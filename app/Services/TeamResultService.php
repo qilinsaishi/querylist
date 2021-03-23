@@ -315,7 +315,14 @@ class TeamResultService
                             $nameList = (array_merge([$teamInfo['team_name'],$teamInfo['en_name']],$aka));
                             foreach($nameList as $key => $name)
                             {
-                                $nameList[$key] = $this->generageNameHash($name);
+                                if($name=="")
+                                {
+                                    unset($nameList[$key]);
+                                }
+                                else
+                                {
+                                    $nameList[$key] = $this->generageNameHash($name);
+                                }
                             }
                             $nameList = array_unique($nameList);
                             foreach($nameList as $name)
@@ -353,8 +360,52 @@ class TeamResultService
             }
             else
             {
-                //不需要做变化
-                //以后需要对名字进行匹配
+                //根据名称找到映射
+                $name = $this->generageNameHash($teamInfo['team_name']);
+                $currentMap = $teamNameMapModel->getTeamByNameHash($name,$teamInfo['game']);
+                if(isset($currentMap['tid']))
+                {
+                    DB::beginTransaction();
+                    $insertMap = $teamMapModel->insertMap(["tid"=>$currentMap['tid'],"team_id"=>$teamInfo['team_id']]);
+                    if($insertMap)
+                    {
+                        $aka = json_decode($teamInfo['aka'],true);
+                        $nameList = (array_merge([$teamInfo['team_name'],$teamInfo['en_name']],$aka));
+                        foreach($nameList as $key => $name)
+                        {
+                            if($name=="")
+                            {
+                                unset($nameList[$key]);
+                            }
+                            else
+                            {
+                                $nameList[$key] = $this->generageNameHash($name);
+                            }
+                        }
+                        $nameList = array_unique($nameList);
+                        foreach($nameList as $name)
+                        {
+                            //保存名称映射
+                            $saveMap = $teamNameMapModel->saveMap(["name_hash"=>$name,"game"=>$teamInfo['game'],"tid"=>$currentMap['tid']]);
+                            if(!$saveMap)
+                            {
+                                //echo "insertTeamMapError";
+                                DB::rollBack();
+                                break;
+                            }
+                        }
+                        DB::commit();
+                        $return = true;
+                    }
+                    else
+                    {
+                        DB::rollBack();
+                    }
+                }
+                else
+                {
+                    //没有匹配上
+                }
             }
         }
         var_dump($return);
