@@ -21,6 +21,10 @@ return [
         'coreword'=>env('5118_coreword_key'),
         'rewrite'=>env('5117_rewrite_key'),
     ],
+    'default_source'=>[
+        'team'=>env('DEFAULT_SOURCE_TEAM'),
+        'player'=>env('DEFAULT_SOURCE_PLAYER'),
+    ],
     /*
     |--------------------------------------------------------------------------
     | Application Environment
