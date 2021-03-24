@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Team;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class TotalTeamModel extends Model
+class TeamMapModel extends Model
 {
-    protected $table = "team_list";
-    protected $primaryKey = "tid";
+    protected $table = "team_map";
+    //protected $primaryKey = "pid";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -36,22 +36,20 @@ class TotalTeamModel extends Model
      * @var array
      */
     protected $attributes = [
-        "aka"=>[]
     ];
     protected $toJson = [
-        "aka"
     ];
     protected $toAppend = [
     ];
     protected $keep = [
     ];
 
-    public function getTeamById($team_id,$fields = "*")
+    public function getTeamByTeamId($team_id,$fields = "*")
     {
         $team_info =$this->select(explode(",",$fields))
-            ->where("tid",$team_id)
+            ->where("team_id",$team_id)
             ->get()->first();
-        if(isset($team_info->tid))
+        if(isset($team_info->id))
         {
             $team_info = $team_info->toArray();
         }
@@ -61,7 +59,7 @@ class TotalTeamModel extends Model
         }
         return $team_info;
     }
-    public function insertTeam($data)
+    public function insertMap($data)
     {
         foreach($this->attributes as $key => $value)
         {
@@ -69,6 +67,7 @@ class TotalTeamModel extends Model
             {
                 $data[$key] = $value;
             }
+
         }
         foreach($this->toJson as $key)
         {
@@ -87,21 +86,5 @@ class TotalTeamModel extends Model
             $data['update_time'] = $currentTime;
         }
         return $this->insertGetId($data);
-    }
-    public function updateTeam($team_id=0,$data=[])
-    {
-        $currentTime = date("Y-m-d H:i:s");
-        if(!isset($data['update_time']))
-        {
-            $data['update_time'] = $currentTime;
-        }
-        foreach($this->keep as $key)
-        {
-            if(isset($data[$key]))
-            {
-                unset($data[$key]);
-            }
-        }
-        return $this->where('tid',$team_id)->update($data);
     }
 }

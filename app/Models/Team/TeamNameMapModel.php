@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Team;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
@@ -87,22 +87,6 @@ class TeamNameMapModel extends Model
             $data['update_time'] = $currentTime;
         }
         return $this->insertGetId($data);
-    }
-    public function updateMap($team_id=0,$data=[])
-    {
-        $currentTime = date("Y-m-d H:i:s");
-        if(!isset($data['update_time']))
-        {
-            $data['update_time'] = $currentTime;
-        }
-        foreach($this->keep as $key)
-        {
-            if(isset($data[$key]))
-            {
-                unset($data[$key]);
-            }
-        }
-        return $this->where('team_id',$team_id)->update($data);
     }
     public function saveMap($data)
     {

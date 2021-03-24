@@ -47,11 +47,6 @@ class PlayerModel extends Model
     {
         $fields = $params['fields']??"player_id,player_name,logo,position";
         $player_list =$this->select(explode(",",$fields));
-        //总表队员ID
-        if(isset($params['pid']) && intval($params['pid'])>=0)
-        {
-            $player_list = $player_list->where("pid",$params['pid']);
-        }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
@@ -269,11 +264,6 @@ class PlayerModel extends Model
 
     public function getPlayerCount($params=[]){
         $player_count = $this;
-        //总表队员ID
-        if(isset($params['pid']) && intval($params['pid'])>=0)
-        {
-            $player_count = $player_count->where("pid",$params['pid']);
-        }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
         {

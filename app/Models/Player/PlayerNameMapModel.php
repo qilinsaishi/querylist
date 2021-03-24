@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Player;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class TeamMapModel extends Model
+class PlayerNameMapModel extends Model
 {
-    protected $table = "team_map";
-    //protected $primaryKey = "tid";
+    protected $table = "player_name_map";
+    protected $primaryKey = "id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -44,20 +44,21 @@ class TeamMapModel extends Model
     protected $keep = [
     ];
 
-    public function getTeamByTeamId($team_id,$fields = "*")
+    public function getPlayerByNameHash($name_hash,$game,$fields = "*")
     {
-        $team_info =$this->select(explode(",",$fields))
-            ->where("team_id",$team_id)
+        $player_info =$this->select(explode(",",$fields))
+            ->where("game",$game)
+            ->where("name_hash",$name_hash)
             ->get()->first();
-        if(isset($team_info->id))
+        if(isset($player_info->id))
         {
-            $team_info = $team_info->toArray();
+            $player_info = $player_info->toArray();
         }
         else
         {
-            $team_info = [];
+            $player_info = [];
         }
-        return $team_info;
+        return $player_info;
     }
     public function insertMap($data)
     {
@@ -87,20 +88,27 @@ class TeamMapModel extends Model
         }
         return $this->insertGetId($data);
     }
-    public function updateMap($team_id=0,$data=[])
+    public function saveMap($data)
     {
-        $currentTime = date("Y-m-d H:i:s");
-        if(!isset($data['update_time']))
+        $currentMap = $this->getPlayerByNameHash($data['name_hash'],$data['game']);
+        if(isset($currentMapp['tid']))
         {
-            $data['update_time'] = $currentTime;
+            //echo "insert";
+            //已经存在
+            return true;
         }
-        foreach($this->keep as $key)
+        else
         {
-            if(isset($data[$key]))
+            //echo "existed";
+            $insert = $this->insertMap($data);
+            if(!$insert)
             {
-                unset($data[$key]);
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
-        return $this->where('team_id',$team_id)->update($data);
     }
 }

@@ -9,9 +9,9 @@ use App\Models\Match\scoregg\tournamentModel;
 use App\Models\MissionModel;
 use App\Models\TeamModel;
 use App\Services\MissionService as oMission;
-use App\Models\TotalTeamModel as TotalTeamModel;
-use App\Models\TeamMapModel as TeamMapModel;
-use App\Models\TeamNameMapModel as TeamNameMapModel;
+use App\Models\Team\TotalTeamModel as TotalTeamModel;
+use App\Models\Team\TeamMapModel as TeamMapModel;
+use App\Models\Team\TeamNameMapModel as TeamNameMapModel;
 use Illuminate\Support\Facades\DB;
 use QL\QueryList;
 
@@ -485,6 +485,4 @@ class TeamResultService
             return true;
         }
     }
-
-
 }

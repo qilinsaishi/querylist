@@ -8,6 +8,8 @@ use App\Services\AliyunService;
 use App\Services\EquipmentService;
 use Illuminate\Console\Command;
 use App\Services\TeamResultService as TeamService;
+use App\Services\PlayerService as PlayerService;
+
 class Intergration extends Command
 {
     /**
@@ -47,7 +49,8 @@ class Intergration extends Command
             case "team":
                 (new TeamService())->intergration($id);
                 break;
-            case "process":
+            case "player":
+                (new PlayerService())->intergration($id);
                 break;
             default:
                 break;
