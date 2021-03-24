@@ -311,48 +311,20 @@ class TeamResultService
                     if(!isset($currentMap['tid']))
                     {
                         DB::beginTransaction();
-                        //加入队伍
+                        //创建队伍
                         $insertTeam = $totalTeamModel->insertTeam(['game'=>$teamInfo['game'],'original_source'=>$teamInfo['original_source']]);
-                        //加入成功
+                        //创建成功
                         if($insertTeam)
                         {
-                            //加入映射
-                            $insertMap = $teamMapModel->insertMap(["tid"=>$insertTeam,"team_id"=>$teamInfo['team_id']]);
-                            //映射成功
-                            if($insertMap)
+                            //合并入查到的映射里面
+                            $mergeToMap = $this->mergeToTeamMap($teamInfo,$insertTeam,$teamMapModel,$teamNameMapModel);
+                            if(!$mergeToMap)
                             {
-                                $aka = json_decode($teamInfo['aka'],true);
-                                $nameList = (array_merge([$teamInfo['team_name'],$teamInfo['en_name']],$aka));
-                                foreach($nameList as $key => $name)
-                                {
-                                    if($name=="")
-                                    {
-                                        unset($nameList[$key]);
-                                    }
-                                    else
-                                    {
-                                        $nameList[$key] = $this->generageNameHash($name);
-                                    }
-                                }
-                                $nameList = array_unique($nameList);
-                                foreach($nameList as $name)
-                                {
-                                    //保存名称映射
-                                    $saveMap = $teamNameMapModel->saveMap(["name_hash"=>$name,"game"=>$teamInfo['game'],"tid"=>$insertTeam]);
-                                    if(!$saveMap)
-                                    {
-                                        //echo "insertTeamMapError";
-                                        DB::rollBack();
-                                        break;
-                                    }
-                                }
-                                DB::commit();
-                                $return = true;
-                            }
-                            else//映射失败
-                            {
-                                //echo "insertMapError";
                                 DB::rollBack();
+                            }
+                            else
+                            {
+                                DB::commit();
                             }
                         }
                         else
@@ -360,12 +332,19 @@ class TeamResultService
                             //echo "insertTeamError";
                             DB::rollBack();
                         }
-                        //需要创建总表队伍，需要创建映射
                     }
                     else//找到映射
                     {
-                        $return = true;
-                        //不需要做变化
+                        //合并入查到的映射里面
+                        $mergeToMap = $this->mergeToTeamMap($teamInfo,$currentMap['tid'],$teamMapModel,$teamNameMapModel);
+                        if(!$mergeToMap)
+                        {
+                            DB::rollBack();
+                        }
+                        else
+                        {
+                            DB::commit();
+                        }
                     }
                 }
                 else
@@ -376,45 +355,41 @@ class TeamResultService
                     if(isset($currentMap['tid']))
                     {
                         DB::beginTransaction();
-                        $insertMap = $teamMapModel->insertMap(["tid"=>$currentMap['tid'],"team_id"=>$teamInfo['team_id']]);
-                        if($insertMap)
-                        {
-                            $aka = json_decode($teamInfo['aka'],true);
-                            $nameList = (array_merge([$teamInfo['team_name'],$teamInfo['en_name']],$aka));
-                            foreach($nameList as $key => $name)
-                            {
-                                if($name=="")
-                                {
-                                    unset($nameList[$key]);
-                                }
-                                else
-                                {
-                                    $nameList[$key] = $this->generageNameHash($name);
-                                }
-                            }
-                            $nameList = array_unique($nameList);
-                            foreach($nameList as $name)
-                            {
-                                //保存名称映射
-                                $saveMap = $teamNameMapModel->saveMap(["name_hash"=>$name,"game"=>$teamInfo['game'],"tid"=>$currentMap['tid']]);
-                                if(!$saveMap)
-                                {
-                                    //echo "insertTeamMapError";
-                                    DB::rollBack();
-                                    break;
-                                }
-                            }
-                            DB::commit();
-                            $return = true;
-                        }
-                        else
+                        //合并入查到的映射里面
+                        $mergeToMap = $this->mergeToTeamMap($teamInfo,$currentMap['tid'],$teamMapModel,$teamNameMapModel);
+                        if(!$mergeToMap)
                         {
                             DB::rollBack();
                         }
+                        else
+                        {
+                            DB::commit();
+                        }
                     }
-                    else
+                    else//没有匹配上 创建
                     {
-                        //没有匹配上
+                        DB::beginTransaction();
+                        //创建队伍
+                        $insertTeam = $totalTeamModel->insertTeam(['game'=>$teamInfo['game'],'original_source'=>$teamInfo['original_source']]);
+                        //创建成功
+                        if($insertTeam)
+                        {
+                            //合并入查到的映射里面
+                            $mergeToMap = $this->mergeToTeamMap($teamInfo,$insertTeam,$teamMapModel,$teamNameMapModel);
+                            if(!$mergeToMap)
+                            {
+                                DB::rollBack();
+                            }
+                            else
+                            {
+                                DB::commit();
+                            }
+                        }
+                        else
+                        {
+                            //echo "insertTeamError";
+                            DB::rollBack();
+                        }
                     }
                 }
             }
@@ -433,6 +408,39 @@ class TeamResultService
             $name = str_replace($key,"",$name);
         }
         return $name;
+    }
+    //把对于合并到已经查到的队伍映射
+    function mergeToTeamMap($teamInfo = [],$tid,$teamMapModel,$teamNameMapModel)
+    {
+        $insertMap = $teamMapModel->insertMap(["tid"=>$tid,"team_id"=>$teamInfo['team_id']]);
+        if($insertMap)
+        {
+            $aka = json_decode($teamInfo['aka'], true);
+            $nameList = (array_merge([$teamInfo['team_name'], $teamInfo['en_name']], $aka));
+            foreach ($nameList as $key => $name)
+            {
+                if ($name == "")
+                {
+                    unset($nameList[$key]);
+                }
+                else
+                {
+                    $nameList[$key] = $this->generageNameHash($name);
+                }
+            }
+            $nameList = array_unique($nameList);
+            foreach ($nameList as $name)
+            {
+                //保存名称映射
+                $saveMap = $teamNameMapModel->saveMap(["name_hash" => $name, "game" => $teamInfo['game'], "tid" => $tid]);
+                if (!$saveMap) {
+                    //echo "insertTeamMapError";
+                    return false;
+                    //break;
+                }
+            }
+            return true;
+        }
     }
 
 
