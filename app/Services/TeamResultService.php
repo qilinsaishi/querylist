@@ -287,21 +287,23 @@ class TeamResultService
         $totalTeamModel = new TotalTeamModel();
         $teamMapModel = new TeamMapModel();
         $teamNameMapModel = new TeamNameMapModel();
+        $teamModel = new TeamModel();
 
         $return = false;
         if($id==0)
         {
-            $teamList = (new TeamModel())->getTeamList(["source"=>config("app.default_source.team"),"fields"=>"team_id,team_name,en_name,aka,original_source,game","page_size"=>1000]);
+            $teamList = $teamModel->getTeamList([/*"source"=>config("app.default_source.team"),*/"fields"=>"team_id,team_name,en_name,aka,original_source,game","tid"=>0,"page_size"=>1000]);
         }
         else
         {
-            $teamInfo = (new TeamModel())->getTeamById($id);
+            $teamInfo = $teamModel->getTeamById($id);
             $teamList = [$teamInfo];
         }
         foreach($teamList as $teamInfo)
         {
             if(isset($teamInfo['team_id']))
             {
+                echo "start to process team:".$teamInfo['team_id']."\n";
                 //如果当前来源不相同于默认来源
                 if($teamInfo['original_source']==config("app.default_source.team"))
                 {
@@ -324,7 +326,17 @@ class TeamResultService
                             }
                             else
                             {
-                                DB::commit();
+                                //把映射写回原来的队伍内容
+                                $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$insertTeam]);
+                                if($updateTeam)
+                                {
+                                    echo "merged ".$teamInfo['team_id']." to ".$insertTeam."\n";
+                                    DB::commit();
+                                }
+                                else
+                                {
+                                    DB::rollBack();
+                                }
                             }
                         }
                         else
@@ -343,7 +355,17 @@ class TeamResultService
                         }
                         else
                         {
-                            DB::commit();
+                            //把映射写回原来的队伍内容
+                            $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$currentMap['tid']]);
+                            if($updateTeam)
+                            {
+                                echo "merged ".$teamInfo['team_id']." to ".$currentMap['tid']."\n";
+                                DB::commit();
+                            }
+                            else
+                            {
+                                DB::rollBack();
+                            }
                         }
                     }
                 }
@@ -363,7 +385,17 @@ class TeamResultService
                         }
                         else
                         {
-                            DB::commit();
+                            //把映射写回原来的队伍内容
+                            $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$currentMap['tid'],"original_source"=>$teamInfo['original_source']]);
+                            if($updateTeam)
+                            {
+                                echo "merged ".$teamInfo['team_id']." to ".$currentMap['tid']."\n";
+                                DB::commit();
+                            }
+                            else
+                            {
+                                DB::rollBack();
+                            }
                         }
                     }
                     else//没有匹配上 创建
@@ -382,7 +414,17 @@ class TeamResultService
                             }
                             else
                             {
-                                DB::commit();
+                                //把映射写回原来的队伍内容
+                                $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$insertTeam]);
+                                if($updateTeam)
+                                {
+                                    echo "merged ".$teamInfo['team_id']." to ".$insertTeam."\n";
+                                    DB::commit();
+                                }
+                                else
+                                {
+                                    DB::rollBack();
+                                }
                             }
                         }
                         else
@@ -407,7 +449,8 @@ class TeamResultService
         {
             $name = str_replace($key,"",$name);
         }
-        return $name;
+        echo "hash:".$name."\n";
+        return md5($name);
     }
     //把对于合并到已经查到的队伍映射
     function mergeToTeamMap($teamInfo = [],$tid,$teamMapModel,$teamNameMapModel)
