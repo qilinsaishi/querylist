@@ -15,11 +15,12 @@ class TeamResultService
 {
     public function insertTeamData($mission_type,$game)
     {
-        $this->getScoreggTeamDetail($game);
+        $this->insertCpseoTeam($game, $mission_type);
+        //$this->getScoreggTeamDetail($game);
         //采集玩加（www.wanplus.com）战队信息
-         $this->insertWanplus($game, $mission_type);
+         //$this->insertWanplus($game, $mission_type);
         //采集cpseo（2cpseo.com）战队信息
-         $this->insertCpseoTeam($game, $mission_type);
+
 
 
         return 'finish';
@@ -211,27 +212,22 @@ class TeamResultService
         $AjaxModel = new AjaxRequest();
         $missionModel = new MissionModel();
         $teamModel = new TeamModel();
-        $count = 0;
+        $page_count = 0;
         if ($game == 'lol') {
-            $count = 3;
+            $page_count = 4;
         } elseif ($game == 'kpl') {
-            $count = 1;
+            $page_count = 2;
         } elseif ($game == 'dota2') {
-            $count = 10;
+            $page_count = 11;
         } elseif ($game == 'csgo') {
-            $count = 12;
+            $page_count = 13;
         }
-        for ($i = 1; $i <= $count; $i++) {
-            $m = $i + 1;
-            if ($game == 'lol') {
-                $url = 'http://www.2cpseo.com/teams/lol/p-' . $m;
-            } elseif ($game == 'kpl') {
-                $url = 'http://www.2cpseo.com/teams/kog/p-' . $m;
-            } elseif ($game == 'dota2') {
-                $url = 'http://www.2cpseo.com/teams/dota2/p-' . $m;
-            }/*elseif($game=='csgo'){
-                $count=12;
-            }*/
+        for ($i = 1; $i <= $page_count; $i++) {
+            if ($game == 'kpl') {
+                $url = 'http://www.2cpseo.com/teams/kog/p-'.$i;
+            } else{
+                $url = 'http://www.2cpseo.com/teams/'.$game.'/p-'.$i;
+            }
             $ql = QueryList::get($url);
             $list = $ql->find('.team-list a')->attrs('href')->all();
             foreach ($list as $val) {
@@ -243,9 +239,9 @@ class TeamResultService
                 ];
 
                 $site_id = str_replace('http://www.2cpseo.com/team/', '', $val) ?? 0;
-                $teamInfo = $teamModel->getTeamBySiteId($site_id, 'cpseo', $game);
+                //$teamInfo = $teamModel->getTeamBySiteId($site_id, 'cpseo', $game);
                 $result = $missionModel->getMissionCount($params);//过滤已经采集过的文章
-                if (count($teamInfo) == 0) {
+                if (is_numeric($site_id)) {
                     $result = $result ?? 0;
                     if ($result == 0) {
                         $data = [
@@ -260,11 +256,12 @@ class TeamResultService
                                     "url" => $team_url,
                                     "game" => $game,
                                     "source" => 'cpseo',
+                                    "site_id" => $site_id,
                                 ]
                             ),
                         ];
                         $insert = (new oMission())->insertMission($data);
-                        echo "lol-information-cpseo-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                        echo "lol-team-cpseo-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                     } else {
                         echo "lol-Mission-cpseo exits"."\n";//表示任务表存在记录，跳出继续
                         continue;

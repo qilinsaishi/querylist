@@ -2,6 +2,7 @@
 
 namespace App\Collect\player\kpl;
 
+use App\Models\TeamModel;
 use QL\QueryList;
 
 class cpseo
@@ -28,9 +29,9 @@ class cpseo
     {
         $cdata = [];
         $url = $arr['detail']['url'] ?? '';
-        $res = $this->cpSeoPlayer($url);
         $team_id = $arr['detail']['team_id'] ?? '';
         $current = $arr['detail']['current'] ?? '';
+        $res = $this->cpSeoPlayer($url,$team_id);
 
         if (!empty($res)) {
             $res['team_id'] = $team_id;
@@ -67,37 +68,41 @@ class cpseo
         $t = explode("/",$arr['source_link']);
         $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         $arr['content']['aka'] = explode(",",$arr['content']['real_name']);
+        $arr['content']['cn_name'] = $arr['content']['real_name'];
+        $arr['content']['en_name'] = $arr['content']['nickname'];
         //     '/^[\x7f-\xff]+$/' 全是中文
-        if(preg_match('/[\x7f-\xff]/', $arr['content']['nickname']))
-        {
-            $arr['content']['cn_name'] = $arr['content']['nickname'];
-        }else{
-            $arr['content']['en_name'] = $arr['content']['nickname'];
-        }
+
         $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }
     //王者荣耀队员信息
-    public function cpSeoPlayer($url)
+    public function cpSeoPlayer($url,$team_id)
     {
         $baseInfo = [];
         $ql = QueryList::get($url);
         $logo = $ql->find('.commonDetail-intro img')->attr('src');
         $name = $ql->find('.intro-content-block .intro-name')->text();
         $wraps = $ql->find('.intro-content p')->texts()->all();
-        if ($wraps) {
+        $wraps=$wraps ?? [];
+        $realname=$nickname=$position=$area=$intro=$goodAtHeroes=$birthday=$team_name='';
+
+        if (count($wraps)>0) {
+
             foreach ($wraps as $key => $val) {
-                if (strpos($val, '昵称：') !== false) {
+                if ((strpos($val, '昵称：') !== false) && strlen($val)<32) {
                     $nickname = str_replace('昵称：', '', $val);
                 }
-                if (strpos($val, '真名：') !== false) {
+                if ((strpos($val, '所属战队：') !== false) && strlen($val)<32) {
+                    $team_name = str_replace('所属战队：', '', $val);
+                }
+                if ((strpos($val, '真名：') !== false) && strlen($val)<28) {
                     $realname = str_replace('真名：', '', $val);
                 }
-                if (strpos($val, '位置：') !== false) {
+                if ((strpos($val, '位置：') !== false) && strlen($val)<32) {
                     $position = str_replace('位置：', '', $val);
                 }
-                if (strpos($val, '地区：') !== false) {
+                if ((strpos($val, '地区：') !== false) && strlen($val)<32) {
                     $area = str_replace('地区：', '', $val);
                 }
                 if (strpos($val, '简介：') !== false) {
@@ -118,14 +123,56 @@ class cpseo
 
             }
         }
+
         if (strpos($name, '（') !== false) {
-            $replace_str='（'.$nickname.'）';
+            $replace_str='（'.$team_name.'）';
             $name = str_replace($replace_str, '', $name);
         }
+        $team_infos = $ql->find('.az-main-right .affiliation-team .content p')->texts()->all();
+        $team_infos=$team_infos ?? [];
+        $team_data=[];
+        $location=$team_cn_name=$team_en_name=$established_date='';
+        if(count($team_infos)>0){
+            foreach ($team_infos as $v){
+                if (strpos($v, '地区：') !== false) {
+                    $location = str_replace('地区：', '', $v);
+                }
+                if (strpos($v, '中文名称：') !== false) {
+                    $team_cn_name = str_replace('中文名称：', '', $v);
+                }
+                if (strpos($v, '英文名称：') !== false) {
+                    $team_en_name = str_replace('英文名称：', '', $v);
+                }
+                if (strpos($v, '建队时间：') !== false) {
+                    $established_date = str_replace('建队时间：', '', $v);
+                }
+            }
+        }
+        if($location !=''){
+            $team_data['location']=$location;
+        }
+        if($team_cn_name !=''){
+            $team_data['cn_name']=$team_cn_name;
+        }
+        if($team_en_name !=''){
+            $team_data['en_name']=$team_en_name;
+        }
+        if($established_date !=''){
+            $team_data['established_date']=$established_date;
+        }
+        if(count($team_data)>0){
+            $teamModel=new TeamModel();
+            $rt=$teamModel->updateTeam($team_id,$team_data);
+        }
+        $en_name=$ql->find('.commonDetail-intro .intro-name-block .intro-name')->text();
+
+        $en_name = str_replace(array('('.$realname.')','（'.$realname.'）',''.$team_name.'.'), '', $en_name);
+
+
         $baseInfo = [
             'logo' => 'http://www.2cpseo.com' . $logo,
             'name' => $name ?? '',//名称
-            'nickname' => $nickname ?? '',//昵称
+            'nickname' => $en_name ?? '',//昵称
             'real_name' => $realname ?? '',//真名
             'position' => $position ?? '',//位置
             'area' => $area ?? '',//地区

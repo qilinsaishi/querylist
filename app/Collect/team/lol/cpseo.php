@@ -83,39 +83,21 @@ class cpseo
     {
         $res = [];
         $ql = QueryList::get($url);
-        $logo = $ql->find('.kf_roster_dec img')->attr('src');
-        $aka = $ql->find('.kf_roster_dec .text span:eq(0)')->text();
-        $wraps = $ql->find('.text_wrap .text_2 p')->text();
-        $wraps = explode("\n", $wraps);
-        foreach ($wraps as $key=>$val) {
-            if (strpos($val, '地区：') !== false) {
-                $area = str_replace('地区：', '', $val);
-            }
-            if (strpos($val, '中文名称：') !== false) {
-                $cname = str_replace('中文名称：', '', $val);
-            }
-            if (strpos($val, '英文名称：') !== false) {
-                $ename = str_replace('英文名称：', '', $val);
-            }
-            if (strpos($val, '建队时间：') !== false) {
-                $createTime = str_replace('建队时间：', '', $val);
-            }
-            if(strpos($val,'简介：') !==false) {
-                $intro=$wraps[$key+1] ?? '';
-            }
-        }
-
+        $logo = $ql->find('.commonDetail-intro .logo-block img')->attr('src');
+        $logo='http://www.2cpseo.com' . $logo;
+        $team_name=$ql->find('.commonDetail-intro .content .name')->text();
+        $en_name=$ql->find('.commonDetail-intro .content .subname')->text();
+        $description=$ql->find('.commonDetail-intro .intro-content-block .intro-content')->html();
         $baseInfo = [
-            'logo' => 'http://www.2cpseo.com' . $logo,
-            'aka' => $aka,
+            'logo' =>$logo,
             'game_id' => 1,//lol
-            'area' => $area ?? '',
-            'cname' => $cname ?? '',
-            'ename' => $ename ?? '',
-            'create_time' => $createTime ?? '',
-            'intro' => $intro ?? ''
+            'game' => 'lol',
+            'area' => '',
+            'cname' => $team_name ?? '',
+            'ename' => $en_name ?? '',
+            'intro' => $description ?? ''
         ];
-        $teamListLink = $ql->find('.versus a')->attrs('href')->all();
+        $teamListLink = $ql->find('.commonDetail-content .l-m-team-member:eq(0) a')->attrs('href')->all();
         $res = [
             'baseInfo' => $baseInfo,
             'teamListLink' => $teamListLink

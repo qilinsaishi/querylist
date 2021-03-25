@@ -114,8 +114,12 @@ class HomeController extends Controller
         return $data;
     }
 
+
+
     public function index()
     {
+
+
         $bilibiList=curl_get('https://www.dota2.com.cn/international/2019/rank?task=main_map');//接口链接
         print_r($bilibiList);exit;
         $url='http://qilingsaishi-01.oss-cn-hangzhou.aliyuncs.com/storage/downloads/0888a90f7b73065e7ace05b692727b52.png';
