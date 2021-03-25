@@ -133,18 +133,13 @@ class MissionService
                                 $t = json_decode($mission['detail'],true);
 
                                 $currentPlayer = $playerModel->getPlayerBySiteId($t['site_id'],$result['game'],$result['source']);
-                                if(!isset($currentPlayer['player_id']))
-                                {
-                                    try{
-                                        $insert = $missionModel->insertMission($mission);
-                                        echo "insertMisson4Member:" . $insert . "\n";
-                                    }catch (\Exception $e){
-                                        return $e->getMessage();
-
-                                    }
-
+                                try{
+                                    $insert = $missionModel->insertMission($mission);
+                                    echo "insertMisson4Member:" . $insert . "\n";
+                                }catch (\Exception $e){
+                                    return $e->getMessage();
                                 }
-                                else
+                                if(isset($currentPlayer['player_id']))
                                 {
                                     echo "existedMember:" . $t['site_id'] . "\n";
                                 }
