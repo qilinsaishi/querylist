@@ -404,7 +404,7 @@ class  PlayerService
         if($insertMap)
         {
             $aka = json_decode($playerInfo['aka'], true);
-            $nameList = (array_merge([$playerInfo['player_name'], $playerInfo['en_name']], $aka));
+            $nameList = (array_merge([$playerInfo['player_name'], $playerInfo['en_name']], $aka??[]));
             foreach ($nameList as $key => $name)
             {
                 if ($name == "")
