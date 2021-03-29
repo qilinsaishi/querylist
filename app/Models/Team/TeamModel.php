@@ -65,6 +65,13 @@ class TeamModel extends Model
         {
             $team_list = $team_list->where("original_source",$params['source']);
         }
+        //数据来源
+        if(isset($params['sources']) && count($params['source'])>=1)
+        {
+            print_R($params);
+            die();
+            $team_list = $team_list->whereIn("original_source",$params['source']);
+        }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
         {
@@ -313,6 +320,11 @@ class TeamModel extends Model
         if(isset($params['source']) && strlen($params['source'])>=2)
         {
             $team_count = $team_count->where("original_source",$params['source']);
+        }
+        //数据来源
+        if(isset($params['sources']) && count($params['source'])>=1)
+        {
+            $team_count = $team_count->whereIn("original_source",$params['source']);
         }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)

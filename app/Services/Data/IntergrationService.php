@@ -18,6 +18,7 @@ class IntergrationService
     //force:强制重新获取 1是0否
     public function getTeamInfo($team_id,$force = 1)
     {
+        $sourceList = config('app.intergration.team');
         if($force==1)
         {
             $oTeam = new TeamModel();
@@ -32,9 +33,8 @@ class IntergrationService
                 //找到映射
                 if(isset($singleMap['tid']))
                 {
-                    $teamMapList = $oTeamMap->getTeamByTid($singleMap['tid']);
-                    print_R($teamMapList);
-                    die();
+                    $teamList = $oTeam->getTeamList(['tid'=>$singleMap['tid'],"fields"=>"*","sources"=>array_column($sourceList,"source")]);
+
                 }
                 else//没找到
                 {
