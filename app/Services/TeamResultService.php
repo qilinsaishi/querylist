@@ -285,11 +285,11 @@ class TeamResultService
         $teamMapModel = new TeamMapModel();
         $teamNameMapModel = new TeamNameMapModel();
         $teamModel = new TeamModel();
-
+        $team_intergration = config("app.intergration.team")??[];
         $return = false;
         if($id==0)
         {
-            $teamList = $teamModel->getTeamList([/*"source"=>config("app.default_source.team"),*/"fields"=>"team_id,team_name,en_name,aka,original_source,game","tid"=>0,"page_size"=>1000]);
+            $teamList = $teamModel->getTeamList(["fields"=>"team_id,team_name,en_name,aka,original_source,game","tid"=>0,"page_size"=>1000]);
         }
         else
         {
@@ -302,7 +302,7 @@ class TeamResultService
             {
                 echo "start to process team:".$teamInfo['team_id']."\n";
                 //如果当前来源不相同于默认来源
-                if($teamInfo['original_source']==config("app.default_source.team"))
+                if($teamInfo['original_source']==$team_intergration['0']['source'])
                 {
                     //尝试获取总表到映射表的对应关系
                     $currentMap = $teamMapModel->getTeamByTeamId($teamInfo['team_id']);

@@ -235,11 +235,11 @@ class  PlayerService
         $playerMapModel = new PlayerMapModel();
         $playerNameMapModel = new PlayerNameMapModel();
         $playerModel = new PlayerModel();
-
+        $player_intergration = config("app.intergration.player")??[];
         $return = false;
         if($id==0)
         {
-            $playerList = $playerModel->getPlayerList([/*"source"=>config("app.default_source.team"),*/"fields"=>"player_id,player_name,en_name,cn_name,aka,original_source,game","pid"=>0,"page_size"=>3000]);
+            $playerList = $playerModel->getPlayerList(["fields"=>"player_id,player_name,en_name,cn_name,aka,original_source,game","pid"=>0,"page_size"=>3000]);
         }
         else
         {
@@ -252,7 +252,7 @@ class  PlayerService
             {
                 echo "start to process team:".$playerInfo['player_id']."\n";
                 //如果当前来源不相同于默认来源
-                if($playerInfo['original_source']==config("app.default_source.player"))
+                if($playerInfo['original_source']==$player_intergration['0']['source'])
                 {
                     //尝试获取总表到映射表的对应关系
                     $currentMap = $playerMapModel->getPlayerByPlayerId($playerInfo['player_id']);
