@@ -26,6 +26,7 @@ class PrivilegeService
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'cpseo'],
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'chaofan'],
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'gamedota2'],
+                    ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'scoregg'],
                 ],
                 'withSource' => 1,
                 'function' => "getMatchList",//获取数据方法
@@ -37,6 +38,7 @@ class PrivilegeService
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "gamedota2"],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => 'scoregg'],
                 ],
                 'withSource' => 1,
                 'function' => "getTournamentList",
@@ -48,6 +50,7 @@ class PrivilegeService
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "chaofan"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "gamedota2"],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => 'scoregg'],
                 ],
                 'withSource' => 1,
                 'function' => "getTournamentById",
@@ -487,7 +490,7 @@ class PrivilegeService
                         $modelName = str_replace("#source#", $currentSource, $modelName);
                         //初始化
                         $classList = $this->getClass($classList, $modelName);
-                        if($sourceFound == 1 && ($params['source'] != $detail['source']))
+                        if($sourceFound == 1 && ($params['source'] != $currentSource))
                         {
                             continue;
                         }

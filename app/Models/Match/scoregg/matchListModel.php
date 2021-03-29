@@ -2,6 +2,7 @@
 
 namespace App\Models\Match\scoregg;
 
+use App\Models\TeamModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -50,10 +51,24 @@ class matchListModel extends Model
         }
         $match_list = $match_list
             ->limit($pageSizge)
-            ->offset(($page-1)*$pageSizge)
-            ->orderBy("match_id","desc")
+            ->whereHas('getHomeInfo', function($query){
+                return $query->select('team_name');
+            })->whereHas('getawayInfo', function($query){
+                return $query->select('team_name');
+            })->offset(($page-1)*$pageSizge)
+            ->orderBy("start_time","desc")
             ->get()->toArray();
+        //print_r($match_list);exit;
         return $match_list;
+    }
+    public function getHomeInfo(){
+        return $this->belongsTo(TeamModel::class,'home_id','team_id');
+    }
+    public function getawayInfo(){
+        return $this->belongsTo(TeamModel::class,'away_id','team_id');
+    }
+    public function getTournamentInfo(){
+        return $this->belongsTo(tournamentModel::class,'tournament_id','tournament_id');
     }
     public function getMatchByName($match_name,$game)
     {
