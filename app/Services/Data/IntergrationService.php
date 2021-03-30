@@ -123,10 +123,10 @@ class IntergrationService
             //生成字段与来源的对应表
             foreach($table as $column)
             {
-                echo "column:".$column."\n";
+                //echo "column:".$column."\n";
                 if(isset($table_source[$column]))
                 {
-                    echo "column:".$column."\n";
+                    //echo "column:".$column."\n";
                     $sList =  $table_source[$column];
                     $temp = "";
                     $current_team = 0;
