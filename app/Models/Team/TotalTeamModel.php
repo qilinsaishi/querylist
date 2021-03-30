@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class TotalTeamModel extends Model
 {
     protected $table = "team_list";
-    protected $primaryKey = "tid";
+    public $primaryKey = "tid";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -46,10 +46,14 @@ class TotalTeamModel extends Model
     protected $keep = [
     ];
 
-    public function getTeamById($team_id,$fields = "*")
+    public function getTableColumns()
+    {
+        return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
+    }
+    public function getTeamById($tid,$fields = "*")
     {
         $team_info =$this->select(explode(",",$fields))
-            ->where("tid",$team_id)
+            ->where("tid",$tid)
             ->get()->first();
         if(isset($team_info->tid))
         {
