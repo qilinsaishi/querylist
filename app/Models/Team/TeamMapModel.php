@@ -59,6 +59,13 @@ class TeamMapModel extends Model
         }
         return $team_info;
     }
+    public function getTeamByTid($tid,$fields = "*")
+    {
+        $team_list =$this->select(explode(",",$fields))
+            ->where("tid",$tid)
+            ->get()->toArray();
+        return $team_list;
+    }
     public function insertMap($data)
     {
         foreach($this->attributes as $key => $value)

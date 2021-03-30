@@ -8,6 +8,7 @@ use App\Models\CollectResultModel;
 use App\Models\Admin\DefaultConfig;
 use App\Services\Data\DataService;
 use App\Services\Data\ExtraProcessService;
+use App\Services\Data\IntergrationService;
 use App\Services\Data\RedisService;
 use Illuminate\Http\Request;
 
@@ -28,6 +29,28 @@ class IndexController extends Controller
     {
         $data=$this->payload;
         $return = (new DataService())->getData($data);
+        return $return;
+    }
+    public function getIntergration()
+    {
+        $data=$this->payload;
+        switch($data['type'])
+        {
+            case "team":
+                if(isset($data['team_id']))
+                {
+                    $return = (new IntergrationService())->getTeamInfo($data['team_id']);
+                }
+                elseif(isset($data['tid']))
+                {
+                    $return = (new IntergrationService())->getTeamInfo(0,$data['tid']);
+                }
+                else
+                {
+                    $return = [];
+                }
+                break;
+        }
         return $return;
     }
 

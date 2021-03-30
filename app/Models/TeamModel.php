@@ -42,14 +42,14 @@ class TeamModel extends Model
         "honor_list"=>[],
         "race_stat"=>[],
     ];
-    protected $toJson = [
+    public $toJson = [
         "race_stat","honor_list","aka","race_stat"
     ];
-    protected $toAppend = [
+    public $toAppend = [
         "aka"
     ];
     protected $keep = [
-      "original_source","team_history"
+        "original_source","team_history"
     ];
     public function getTeamList($params)
     {
@@ -64,6 +64,11 @@ class TeamModel extends Model
         if(isset($params['source']) && strlen($params['source'])>=2)
         {
             $team_list = $team_list->where("original_source",$params['source']);
+        }
+        //数据来源
+        if(isset($params['sources']) && count($params['sources'])>=1)
+        {
+            $team_list = $team_list->whereIn("original_source",$params['sources']);
         }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
@@ -114,9 +119,9 @@ class TeamModel extends Model
     public function getTeamByName($team_name,$game)
     {
         $team_info =$this->select("*")
-                    ->where("team_name",$team_name)
-                    ->where("game",$game)
-                    ->get()->first();
+            ->where("team_name",$team_name)
+            ->where("game",$game)
+            ->get()->first();
         if(isset($team_info->team_id))
         {
             $team_info = $team_info->toArray();
@@ -313,6 +318,11 @@ class TeamModel extends Model
         if(isset($params['source']) && strlen($params['source'])>=2)
         {
             $team_count = $team_count->where("original_source",$params['source']);
+        }
+        //数据来源
+        if(isset($params['sources']) && count($params['sources'])>=1)
+        {
+            $team_count = $team_count->whereIn("original_source",$params['sources']);
         }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
