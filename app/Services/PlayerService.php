@@ -20,7 +20,7 @@ class  PlayerService
 {
     public function insertPlayerData($mission_type, $game)
     {
-        $this->insertCpseoPlayer($game, $mission_type);
+        $this->getScoreggPlayerDetail($game, $mission_type);
         return 'finish';
     }
     public function insertCpseoPlayer($game, $mission_type)
