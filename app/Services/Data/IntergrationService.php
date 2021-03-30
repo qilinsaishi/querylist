@@ -60,77 +60,58 @@ class IntergrationService
             $teamList = $oTeam->getTeamList(['tid'=>$tid,"fields"=>"*","sources"=>array_column($sourceList,"source")]);
             //获取集合数据
             $totalTeam = $oTotalTeam->getTeamById($tid);
+            $teamIdList = array_column($teamList,"team_id");
             //复制映射结构
             $totalTeamStructure = $totalTeam;
             $append = [];
-            //按照来源逐一扫描
-            foreach($sourceList as $key => $source)
+            $table_source = [];
+            foreach($table as $column)
             {
-                $first_source = 0;
-                if($key==0)
+                if(in_array($totalTeam[$column],$teamIdList))
                 {
-                    //echo "first_source:";
-                    $first_source = 1;
-                }
-                //echo $source['source']."\n";
-                //按照字段逐一扫描
-                foreach($table as $column)
-                {
-                    //字段尚未被指定 + 不是主键 + (第一个来源（默认全部）/ 在来源列表中）
-                    if (($totalTeam[$column] == "0") && ($column != $pk) && (($first_source==1) || in_array($column,$source['detail_list'])))
+                    $currentKey = array_flip($teamIdList)[$totalTeam[$column]];
+                    //不在需要json的列表中
+                    if(!in_array($column,$jsonList))
                     {
-                        $temp = "";
-                        //依次循环队伍
-                        foreach($teamList as $teamInfo)
-                        {
-                            //如果和当前循环到的来源相同
-                            if($teamInfo['original_source'] == $source['source'])
-                            {
-                                //echo "column:".$column.", use source:".$source['source']."\n";
-                                //不在需要json的列表中
-                                if(!in_array($column,$jsonList))
-                                {
-                                    if(strlen($teamInfo[$column])>strlen($temp))
-                                    {
-                                        $temp = $teamInfo[$column];
-                                        $current_team = $teamInfo['team_id']."|".$source['source'];
-                                        $current_team = $teamInfo['team_id'];//."|".$source['source'];
-                                    }
-                                }
-                                else
-                                {
-                                    //json解码，比较数组大小
-                                    $t = json_decode($teamInfo[$column],true);
-                                    if($temp == "")
-                                    {
-                                        $temp = [];
-                                    }
-                                    if(count($temp)<$t)
-                                    {
-                                        $temp = $t;
-                                        $current_team = $teamInfo['team_id']."|".$source['source'];
-                                        $current_team = $teamInfo['team_id'];//."|".$source['source'];
-                                    }
-                                }
-                            }
-                        }
-                        $totalTeam[$column] = $temp;
-                        $totalTeamStructure[$column] = $current_team;
+                        $totalTeam[$column] = $teamList[$currentKey][$column];
                     }
-                    if(in_array($column,$appendList))
+                    else
                     {
-                        if(!isset($append[$column]))
+                        $totalTeam[$column] = json_decode($teamList[$currentKey][$column],true);
+                    }
+                }
+            }
+            //生成字段与来源的对应表
+            foreach($table as $column)
+            {
+                if(($totalTeam[$column] == "0") && ($column != $pk))
+                {
+                    $selectedSource = [];
+                    //按照来源逐一扫描
+                    foreach($sourceList as $key => $source)
+                    {
+                        //如果有注明高优先级
+                        if(in_array($column,$source['detail_list']))
                         {
-                            $append[$column] = [];
+                            $selectedSource[] = $source['source'];
                         }
-                        //依次循环队伍
-                        foreach($teamList as $teamInfo)
-                        {
-                            if($teamInfo['original_source'] == $source['source'])
-                            {
-                                $append[$column] = array_unique(array_merge($append[$column],json_decode($teamInfo[$column],true)));
-                            }
-                        }
+                    }
+                    if(count($selectedSource)==0)
+                    {
+                        $selectedSource = array_column($sourceList,"source");
+                    }
+                    $table_source[$column] = $selectedSource;
+                }
+                elseif(in_array($column,$appendList))
+                {
+                    if(!isset($append[$column]))
+                    {
+                        $append[$column] = [];
+                    }
+                    //依次循环队伍
+                    foreach($teamList as $teamInfo)
+                    {
+                        $append[$column] = array_unique(array_merge($append[$column],json_decode($teamInfo[$column],true)));
                     }
                 }
             }
@@ -138,6 +119,51 @@ class IntergrationService
             {
                 $totalTeam[$key] = $value;
                 $totalTeamStructure[$key] = $value;
+            }
+            //生成字段与来源的对应表
+            foreach($table as $column)
+            {
+                echo "column:".$column."\n";
+                if(isset($table_source[$column]))
+                {
+                    echo "column:".$column."\n";
+                    $sList =  $table_source[$column];
+                    $temp = "";
+                    $current_team = 0;
+                    foreach($teamList as $teamInfo)
+                    {
+                        if(in_array($teamInfo['original_source'],$sList))
+                        {
+                            //不在需要json的列表中
+                            if(!in_array($column,$jsonList))
+                            {
+                                if(strlen($teamInfo[$column])>strlen($temp))
+                                {
+                                    $temp = $teamInfo[$column];
+                                    $current_team = $teamInfo['team_id']."|".$source['source'];
+                                    $current_team = $teamInfo['team_id'];//."|".$source['source'];
+                                }
+                            }
+                            else
+                            {
+                                //json解码，比较数组大小
+                                $t = json_decode($teamInfo[$column],true);
+                                if($temp == "")
+                                {
+                                    $temp = [];
+                                }
+                                if(count($temp)<$t)
+                                {
+                                    $temp = $t;
+                                    $current_team = $teamInfo['team_id']."|".$source['source'];
+                                    $current_team = $teamInfo['team_id'];//."|".$source['source'];
+                                }
+                            }
+                            $totalTeam[$column] = $temp;
+                            $totalTeamStructure[$column] = $current_team;
+                        }
+                    }
+                }
             }
             $return['data'] = $totalTeam;
             $return['structure'] = $totalTeamStructure;
