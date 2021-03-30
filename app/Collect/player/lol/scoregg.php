@@ -17,7 +17,7 @@ class scoregg
             "position"=>['path'=>"position",'default'=>''],
             "team_history"=>['path'=>'','default'=>[]],
             "event_history"=>['path'=>'','default'=>[]],
-            "stat"=>['path'=>'','default'=>[]],
+            "stat"=>['path'=>'stat','default'=>[]],
             "team_id"=>['path'=>'team_id','default'=>0],
             "logo"=>['path'=>'player_image','default'=>0],
             "original_source"=>['path'=>"",'default'=>"scoregg"],
@@ -113,6 +113,13 @@ class scoregg
         $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","lol");
         if(isset($teamInfo['team_id']))
         {
+            /*$stat_arr_list = ['KDA','PLAYS_TIMES'];
+            $arr['content'] = [];
+            foreach($stat_arr_list as $key_name)
+            {
+                $arr['content']['stat'][$key_name] = $arr['content'][$key_name];
+            }*/
+
             $arr['content']['player_image'] = getImage($arr['content']['player_image']);
             $arr['content']['team_id'] = $teamInfo['team_id'];
             $patten = '/([\x{4e00}-\x{9fa5}]+)/u';

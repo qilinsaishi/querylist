@@ -109,27 +109,23 @@ class MissionModel extends Model
     {
         $currentTime = date("Y-m-d H:i:s");
         if (!isset($data['update_time'])) {
-            $data['update_time'] = $currentTime;
+            $data['update_time'] = $currentTime ?? '';
         }
         return $this->where('mission_id', $mission_id)->update($data);
     }
     public function getMissionCount($params=[]){
-        $missionModel = $this;
+        $missionModel = $this->where('mission_status','<>',2);
         $game=$params['game'] ?? '';
         $mission_type=$params['mission_type'] ?? '';
         $source_link=$params['source_link'] ?? '';
         $title=$params['title'] ?? '';
         //游戏
-        if($game!="")
-        {
-            $missionModel = $this->where("game","=",$game);
-        }
+        $missionModel = $missionModel->where("game","=",$game);
 
         //类型
-        if($mission_type!="")
-        {
-            $missionModel = $missionModel->where("mission_type",$mission_type);
-        }
+
+        $missionModel = $missionModel->where("mission_type",$mission_type);
+
         //采集来源
         if($source_link!="")
         {

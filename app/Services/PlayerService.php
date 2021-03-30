@@ -10,18 +10,94 @@ use App\Models\MissionModel;
 use App\Models\PlayerModel;
 use App\Models\TeamModel;
 use App\Services\MissionService as oMission;
+use App\Models\Player\TotalPlayerModel as TotalPlayerModel;
+use App\Models\Player\PlayerMapModel as PlayerMapModel;
+use App\Models\Player\PlayerNameMapModel as PlayerNameMapModel;
+use Illuminate\Support\Facades\DB;
 use QL\QueryList;
 
 class  PlayerService
 {
     public function insertPlayerData($mission_type, $game)
     {
-        $gameItem = [
-            'lol', 'kpl',// 'dota2'//,  'csgo'
-        ];
-        $this->getScoreggPlayerDetail($game);
-
+        $this->insertCpseoPlayer($game, $mission_type);
         return 'finish';
+    }
+    public function insertCpseoPlayer($game, $mission_type)
+    {
+        $AjaxModel = new AjaxRequest();
+        $missionModel = new MissionModel();
+
+        $page_count = 0;
+        if ($game == 'lol') {
+            $page_count = 74;
+        } elseif ($game == 'kpl') {
+            $page_count = 11;
+        } elseif ($game == 'dota2') {
+            $page_count = 31;
+        } elseif ($game == 'csgo') {
+            $page_count = 63;
+        }
+        for ($i = 1; $i <= $page_count; $i++) {
+            if($game == 'kpl'){
+                $url = 'http://www.2cpseo.com/players/kog/p-' . $i;
+            }else{
+                $url = 'http://www.2cpseo.com/players/'.$game.'/p-' . $i;
+            }
+            //判断url是否有效
+            $headers=get_headers($url,1);
+            if(!preg_match('/200/',$headers[0])){
+                return  [];
+            }
+
+            $ql = QueryList::get($url);
+            $list = $ql->find('.player-list a')->attrs('href')->all();
+
+            foreach ($list as $val) {
+                $player_url = $val;
+                $params = [
+                    'game' => $game,
+                    'mission_type' => $mission_type,
+                    'source_link' => $player_url,
+                ];
+
+                $site_id = str_replace('http://www.2cpseo.com/player/', '', $val) ?? 0;
+                //$teamInfo = $teamModel->getTeamBySiteId($site_id, 'cpseo', $game);
+                $result = $missionModel->getMissionCount($params);//过滤已经采集过的文章
+
+                if (is_numeric($site_id)) {
+                    $result = $result ?? 0;
+                    if ($result == 0) {
+                        $data = [
+                            "asign_to" => 1,
+                            "mission_type" => $mission_type,
+                            "mission_status" => 1,
+                            "game" => $game,
+                            "source" => 'cpseo',
+                            'source_link' => $player_url,
+                            "detail" => json_encode(
+                                [
+                                    "url" => $player_url,
+                                    "game" => $game,
+                                    "source" => 'cpseo',
+                                ]
+                            ),
+                        ];
+                        $insert = (new oMission())->insertMission($data);
+                        echo "lol-player-cpseo-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                    } else {
+                        echo "lol-Mission-cpseo-exits"."\n";//表示任务表存在记录，跳出继续
+                        continue;
+                    }
+                } else {
+                    echo $player_url."\n";
+                    continue;
+
+                }
+
+            }
+        }
+        return true;
     }
 
     public function getScoreggPlayerDetail($game)
@@ -153,6 +229,205 @@ class  PlayerService
         }
         return $list;
     }
+    public function intergration($id = 0)
+    {
+        $totalPlayerModel = new TotalPlayerModel();
+        $playerMapModel = new PlayerMapModel();
+        $playerNameMapModel = new PlayerNameMapModel();
+        $playerModel = new PlayerModel();
 
-
+        $return = false;
+        if($id==0)
+        {
+            $playerList = $playerModel->getPlayerList([/*"source"=>config("app.default_source.team"),*/"fields"=>"player_id,player_name,en_name,cn_name,aka,original_source,game","pid"=>0,"page_size"=>3000]);
+        }
+        else
+        {
+            $playerInfo = $playerModel->getPlayerById($id);
+            $playerList = [$playerInfo];
+        }
+        foreach($playerList as $playerInfo)
+        {
+            if(isset($playerInfo['player_id']))
+            {
+                echo "start to process team:".$playerInfo['player_id']."\n";
+                //如果当前来源不相同于默认来源
+                if($playerInfo['original_source']==config("app.default_source.player"))
+                {
+                    //尝试获取总表到映射表的对应关系
+                    $currentMap = $playerMapModel->getPlayerByPlayerId($playerInfo['player_id']);
+                    //如果没取到
+                    if(!isset($currentMap['pid']))
+                    {
+                        DB::beginTransaction();
+                        //创建队员
+                        $insertPlayer = $totalPlayerModel->insertPlayer(['game'=>$playerInfo['game'],'original_source'=>$playerInfo['original_source']]);
+                        //创建成功
+                        if($insertPlayer)
+                        {
+                            //合并入查到的映射里面
+                            $mergeToMap = $this->mergeToPlayerMap($playerInfo,$insertPlayer,$playerMapModel,$playerNameMapModel);
+                            if(!$mergeToMap)
+                            {
+                                DB::rollBack();
+                            }
+                            else
+                            {
+                                //把映射写回原来的队员内容
+                                $updatePlayer = $playerModel->updatePlayer($playerInfo['player_id'],["pid"=>$insertPlayer]);
+                                if($updatePlayer)
+                                {
+                                    echo "merged ".$playerInfo['player_id']." to ".$insertPlayer."\n";
+                                    DB::commit();
+                                }
+                                else
+                                {
+                                    DB::rollBack();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //echo "insertPlayerError";
+                            DB::rollBack();
+                        }
+                    }
+                    else//找到映射
+                    {
+                        //合并入查到的映射里面
+                        $mergeToMap = $this->mergeToPlayerMap($playerInfo,$currentMap['pid'],$playerMapModel,$playerNameMapModel);
+                        if(!$mergeToMap)
+                        {
+                            DB::rollBack();
+                        }
+                        else
+                        {
+                            //把映射写回原来的队员内容
+                            $updatePlayer = $playerModel->updatePlayer($playerInfo['player_id'],["pid"=>$currentMap['pid']]);
+                            if($updatePlayer)
+                            {
+                                echo "merged ".$playerInfo['player_id']." to ".$currentMap['pid']."\n";
+                                DB::commit();
+                            }
+                            else
+                            {
+                                DB::rollBack();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    //根据名称找到映射
+                    $name = $this->generageNameHash($playerInfo['player_name']);
+                    $currentMap = $playerNameMapModel->getPlayerByNameHash($name,$playerInfo['game']);
+                    if(isset($currentMap['pid']))
+                    {
+                        DB::beginTransaction();
+                        //合并入查到的映射里面
+                        $mergeToMap = $this->mergeToPlayerMap($playerInfo,$currentMap['pid'],$playerMapModel,$playerNameMapModel);
+                        if(!$mergeToMap)
+                        {
+                            DB::rollBack();
+                        }
+                        else
+                        {
+                            //把映射写回原来的队员内容
+                            $updatePlayer = $playerModel->updatePlayer($playerInfo['player_id'],["pid"=>$currentMap['pid'],"original_source"=>$playerInfo['original_source']]);
+                            if($updatePlayer)
+                            {
+                                echo "merged ".$playerInfo['player_id']." to ".$currentMap['pid']."\n";
+                                DB::commit();
+                            }
+                            else
+                            {
+                                DB::rollBack();
+                            }
+                        }
+                    }
+                    else//没有匹配上 创建
+                    {
+                        DB::beginTransaction();
+                        //创建队员
+                        $insertPlayer = $totalPlayerModel->insertPlayer(['game'=>$playerInfo['game'],'original_source'=>$playerInfo['original_source']]);
+                        //创建成功
+                        if($insertPlayer)
+                        {
+                            //合并入查到的映射里面
+                            $mergeToMap = $this->mergeToPlayerMap($playerInfo,$insertPlayer,$playerMapModel,$playerNameMapModel);
+                            if(!$mergeToMap)
+                            {
+                                DB::rollBack();
+                            }
+                            else
+                            {
+                                //把映射写回原来的队员内容
+                                $updatePlayer = $playerModel->updatePlayer($playerInfo['player_id'],["pid"=>$insertPlayer]);
+                                if($updatePlayer)
+                                {
+                                    echo "merged ".$playerInfo['player_id']." to ".$insertPlayer."\n";
+                                    //sleep(1);
+                                    DB::commit();
+                                }
+                                else
+                                {
+                                    DB::rollBack();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //echo "insertPlayerError";
+                            DB::rollBack();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    function generageNameHash($name = "")
+    {
+        $name = strtolower($name);
+        $name = trim($name);
+        $replaceList = [" ","."];
+        foreach($replaceList as $key)
+        {
+            $name = str_replace($key,"",$name);
+        }
+        echo "hash:".$name."\n";
+        return md5($name);
+    }
+    //把对于合并到已经查到的队员映射
+    function mergeToPlayerMap($playerInfo = [],$pid,$playerMapModel,$playerNameMapModel)
+    {
+        $insertMap = $playerMapModel->insertMap(["pid"=>$pid,"player_id"=>$playerInfo['player_id']]);
+        if($insertMap)
+        {
+            $aka = json_decode($playerInfo['aka'], true);
+            $nameList = (array_merge([$playerInfo['player_name'], $playerInfo['en_name']], $aka??[]));
+            foreach ($nameList as $key => $name)
+            {
+                if ($name == "")
+                {
+                    unset($nameList[$key]);
+                }
+                else
+                {
+                    $nameList[$key] = $this->generageNameHash($name);
+                }
+            }
+            $nameList = array_unique($nameList);
+            foreach ($nameList as $name)
+            {
+                //保存名称映射
+                $saveMap = $playerNameMapModel->saveMap(["name_hash" => $name, "game" => $playerInfo['game'], "pid" => $pid]);
+                if (!$saveMap) {
+                    //echo "insertPlayerMapError";
+                    return false;
+                    //break;
+                }
+            }
+            return true;
+        }
+    }
 }

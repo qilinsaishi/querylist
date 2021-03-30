@@ -10,6 +10,7 @@ class scoregg
         [
             "team_name"=>['path'=>"team_name",'default'=>''],
             "en_name"=>['path'=>"en_name",'default'=>''],
+            "cn_name"=>['path'=>"cn_name",'default'=>''],
             "aka"=>['path'=>"","default"=>""],
             "location"=>['path'=>"","default"=>"未知"],
             "established_date"=>['path'=>"",'default'=>"未知"],

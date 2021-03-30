@@ -122,7 +122,7 @@ class cpseo
         $intro_content=$ql->find('.intro-content-block .intro-content')->html();
         $team_members=$ql->find('.l-m-team-member:eq(0) td a')->attrs('href')->all();
 
-        $history_match=$ql->rules([
+        /*$history_match=$ql->rules([
             'date' => ['.text:eq(0)', 'text'],
             'score' => ['.score', 'text'],
             'info' => ['.info', 'html'],
@@ -133,8 +133,8 @@ class cpseo
             $link=QueryList::html($info)->find('a')->attrs('href')->toArray();
             $val['team_url']=$link ?? [];
             unset($val['info']);
-        }
-
+        }*/
+/*
         $article_list=$ql->rules([
             'sTitle' => ['.article-title', 'text'],
             'link' => ['a', 'href'],
@@ -145,27 +145,26 @@ class cpseo
             $item['type']=1761;//资讯
             $item['content'] = QueryList::get($item['link'])->find('.article-content')->html();
             return $item;
-        });
+        });*/
         $teamArr=explode('team/',$url);
         $team_id=end($teamArr);
-
 
         $baseInfo = [
             'logo' => $logo,
             'name' => $name ?? '',
-            'team_id'=>$team_id,
+            'site_id'=>$team_id,
             'game' => 'kpl',
-            'subname' => $subname ?? '',
+            'ename' => $subname ?? '',
             'intro' => $intro_content ?? '',
-            'connect_info'=>['team_id'=>$team_id]
+
 
         ];
 
         $res = [
             'baseInfo' => $baseInfo,
-            'history_match' => $history_match,
+            //'history_match' => $history_match,
             'team_members' => $team_members,
-            'information'=>$article_list,
+            //'information'=>$article_list,
         ];
 
         return $res;
