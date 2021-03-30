@@ -12,7 +12,7 @@ class Coreword extends Command
      *
      * @var string
      */
-    protected $signature = 'keyword:coreword {game}';
+    protected $signature = 'keyword:coreword {game} {type}';
 
     /**
      * The console command description.
@@ -39,6 +39,16 @@ class Coreword extends Command
     public function handle()
     {
         $game = ($this->argument("game")??"");
-        (new oKeyword())->coreword($game);
+        $type = ($this->argument("type")??"5118");
+        switch($type)
+        {
+            case "5118":
+                (new oKeyword())->coreword($game);
+                break;
+            case "baidu":
+                (new oKeyword())->baidu_keyword($game);
+                break;
+        }
+
     }
 }

@@ -109,7 +109,7 @@ class MissionModel extends Model
     {
         $currentTime = date("Y-m-d H:i:s");
         if (!isset($data['update_time'])) {
-            $data['update_time'] = $currentTime;
+            $data['update_time'] = $currentTime ?? '';
         }
         return $this->where('mission_id', $mission_id)->update($data);
     }

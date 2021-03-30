@@ -81,7 +81,7 @@ class cpseo
     public function cpSeoPlayer($url,$team_id)
     {
         //判断url是否有效
-        $headers=get_headers($url,1);
+        //$headers=get_headers($url,1);
        /* if(!preg_match('/200/',$headers[0])){
             return  [];
         }*/

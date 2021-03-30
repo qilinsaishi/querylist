@@ -21,6 +21,15 @@ return [
         'coreword'=>env('5118_coreword_key'),
         'rewrite'=>env('5117_rewrite_key'),
     ],
+    'default_source'=>[
+        'team'=>env('DEFAULT_SOURCE_TEAM'),
+        'player'=>env('DEFAULT_SOURCE_PLAYER'),
+    ],
+    'baidu'=>[
+        'APP_ID'=>env('BAIDU_APP_ID'),
+        'API_KEY'=>env('BAIDU_APP_KEY'),
+        'SECRET_KEY'=>env('BAIDU_SECRET_KEY'),
+    ],
     /*
     |--------------------------------------------------------------------------
     | Application Environment

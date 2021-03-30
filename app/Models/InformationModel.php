@@ -38,7 +38,7 @@ class InformationModel extends Model
     protected $attributes = [
     ];
     protected $toJson = [
-        "keywords_list","scws_list"
+        "keywords_list","scws_list","baidu_word_list","5118_word_list"
     ];
     protected $toAppend = [
     ];
@@ -76,6 +76,11 @@ class InformationModel extends Model
         if(isset($params['5118_rewrite']))
         {
             $information_list = $information_list->where("5118_rewrite",$params['5118_rewrite']>0?1:0);
+        }
+        //是否需要处理百度分词
+        if(isset($params['baidu_word']))
+        {
+            $information_list = $information_list->where("baidu_word",$params['baidu_word']>0?1:0);
         }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)
@@ -284,6 +289,11 @@ class InformationModel extends Model
         if(isset($params['5118_rewrite']))
         {
             $information_count = $information_count->where("5118_rewrite",$params['5118_rewrite']>0?1:0);
+        }
+        //是否需要处理百度分词
+        if(isset($params['baidu_word']))
+        {
+            $information_count = $information_count->where("baidu_word",$params['baidu_word']>0?1:0);
         }
         //游戏类型
         if(isset($params['game']) && strlen($params['game'])>=3)

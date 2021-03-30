@@ -8,6 +8,8 @@ use App\Models\ScwsMapModel;
 use App\Models\ScwsKeywordMapModel;
 use App\Models\CorewordModel;
 use App\Models\CorewordMapModel;
+use App\Models\BaiduKeywordModel;
+use App\Models\BaiduKeywordMapModel;
 use App\Models\TeamModel as TeamModel;
 use App\Models\PlayerModel as PlayerModel;
 use App\Models\KeywordsModel as KeywordsModel;
@@ -16,6 +18,7 @@ use App\Models\Hero\kplModel as kplHeroModel;
 use App\Models\Hero\dota2Model as dota2HeroModel;
 use App\Models\InformationContentModel as contentModel;
 use App\Services\Data\RedisService;
+use App\Libs\Baidu\AipNlp;
 
 
 class KeywordService
@@ -177,6 +180,19 @@ class KeywordService
         }
     }
     //爬取数据
+    public function baidu_keyword($game = "")
+    {
+        $informationModel = (new InformationModel());
+        $result = [];
+        $informationList = $informationModel->getInformationList(["game"=>$game,"baidu_word"=>1,"status"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = array_column($informationList,"id");
+        $client = new AipNlp(config("app.baidu.APP_ID"), config("app.baidu.API_KEY"), config("app.baidu.SECRET_KEY"));
+        foreach($informationList as $content_id)
+        {
+            $this->processBaiduKeyword($content_id,$informationModel,$client);
+        }
+    }
+    //爬取数据
     public function rewrite($game = "")
     {
         $informationModel = (new InformationModel());
@@ -330,13 +346,45 @@ class KeywordService
             }
         }
         $keywordMap = $corewordModel->saveMap($return['data']);
-
         $informationModel->updateInformation($information['id'],['5118_word'=>0,'5118_word_list'=> array_flip($keywordMap)]);
         print_R(array_flip($keywordMap));
         echo "count:".count($keywordMap)."\n";
         $corewordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],array_flip($keywordMap),$information['create_time']);
         $data = $redisService->refreshCache("information",[strval($information['id'])]);
     }
+    public function processBaiduKeyword($content_id,$informationModel,$oClient)
+    {
+        $redisService = new RedisService();
+        $baiduKeywordModel = new BaiduKeywordModel();
+        $baiduKeywordMapModel = new BaiduKeywordMapModel();
+        $information = $informationModel->getInformationById($content_id,["title","content","type","game","id","create_time"]);
+        echo "start_to_process:".$information['id']."\n";
+        $replace_arr = [
+            '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&lsquo'=>"'",'&rsquo'=>"'",'&rdquo'=>'”','&mdash'=>'-'
+        ];
+        $content = (html_entity_decode($information['content']));
+        foreach($replace_arr as $k => $v)
+        {
+            $content = str_replace($k,$v,$content);
+        }
+        $text = strip_tags($content);
+        $return = $oClient->keyword($information['title'],$text);
+        $return['items'] = $return['items']??[];
+        foreach($return['items'] as $key => $word)
+        {
+            if(in_array($word['tag'],$this->expect_keywords))
+            {
+                unset($return['items'][$key]);
+            }
+        }
+        $keywordMap = $baiduKeywordModel->saveMap($return['items']);
+        $informationModel->updateInformation($information['id'],['baidu_word'=>0,'baidu_word_list'=> $return['items']]);
+        print_R($return['items']);
+        echo "count:".count($return['items'])."\n";
+        $baiduKeywordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$return['items'],$keywordMap,$information['create_time']);
+        $data = $redisService->refreshCache("information",[strval($information['id'])]);
+    }
+
     public function process5118Rewrite($content_id,$informationModel,$informationContentModel)
     {
         $redisService = new RedisService();
