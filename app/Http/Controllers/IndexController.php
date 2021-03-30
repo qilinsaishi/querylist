@@ -50,6 +50,20 @@ class IndexController extends Controller
                     $return = [];
                 }
                 break;
+            case "player":
+                if(isset($data['player_id']))
+                {
+                    $return = (new IntergrationService())->getPlayerInfo($data['player_id']);
+                }
+                elseif(isset($data['pid']))
+                {
+                    $return = (new IntergrationService())->getPlayerInfo(0,$data['pid']);
+                }
+                else
+                {
+                    $return = [];
+                }
+                break;
         }
         return $return;
     }
