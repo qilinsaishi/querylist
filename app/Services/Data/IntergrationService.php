@@ -303,8 +303,8 @@ class IntergrationService
                                 if(strlen($playerInfo[$column])>strlen($temp))
                                 {
                                     $temp = $playerInfo[$column];
-                                    $current_player = $playerInfo['team_id']."|".$source['source'];
-                                    $current_player = $playerInfo['team_id'];//."|".$source['source'];
+                                    $current_player = $playerInfo['player_id']."|".$source['source'];
+                                    $current_player = $playerInfo['player_id'];//."|".$source['source'];
                                 }
                             }
                             else
@@ -318,8 +318,8 @@ class IntergrationService
                                 if(count($temp)<$t)
                                 {
                                     $temp = $t;
-                                    $current_player = $playerInfo['team_id']."|".$source['source'];
-                                    $current_player = $playerInfo['team_id'];//."|".$source['source'];
+                                    $current_player = $playerInfo['player_id']."|".$source['source'];
+                                    $current_player = $playerInfo['player_id'];//."|".$source['source'];
                                 }
                             }
                             $totalPlayer[$column] = $temp;

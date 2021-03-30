@@ -37,10 +37,10 @@ class PlayerModel extends Model
      */
     protected $attributes = [
     ];
-    protected $toJson = [
+    public $toJson = [
         "team_history","event_history","aka","stat"
     ];
-    protected $toAppend = [
+    public $toAppend = [
         "aka"
     ];
     public function getPlayerList($params)
