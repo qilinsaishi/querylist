@@ -28,6 +28,7 @@ class IntergrationService
             //获取表结构
             $table = $oTotalTeam->getTableColumns();
             $jsonList = $oTeam->toJson;
+            $appendList = $oTeam->toAppend;
             $pk = $oTotalTeam->primaryKey;
             //找到单条详情
             $singleTeamInfo = $oTeam->getTeamById($team_id);
@@ -45,6 +46,7 @@ class IntergrationService
                     $totalTeam = $oTotalTeam->getTeamById($singleMap['tid']);
                     //复制映射结构
                     $totalTeamStructure = $totalTeam;
+                    $append = [];
                     //按照来源逐一扫描
                     foreach($sourceList as $key => $source)
                     {
@@ -97,7 +99,28 @@ class IntergrationService
                                 $totalTeam[$column] = $temp;
                                 $totalTeamStructure[$column] = $current_team;
                             }
+                            if(in_array($column,$appendList))
+                            {
+                                print_R($teamInfo[$column]);
+                                if(!isset($append[$column]))
+                                {
+                                    $append[$column] = [];
+                                }
+
+                                //依次循环队伍
+                                foreach($teamList as $teamInfo)
+                                {
+                                    if($teamInfo['original_source'] == $source['source'])
+                                    {
+                                        $append[$column] = array_unique(array_merge($append[$column],json_decode($teamInfo[$column],true)));
+                                    }
+                                }
+                            }
                         }
+                    }
+                    foreach($append as $key => $value)
+                    {
+                        $totalTeam[$key] = $value;
                     }
                     $return['data'] = $totalTeam;
                     $return['structure'] = $totalTeamStructure;
@@ -113,8 +136,6 @@ class IntergrationService
                 //$return = [];
             }
         }
-        print_R($return['structure']);
-        die();
         return $return;
     }
 }
