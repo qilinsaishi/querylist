@@ -42,7 +42,7 @@ class TeamModel extends Model
         "honor_list"=>[],
         "race_stat"=>[],
     ];
-    protected $toJson = [
+    public $toJson = [
         "race_stat","honor_list","aka","race_stat"
     ];
     protected $toAppend = [

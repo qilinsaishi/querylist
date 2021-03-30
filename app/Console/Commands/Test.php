@@ -44,7 +44,8 @@ class Test extends Command
         {
             case "team_intergration":
             {
-                (new IntergrationService())->getTeamInfo($id);
+                $teamInfo = (new IntergrationService())->getTeamInfo($id);
+                print_R($teamInfo);
                 break;
             }
         }
