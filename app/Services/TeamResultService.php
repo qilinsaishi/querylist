@@ -289,7 +289,7 @@ class TeamResultService
         $return = false;
         if($id==0)
         {
-            $teamList = $teamModel->getTeamList(["fields"=>"team_id,team_name,en_name,aka,original_source,game","tid"=>0,"page_size"=>1000]);
+            $teamList = $teamModel->getTeamList(["fields"=>"team_id,team_name,en_name,cn_name,aka,original_source,game","tid"=>0,"page_size"=>1000]);
         }
         else
         {
@@ -309,14 +309,49 @@ class TeamResultService
                     //如果没取到
                     if(!isset($currentMap['tid']))
                     {
-                        DB::beginTransaction();
-                        //创建队伍
-                        $insertTeam = $totalTeamModel->insertTeam(['game'=>$teamInfo['game'],'original_source'=>$teamInfo['original_source']]);
-                        //创建成功
-                        if($insertTeam)
+                        //根据名称找到映射
+                        $name = $this->generageNameHash($teamInfo['team_name']);
+                        $currentMap = $teamNameMapModel->getTeamByNameHash($name,$teamInfo['game']);
+                        if(!isset($currentMap['tid']))
+                        {
+                            DB::beginTransaction();
+                            //创建队伍
+                            $insertTeam = $totalTeamModel->insertTeam(['game'=>$teamInfo['game'],'original_source'=>$teamInfo['original_source']]);
+                            //创建成功
+                            if($insertTeam)
+                            {
+                                //合并入查到的映射里面
+                                $mergeToMap = $this->mergeToTeamMap($teamInfo,$insertTeam,$teamMapModel,$teamNameMapModel);
+                                if(!$mergeToMap)
+                                {
+                                    DB::rollBack();
+                                }
+                                else
+                                {
+                                    //把映射写回原来的队伍内容
+                                    $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$insertTeam]);
+                                    if($updateTeam)
+                                    {
+                                        echo "merged ".$teamInfo['team_id']." to ".$insertTeam."\n";
+                                        echo "888";
+                                        DB::commit();
+                                    }
+                                    else
+                                    {
+                                        DB::rollBack();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                //echo "insertTeamError";
+                                DB::rollBack();
+                            }
+                        }
+                        else
                         {
                             //合并入查到的映射里面
-                            $mergeToMap = $this->mergeToTeamMap($teamInfo,$insertTeam,$teamMapModel,$teamNameMapModel);
+                            $mergeToMap = $this->mergeToTeamMap($teamInfo,$currentMap['tid'],$teamMapModel,$teamNameMapModel);
                             if(!$mergeToMap)
                             {
                                 DB::rollBack();
@@ -324,10 +359,11 @@ class TeamResultService
                             else
                             {
                                 //把映射写回原来的队伍内容
-                                $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$insertTeam]);
+                                $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$currentMap['tid']]);
                                 if($updateTeam)
                                 {
-                                    echo "merged ".$teamInfo['team_id']." to ".$insertTeam."\n";
+                                    echo "merged ".$teamInfo['team_id']." to ".$currentMap['tid']."\n";
+                                    echo "000";
                                     DB::commit();
                                 }
                                 else
@@ -335,11 +371,6 @@ class TeamResultService
                                     DB::rollBack();
                                 }
                             }
-                        }
-                        else
-                        {
-                            //echo "insertTeamError";
-                            DB::rollBack();
                         }
                     }
                     else//找到映射
@@ -357,6 +388,7 @@ class TeamResultService
                             if($updateTeam)
                             {
                                 echo "merged ".$teamInfo['team_id']." to ".$currentMap['tid']."\n";
+                                echo "999";
                                 DB::commit();
                             }
                             else
@@ -387,6 +419,7 @@ class TeamResultService
                             if($updateTeam)
                             {
                                 echo "merged ".$teamInfo['team_id']." to ".$currentMap['tid']."\n";
+                                echo "666";
                                 DB::commit();
                             }
                             else
@@ -416,6 +449,7 @@ class TeamResultService
                                 if($updateTeam)
                                 {
                                     echo "merged ".$teamInfo['team_id']." to ".$insertTeam."\n";
+                                    echo "777";
                                     DB::commit();
                                 }
                                 else
@@ -446,8 +480,28 @@ class TeamResultService
         {
             $name = str_replace($key,"",$name);
         }
+        $name = $this->removeEmoji($name);
         echo "hash:".$name."\n";
-        return md5($name);
+        return $name;
+    }
+    function removeEmoji($text) {
+        $clean_text = "";
+        // Match Emoticons
+        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
+        $clean_text = preg_replace($regexEmoticons, '', $text);
+        // Match Miscellaneous Symbols and Pictographs
+        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
+        $clean_text = preg_replace($regexSymbols, '', $clean_text);
+        // Match Transport And Map Symbols
+        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
+        $clean_text = preg_replace($regexTransport, '', $clean_text);
+        // Match Miscellaneous Symbols
+        $regexMisc = '/[\x{2600}-\x{26FF}]/u';
+        $clean_text = preg_replace($regexMisc, '', $clean_text);
+        // Match Dingbats
+        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
+        $clean_text = preg_replace($regexDingbats, '', $clean_text);
+        return $clean_text;
     }
     //把对于合并到已经查到的队伍映射
     function mergeToTeamMap($teamInfo = [],$tid,$teamMapModel,$teamNameMapModel)
@@ -456,7 +510,7 @@ class TeamResultService
         if($insertMap)
         {
             $aka = json_decode($teamInfo['aka'], true);
-            $nameList = (array_merge([$teamInfo['team_name'], $teamInfo['en_name']], $aka));
+            $nameList = (array_merge([$teamInfo['team_name'], $teamInfo['en_name'],$teamInfo['cn_name']], $aka));
             foreach ($nameList as $key => $name)
             {
                 if ($name == "")
@@ -471,12 +525,15 @@ class TeamResultService
             $nameList = array_unique($nameList);
             foreach ($nameList as $name)
             {
-                //保存名称映射
-                $saveMap = $teamNameMapModel->saveMap(["name_hash" => $name, "game" => $teamInfo['game'], "tid" => $tid]);
-                if (!$saveMap) {
-                    //echo "insertTeamMapError";
-                    return false;
-                    //break;
+                if($name != "")
+                {
+                    //保存名称映射
+                    $saveMap = $teamNameMapModel->saveMap(["name_hash" => $name, "game" => $teamInfo['game'], "tid" => $tid]);
+                    if (!$saveMap) {
+                        //echo "insertTeamMapError";
+                        return false;
+                        //break;
+                    }
                 }
             }
             return true;

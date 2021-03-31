@@ -394,8 +394,28 @@ class  PlayerService
         {
             $name = str_replace($key,"",$name);
         }
+        $name = $this->removeEmoji($name);
         echo "hash:".$name."\n";
-        return md5($name);
+        return $name;
+    }
+    function removeEmoji($text) {
+        $clean_text = "";
+        // Match Emoticons
+        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
+        $clean_text = preg_replace($regexEmoticons, '', $text);
+        // Match Miscellaneous Symbols and Pictographs
+        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
+        $clean_text = preg_replace($regexSymbols, '', $clean_text);
+        // Match Transport And Map Symbols
+        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
+        $clean_text = preg_replace($regexTransport, '', $clean_text);
+        // Match Miscellaneous Symbols
+        $regexMisc = '/[\x{2600}-\x{26FF}]/u';
+        $clean_text = preg_replace($regexMisc, '', $clean_text);
+        // Match Dingbats
+        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
+        $clean_text = preg_replace($regexDingbats, '', $clean_text);
+        return $clean_text;
     }
     //把对于合并到已经查到的队员映射
     function mergeToPlayerMap($playerInfo = [],$pid,$playerMapModel,$playerNameMapModel)
@@ -404,7 +424,7 @@ class  PlayerService
         if($insertMap)
         {
             $aka = json_decode($playerInfo['aka'], true);
-            $nameList = (array_merge([$playerInfo['player_name'], $playerInfo['en_name']], $aka??[]));
+            $nameList = (array_merge([$playerInfo['player_name'],$playerInfo['en_name'],$playerInfo['en_name']], $aka??[]));
             foreach ($nameList as $key => $name)
             {
                 if ($name == "")
@@ -419,13 +439,17 @@ class  PlayerService
             $nameList = array_unique($nameList);
             foreach ($nameList as $name)
             {
-                //保存名称映射
-                $saveMap = $playerNameMapModel->saveMap(["name_hash" => $name, "game" => $playerInfo['game'], "pid" => $pid]);
-                if (!$saveMap) {
-                    //echo "insertPlayerMapError";
-                    return false;
-                    //break;
+                if($name != "")
+                {
+                    //保存名称映射
+                    $saveMap = $playerNameMapModel->saveMap(["name_hash" => $name, "game" => $playerInfo['game'], "pid" => $pid]);
+                    if (!$saveMap) {
+                        //echo "insertPlayerMapError";
+                        return false;
+                        //break;
+                    }
                 }
+
             }
             return true;
         }
