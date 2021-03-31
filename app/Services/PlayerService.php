@@ -20,7 +20,7 @@ class  PlayerService
 {
     public function insertPlayerData($mission_type, $game)
     {
-        $this->getScoreggPlayerDetail($game, $mission_type);
+        $this->insertCpseoPlayer($game, $mission_type);
         return 'finish';
     }
     public function insertCpseoPlayer($game, $mission_type)
@@ -107,6 +107,8 @@ class  PlayerService
         if ($game == 'kpl') {
             $gameID = 2;
         } elseif ($game == 'lol') {
+            $gameID = 1;
+        }elseif ($game == 'dota2') {
             $gameID = 1;
         }
         $tournament_url = 'https://www.scoregg.com/services/api_url.php';
