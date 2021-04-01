@@ -292,7 +292,6 @@ class TeamModel extends Model
                     //判断字段是否有后台手动更新
                     $changeLogsModel=new ChangeLogsModel();
                     $check_result=$changeLogsModel->checkData($currentTeam['team_id'],$key,$type='team');
-
                     if(!$check_result){
                         unset($data[$key]);
                     }

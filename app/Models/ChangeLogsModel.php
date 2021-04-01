@@ -33,17 +33,27 @@ class ChangeLogsModel extends Model
     //判断字段是否已经更改,如果有变动则不更新
     public function checkData($data_id = 0, $field, $type = 'team')
     {
-        $rt_count = 0;
-        $rt_count = $this->getCount($field, $data_id, $type);
-        if ($rt_count > 0) {
+        //获取change_log日志表最后一条数据
+        $obj =$this->getChangeLog($field, $data_id, $type);
+
+        if(!empty($obj))
+        {
+            //如果为不为空的情况下，返回false
             return false;
         }
+
         return $field;
     }
 
-    public function getCount($field, $data_id, $type)
+    /**
+     * @param $field //更新字段
+     * @param $data_id //队员id
+     * @param $type  //更新类型
+     * @return mixed
+     */
+    public function getChangeLog($field, $data_id, $type)
     {
-        return $this->where(['type' => $type, 'data_id' => $data_id, 'fields' => $field])->count();
+        return $this->where(['type' => $type, 'data_id' => $data_id, 'fields' => $field,'status'=>0])->orderBy('id', 'desc')->first();
 
     }
 
