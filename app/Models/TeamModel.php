@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class TeamModel extends Model
 {
-    protected $table = "team_info_bak";
+    protected $table = "team_info";
     protected $primaryKey = "team_id";
     public $timestamps = false;
     protected $connection = "query_list";
