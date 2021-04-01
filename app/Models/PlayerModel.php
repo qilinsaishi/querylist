@@ -41,7 +41,7 @@ class PlayerModel extends Model
         "team_history","event_history","aka","stat"
     ];
     public $toAppend = [
-        "aka"
+        "aka"=>["player_name","en_name","cn_name","aka"]
     ];
     public function getPlayerList($params)
     {
@@ -233,7 +233,7 @@ class PlayerModel extends Model
             //校验原有数据
             foreach($data as $key => $value)
             {
-                if(in_array($key,$this->toAppend))
+                if(isset($this->toAppend[$key]))
                 {
                     $t = json_decode($currentPlayer[$key],true);
 
