@@ -45,7 +45,10 @@ class TotalPlayerModel extends Model
     ];
     protected $keep = [
     ];
-
+    public function getTableColumns()
+    {
+        return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
+    }
     public function getPlayerById($player_id,$fields = "*")
     {
         $player_info =$this->select(explode(",",$fields))

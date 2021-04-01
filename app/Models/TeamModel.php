@@ -46,7 +46,7 @@ class TeamModel extends Model
         "race_stat","honor_list","aka","race_stat"
     ];
     public $toAppend = [
-        "aka"
+        "aka"=>["team_name","en_name","cn_name","aka"]
     ];
     protected $keep = [
         "original_source","team_history"
@@ -265,7 +265,7 @@ class TeamModel extends Model
             //校验原有数据
             foreach($data as $key => $value)
             {
-                if(in_array($key,$this->toAppend))
+                if(isset($this->toAppend[$key]))
                 {
                     $t = json_decode($currentTeam[$key],true);
                     foreach($value as $k => $v)

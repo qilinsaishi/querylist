@@ -15,6 +15,7 @@ use App\Models\Player\PlayerNameMapModel as PlayerNameMapModel;
 class IntergrationService
 {
     //team_id:team_info表的主键
+    //tid:team_list表的主键
     //force:强制重新获取 1是0否
     public function getTeamInfo($team_id=0,$tid=0,$get_data = 0,$force = 1)
     {
@@ -102,18 +103,30 @@ class IntergrationService
                     }
                     $table_source[$column] = $selectedSource;
                 }
-                elseif(in_array($column,$appendList))
+                elseif(isset($appendList[$column]))
                 {
                     if(!isset($append[$column]))
                     {
                         $append[$column] = [];
                     }
-                    //依次循环队伍
+                    //依次循环队员
                     foreach($teamList as $teamInfo)
                     {
-                        $append[$column] = array_unique(array_merge($append[$column],json_decode($teamInfo[$column],true)));
+                        foreach($appendList[$column] as $appendKey)
+                        {
+                            if(!in_array($appendKey,$jsonList))
+                            {
+                                $append[$column][] = $teamInfo[$appendKey];
+                            }
+                            else
+                            {
+                                $append[$column] = array_merge($append[$column],json_decode($teamInfo[$column],true)??[]);
+                            }
+                        }
+                        $append[$column] = array_unique($append[$column]);
                     }
                 }
+
             }
             foreach($append as $key => $value)
             {
@@ -167,6 +180,179 @@ class IntergrationService
             }
             $return['data'] = $totalTeam;
             $return['structure'] = $totalTeamStructure;
+        }
+        if($get_data==0)
+        {
+            unset($return['data']);
+        }
+        return $return;
+    }
+
+    //player_id:player_info表的主键
+    //tid:player_list表的主键
+    //force:强制重新获取 1是0否
+    public function getPlayerInfo($player_id=0,$pid=0,$get_data = 0,$force = 1)
+    {
+        $return = ["data"=>[],"structure"=>[]];
+        $sourceList = config('app.intergration.player');
+        if($force==1)
+        {
+            $oPlayer = new PlayerModel();
+            $oPlayerMap = new PlayerMapModel();
+            $oTotalPlayer = new TotalPlayerModel();
+            //获取表结构
+            $table = $oTotalPlayer->getTableColumns();
+            $jsonList = $oPlayer->toJson;
+            $appendList = $oPlayer->toAppend;
+            $pk = $oTotalPlayer->primaryKey;
+            if($player_id>0)
+            {
+                //找到单条详情
+                $singleTeamInfo = $oPlayer->getPlayerById($player_id);
+                //找到
+                if(isset($singlePLayerInfo['player_id']))
+                {
+                    //获取当前映射
+                    $singleMap = $oPlayerMap->getPlayerByPlayerId($singlePLayerInfo['player_id']);
+                    //找到映射
+                    if(isset($singleMap['pid']))
+                    {
+                        $pid = $singleMap['pid'];
+                    }
+                    else//没找到
+                    {
+                        $pid = 0;
+                        //$return = [];
+                        //创建映射
+                    }
+                }
+                else//没找到
+                {
+                    $pid = 0;
+                }
+            }
+            //获取集合所有详情
+            $playerList = $oPlayer->getPLayerList(['pid'=>$pid,"fields"=>"*","sources"=>array_column($sourceList,"source")]);
+            //获取集合数据
+            $totalPlayer = $oTotalPlayer->getPlayerById($pid);
+            $playerIdList = array_column($playerList,"player_id");
+            //复制映射结构
+            $totalPlayerStructure = $totalPlayer;
+            $append = [];
+            $table_source = [];
+            foreach($table as $column)
+            {
+                if(in_array($totalPlayer[$column],$playerIdList))
+                {
+                    $currentKey = array_flip($playerIdList)[$totalPlayer[$column]];
+                    //不在需要json的列表中
+                    if(!in_array($column,$jsonList))
+                    {
+                        $totalPlayer[$column] = $playerList[$currentKey][$column];
+                    }
+                    else
+                    {
+                        $totalPlayer[$column] = json_decode($playerList[$currentKey][$column],true);
+                    }
+                }
+            }
+            //生成字段与来源的对应表
+            foreach($table as $column)
+            {
+                if(($totalPlayer[$column] == "0") && ($column != $pk))
+                {
+                    $selectedSource = [];
+                    //按照来源逐一扫描
+                    foreach($sourceList as $key => $source)
+                    {
+                        //如果有注明高优先级
+                        if(in_array($column,$source['detail_list']))
+                        {
+                            $selectedSource[] = $source['source'];
+                        }
+                    }
+                    if(count($selectedSource)==0)
+                    {
+                        $selectedSource = array_column($sourceList,"source");
+                    }
+                    $table_source[$column] = $selectedSource;
+                }
+                elseif(isset($appendList[$column]))
+                {
+                    if(!isset($append[$column]))
+                    {
+                        $append[$column] = [];
+                    }
+                    //依次循环队员
+                    foreach($playerList as $playerInfo)
+                    {
+                        foreach($appendList[$column] as $appendKey)
+                        {
+                            if(!in_array($appendKey,$jsonList))
+                            {
+                                $append[$column][] = $playerInfo[$appendKey];
+                            }
+                            else
+                            {
+                                $append[$column] = array_merge($append[$column],json_decode($playerInfo[$column],true)??[]);
+                            }
+                        }
+                        $append[$column] = array_unique($append[$column]);
+                    }
+                }
+            }
+            foreach($append as $key => $value)
+            {
+                $totalPlayer[$key] = array_values($value);
+                $totalPlayerStructure[$key] = array_values($value);
+            }
+            //生成字段与来源的对应表
+            foreach($table as $column)
+            {
+                //echo "column:".$column."\n";
+                if(isset($table_source[$column]))
+                {
+                    //echo "column:".$column."\n";
+                    $sList =  $table_source[$column];
+                    $temp = "";
+                    $current_player = 0;
+                    foreach($playerList as $playerInfo)
+                    {
+                        if(in_array($playerInfo['original_source'],$sList))
+                        {
+                            //不在需要json的列表中
+                            if(!in_array($column,$jsonList))
+                            {
+                                if(strlen($playerInfo[$column])>strlen($temp))
+                                {
+                                    $temp = $playerInfo[$column];
+                                    $current_player = $playerInfo['player_id']."|".$source['source'];
+                                    $current_player = $playerInfo['player_id'];//."|".$source['source'];
+                                }
+                            }
+                            else
+                            {
+                                //json解码，比较数组大小
+                                $t = json_decode($playerInfo[$column],true);
+                                if($temp == "")
+                                {
+                                    $temp = [];
+                                }
+                                if(count($temp)<$t)
+                                {
+                                    $temp = $t;
+                                    $current_player = $playerInfo['player_id']."|".$source['source'];
+                                    $current_player = $playerInfo['player_id'];//."|".$source['source'];
+                                }
+                            }
+                            $totalPlayer[$column] = $temp;
+                            $totalPlayerStructure[$column] = $current_player;
+                        }
+                    }
+                }
+            }
+            $return['data'] = $totalPlayer;
+            $return['structure'] = $totalPlayerStructure;
         }
         if($get_data==0)
         {

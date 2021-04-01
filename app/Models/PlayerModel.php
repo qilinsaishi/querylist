@@ -37,11 +37,11 @@ class PlayerModel extends Model
      */
     protected $attributes = [
     ];
-    protected $toJson = [
+    public $toJson = [
         "team_history","event_history","aka","stat"
     ];
-    protected $toAppend = [
-        "aka"
+    public $toAppend = [
+        "aka"=>["player_name","en_name","cn_name","aka"]
     ];
     public function getPlayerList($params)
     {
@@ -66,6 +66,11 @@ class PlayerModel extends Model
         if(isset($params['team_id']) && $params['team_id']>0)
         {
             $player_list = $player_list->where("team_id",$params['team_id']);
+        }
+        //所属战队
+        if(isset($params['team_ids']) && count($params['team_ids'])>0)
+        {
+            $player_list = $player_list->whereIn("team_id",$params['team_ids']);
         }
         //不所属战队
         if(isset($params['except_team']) && $params['except_team']>0)
@@ -228,7 +233,7 @@ class PlayerModel extends Model
             //校验原有数据
             foreach($data as $key => $value)
             {
-                if(in_array($key,$this->toAppend))
+                if(isset($this->toAppend[$key]))
                 {
                     $t = json_decode($currentPlayer[$key],true);
 
@@ -294,6 +299,11 @@ class PlayerModel extends Model
         if(isset($params['team_id']) && $params['team_id']>0)
         {
             $player_count = $player_count->where("team_id",$params['team_id']);
+        }
+        //所属战队
+        if(isset($params['team_ids']) && count($params['team_ids'])>0)
+        {
+            $player_count = $player_count->whereIn("team_id",$params['team_ids']);
         }
         //不所属战队
         if(isset($params['except_team']) && $params['except_team']>0)
