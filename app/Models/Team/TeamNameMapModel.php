@@ -46,19 +46,11 @@ class TeamNameMapModel extends Model
 
     public function getTeamByNameHash($name_hash,$game,$fields = "*")
     {
-        $team_info =$this->select(explode(",",$fields))
+        $team_list =$this->select(explode(",",$fields))
             ->where("game",$game)
             ->where("name_hash",$name_hash)
-            ->get()->first();
-        if(isset($team_info->id))
-        {
-            $team_info = $team_info->toArray();
-        }
-        else
-        {
-            $team_info = [];
-        }
-        return $team_info;
+            ->get()->toArray();
+        return $team_list;
     }
     public function insertMap($data)
     {
