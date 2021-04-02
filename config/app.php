@@ -1,5 +1,40 @@
 <?php
-
+$t = explode('|',env('DEFAULT_SOURCE_TEAM'));
+$team_intergration = [];
+foreach($t as $detail)
+{
+    $stop = stripos($detail,":");
+    if($stop>0)
+    {
+        $detail_list = substr($detail,$stop+1,(strlen($detail)-$stop-1));
+        $detail_list = explode("/",$detail_list);
+        $source = substr($detail,0,$stop);
+    }
+    else
+    {
+        $detail_list = [];
+        $source = $detail;
+    }
+    $team_intergration[] = ["source"=>$source,"detail_list" => $detail_list];
+}
+$p = explode('|',env('DEFAULT_SOURCE_PLAYER'));
+$player_intergration = [];
+foreach($p as $detail)
+{
+    $stop = stripos($detail,":");
+    if($stop>0)
+    {
+        $detail_list = substr($detail,$stop+1,(strlen($detail)-$stop-1));
+        $detail_list = explode("/",$detail_list);
+        $source = substr($detail,0,$stop);
+    }
+    else
+    {
+        $detail_list = [];
+        $source = $detail;
+    }
+    $player_intergration[] = ["source"=>$source,"detail_list" => $detail_list];
+}
 return [
 
     /*
@@ -19,11 +54,11 @@ return [
     '5118'=>[
         'abstract'=>env('5118_abstract_key'),
         'coreword'=>env('5118_coreword_key'),
-        'rewrite'=>env('5117_rewrite_key'),
+        'rewrite'=>env('5118_rewrite_key'),
     ],
-    'default_source'=>[
-        'team'=>env('DEFAULT_SOURCE_TEAM'),
-        'player'=>env('DEFAULT_SOURCE_PLAYER'),
+    'intergration'=>[
+        'team'=>$team_intergration,
+        'player'=>$player_intergration,
     ],
     'baidu'=>[
         'APP_ID'=>env('BAIDU_APP_ID'),

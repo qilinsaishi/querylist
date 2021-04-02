@@ -17,7 +17,7 @@ class Intergration extends Command
      *
      * @var string
      */
-    protected $signature = 'intergration {mission_type} {--id=}';
+    protected $signature = 'intergration {mission_type} {--game=}';
 
     /**
      * The console command description.
@@ -43,14 +43,14 @@ class Intergration extends Command
      */
     public function handle()
     {
-        $id = $this->option("id")??0;
+        $game = $this->option("game")??"lol";
         $mission_type = ($this->argument("mission_type")??"");
         switch ($mission_type) {
             case "team":
-                (new TeamService())->intergration($id);
+                (new TeamService())->intergration($game);
                 break;
             case "player":
-                (new PlayerService())->intergration($id);
+                (new PlayerService())->intergration($game);
                 break;
             default:
                 break;
