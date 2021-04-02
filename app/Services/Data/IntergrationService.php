@@ -94,7 +94,15 @@ class IntergrationService
                         //如果有注明高优先级
                         if(in_array($column,$source['detail_list']))
                         {
-                            $selectedSource[] = $source['source'];
+                            if(in_array($source['source'],array_column($teamList,"original_source")))
+                            {
+                                $selectedSource[] = $source['source'];
+                            }
+                            else
+                            {
+                                $selectedSource = [];
+                            }
+
                         }
                     }
                     if(count($selectedSource)==0)
@@ -126,7 +134,6 @@ class IntergrationService
                         $append[$column] = array_unique($append[$column]);
                     }
                 }
-
             }
             foreach($append as $key => $value)
             {

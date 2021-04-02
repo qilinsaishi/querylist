@@ -303,7 +303,7 @@ class  PlayerService
                 else
                 {
                     //根据名称找到映射
-                    $name = $this->generageNameHash($playerInfo['player_name']);
+                    $name = $this->generateNameHash($playerInfo['player_name']);
                     $currentMap = $playerNameMapModel->getPlayerByNameHash($name,$playerInfo['game']);
                     if(isset($currentMap['pid']))
                     {
@@ -351,7 +351,7 @@ class  PlayerService
             }
         }
     }
-    function generageNameHash($name = "")
+    function generateNameHash($name = "")
     {
         $name = strtolower($name);
         $name = trim($name);
@@ -399,7 +399,7 @@ class  PlayerService
                 }
                 else
                 {
-                    $nameList[$key] = $this->generageNameHash($name);
+                    $nameList[$key] = $this->generateNameHash($name);
                 }
             }
             $nameList = array_unique($nameList);
