@@ -237,7 +237,7 @@ class IntergrationService
         $return = ["data"=>[],"structure"=>[]];
         $sourceList = config('app.intergration.player');
         $redis = app("redis.connection");
-        $redis_key = "intergrated_team_".$player_id."-".$pid;
+        $redis_key = "intergrated_player_".$player_id."-".$pid;
         $toGet = 0;
         if($force == 1)
         {
