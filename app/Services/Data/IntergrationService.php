@@ -232,7 +232,7 @@ class IntergrationService
     //player_id:player_info表的主键
     //tid:player_list表的主键
     //force:强制重新获取 1是0否
-    public function getPlayerInfo($player_id=0,$pid=0,$get_data = 0,$force = 1)
+    public function getPlayerInfo($player_id=0,$pid=0,$get_data = 0,$force = 0)
     {
         $return = ["data"=>[],"structure"=>[]];
         $sourceList = config('app.intergration.player');
