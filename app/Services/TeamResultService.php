@@ -365,6 +365,7 @@ class TeamResultService
                                             $matchedPlayer++;
                                             echo "playerInfo:".$playerInfo['player_id']."\n";
                                             $toMerge[$player_id][] = $playerInfo['pid'];
+                                            $toMerge[$player_id] = array_unique($toMerge[$player_id]);
                                             //$toMerge[$player_id][] = ["pid"=>$playerInfo['pid'],"name"=>$nameToCheck];
                                         }
                                     }
@@ -374,8 +375,10 @@ class TeamResultService
                         if($matchedPlayer>=3)
                         {
                             //print_R($playerNameList);
+                            echo ">>>>>>>>>>>>>>>>>>>>>>>>>-------------------------<<<<<<<<<<<<<<<<<<<<<<<<<\n";
                             print_R($toMerge);
                             sleep(1);
+                            echo "<<<<<<<<<<<<<<<<<<<<<<<<<------------------------->>>>>>>>>>>>>>>>>>>>>>>>>\n";
                             //die();
                         }
                         if($matchedPlayer>=3)//整合入队伍

@@ -54,6 +54,7 @@ class RedisService
                 'prefix' => "tournament",
                 'expire' => 3600,
             ],
+
             "intergratedTeam" => [//整合队伍
                 'prefix' => "intergratedTeam",
                 'expire' => 86400,
@@ -70,6 +71,7 @@ class RedisService
                 'prefix' => "intergratedPlayeList",
                 'expire' => 86400,
             ],
+
 
 
         ];
