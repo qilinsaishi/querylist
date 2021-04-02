@@ -8,10 +8,17 @@ use App\Models\CollectUrlModel;
 use App\Models\Match\scoregg\tournamentModel;
 use App\Models\MissionModel;
 use App\Models\TeamModel;
-use App\Services\MissionService as oMission;
+use App\Models\PlayerModel;
+
+use App\Models\Player\TotalPlayerModel as TotalPlayerModel;
+use App\Models\Player\PlayerMapModel as PlayerMapModel;
+use App\Models\Player\PlayerNameMapModel as PlayerNameMapModel;
+
 use App\Models\Team\TotalTeamModel as TotalTeamModel;
 use App\Models\Team\TeamMapModel as TeamMapModel;
 use App\Models\Team\TeamNameMapModel as TeamNameMapModel;
+
+use App\Services\PlayerService;
 use Illuminate\Support\Facades\DB;
 use QL\QueryList;
 
@@ -279,44 +286,103 @@ class TeamResultService
         }
         return true;
     }
-    public function intergration($id = 0)
+    public function intergration($game = "lol")
     {
+        $totalPlayerModel = new TotalPlayerModel();
+        $playerMapModel = new PlayerMapModel();
+        $playerNameMapModel = new PlayerNameMapModel();
+
         $totalTeamModel = new TotalTeamModel();
         $teamMapModel = new TeamMapModel();
         $teamNameMapModel = new TeamNameMapModel();
+
         $teamModel = new TeamModel();
+        $playerModel = new PlayerModel();
+
+        $playerServices = new PlayerService();
         $team_intergration = config("app.intergration.team")??[];
-        $return = false;
-        if($id==0)
+        $return = [];
+        $teamList = $teamModel->getTeamList(["fields"=>"team_id,team_name,en_name,cn_name,aka,original_source,game","tid"=>0,"game"=>$game,"sources"=>array_column($team_intergration,"source"),"page_size"=>99999999]);
+        echo count($teamList);
+        //die();//生成所有队伍的可用名称列表
+        foreach($teamList as $key => $teamInfo)
         {
-            $teamList = $teamModel->getTeamList(["fields"=>"team_id,team_name,en_name,aka,original_source,game","tid"=>0,"page_size"=>1000]);
+            $nameList[$teamInfo['team_id']] = [];
+            $aka = json_decode($teamInfo['aka'], true);
+            $detailNameList = $this->getNames($teamInfo,["team_name","en_name","cn_name"],["aka"]);
+            $nameList[$teamInfo['team_id']] = $detailNameList;
+            $teamList[$key]['nameList'] = $detailNameList;
         }
-        else
-        {
-            $teamInfo = $teamModel->getTeamById($id);
-            $teamList = [$teamInfo];
-        }
+        //循环队伍
         foreach($teamList as $teamInfo)
         {
-            if(isset($teamInfo['team_id']))
+            echo "start to process team:".$teamInfo['team_id']."\n";
+            $currentExistedPlayer = [];
+            //尝试获取总表到映射表的对应关系
+            $currentMap = $teamMapModel->getTeamByTeamId($teamInfo['team_id']);
+            //如果没取到
+            if(!isset($currentMap['tid']))
             {
-                echo "start to process team:".$teamInfo['team_id']."\n";
-                //如果当前来源不相同于默认来源
-                if($teamInfo['original_source']==$team_intergration['0']['source'])
+                $playerList_toProcess = $playerModel->getPlayerList(["team_id"=>$teamInfo['team_id'],"fields"=>"player_id,pid,player_name,cn_name,en_name,aka,game,original_source","page_size"=>1000]);
+                $ourPlayer = [];
+                foreach($playerList_toProcess as $player_toProcess)
                 {
-                    //尝试获取总表到映射表的对应关系
-                    $currentMap = $teamMapModel->getTeamByTeamId($teamInfo['team_id']);
-                    //如果没取到
-                    if(!isset($currentMap['tid']))
+                    $name = $this->generateNameHash($player_toProcess['player_name']);
+                    if($name!="")
                     {
-                        DB::beginTransaction();
-                        //创建队伍
-                        $insertTeam = $totalTeamModel->insertTeam(['game'=>$teamInfo['game'],'original_source'=>$teamInfo['original_source']]);
-                        //创建成功
-                        if($insertTeam)
+                        $ourPlayer[$player_toProcess['player_id']][] = $name;
+                    }
+                }
+                //根据名称找到映射
+                $name = $this->generateNameHash($teamInfo['team_name']);
+                $currentMapList = $teamNameMapModel->getTeamByNameHash($name,$teamInfo['game']);
+                //循环现有映射 进行比对
+                //$tidList = array_column($currentMapList,"tid");
+                $toCreate = 1;
+                if(count($currentMapList)>0)
+                {
+                    foreach($currentMapList as $currentMap)
+                    {
+                        $matchedPlayer = 0;
+                        $currentMapTeamList = $teamMapModel->getTeamByTid(["tid"=>$currentMap['tid']]);
+                        $teamIdList = array_column($currentMapTeamList,"team_id");
+                        $playerList_toMerge = $playerModel->getPlayerList(["team_ids"=>$teamIdList,"fields"=>"player_id,pid,player_name,cn_name,en_name,aka,game,original_source","page_size"=>1000]);
+                        //双方队员数量都大于2
+                        if(count($playerList_toMerge)>=3 && count($playerList_toProcess)>=3)
                         {
+                            $toMerge = [];
+                            foreach($playerList_toMerge as $k => $playerInfo)
+                            {
+                                $aka = json_decode($playerInfo['aka'], true);
+                                $playerNameList = $this->getNames($playerInfo,["player_name","en_name","cn_name"],["aka"]);
+                                foreach ($playerNameList as $key => $nameToCheck)
+                                {
+
+                                    foreach($ourPlayer as $player_id => $playerName)
+                                    {
+                                        if(in_array($nameToCheck,$playerName))
+                                        {
+                                            $matchedPlayer++;
+                                            echo "playerInfo:".$playerInfo['player_id']."\n";
+                                            $toMerge[$player_id][] = $playerInfo['pid'];
+                                            //$toMerge[$player_id][] = ["pid"=>$playerInfo['pid'],"name"=>$nameToCheck];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if($matchedPlayer>=3)
+                        {
+                            //print_R($playerNameList);
+                            print_R($toMerge);
+                            sleep(1);
+                            //die();
+                        }
+                        if($matchedPlayer>=3)//整合入队伍
+                        {
+                            DB::beginTransaction();
                             //合并入查到的映射里面
-                            $mergeToMap = $this->mergeToTeamMap($teamInfo,$insertTeam,$teamMapModel,$teamNameMapModel);
+                            $mergeToMap = $this->mergeToTeamMap($teamInfo,$currentMap['tid'],$teamMapModel,$teamNameMapModel);
                             if(!$mergeToMap)
                             {
                                 DB::rollBack();
@@ -324,10 +390,51 @@ class TeamResultService
                             else
                             {
                                 //把映射写回原来的队伍内容
-                                $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$insertTeam]);
+                                $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$currentMap['tid']]);
                                 if($updateTeam)
                                 {
-                                    echo "merged ".$teamInfo['team_id']." to ".$insertTeam."\n";
+                                    echo "merged team ".$teamInfo['team_id']." to existed:".$currentMap['tid']."\n";
+                                    foreach($playerList_toProcess as $player_toProcess)
+                                    {
+                                        if(isset($toMerge[$player_toProcess['player_id']]))
+                                        {
+                                            $toMerge[$player_toProcess['player_id']] = array_unique($toMerge[$player_toProcess['player_id']]);
+                                            foreach($toMerge[$player_toProcess['player_id']] as $pid_to_merge)
+                                            {
+                                                //合并入创建的映射里面
+                                                $mergeToMap = $playerServices->mergeToPlayerMap($player_toProcess, $pid_to_merge, $playerModel, $playerMapModel, $playerNameMapModel);
+                                                if(!$mergeToMap)
+                                                {
+                                                    DB::rollBack();break;
+                                                }
+                                                else
+                                                {
+                                                    echo "merged player ".$player_toProcess['player_id']." to existed ".$pid_to_merge."\n";
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            //创建队员
+                                            $insertPlayer = $totalPlayerModel->insertPlayer(['game'=>$player_toProcess['game'],'original_source'=>$player_toProcess['original_source']]);
+                                            //创建成功
+                                            if($insertPlayer)
+                                            {
+                                                //合并入创建的映射里面
+                                                $mergeToMap = $playerServices->mergeToPlayerMap($player_toProcess, $insertPlayer, $playerModel, $playerMapModel, $playerNameMapModel);
+                                                if(!$mergeToMap)
+                                                {
+                                                    DB::rollBack();
+                                                }
+                                                else
+                                                {
+                                                    echo "merged player ".$player_toProcess['player_id']." to created ".$insertPlayer."\n";
+                                                }
+                                            }
+                                        }
+                                    }
+                                    //sleep(1);
+                                    //die();
                                     DB::commit();
                                 }
                                 else
@@ -335,47 +442,21 @@ class TeamResultService
                                     DB::rollBack();
                                 }
                             }
-                        }
-                        else
-                        {
-                            //echo "insertTeamError";
-                            DB::rollBack();
-                        }
-                    }
-                    else//找到映射
-                    {
-                        //合并入查到的映射里面
-                        $mergeToMap = $this->mergeToTeamMap($teamInfo,$currentMap['tid'],$teamMapModel,$teamNameMapModel);
-                        if(!$mergeToMap)
-                        {
-                            DB::rollBack();
-                        }
-                        else
-                        {
-                            //把映射写回原来的队伍内容
-                            $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$currentMap['tid']]);
-                            if($updateTeam)
-                            {
-                                echo "merged ".$teamInfo['team_id']." to ".$currentMap['tid']."\n";
-                                DB::commit();
-                            }
-                            else
-                            {
-                                DB::rollBack();
-                            }
+                            //合并
+                            $toCreate = 0;
                         }
                     }
                 }
-                else
+                if($toCreate==1)//以自身创建一个整合队伍
                 {
-                    //根据名称找到映射
-                    $name = $this->generageNameHash($teamInfo['team_name']);
-                    $currentMap = $teamNameMapModel->getTeamByNameHash($name,$teamInfo['game']);
-                    if(isset($currentMap['tid']))
+                    DB::beginTransaction();
+                    //创建队伍
+                    $insertTeam = $totalTeamModel->insertTeam(['game'=>$teamInfo['game'],'original_source'=>$teamInfo['original_source']]);
+                    //创建成功
+                    if($insertTeam)
                     {
-                        DB::beginTransaction();
                         //合并入查到的映射里面
-                        $mergeToMap = $this->mergeToTeamMap($teamInfo,$currentMap['tid'],$teamMapModel,$teamNameMapModel);
+                        $mergeToMap = $this->mergeToTeamMap($teamInfo,$insertTeam,$teamMapModel,$teamNameMapModel);
                         if(!$mergeToMap)
                         {
                             DB::rollBack();
@@ -383,10 +464,49 @@ class TeamResultService
                         else
                         {
                             //把映射写回原来的队伍内容
-                            $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$currentMap['tid'],"original_source"=>$teamInfo['original_source']]);
+                            $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$insertTeam]);
                             if($updateTeam)
                             {
-                                echo "merged ".$teamInfo['team_id']." to ".$currentMap['tid']."\n";
+                                echo "merged team ".$teamInfo['team_id']." to created:".$insertTeam."\n";
+                                //循环队员列表
+                                foreach($playerList_toProcess as $player_toProcess)
+                                {
+                                    $insertPlayer = 0;
+                                    $nameToCheck = $this->generateNameHash($player_toProcess['player_name']);
+                                    foreach($currentExistedPlayer as $p => $nameList)
+                                    {
+                                        if(in_array($nameToCheck,$nameList))
+                                        {
+                                            $insertPlayer = $p;
+                                            break;
+                                        }
+                                    }
+                                    if($insertPlayer==0)
+                                    {
+                                        //创建队员
+                                        $insertPlayer = $totalPlayerModel->insertPlayer(['game'=>$player_toProcess['game'],'original_source'=>$player_toProcess['original_source']]);
+                                    }
+                                    //创建成功
+                                    if($insertPlayer)
+                                    {
+                                        //合并入查到的映射里面
+                                        $mergeToMap = $playerServices->mergeToPlayerMap($player_toProcess,$insertPlayer,$playerModel,$playerMapModel,$playerNameMapModel);
+                                        if(!$mergeToMap)
+                                        {
+                                            DB::rollBack();break;
+                                        }
+                                        else
+                                        {
+                                            $currentExistedPlayer[$insertPlayer] = $this->getNames($player_toProcess,["player_name","en_name","cn_name"],["aka"]);
+                                            echo "merged player ".$player_toProcess['player_id']." to created ".$insertPlayer."\n";
+                                        }
+                                    }
+                                    else
+                                    {
+                                        DB::rollBack();break;
+                                    }
+                                }
+                                echo "success!";
                                 DB::commit();
                             }
                             else
@@ -395,49 +515,24 @@ class TeamResultService
                             }
                         }
                     }
-                    else//没有匹配上 创建
+                    else
                     {
-                        DB::beginTransaction();
-                        //创建队伍
-                        $insertTeam = $totalTeamModel->insertTeam(['game'=>$teamInfo['game'],'original_source'=>$teamInfo['original_source']]);
-                        //创建成功
-                        if($insertTeam)
-                        {
-                            //合并入查到的映射里面
-                            $mergeToMap = $this->mergeToTeamMap($teamInfo,$insertTeam,$teamMapModel,$teamNameMapModel);
-                            if(!$mergeToMap)
-                            {
-                                DB::rollBack();
-                            }
-                            else
-                            {
-                                //把映射写回原来的队伍内容
-                                $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>$insertTeam]);
-                                if($updateTeam)
-                                {
-                                    echo "merged ".$teamInfo['team_id']." to ".$insertTeam."\n";
-                                    DB::commit();
-                                }
-                                else
-                                {
-                                    DB::rollBack();
-                                }
-                            }
-                        }
-                        else
-                        {
-                            //echo "insertTeamError";
-                            DB::rollBack();
-                        }
+                        DB::rollBack();
                     }
                 }
             }
+            else//找到映射
+            {
+                //不做操作
+                //修复缺失的映射
+            }
+
 
         }
 
         //return $return;
     }
-    function generageNameHash($name = "")
+    function generateNameHash($name = "")
     {
         $name = strtolower($name);
         $name = trim($name);
@@ -446,8 +541,28 @@ class TeamResultService
         {
             $name = str_replace($key,"",$name);
         }
-        echo "hash:".$name."\n";
-        return md5($name);
+        $name = $this->removeEmoji($name);
+        //echo "hash:".$name."\n";
+        return $name;
+    }
+    function removeEmoji($text) {
+        $clean_text = "";
+        // Match Emoticons
+        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
+        $clean_text = preg_replace($regexEmoticons, '', $text);
+        // Match Miscellaneous Symbols and Pictographs
+        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
+        $clean_text = preg_replace($regexSymbols, '', $clean_text);
+        // Match Transport And Map Symbols
+        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
+        $clean_text = preg_replace($regexTransport, '', $clean_text);
+        // Match Miscellaneous Symbols
+        $regexMisc = '/[\x{2600}-\x{26FF}]/u';
+        $clean_text = preg_replace($regexMisc, '', $clean_text);
+        // Match Dingbats
+        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
+        $clean_text = preg_replace($regexDingbats, '', $clean_text);
+        return $clean_text;
     }
     //把对于合并到已经查到的队伍映射
     function mergeToTeamMap($teamInfo = [],$tid,$teamMapModel,$teamNameMapModel)
@@ -456,30 +571,48 @@ class TeamResultService
         if($insertMap)
         {
             $aka = json_decode($teamInfo['aka'], true);
-            $nameList = (array_merge([$teamInfo['team_name'], $teamInfo['en_name']], $aka));
-            foreach ($nameList as $key => $name)
-            {
-                if ($name == "")
-                {
-                    unset($nameList[$key]);
-                }
-                else
-                {
-                    $nameList[$key] = $this->generageNameHash($name);
-                }
-            }
-            $nameList = array_unique($nameList);
+            $nameList = $this->getNames($teamInfo,["team_name","en_name","cn_name"],["aka"]);
             foreach ($nameList as $name)
             {
-                //保存名称映射
-                $saveMap = $teamNameMapModel->saveMap(["name_hash" => $name, "game" => $teamInfo['game'], "tid" => $tid]);
-                if (!$saveMap) {
-                    //echo "insertTeamMapError";
-                    return false;
-                    //break;
+                if($name != "")
+                {
+                    //保存名称映射
+                    $saveMap = $teamNameMapModel->saveMap(["name_hash" => $name, "game" => $teamInfo['game'], "tid" => $tid]);
+                    if (!$saveMap) {
+                        //echo "insertTeamMapError";
+                        return false;
+                        //break;
+                    }
                 }
             }
             return true;
         }
+    }
+    //从数组中拆解名称
+    function getNames($data,$keys=['team_name','cn_name','en_name'],$toJson=["aka"])
+    {
+        $return = [];
+        foreach($keys as $key => $value)
+        {
+            $value=$this->generateNameHash($data[$value]);
+            if($value!="")
+            {
+                $return[] = $value;
+            }
+        }
+        foreach($toJson  as $key)
+        {
+            $value=json_decode($data[$key],true);
+            foreach($value??[] as $value_detail)
+            {
+                $value_detail = $this->generateNameHash($value_detail);
+                if($value_detail!="")
+                {
+                    $return[] = $value_detail;
+                }
+            }
+        }
+        $return = array_unique($return);
+        return $return;
     }
 }

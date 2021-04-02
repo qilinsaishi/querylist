@@ -94,7 +94,14 @@ class IntergrationService
                         //如果有注明高优先级
                         if(in_array($column,$source['detail_list']))
                         {
-                            $selectedSource[] = $source['source'];
+                            if(in_array($source['source'],array_column($teamList,"original_source")))
+                            {
+                                $selectedSource[] = $source['source'];
+                            }
+                            else
+                            {
+                                $selectedSource = [];
+                            }
                         }
                     }
                     if(count($selectedSource)==0)
@@ -103,16 +110,27 @@ class IntergrationService
                     }
                     $table_source[$column] = $selectedSource;
                 }
-                elseif(in_array($column,$appendList))
+                elseif(isset($appendList[$column]))
                 {
                     if(!isset($append[$column]))
                     {
                         $append[$column] = [];
                     }
-                    //依次循环队伍
+                    //依次循环队员
                     foreach($teamList as $teamInfo)
                     {
-                        $append[$column] = array_unique(array_merge($append[$column],json_decode($teamInfo[$column],true)));
+                        foreach($appendList[$column] as $appendKey)
+                        {
+                            if(!in_array($appendKey,$jsonList))
+                            {
+                                $append[$column][] = $teamInfo[$appendKey];
+                            }
+                            else
+                            {
+                                $append[$column] = array_merge($append[$column],json_decode($teamInfo[$column],true)??[]);
+                            }
+                        }
+                        $append[$column] = array_unique($append[$column]);
                     }
                 }
             }
@@ -166,6 +184,7 @@ class IntergrationService
                     }
                 }
             }
+            $totalTeam['intergrated_id_list'] = ($teamIdList);
             $return['data'] = $totalTeam;
             $return['structure'] = $totalTeamStructure;
         }
@@ -256,7 +275,14 @@ class IntergrationService
                         //如果有注明高优先级
                         if(in_array($column,$source['detail_list']))
                         {
-                            $selectedSource[] = $source['source'];
+                            if(in_array($source['source'],array_column($playerList,"original_source")))
+                            {
+                                $selectedSource[] = $source['source'];
+                            }
+                            else
+                            {
+                                $selectedSource = [];
+                            }
                         }
                     }
                     if(count($selectedSource)==0)
@@ -265,7 +291,7 @@ class IntergrationService
                     }
                     $table_source[$column] = $selectedSource;
                 }
-                elseif(in_array($column,$appendList))
+                elseif(isset($appendList[$column]))
                 {
                     if(!isset($append[$column]))
                     {
@@ -274,14 +300,25 @@ class IntergrationService
                     //依次循环队员
                     foreach($playerList as $playerInfo)
                     {
-                        $append[$column] = array_unique(array_merge($append[$column],json_decode($playerInfo[$column],true)));
+                        foreach($appendList[$column] as $appendKey)
+                        {
+                            if(!in_array($appendKey,$jsonList))
+                            {
+                                $append[$column][] = $playerInfo[$appendKey];
+                            }
+                            else
+                            {
+                                $append[$column] = array_merge($append[$column],json_decode($playerInfo[$column],true)??[]);
+                            }
+                        }
+                        $append[$column] = array_unique($append[$column]);
                     }
                 }
             }
             foreach($append as $key => $value)
             {
-                $totalPlayer[$key] = $value;
-                $totalPlayerStructure[$key] = $value;
+                $totalPlayer[$key] = array_values($value);
+                $totalPlayerStructure[$key] = array_values($value);
             }
             //生成字段与来源的对应表
             foreach($table as $column)
@@ -328,6 +365,7 @@ class IntergrationService
                     }
                 }
             }
+            $totalPlayer['intergrated_id_list'] = ($playerIdList);
             $return['data'] = $totalPlayer;
             $return['structure'] = $totalPlayerStructure;
         }
