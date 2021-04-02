@@ -365,6 +365,7 @@ class IntergrationService
                     }
                 }
             }
+            $totalPlayer['intergrated_id_list'] = ($playerIdList);
             $return['data'] = $totalPlayer;
             $return['structure'] = $totalPlayerStructure;
         }

@@ -56,11 +56,19 @@ class RedisService
             ],
             "intergratedTeam" => [//整合队伍
                 'prefix' => "intergratedTeam",
-                'expire' => 3600,
+                'expire' => 86400,
             ],
             "intergratedTeamList" => [//整合队伍列表
                 'prefix' => "intergratedTeamList",
-                'expire' => 3600,
+                'expire' => 86400,
+            ],
+            "intergratedPlayer" => [//整合队员
+                'prefix' => "intergratedPlayer",
+                'expire' => 86400,
+            ],
+            "intergratedPlayeList" => [//整合队员列表
+                'prefix' => "intergratedPlayeList",
+                'expire' => 86400,
             ],
 
 

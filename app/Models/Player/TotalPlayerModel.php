@@ -49,10 +49,69 @@ class TotalPlayerModel extends Model
     {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
-    public function getPlayerById($player_id,$fields = "*")
+    public function getPlayerList($params)
+    {
+        $fields = $params['fields']??"pid,player_name,logo,position";
+        $player_list =$this->select(explode(",",$fields));
+        //总表队员ID
+        if(isset($params['pids']) && count($params['pid'])>=1)
+        {
+            $player_list = $player_list->whereIn("pid", $params['pid']);
+        }
+        //总表队员ID
+        if(isset($params['pid']) && intval($params['pid'])>=0)
+        {
+            $player_list = $player_list->where("pid",$params['pid']);
+        }
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $player_list = $player_list->where("game",$params['game']);
+        }
+        //所属战队
+        if(isset($params['team_id']) && $params['team_id']>0)
+        {
+            $player_list = $player_list->where("team_id",$params['team_id']);
+        }
+        //所属战队
+        if(isset($params['team_ids']) && count($params['team_ids'])>0)
+        {
+            $player_list = $player_list->whereIn("team_id",$params['team_ids']);
+        }
+        //不所属战队
+        if(isset($params['except_team']) && $params['except_team']>0)
+        {
+            $player_list = $player_list->where("team_id","!=",$params['except_team']);
+        }
+        //不是队员
+        if(isset($params['except_player']) && $params['except_player']>0)
+        {
+            $player_list = $player_list->where("pid","!=",$params['except_player']);
+        }
+        $pageSizge = $params['page_size']??3;
+        $page = $params['page']??1;
+        if(isset($params['rand']) && $params['rand'] >0)
+        {
+            $player_list = $player_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->inRandomOrder()
+                ->get()->toArray();
+        }
+        else
+        {
+            $player_list = $player_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->orderBy("pid","desc")
+                ->get()->toArray();
+        }
+        return $player_list;
+    }
+    public function getPlayerById($pid,$fields = "*")
     {
         $player_info =$this->select(explode(",",$fields))
-            ->where("pid",$player_id)
+            ->where("pid",$pid)
             ->get()->first();
         if(isset($player_info->pid))
         {
@@ -91,7 +150,7 @@ class TotalPlayerModel extends Model
         }
         return $this->insertGetId($data);
     }
-    public function updatePlayer($player_id=0,$data=[])
+    public function updatePlayer($pid=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
@@ -105,6 +164,45 @@ class TotalPlayerModel extends Model
                 unset($data[$key]);
             }
         }
-        return $this->where('pid',$player_id)->update($data);
+        return $this->where('pid',$pid)->update($data);
+    }
+    public function getPlayerCount($params=[]){
+        $player_count = $this;
+        //总表队员ID
+        if(isset($params['pids']) && count($params['pid'])>=1)
+        {
+            $player_count = $player_count->whereIn("pid", $params['pid']);
+        }
+        //总表队员ID
+        if(isset($params['pid']) && intval($params['pid'])>=0)
+        {
+            $player_count = $player_count->where("pid",$params['pid']);
+        }
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $player_count = $player_count->where("game",$params['game']);
+        }
+        //所属战队
+        if(isset($params['team_id']) && $params['team_id']>0)
+        {
+            $player_count = $player_count->where("team_id",$params['team_id']);
+        }
+        //所属战队
+        if(isset($params['team_ids']) && count($params['team_ids'])>0)
+        {
+            $player_count = $player_count->whereIn("team_id",$params['team_ids']);
+        }
+        //不所属战队
+        if(isset($params['except_team']) && $params['except_team']>0)
+        {
+            $player_count = $player_count->where("team_id","!=",$params['except_team']);
+        }
+        //不是队员
+        if(isset($params['except_player']) && $params['except_player']>0)
+        {
+            $player_count = $player_count->where("player_id","!=",$params['except_player']);
+        }
+        return $player_count->count();
     }
 }

@@ -42,6 +42,27 @@ class PrivilegeService
                     'functionSingle' => "getTeamByTeamId",
                     'functionProcess' => "processIntergratedTeamList",
                 ],
+            "intergratedPlayer"=>
+                [
+                    'list' => [
+                        ['model' => 'App\Models\Player\TotalPlayerModel', 'source' => ''],
+                    ],
+                    'withSource' => 0,
+                    'function' => "getPlayerById",
+                    'functionSingle' => "getPlayerById",
+                    'functionProcess' => "processIntergratedPlayer",
+                ],
+            "intergratedPlayerList"=>
+                [
+                    'list' => [
+                        ['model' => 'App\Models\Player\TotalPlayerModel', 'source' => ''],
+                    ],
+                    'withSource' => 0,
+                    'function' => "getPlayerList",
+                    'functionCount' => "getPlayerCount",
+                    'functionSingle' => "getPlayerById",
+                    'functionProcess' => "processIntergratedPlayerList",
+                ],
             "matchList" => [
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'cpseo'],
@@ -1216,22 +1237,20 @@ class PrivilegeService
     {
         if($data['tid']>0)
         {
-            $data['playerList'] = [];
             $intergrationService = (new IntergrationService());
             $data = $intergrationService->getTeamInfo(0,$data["tid"],1)['data'];
             $f = $this->getFunction(['totalPlayerList' => []]);
             if (isset($f['totalPlayerList']['class'])) {
                 $functionList["totalPlayerList"] = $f['totalPlayerList'];
             }
+            $data['playerList'] = [];
             $modelClass = $functionList["totalPlayerList"]["class"];
             $function = $functionList["totalPlayerList"]['function'];
             $pidList = $modelClass->$function(['team_id'=>$data['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>100]);
             $pidList = array_unique(array_column($pidList,"pid"));
-            //$data['playerList'] = array_unique()
             foreach($pidList as $pid)
             {
                 $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo");
-
             }
         }
         else
@@ -1253,6 +1272,50 @@ class PrivilegeService
             {
                 $data[$key] = [];
             }
+        }
+        return $data;
+    }
+    public function processIntergratedPlayerList($data, $functionList,$params)
+    {
+        $intergrationService = (new IntergrationService());
+        foreach($data as $key => $detailData)
+        {
+            if($detailData['pid']>0)
+            {
+                $data[$key] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$detailData["pid"],1)['data'],$params['fields']??"*");
+            }
+            else
+            {
+                $data[$key] = [];
+            }
+        }
+        return $data;
+    }
+    public function processIntergratedPlayer($data, $functionList,$params)
+    {
+        if($data['pid']>0)
+        {
+            $intergrationService = (new IntergrationService());
+            $data = $intergrationService->getPlayerInfo(0,$data["pid"],1)['data'];
+            $ingergratedTeam = $intergrationService->getTeamInfo($data['team_id'],0,1)['data'];
+            $f = $this->getFunction(['totalPlayerList' => []]);
+            if (isset($f['totalPlayerList']['class'])) {
+                $functionList["totalPlayerList"] = $f['totalPlayerList'];
+            }
+            $data['playerList'] = [];
+            $data['teamInfo'] = $ingergratedTeam;
+            $modelClass = $functionList["totalPlayerList"]["class"];
+            $function = $functionList["totalPlayerList"]['function'];
+            $pidList = $modelClass->$function(['team_id'=>$ingergratedTeam['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>100]);
+            $pidList = array_unique(array_column($pidList,"pid"));
+            foreach($pidList as $pid)
+            {
+                $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo");
+            }
+        }
+        else
+        {
+            $data = [];
         }
         return $data;
     }
