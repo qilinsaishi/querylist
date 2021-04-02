@@ -67,13 +67,10 @@ class RedisService
                 'prefix' => "intergratedPlayer",
                 'expire' => 86400,
             ],
-            "intergratedPlayeList" => [//整合队员列表
-                'prefix' => "intergratedPlayeList",
+            "intergratedPlayerList" => [//整合队员列表
+                'prefix' => "intergratedPlayerList",
                 'expire' => 86400,
             ],
-
-
-
         ];
         return $cacheConfig;
     }
