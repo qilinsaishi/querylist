@@ -54,6 +54,15 @@ class RedisService
                 'prefix' => "tournament",
                 'expire' => 3600,
             ],
+            "intergratedTeam" => [//整合队伍
+                'prefix' => "intergratedTeam",
+                'expire' => 3600,
+            ],
+            "intergratedTeamList" => [//整合队伍列表
+                'prefix' => "intergratedTeamList",
+                'expire' => 3600,
+            ],
+
 
         ];
         return $cacheConfig;
@@ -87,6 +96,7 @@ class RedisService
                 $data = json_decode($redis->get($keyConfig), true);
                 if (is_array($data)) {
                     if (isset($data['data'])) {
+                        //echo "cached ".$keyConfig."\n";
                         $data = $data['data'];
                     }
                     return $data;

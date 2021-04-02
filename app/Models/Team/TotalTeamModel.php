@@ -83,7 +83,7 @@ class TotalTeamModel extends Model
             $team_list = $team_list
                 ->limit($pageSizge)
                 ->offset(($page-1)*$pageSizge)
-                ->orderBy("team_id")
+                ->orderBy("tid")
                 ->get()->toArray();
         }
         foreach ($team_list as &$val){
@@ -136,7 +136,7 @@ class TotalTeamModel extends Model
         }
         return $this->insertGetId($data);
     }
-    public function updateTeam($team_id=0,$data=[])
+    public function updateTeam($tid=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
@@ -150,7 +150,7 @@ class TotalTeamModel extends Model
                 unset($data[$key]);
             }
         }
-        return $this->where('tid',$team_id)->update($data);
+        return $this->where('tid',$tid)->update($data);
     }
     public function getTeamCount($params=[])
     {
