@@ -252,7 +252,7 @@ class IntergrationService
                 if(isset($data['data']['pid']))
                 {
                     $return = $data;
-                    echo "cached\n";
+                    //echo "cached\n";
                     $toGet = 0;
                 }
                 else
