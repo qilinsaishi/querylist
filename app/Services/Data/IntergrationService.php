@@ -102,7 +102,6 @@ class IntergrationService
                             {
                                 $selectedSource = [];
                             }
-
                         }
                     }
                     if(count($selectedSource)==0)
@@ -185,6 +184,7 @@ class IntergrationService
                     }
                 }
             }
+            $totalTeam['intergrated_id_list'] = ($teamIdList);
             $return['data'] = $totalTeam;
             $return['structure'] = $totalTeamStructure;
         }
@@ -275,7 +275,14 @@ class IntergrationService
                         //如果有注明高优先级
                         if(in_array($column,$source['detail_list']))
                         {
-                            $selectedSource[] = $source['source'];
+                            if(in_array($source['source'],array_column($playerList,"original_source")))
+                            {
+                                $selectedSource[] = $source['source'];
+                            }
+                            else
+                            {
+                                $selectedSource = [];
+                            }
                         }
                     }
                     if(count($selectedSource)==0)

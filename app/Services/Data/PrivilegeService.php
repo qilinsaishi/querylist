@@ -1216,7 +1216,23 @@ class PrivilegeService
     {
         if($data['tid']>0)
         {
-            $data = (new IntergrationService())->getTeamInfo(0,$data["tid"],1)['data'];
+            $data['playerList'] = [];
+            $intergrationService = (new IntergrationService());
+            $data = $intergrationService->getTeamInfo(0,$data["tid"],1)['data'];
+            $f = $this->getFunction(['totalPlayerList' => []]);
+            if (isset($f['totalPlayerList']['class'])) {
+                $functionList["totalPlayerList"] = $f['totalPlayerList'];
+            }
+            $modelClass = $functionList["totalPlayerList"]["class"];
+            $function = $functionList["totalPlayerList"]['function'];
+            $pidList = $modelClass->$function(['team_id'=>$data['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>100]);
+            $pidList = array_unique(array_column($pidList,"pid"));
+            //$data['playerList'] = array_unique()
+            foreach($pidList as $pid)
+            {
+                $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo");
+
+            }
         }
         else
         {
