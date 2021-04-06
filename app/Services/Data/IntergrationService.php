@@ -232,12 +232,12 @@ class IntergrationService
     //player_id:player_info表的主键
     //tid:player_list表的主键
     //force:强制重新获取 1是0否
-    public function getPlayerInfo($player_id=0,$pid=0,$get_data = 0,$force = 1)
+    public function getPlayerInfo($player_id=0,$pid=0,$get_data = 0,$force = 0)
     {
         $return = ["data"=>[],"structure"=>[]];
         $sourceList = config('app.intergration.player');
         $redis = app("redis.connection");
-        $redis_key = "intergrated_team_".$player_id."-".$pid;
+        $redis_key = "intergrated_player_".$player_id."-".$pid;
         $toGet = 0;
         if($force == 1)
         {
@@ -252,7 +252,7 @@ class IntergrationService
                 if(isset($data['data']['pid']))
                 {
                     $return = $data;
-                    echo "cached\n";
+                    //echo "cached\n";
                     $toGet = 0;
                 }
                 else
@@ -279,7 +279,7 @@ class IntergrationService
             if($player_id>0)
             {
                 //找到单条详情
-                $singleTeamInfo = $oPlayer->getPlayerById($player_id);
+                $singlePLayerInfo = $oPlayer->getPlayerById($player_id);
                 //找到
                 if(isset($singlePLayerInfo['player_id']))
                 {
