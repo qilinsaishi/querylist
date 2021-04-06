@@ -279,7 +279,7 @@ class IntergrationService
             if($player_id>0)
             {
                 //找到单条详情
-                $singleTeamInfo = $oPlayer->getPlayerById($player_id);
+                $singlePLayerInfo = $oPlayer->getPlayerById($player_id);
                 //找到
                 if(isset($singlePLayerInfo['player_id']))
                 {
