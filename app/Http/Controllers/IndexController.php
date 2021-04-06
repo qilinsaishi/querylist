@@ -39,11 +39,11 @@ class IndexController extends Controller
             case "team":
                 if(isset($data['team_id']))
                 {
-                    $return = (new IntergrationService())->getTeamInfo($data['team_id']);
+                    $return = (new IntergrationService())->getTeamInfo($data['team_id'],0,1);
                 }
                 elseif(isset($data['tid']))
                 {
-                    $return = (new IntergrationService())->getTeamInfo(0,$data['tid']);
+                    $return = (new IntergrationService())->getTeamInfo(0,$data['tid'],0,1);
                 }
                 else
                 {
@@ -53,11 +53,11 @@ class IndexController extends Controller
             case "player":
                 if(isset($data['player_id']))
                 {
-                    $return = (new IntergrationService())->getPlayerInfo($data['player_id']);
+                    $return = (new IntergrationService())->getPlayerInfo($data['player_id'],0,1);
                 }
                 elseif(isset($data['pid']))
                 {
-                    $return = (new IntergrationService())->getPlayerInfo(0,$data['pid']);
+                    $return = (new IntergrationService())->getPlayerInfo(0,$data['pid'],0,1);
                 }
                 else
                 {
