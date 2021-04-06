@@ -258,6 +258,12 @@ class PlayerModel extends Model
                 }
                 else
                 {
+                    //判断字段是否有后台手动更新
+                    $changeLogsModel=new ChangeLogsModel();
+                    $check_result=$changeLogsModel->checkData($currentPlayer['player_id'],$key,$type='player');
+                    if(!$check_result){
+                        unset($data[$key]);
+                    }
                     echo $key.":difference:\n";
                 }
             }
