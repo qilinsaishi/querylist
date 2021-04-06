@@ -54,6 +54,7 @@ class RedisService
                 'prefix' => "tournament",
                 'expire' => 3600,
             ],
+
             "intergratedTeam" => [//整合队伍
                 'prefix' => "intergratedTeam",
                 'expire' => 86400,
@@ -66,12 +67,10 @@ class RedisService
                 'prefix' => "intergratedPlayer",
                 'expire' => 86400,
             ],
-            "intergratedPlayeList" => [//整合队员列表
-                'prefix' => "intergratedPlayeList",
+            "intergratedPlayerList" => [//整合队员列表
+                'prefix' => "intergratedPlayerList",
                 'expire' => 86400,
             ],
-
-
         ];
         return $cacheConfig;
     }
