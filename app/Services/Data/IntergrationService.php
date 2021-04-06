@@ -17,11 +17,41 @@ class IntergrationService
     //team_id:team_info表的主键
     //tid:team_list表的主键
     //force:强制重新获取 1是0否
-    public function getTeamInfo($team_id=0,$tid=0,$get_data = 0,$force = 1)
+    public function getTeamInfo($team_id=0,$tid=0,$get_data = 0,$force = 0)
     {
         $return = ["data"=>[],"structure"=>[]];
         $sourceList = config('app.intergration.team');
-        if($force==1)
+        $redis = app("redis.connection");
+        $redis_key = "intergrated_team_".$team_id."-".$tid;
+        $toGet = 0;
+        if($force == 1)
+        {
+            $toGet = 1;
+        }
+        else
+        {
+            $exists = $redis->exists($redis_key);
+            if ($exists)
+            {
+                $data = json_decode($redis->get($redis_key), true);
+                if(isset($data['data']['tid']))
+                {
+                    $return = $data;
+                    //echo "cached\n";
+                    $toGet = 0;
+                }
+                else
+                {
+                    $toGet = 1;
+                }
+            }
+            else
+            {
+                $toGet = 1;
+            }
+        }
+        //echo "toGet:".$toGet."\n";
+        if($toGet==1)
         {
             $oTeam = new TeamModel();
             $oTeamMap = new TeamMapModel();
@@ -94,7 +124,14 @@ class IntergrationService
                         //如果有注明高优先级
                         if(in_array($column,$source['detail_list']))
                         {
-                            $selectedSource[] = $source['source'];
+                            if(in_array($source['source'],array_column($teamList,"original_source")))
+                            {
+                                $selectedSource[] = $source['source'];
+                            }
+                            else
+                            {
+                                $selectedSource = [];
+                            }
                         }
                     }
                     if(count($selectedSource)==0)
@@ -126,7 +163,6 @@ class IntergrationService
                         $append[$column] = array_unique($append[$column]);
                     }
                 }
-
             }
             foreach($append as $key => $value)
             {
@@ -178,9 +214,14 @@ class IntergrationService
                     }
                 }
             }
+            $totalTeam['intergrated_id_list'] = ($teamIdList);
             $return['data'] = $totalTeam;
             $return['structure'] = $totalTeamStructure;
         }
+        //有数据原样缓存，没数据缓存时间减少为1/10
+        $expire = 86400;
+        $redis->set($redis_key, json_encode($return));
+        $redis->expire($redis_key, $expire);
         if($get_data==0)
         {
             unset($return['data']);
@@ -191,11 +232,41 @@ class IntergrationService
     //player_id:player_info表的主键
     //tid:player_list表的主键
     //force:强制重新获取 1是0否
-    public function getPlayerInfo($player_id=0,$pid=0,$get_data = 0,$force = 1)
+    public function getPlayerInfo($player_id=0,$pid=0,$get_data = 0,$force = 0)
     {
         $return = ["data"=>[],"structure"=>[]];
         $sourceList = config('app.intergration.player');
-        if($force==1)
+        $redis = app("redis.connection");
+        $redis_key = "intergrated_player_".$player_id."-".$pid;
+        $toGet = 0;
+        if($force == 1)
+        {
+            $toGet = 1;
+        }
+        else
+        {
+            $exists = $redis->exists($redis_key);
+            if ($exists)
+            {
+                $data = json_decode($redis->get($redis_key), true);
+                if(isset($data['data']['pid']))
+                {
+                    $return = $data;
+                    //echo "cached\n";
+                    $toGet = 0;
+                }
+                else
+                {
+                    $toGet = 1;
+                }
+            }
+            else
+            {
+                $toGet = 1;
+            }
+        }
+        //echo "toGet:".$toGet."\n";
+        if($toGet==1)
         {
             $oPlayer = new PlayerModel();
             $oPlayerMap = new PlayerMapModel();
@@ -208,7 +279,7 @@ class IntergrationService
             if($player_id>0)
             {
                 //找到单条详情
-                $singleTeamInfo = $oPlayer->getPlayerById($player_id);
+                $singlePLayerInfo = $oPlayer->getPlayerById($player_id);
                 //找到
                 if(isset($singlePLayerInfo['player_id']))
                 {
@@ -268,7 +339,14 @@ class IntergrationService
                         //如果有注明高优先级
                         if(in_array($column,$source['detail_list']))
                         {
-                            $selectedSource[] = $source['source'];
+                            if(in_array($source['source'],array_column($playerList,"original_source")))
+                            {
+                                $selectedSource[] = $source['source'];
+                            }
+                            else
+                            {
+                                $selectedSource = [];
+                            }
                         }
                     }
                     if(count($selectedSource)==0)
@@ -351,9 +429,14 @@ class IntergrationService
                     }
                 }
             }
+            $totalPlayer['intergrated_id_list'] = ($playerIdList);
             $return['data'] = $totalPlayer;
             $return['structure'] = $totalPlayerStructure;
         }
+        //有数据原样缓存，没数据缓存时间减少为1/10
+        $expire = 86400;
+        $redis->set($redis_key, json_encode($return));
+        $redis->expire($redis_key, $expire);
         if($get_data==0)
         {
             unset($return['data']);

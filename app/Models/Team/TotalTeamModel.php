@@ -50,6 +50,50 @@ class TotalTeamModel extends Model
     {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
+    public function getTeamList($params)
+    {
+        $team_list =$this->select("*");
+        //总表队伍ID
+        if(isset($params['tid']) && intval($params['tid'])>=0)
+        {
+            $team_list = $team_list->where("tid",$params['tid']);
+        }
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $team_list = $team_list->where("game",$params['game']);
+        }
+        //不所属战队
+        if(isset($params['except_team']) && $params['except_team']>0)
+        {
+            $team_list = $team_list->where("tid","!=",$params['except_team']);
+        }
+        $pageSizge = $params['page_size']??3;
+        $page = $params['page']??1;
+        if(isset($params['rand']) && $params['rand'] >0)
+        {
+            $team_list = $team_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->inRandomOrder()
+                ->get()->toArray();
+        }
+        else
+        {
+            $team_list = $team_list
+                ->limit($pageSizge)
+                ->offset(($page-1)*$pageSizge)
+                ->orderBy("tid")
+                ->get()->toArray();
+        }
+        foreach ($team_list as &$val){
+            if(isset($val['team_history']))
+            {
+                $val['team_history']=htmlspecialchars_decode($val['team_history']);
+            }
+        }
+        return $team_list;
+    }
     public function getTeamById($tid,$fields = "*")
     {
         $team_info =$this->select(explode(",",$fields))
@@ -92,7 +136,7 @@ class TotalTeamModel extends Model
         }
         return $this->insertGetId($data);
     }
-    public function updateTeam($team_id=0,$data=[])
+    public function updateTeam($tid=0,$data=[])
     {
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
@@ -106,6 +150,26 @@ class TotalTeamModel extends Model
                 unset($data[$key]);
             }
         }
-        return $this->where('tid',$team_id)->update($data);
+        return $this->where('tid',$tid)->update($data);
+    }
+    public function getTeamCount($params=[])
+    {
+        $team_count =$this;
+        //总表队伍ID
+        if(isset($params['tid']) && intval($params['tid'])>=0)
+        {
+            $team_count = $team_count->where("tid",$params['tid']);
+        }
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $team_count = $team_count->where("game",$params['game']);
+        }
+        //不所属战队
+        if(isset($params['except_team']) && $params['except_team']>0)
+        {
+            $team_count = $team_count->where("tid","!=",$params['except_team']);
+        }
+        return $team_count->count();
     }
 }

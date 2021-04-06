@@ -327,14 +327,14 @@ class TeamResultService
                 $ourPlayer = [];
                 foreach($playerList_toProcess as $player_toProcess)
                 {
-                    $name = $this->generageNameHash($player_toProcess['player_name']);
+                    $name = $this->generateNameHash($player_toProcess['player_name']);
                     if($name!="")
                     {
                         $ourPlayer[$player_toProcess['player_id']][] = $name;
                     }
                 }
                 //根据名称找到映射
-                $name = $this->generageNameHash($teamInfo['team_name']);
+                $name = $this->generateNameHash($teamInfo['team_name']);
                 $currentMapList = $teamNameMapModel->getTeamByNameHash($name,$teamInfo['game']);
                 //循环现有映射 进行比对
                 //$tidList = array_column($currentMapList,"tid");
@@ -365,6 +365,7 @@ class TeamResultService
                                             $matchedPlayer++;
                                             echo "playerInfo:".$playerInfo['player_id']."\n";
                                             $toMerge[$player_id][] = $playerInfo['pid'];
+                                            $toMerge[$player_id] = array_unique($toMerge[$player_id]);
                                             //$toMerge[$player_id][] = ["pid"=>$playerInfo['pid'],"name"=>$nameToCheck];
                                         }
                                     }
@@ -374,8 +375,10 @@ class TeamResultService
                         if($matchedPlayer>=3)
                         {
                             //print_R($playerNameList);
+                            echo ">>>>>>>>>>>>>>>>>>>>>>>>>-------------------------<<<<<<<<<<<<<<<<<<<<<<<<<\n";
                             print_R($toMerge);
                             sleep(1);
+                            echo "<<<<<<<<<<<<<<<<<<<<<<<<<------------------------->>>>>>>>>>>>>>>>>>>>>>>>>\n";
                             //die();
                         }
                         if($matchedPlayer>=3)//整合入队伍
@@ -472,7 +475,7 @@ class TeamResultService
                                 foreach($playerList_toProcess as $player_toProcess)
                                 {
                                     $insertPlayer = 0;
-                                    $nameToCheck = $this->generageNameHash($player_toProcess['player_name']);
+                                    $nameToCheck = $this->generateNameHash($player_toProcess['player_name']);
                                     foreach($currentExistedPlayer as $p => $nameList)
                                     {
                                         if(in_array($nameToCheck,$nameList))
@@ -532,7 +535,7 @@ class TeamResultService
 
         //return $return;
     }
-    function generageNameHash($name = "")
+    function generateNameHash($name = "")
     {
         $name = strtolower($name);
         $name = trim($name);
@@ -594,7 +597,7 @@ class TeamResultService
         $return = [];
         foreach($keys as $key => $value)
         {
-            $value=$this->generageNameHash($data[$value]);
+            $value=$this->generateNameHash($data[$value]);
             if($value!="")
             {
                 $return[] = $value;
@@ -605,7 +608,7 @@ class TeamResultService
             $value=json_decode($data[$key],true);
             foreach($value??[] as $value_detail)
             {
-                $value_detail = $this->generageNameHash($value_detail);
+                $value_detail = $this->generateNameHash($value_detail);
                 if($value_detail!="")
                 {
                     $return[] = $value_detail;

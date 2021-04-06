@@ -14,6 +14,7 @@ class DataService
         $functionList = $privilegeService->getFunction($data);
         foreach($data as $name => $params)
         {
+            $start = microtime(true);
             $dataType = $params['dataType']??$name;
             if(isset($functionList[$dataType]))
             {
@@ -36,8 +37,6 @@ class DataService
                 $dataArr = $redisService->processCache($dataType,$p);
                 if(is_array($dataArr))
                 {
-
-                    //$return[$dataType] = $cache;
                     $toSave = 0;
                 }
                 else
@@ -91,7 +90,7 @@ class DataService
                 if(isset($dataType) && $dataType='informationList') {
                     $dataArr["data"] = (new ExtraProcessService())->process($dataType,$dataArr["data"]);
                 }
-
+                $dataArr['processTime'] = microtime(true)-$start;
                 $return[$name] = $dataArr;
             }
         }

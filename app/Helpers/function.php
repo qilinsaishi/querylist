@@ -434,47 +434,63 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
     }
 
 }
-//判断url是否正常打开
-function httpcode($url){
-    $ch = curl_init();
-    $timeout = 3;
-    curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-    curl_setopt($ch, CURLOPT_HEADER, 1);
-    curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-    curl_setopt($ch,CURLOPT_URL,$url);
-    curl_exec($ch);
-    return $httpcode = curl_getinfo($ch,CURLINFO_HTTP_CODE);
-    curl_close($ch);
-}
-function getAttrFromHTML($html,$attr_name)
-{
-    $t = explode($attr_name,$html);
-    $t2 = explode('"',$t[1]);
-    return $t2[1];
-}
-function string_split($str,$split_length=1,$charset="UTF-8")
-{
-    if (func_num_args() == 1) {
-        return preg_split('/(?<!^)(?!$)/u', $str);
+    //判断url是否正常打开
+    function httpcode($url){
+        $ch = curl_init();
+        $timeout = 3;
+        curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+        curl_setopt($ch,CURLOPT_URL,$url);
+        curl_exec($ch);
+        return $httpcode = curl_getinfo($ch,CURLINFO_HTTP_CODE);
+        curl_close($ch);
     }
-    if ($split_length < 1) return false;
-    $len = mb_strlen($str, $charset);
-    return mb_substr($str,0,$split_length,$charset);
-}
-function sort_split_array($array = [],$sort = "count",$count = 5)
-{
-    if(count($array)<=$count)
+    function getAttrFromHTML($html,$attr_name)
     {
+        $t = explode($attr_name,$html);
+        $t2 = explode('"',$t[1]);
+        return $t2[1];
+    }
+    function string_split($str,$split_length=1,$charset="UTF-8")
+    {
+        if (func_num_args() == 1) {
+            return preg_split('/(?<!^)(?!$)/u', $str);
+        }
+        if ($split_length < 1) return false;
+        $len = mb_strlen($str, $charset);
+        return mb_substr($str,0,$split_length,$charset);
+    }
+    function sort_split_array($array = [],$sort = "count",$count = 5)
+    {
+        if(count($array)<=$count)
+        {
+            return $array;
+        }
+        else
+        {
+            array_multisort(array_column($array,$sort),SORT_DESC,$array);
+            $array = array_slice($array,0,$count);
+            return $array;
+        }
+    }
+    function getFieldsFromArray($array=[],$fields="*")
+    {
+        if($fields!="*")
+        {
+            $fieldsList = explode(",",$fields);
+            $keyList = array_keys($array);
+            foreach($keyList as $key)
+            {
+                if(!in_array($key,$fieldsList))
+                {
+                    unset($array[$key]);
+                }
+            }
+        }
         return $array;
     }
-    else
-    {
-        array_multisort(array_column($array,$sort),SORT_DESC,$array);
-        $array = array_slice($array,0,$count);
-        return $array;
-    }
-}
 
 
 
