@@ -62,6 +62,11 @@ class PlayerModel extends Model
         {
             $player_list = $player_list->where("original_source",$params['source']);
         }
+        //数据来源
+        if(isset($params['sources']) && count($params['sources'])>=1)
+        {
+            $player_list = $player_list->whereIn("original_source",$params['sources']);
+        }
         //所属战队
         if(isset($params['team_id']) && $params['team_id']>0)
         {
@@ -294,6 +299,11 @@ class PlayerModel extends Model
         if(isset($params['source']) && strlen($params['source'])>=2)
         {
             $player_count = $player_count->where("original_source",$params['source']);
+        }
+        //数据来源
+        if(isset($params['sources']) && count($params['sources'])>=1)
+        {
+            $player_count = $player_count->whereIn("original_source",$params['sources']);
         }
         //所属战队
         if(isset($params['team_id']) && $params['team_id']>0)
