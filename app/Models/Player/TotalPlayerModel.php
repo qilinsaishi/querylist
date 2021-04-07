@@ -51,7 +51,6 @@ class TotalPlayerModel extends Model
     }
     public function getPlayerList($params)
     {
-
         $fields = $params['fields']??"pid,player_name,logo,position";
         $player_list =$this->select(explode(",",$fields));
         $sourceList = config('app.intergration.player');
