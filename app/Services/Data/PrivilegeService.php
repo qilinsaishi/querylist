@@ -1307,11 +1307,12 @@ class PrivilegeService
             if (isset($f['totalPlayerList']['class'])) {
                 $functionList["totalPlayerList"] = $f['totalPlayerList'];
             }
+            $sourceList = config('app.intergration.player');
             $data['playerList'] = [];
             $data['teamInfo'] = $ingergratedTeam;
             $modelClass = $functionList["totalPlayerList"]["class"];
             $function = $functionList["totalPlayerList"]['function'];
-            $pidList = $modelClass->$function(['team_id'=>$ingergratedTeam['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>100]);
+            $pidList = $modelClass->$function(["sources"=>array_column($sourceList,"source"),'except_pid'=>$data["pid"],'team_id'=>$ingergratedTeam['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>100]);
             $pidList = array_unique(array_column($pidList,"pid"));
             foreach($pidList as $pid)
             {

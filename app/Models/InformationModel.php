@@ -44,7 +44,7 @@ class InformationModel extends Model
     ];
     public function getInformationList($params)
     {
-        $fields = $params['fields']??"id,title,author,author_id,logo,create_time,status";
+        $fields = $params['fields']??"id,title,author,author_id,logo,create_time,status,type";
         $information_list =$this->select(explode(",",$fields))->where("status",1);
         //排除的来源
         if(isset($params['except_source']) && strlen($params['except_source'])>0)
