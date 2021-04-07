@@ -327,4 +327,12 @@ class InformationModel extends Model
         $information_count = $information_count->count();
         return $information_count;
     }
+    public function publishedList($status=3){
+        return $this->select('id','title','game','published_time','create_time','status', DB::raw('DATE_FORMAT(create_time,\'%H\') as day'))
+                    ->where('status',$status)
+                    ->orderBy('id', 'desc')
+                    ->get()
+                    ->toArray();
+
+    }
 }
