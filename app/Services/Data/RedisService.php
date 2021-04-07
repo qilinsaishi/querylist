@@ -10,12 +10,11 @@ class RedisService
     public function getCacheConfig()
     {
         $cacheConfig = [
-            /*
-            "matchList" => [
-                'prefix' => "matchList",
-                'expire' => 3600,
+
+            "informationList" => [
+                'prefix' => "informationList",
+                'expire' => 86400,
             ],
-            */
             "teamList" => [//团队列表
                 'prefix' => "teamList",
                 'expire' => 3600,
