@@ -49,24 +49,21 @@ class BaiduKeywordMapModel extends Model
     {
         return $this->where('content_id',$id)->delete();
     }
-    public function saveMap($id,$game,$type,$content_type,$keywordList,$mapList,$time)
+    public function saveMap($id,$game,$type,$content_type,$keywordList,$time)
     {
         echo "content_id:".$id."\n";
         echo "deleted:".$this->deleteByContent($id,$type)."\n";
-        foreach($keywordList as $keyword)
+        foreach($keywordList as $keyword_id => $keyword)
         {
-            if(isset($mapList[$keyword['tag']]))
-            {
-                $map = ['keyword'=>$keyword['tag'],
-                    'keyword_id'=>$mapList[$keyword['tag']],
-                    'score'=>$keyword['score'],
-                    "content_id"=>$id,
-                    "content_time"=>$time,
-                    "content_type"=>$content_type,
-                    "game"=>$game,
-                ];
-                $this->insert($map);
-            }
+            $map = ['keyword'=>$keyword['tag'],
+                'keyword_id'=>$keyword_id,
+                'score'=>$keyword['score'],
+                "content_id"=>$id,
+                "content_time"=>$time,
+                "content_type"=>$content_type,
+                "game"=>$game,
+            ];
+            $this->insert($map);
         }
         return;
     }

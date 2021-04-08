@@ -378,10 +378,10 @@ class KeywordService
             }
         }
         $keywordMap = $baiduKeywordModel->saveMap($return['items']);
-        $informationModel->updateInformation($information['id'],['baidu_word'=>0,'baidu_word_list'=> $return['items']]);
+        $informationModel->updateInformation($information['id'],['baidu_word'=>0,'baidu_word_list'=> $keywordMap]);
         print_R($return['items']);
         echo "count:".count($return['items'])."\n";
-        $baiduKeywordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$return['items'],$keywordMap,$information['create_time']);
+        $baiduKeywordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$keywordMap,$information['create_time']);
         $data = $redisService->refreshCache("information",[strval($information['id'])]);
     }
 
