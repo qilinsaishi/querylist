@@ -81,6 +81,7 @@ class RedisService
     //尝试从缓存获取
     public function processCache($dataType, $params)
     {
+
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
             $redis = app("redis.connection");
@@ -110,7 +111,6 @@ class RedisService
                 $data = json_decode($redis->get($keyConfig), true);
                 if (is_array($data)) {
                     if (isset($data['data'])) {
-                        //echo "cached ".$keyConfig."\n";
                         $data = $data['data'];
                     }
                     return $data;
@@ -136,6 +136,7 @@ class RedisService
             }
             ksort($params);
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
+
             //如果接口指定了缓存时间
             if(isset($params['cache_time']))
             {
@@ -145,7 +146,6 @@ class RedisService
             {
                 $expire =  $cacheConfig[$dataType]['expire'];
             }
-            //echo "set:".$dataType.":".$expire."\n";
             //如果指定缓存时间为非正整数，跳出，不保存
             if($expire<=0)
             {
