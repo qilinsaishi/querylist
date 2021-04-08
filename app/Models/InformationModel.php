@@ -276,16 +276,4 @@ class InformationModel extends Model
         $information_count = $information_count->count();
         return $information_count;
     }
-    //后台预发布时间
-    public function publishedList($status = 3)
-    {
-        $curTime = date("YmdH");
-        return $this->select('id','published_time','status', DB::raw('UNIX_TIMESTAMP(published_time) as published_at'))
-            ->where('status', $status)
-            //->where(DB::raw("(DATE_FORMAT(published_time,'%Y%m%d%H%i'))"), "<=", $curTime)
-            ->orderBy('id', 'desc')
-            ->get()
-            ->toArray();
-
-    }
 }
