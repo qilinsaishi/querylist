@@ -474,10 +474,8 @@ class InformationService
                         echo $game . "exits-information-wanplus:" . '-site_id:' . $val['id'] . "\n";
                         continue;
                     }
-
                 }
             }
-
         }
         return true;
     }
@@ -488,7 +486,7 @@ class InformationService
         $redisService = new RedisService();
         $keywordsService=new KeywordService();
         $client = new AipNlp(config("app.baidu.APP_ID"), config("app.baidu.API_KEY"), config("app.baidu.SECRET_KEY"));
-        $informationList=$informationModel->getInformationList(["status"=>3,"fields"=>"id,time_to_publish"]);
+        $informationList=$informationModel->getInformationList(["status"=>3,"fields"=>"id,time_to_publish,game,type"]);
         $curTime=time();
         foreach ($informationList as $val)
         {
@@ -504,6 +502,22 @@ class InformationService
                     $keywordsService->processScws($val['id'],$informationModel);
                     $keywordsService->process5118Coreword($val['id'],$informationModel);
                     $keywordsService->processBaiduKeyword($val['id'],$informationModel,$client);
+                    if($val['type']==4)
+                    {
+                        $type="strategylist/1/force";
+                    }
+                    elseif(in_array($val['type'],[1,2,3,5]))
+                    {
+                        $typeList = "newslist/1/force";
+                    }
+                    switch($val['game'])
+                    {
+                        case "lol":
+
+                        case "kpl":
+
+                        case "dota2":
+                    }
                 }
             }
 

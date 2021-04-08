@@ -96,9 +96,13 @@ class RedisService
             }
             //echo "get:".$dataType.":".$expire."\n";
             //如果指定缓存时间为非正整数，跳出，不保存
-            if($expire<=0)
+            if($expire<=0 || (isset($params['reset']) && $params['reset']>0))
             {
                 return false;
+            }
+            if(isset($params['reset']))
+            {
+                unset($params['reset']);
             }
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
             $exists = $redis->exists($keyConfig);
@@ -125,8 +129,11 @@ class RedisService
     {
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
-
             $redis = app("redis.connection");
+            if(isset($params['reset']))
+            {
+                unset($params['reset']);
+            }
             ksort($params);
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
             //如果接口指定了缓存时间
