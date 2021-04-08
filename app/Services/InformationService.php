@@ -471,10 +471,8 @@ class InformationService
                         echo $game . "exits-information-wanplus:" . '-site_id:' . $val['id'] . "\n";
                         continue;
                     }
-
                 }
             }
-
         }
         return true;
     }
