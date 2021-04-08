@@ -1254,7 +1254,7 @@ class PrivilegeService
                 $playerInfo = $intergrationService->getPlayerInfo(0,$pid,1);
                 if(strlen($playerInfo['data']['logo'])>=10)
                 {
-                    $data['playerList'][] = getFieldsFromArray($playerInfo['data']??[],"pid,player_name,logo");
+                    $data['playerList'][] = getFieldsFromArray($playerInfo['data']??[],"pid,player_name,logo,position");
                 }
             }
         }
