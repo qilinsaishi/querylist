@@ -128,6 +128,9 @@ class Mission extends Command
                     }
                 }
                 break;
+            case "published":
+                (new InformationService())->publishedList();
+                break;
             default:
 
                 break;

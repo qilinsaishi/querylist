@@ -3,11 +3,14 @@
 namespace App\Services;
 
 use App\Libs\AjaxRequest;
+use App\Libs\Baidu\AipNlp;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\InformationModel;
 use App\Models\MissionModel;
+use App\Services\Data\RedisService;
 use App\Services\MissionService as oMission;
+use Illuminate\Support\Facades\DB;
 use QL\QueryList;
 
 class InformationService
@@ -473,6 +476,39 @@ class InformationService
                     }
 
                 }
+            }
+
+        }
+        return true;
+    }
+
+    //更新预发布脚本
+    public function publishedList(){
+        $informationModel=new InformationModel();
+        $redisService = new RedisService();
+        $keywordsService=new KeywordService();
+        $client = new AipNlp(config("app.baidu.APP_ID"), config("app.baidu.API_KEY"), config("app.baidu.SECRET_KEY"));
+        $informationList=$informationModel->publishedList(3);
+        $curTime=time();
+        foreach ($informationList as $val){
+            if($val['published_at'] <=$curTime){
+                $data['status']=1;
+                $data['create_time']=$val['published_time'];
+                DB::connection()->enableQueryLog();
+                $rt=$informationModel->updateInformation($val['id'], $data);
+                if($rt){
+                    //$keywordsService->processScws($val['id'],$informationModel);
+                    $keywordsService->process5118Coreword($val['id'],$informationModel);
+                    $keywordsService->processBaiduKeyword($val['id'],$informationModel,$client);
+                }
+                $queries = DB::getQueryLog();
+                $logData=[
+                    'information_id'=>$val['id'],
+                    'sql'=>$queries
+                ];
+                echo "published_information_id:".$val['id'].',published_time:'.$val['published_time']."\n";
+                //print_r($logData);
+                //\Illuminate\Support\Facades\Log::info("published_information_log:".json_encode($logData));
             }
 
         }
