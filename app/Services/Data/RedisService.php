@@ -13,6 +13,10 @@ class RedisService
 
             "informationList" => [
                 'prefix' => "informationList",
+                'expire' => 3600,
+            ],
+            "information" => [
+                'prefix' => "information",
                 'expire' => 86400,
             ],
             "teamList" => [//团队列表
