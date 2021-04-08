@@ -483,20 +483,20 @@ class InformationService
     }
 
     //更新预发布脚本
-    public function publishedList(){
+    public function unPublishedList(){
         $informationModel=new InformationModel();
         $redisService = new RedisService();
         $keywordsService=new KeywordService();
         $client = new AipNlp(config("app.baidu.APP_ID"), config("app.baidu.API_KEY"), config("app.baidu.SECRET_KEY"));
-        $informationList=$informationModel->getInformationList(["status"=>3,"fields"=>"id,published_time"]);
+        $informationList=$informationModel->getInformationList(["status"=>3,"fields"=>"id,time_to_publish"]);
         $curTime=time();
         foreach ($informationList as $val)
         {
-            if(strtotime($val['published_time']) <=$curTime)
+            if(strtotime($val['time_to_publish']) <=$curTime)
             {
                 echo "start to process:".$val['id']."\n";
                 $data['status']=1;
-                $data['create_time']=$val['published_time'];
+                $data['create_time']=$val['time_to_publish'];
                 $rt=$informationModel->updateInformation($val['id'], $data);
                 if($rt)
                 {

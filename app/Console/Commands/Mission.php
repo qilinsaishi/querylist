@@ -128,8 +128,8 @@ class Mission extends Command
                     }
                 }
                 break;
-            case "published":
-                (new InformationService())->publishedList();
+            case "unpublished":
+                (new InformationService())->unPublishedList();//更新预发布脚本
                 break;
             default:
 
