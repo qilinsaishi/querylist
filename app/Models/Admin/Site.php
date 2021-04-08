@@ -81,14 +81,14 @@ class Site extends Model
         //return true;
     }
 
-    public function getSiteById($game)
+    public function getSiteById($id)
     {
 
-        $get_site_info = $this->select("id","name","title","logo","keywords","description","content")
-            ->where(["game"=>$game,'status'=>0])->orderBy("sort","desc")->first();
+        $get_site_info = $this->select("id","name","logo","keywords","game","domain")
+            ->where(["id"=>$id,'status'=>0])->orderBy("sort","desc")->first();
         if (isset($get_site_info->id)) {
             $get_site_info = $get_site_info->toArray();
-            $get_site_info['content']=htmlspecialchars_decode($get_site_info['content']);
+            //$get_site_info['content']=htmlspecialchars_decode($get_site_info['content']);
         } else {
             $get_site_info = [];
         }

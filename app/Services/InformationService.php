@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Libs\AjaxRequest;
 use App\Libs\Baidu\AipNlp;
 use App\Libs\ClientServices;
+use App\Models\Admin\Site;
 use App\Models\CollectResultModel;
 use App\Models\InformationModel;
 use App\Models\MissionModel;
@@ -485,6 +486,7 @@ class InformationService
         $informationModel=new InformationModel();
         $redisService = new RedisService();
         $keywordsService=new KeywordService();
+        $siteModel=new Site();
         $client = new AipNlp(config("app.baidu.APP_ID"), config("app.baidu.API_KEY"), config("app.baidu.SECRET_KEY"));
         $informationList=$informationModel->getInformationList(["status"=>3,"fields"=>"id,time_to_publish,game,type"]);
         $curTime=time();
@@ -504,20 +506,32 @@ class InformationService
                     $keywordsService->processBaiduKeyword($val['id'],$informationModel,$client);
                     if($val['type']==4)
                     {
-                        $type="strategylist/1/force";
+                        $type="/strategylist/1/reset";
                     }
                     elseif(in_array($val['type'],[1,2,3,5]))
                     {
-                        $typeList = "newslist/1/force";
+                        $type = "/newslist/1/reset";
                     }
+
                     switch($val['game'])
                     {
                         case "lol":
-
+                            $id=1;
+                            break;
                         case "kpl":
-
+                            $id=2;
+                            break;
                         case "dota2":
+                            $id=4;
+                            break;
                     }
+                    //请求浏览器刷新缓存
+                    $siteInfo=$siteModel->getSiteById($id);
+                    $domain=$siteInfo['domain'] ?? '';
+                    $url=$domain.$type;
+                    $rt=file_get_contents($url);
+                    echo $rt."\n";
+
                 }
             }
 
