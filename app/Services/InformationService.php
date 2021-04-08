@@ -3,11 +3,14 @@
 namespace App\Services;
 
 use App\Libs\AjaxRequest;
+use App\Libs\Baidu\AipNlp;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\InformationModel;
 use App\Models\MissionModel;
+use App\Services\Data\RedisService;
 use App\Services\MissionService as oMission;
+use Illuminate\Support\Facades\DB;
 use QL\QueryList;
 
 class InformationService
@@ -473,6 +476,35 @@ class InformationService
                     }
                 }
             }
+        }
+        return true;
+    }
+
+    //更新预发布脚本
+    public function unPublishedList(){
+        $informationModel=new InformationModel();
+        $redisService = new RedisService();
+        $keywordsService=new KeywordService();
+        $client = new AipNlp(config("app.baidu.APP_ID"), config("app.baidu.API_KEY"), config("app.baidu.SECRET_KEY"));
+        $informationList=$informationModel->getInformationList(["status"=>3,"fields"=>"id,time_to_publish"]);
+        $curTime=time();
+        foreach ($informationList as $val)
+        {
+            if(strtotime($val['time_to_publish']) <=$curTime)
+            {
+                echo "start to process:".$val['id']."\n";
+                $data['status']=1;
+                $data['create_time']=$val['time_to_publish'];
+                $rt=$informationModel->updateInformation($val['id'], $data);
+                if($rt)
+                {
+                    echo "published:".$val['id']."\n";
+                    $keywordsService->processScws($val['id'],$informationModel);
+                    $keywordsService->process5118Coreword($val['id'],$informationModel);
+                    $keywordsService->processBaiduKeyword($val['id'],$informationModel,$client);
+                }
+            }
+
         }
         return true;
     }
