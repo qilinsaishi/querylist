@@ -55,6 +55,11 @@ class TeamModel extends Model
     {
         $fields = $params['fields']??"team_id,team_name,logo,team_history";
         $team_list =$this->select(explode(",",$fields));
+        //队伍ID
+        if(isset($params['ids']) && count($params['ids'])>0)
+        {
+            $team_list = $team_list->whereIn("team_id",$params['ids']);
+        }
         //总表队伍ID
         if(isset($params['tid']) && intval($params['tid'])>=0)
         {
@@ -316,6 +321,11 @@ class TeamModel extends Model
     public function getTeamCount($params=[])
     {
         $team_count =$this;
+        //队伍ID
+        if(isset($params['ids']) && count($params['ids'])>0)
+        {
+            $team_count = $team_count->whereIn("team_id",$params['ids']);
+        }
         //总表队伍ID
         if(isset($params['tid']) && intval($params['tid'])>=0)
         {
