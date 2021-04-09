@@ -1316,7 +1316,7 @@ class PrivilegeService
             $pidList = array_unique(array_column($pidList,"pid"));
             foreach($pidList as $pid)
             {
-                $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo");
+                $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo,position");
             }
         }
         else
