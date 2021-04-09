@@ -21,6 +21,7 @@ class  PlayerService
     public function insertPlayerData($mission_type, $game)
     {
         $this->getScoreggPlayerDetail($game, $mission_type);
+        $this->insertCpseoPlayer($game, $mission_type);
         return 'finish';
     }
     public function insertCpseoPlayer($game, $mission_type)
@@ -84,9 +85,9 @@ class  PlayerService
                             ),
                         ];
                         $insert = (new oMission())->insertMission($data);
-                        echo "lol-player-cpseo-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                        echo $game."-player-cpseo-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                     } else {
-                        echo "lol-Mission-cpseo-exits"."\n";//表示任务表存在记录，跳出继续
+                        echo $game."-Mission-cpseo-exits"."\n";//表示任务表存在记录，跳出继续
                         continue;
                     }
                 } else {
