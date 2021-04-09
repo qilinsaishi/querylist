@@ -491,6 +491,65 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         }
         return $array;
     }
+    //从数组中拆解名称
+    function getNames($data,$keys=['team_name','cn_name','en_name'],$toJson=["aka"])
+    {
+        $return = [];
+        foreach($keys as $key => $value)
+        {
+            $value=generateNameHash($data[$value]);
+            if($value!="")
+            {
+                $return[] = $value;
+            }
+        }
+        foreach($toJson  as $key)
+        {
+            $value=is_array($data[$key])?$data[$key]:json_decode($data[$key],true);
+            foreach($value??[] as $value_detail)
+            {
+                $value_detail = generateNameHash($value_detail);
+                if($value_detail!="")
+                {
+                    $return[] = $value_detail;
+                }
+            }
+        }
+        $return = array_unique($return);
+        return $return;
+    }
+    function generateNameHash($name = "")
+    {
+        $name = strtolower($name);
+        $name = trim($name);
+        $replaceList = [" ","."];
+        foreach($replaceList as $key)
+        {
+            $name = str_replace($key,"",$name);
+        }
+        $name = removeEmoji($name);
+        //echo "hash:".$name."\n";
+        return $name;
+    }
+    function removeEmoji($text) {
+        $clean_text = "";
+        // Match Emoticons
+        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
+        $clean_text = preg_replace($regexEmoticons, '', $text);
+        // Match Miscellaneous Symbols and Pictographs
+        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
+        $clean_text = preg_replace($regexSymbols, '', $clean_text);
+        // Match Transport And Map Symbols
+        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
+        $clean_text = preg_replace($regexTransport, '', $clean_text);
+        // Match Miscellaneous Symbols
+        $regexMisc = '/[\x{2600}-\x{26FF}]/u';
+        $clean_text = preg_replace($regexMisc, '', $clean_text);
+        // Match Dingbats
+        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
+        $clean_text = preg_replace($regexDingbats, '', $clean_text);
+        return $clean_text;
+    }
 
 
 

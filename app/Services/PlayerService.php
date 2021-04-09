@@ -13,6 +13,7 @@ use App\Services\MissionService as oMission;
 use App\Models\Player\TotalPlayerModel as TotalPlayerModel;
 use App\Models\Player\PlayerMapModel as PlayerMapModel;
 use App\Models\Player\PlayerNameMapModel as PlayerNameMapModel;
+use App\Services\Data\IntergrationService;
 use Illuminate\Support\Facades\DB;
 use QL\QueryList;
 
@@ -234,6 +235,7 @@ class  PlayerService
     }
     public function intergration($game = "lol")
     {
+        $intergrationService = new IntergrationService();
         $totalPlayerModel = new TotalPlayerModel();
         $playerMapModel = new PlayerMapModel();
         $playerNameMapModel = new PlayerNameMapModel();
@@ -245,8 +247,13 @@ class  PlayerService
         $return = false;
         $playerList = $playerModel->getPlayerList(["fields"=>"player_id,player_name,en_name,cn_name,aka,original_source,game,team_id","pid"=>0,"game"=>$game,"sources"=>array_column($player_intergration,"source"),"page_size"=>3000]);
         $teamIdList = array_unique(array_column($playerList,"team_id"));
-        $teamList = $teamModel->getTeamList(["fields"=>"team_id,team_name,en_name,cn_name,aka,original_source,game,tid","game"=>$game,"ids"=>array_values($teamIdList),"sources"=>array_column($team_intergration,"source"),"page_size"=>99999999]);
+        $teamList = $teamModel->getTeamList(["fields"=>"team_id,tid","game"=>$game,"ids"=>array_values($teamIdList),"sources"=>array_column($team_intergration,"source"),"page_size"=>99999999]);
         $teamList = array_combine(array_column($teamList,"team_id"),array_values($teamList));
+        foreach($teamList as $team_id => $team)
+        {
+            $intergrated_team_info = getFieldsFromArray($intergrationService->getTeamInfo(0,$team['tid'],1,1)['data'],"tid,intergrated_id_list");
+            $teamList[$team_id]['intergrated_id_list'] = $intergrated_team_info['intergrated_id_list'];
+        }
         foreach($playerList as $playerInfo)
         {
             if(isset($playerInfo['player_id']))
@@ -254,7 +261,67 @@ class  PlayerService
                 echo "start to process player:".$playerInfo['player_id']."\n";
                 if(isset($teamList[$playerInfo['team_id']]))
                 {
-
+                    $merged = 0;
+                    //获取当前队伍的队员总表
+                    $playerList_toProcess = $playerModel->getPlayerList(["team_id"=>$teamList[$playerInfo['team_id']]['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>1000]);
+                    //获取整合后的队员id列表
+                    $pidList = array_unique(array_column($playerList_toProcess,"pid"));
+                    foreach($pidList as $pid)
+                    {
+                        if($pid>0)
+                        {
+                            //获取整合后数据
+                            $playerInfoToMerge = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1,1)['data'],"player_name,cn_name,en_name,aka");
+                            //拆解名字
+                            $playerNameList = getNames($playerInfoToMerge,["player_name","en_name","cn_name"],["aka"]);
+                            //处理当前的名字
+                            $playerName = generateNameHash($playerInfo['player_name']);
+                            //如果匹配上之前曾用过的任意名字
+                            if(in_array($playerName,$playerNameList))
+                            {
+                                echo "to Merge\n";
+                                DB::beginTransaction();
+                                //合并入创建的映射里面
+                                $mergeToMap = $this->mergeToPlayerMap($playerInfo, $pid, $playerModel, $playerMapModel, $playerNameMapModel);
+                                if(!$mergeToMap)
+                                {
+                                    echo "merge to existed intergrated player Error\n";
+                                    DB::rollBack();
+                                }
+                                else
+                                {
+                                    echo "merged player ".$playerInfo['player_id']." to existed ".$pid."\n";
+                                    DB::commit();
+                                    $merged = 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    //如果没有合并
+                    if($merged == 0)
+                    {
+                        echo "to Create\n";
+                        DB::beginTransaction();
+                        //创建队员
+                        $insertPlayer = $totalPlayerModel->insertPlayer(['game'=>$playerInfo['game'],'original_source'=>$playerInfo['original_source']]);
+                        //创建成功
+                        if($insertPlayer)
+                        {
+                            //合并入创建的映射里面
+                            $mergeToMap = $this->mergeToPlayerMap($playerInfo, $insertPlayer, $playerModel, $playerMapModel, $playerNameMapModel);
+                            if(!$mergeToMap)
+                            {
+                                echo "create intergrated player Error\n";
+                                DB::rollBack();
+                            }
+                            else
+                            {
+                                echo "merged player ".$playerInfo['player_id']." to created ".$insertPlayer."\n";
+                                DB::commit();
+                            }
+                        }
+                    }
                 }
                 else
                 {
@@ -302,7 +369,7 @@ class  PlayerService
         if($insertMap)
         {
             $aka = json_decode($playerInfo['aka'], true);
-            $nameList = (array_merge([$playerInfo['player_name'],$playerInfo['en_name'],$playerInfo['en_name']], $aka??[]));
+            $nameList = (array_merge([$playerInfo['player_name'],$playerInfo['en_name'],$playerInfo['cn_name']], $aka??[]));
             foreach ($nameList as $key => $name)
             {
                 if ($name == "")
@@ -327,7 +394,6 @@ class  PlayerService
                         //break;
                     }
                 }
-
             }
             $updateTid = $playerModel->updatePlayer($playerInfo['player_id'],["pid"=>$pid]);
             if(!$updateTid)
