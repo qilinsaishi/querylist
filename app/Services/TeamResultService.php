@@ -529,10 +529,7 @@ class TeamResultService
                 //不做操作
                 //修复缺失的映射
             }
-
-
         }
-
         //return $return;
     }
     function generateNameHash($name = "")

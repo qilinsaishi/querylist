@@ -232,122 +232,33 @@ class  PlayerService
         }
         return $list;
     }
-    public function intergration($id = 0)
+    public function intergration($game = "lol")
     {
         $totalPlayerModel = new TotalPlayerModel();
         $playerMapModel = new PlayerMapModel();
         $playerNameMapModel = new PlayerNameMapModel();
         $playerModel = new PlayerModel();
+        $teamModel = new TeamModel();
         $player_intergration = config("app.intergration.player")??[];
+        $team_intergration = config("app.intergration.team")??[];
+        $teamList = [];
         $return = false;
-        if($id==0)
-        {
-            $playerList = $playerModel->getPlayerList(["fields"=>"player_id,player_name,en_name,cn_name,aka,original_source,game","pid"=>0,"page_size"=>3000]);
-        }
-        else
-        {
-            $playerInfo = $playerModel->getPlayerById($id);
-            $playerList = [$playerInfo];
-        }
+        $playerList = $playerModel->getPlayerList(["fields"=>"player_id,player_name,en_name,cn_name,aka,original_source,game,team_id","pid"=>0,"game"=>$game,"sources"=>array_column($player_intergration,"source"),"page_size"=>3000]);
+        $teamIdList = array_unique(array_column($playerList,"team_id"));
+        $teamList = $teamModel->getTeamList(["fields"=>"team_id,team_name,en_name,cn_name,aka,original_source,game,tid","game"=>$game,"ids"=>array_values($teamIdList),"sources"=>array_column($team_intergration,"source"),"page_size"=>99999999]);
+        $teamList = array_combine(array_column($teamList,"team_id"),array_values($teamList));
         foreach($playerList as $playerInfo)
         {
             if(isset($playerInfo['player_id']))
             {
-                echo "start to process team:".$playerInfo['player_id']."\n";
-                //如果当前来源不相同于默认来源
-                if($playerInfo['original_source']==$player_intergration['0']['source'])
+                echo "start to process player:".$playerInfo['player_id']."\n";
+                if(isset($teamList[$playerInfo['team_id']]))
                 {
-                    //尝试获取总表到映射表的对应关系
-                    $currentMap = $playerMapModel->getPlayerByPlayerId($playerInfo['player_id']);
-                    //如果没取到
-                    if(!isset($currentMap['pid']))
-                    {
-                        DB::beginTransaction();
-                        //创建队员
-                        $insertPlayer = $totalPlayerModel->insertPlayer(['game'=>$playerInfo['game'],'original_source'=>$playerInfo['original_source']]);
-                        //创建成功
-                        if($insertPlayer)
-                        {
-                            //合并入查到的映射里面
-                            $mergeToMap = $this->mergeToPlayerMap($playerInfo,$insertPlayer,$playerModel,$playerMapModel,$playerNameMapModel);
-                            if(!$mergeToMap)
-                            {
-                                DB::rollBack();
-                            }
-                            else
-                            {
-                                echo "merged ".$playerInfo['player_id']." to created ".$insertPlayer."\n";
-                                DB::commit();
-                            }
-                        }
-                        else
-                        {
-                            //echo "insertPlayerError";
-                            DB::rollBack();
-                        }
-                    }
-                    else//找到映射
-                    {
-                        //合并入查到的映射里面
-                        $mergeToMap = $this->mergeToPlayerMap($playerInfo,$currentMap['pid'],$playerModel,$playerMapModel,$playerNameMapModel);
-                        if(!$mergeToMap)
-                        {
-                            DB::rollBack();
-                        }
-                        else
-                        {
-                            echo "merged ".$playerInfo['player_id']." to existed ".$currentMap['pid']."\n";
-                            DB::commit();
-                        }
-                    }
+
                 }
                 else
                 {
-                    //根据名称找到映射
-                    $name = $this->generateNameHash($playerInfo['player_name']);
-                    $currentMap = $playerNameMapModel->getPlayerByNameHash($name,$playerInfo['game']);
-                    if(isset($currentMap['pid']))
-                    {
-                        DB::beginTransaction();
-                        //合并入查到的映射里面
-                        $mergeToMap = $this->mergeToPlayerMap($playerInfo,$currentMap['pid'],$playerModel,$playerMapModel,$playerNameMapModel);
-                        if(!$mergeToMap)
-                        {
-                            DB::rollBack();
-                        }
-                        else
-                        {
-                            echo "merged ".$playerInfo['player_id']." to existed ".$currentMap['pid']."\n";
-                            DB::commit();
-                        }
-                    }
-                    else//没有匹配上 创建
-                    {
-                        DB::beginTransaction();
-                        //创建队员
-                        $insertPlayer = $totalPlayerModel->insertPlayer(['game'=>$playerInfo['game'],'original_source'=>$playerInfo['original_source']]);
-                        //创建成功
-                        if($insertPlayer)
-                        {
-                            //合并入查到的映射里面
-                            $mergeToMap = $this->mergeToPlayerMap($playerInfo,$insertPlayer,$playerModel,$playerMapModel,$playerNameMapModel);
-                            if(!$mergeToMap)
-                            {
-                                DB::rollBack();
-                            }
-                            else
-                            {
-                                echo "merged ".$playerInfo['player_id']." to created ".$insertPlayer."\n";
-                                //sleep(1);
-                                DB::commit();
-                            }
-                        }
-                        else
-                        {
-                            //echo "insertPlayerError";
-                            DB::rollBack();
-                        }
-                    }
+                    echo "team not intergrated pass\n";
                 }
             }
         }
