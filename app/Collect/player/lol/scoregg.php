@@ -149,6 +149,9 @@ class scoregg
                 if (strpos($val, '国籍：') !== false) {
                     $country = str_replace('国籍： ', '', $val);
                 }
+                if (strpos($val, '姓名：') !== false) {
+                    $real_name = str_replace('姓名： ', '', $val);
+                }
                 if (strpos($val, '出生：') !== false) {
                     $birthday = str_replace('出生：', '', $val);
                 }
@@ -215,6 +218,7 @@ class scoregg
         $birthday = substr($birthday, 0, 11);
         $baseinfo = [
             'country' => $country ?? '',//国家
+            'real_name'=>$real_name ?? '',//姓名
             'birthday' => $birthday ?? '',//出生
             'status' => trim($status) ?? '',//主力状态
             'position' => $position ?? '',//位置
