@@ -98,6 +98,10 @@ class TotalPlayerModel extends Model
     }
     public function getPlayerById($pid,$fields = "*")
     {
+        if(is_array($pid))
+        {
+            $pid = $pid['0']??0;
+        }
         $player_info =$this->select(explode(",",$fields))
             ->where("pid",$pid)
             ->get()->first();

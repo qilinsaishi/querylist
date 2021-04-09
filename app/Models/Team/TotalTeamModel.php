@@ -96,6 +96,10 @@ class TotalTeamModel extends Model
     }
     public function getTeamById($tid,$fields = "*")
     {
+        if(is_array($tid))
+        {
+            $tid = $tid['0']??0;
+        }
         $team_info =$this->select(explode(",",$fields))
             ->where("tid",$tid)
             ->get()->first();
