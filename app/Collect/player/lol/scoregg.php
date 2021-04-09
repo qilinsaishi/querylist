@@ -119,16 +119,22 @@ class scoregg
             {
                 $arr['content']['stat'][$key_name] = $arr['content'][$key_name];
             }*/
-
             $arr['content']['player_image'] = getImage($arr['content']['player_image']);
+
             $arr['content']['team_id'] = $teamInfo['team_id'];
             $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
-            if(!preg_match($patten, $arr['content']['player_name']))
-            {
-                $arr['content']['en_name'] = $arr['content']['player_name'];
+            if(isset($arr['content']['real_name']) && preg_match($patten, $arr['content']['real_name'])){
+                $arr['content']['cn_name'] = $arr['content']['real_name'];
             }else{
-                $arr['content']['cn_name'] = $arr['content']['player_name'];
+                $arr['content']['cn_name'] = preg_match($patten, $arr['content']['player_name']) ? $arr['content']['player_name']:'';
             }
+
+            if(isset($arr['content']['real_name']) && !preg_match($patten, $arr['content']['real_name'])){
+                $arr['content']['en_name'] = $arr['content']['real_name'];
+            }else{
+                $arr['content']['en_name'] = !preg_match($patten, $arr['content']['player_name']) ? $arr['content']['player_name']:'';
+            }
+
             $arr['content']['position'] = is_array($arr['content']['position'])?$arr['content']['position']['0']??"":$arr['content']['position'];
             $data = getDataFromMapping($this->data_map,$arr['content']);
             return $data;

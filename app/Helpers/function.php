@@ -311,6 +311,7 @@ if (!function_exists('randStr')) {
 //获取远程图片，并以文件的hash作为文件名保存
 function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type = 1)
 {
+    $f_name = $filename;
     if(substr($url,0,2)=='//')
     {
         if(substr_count($url,'shp.qpic.cn')>0)
@@ -385,6 +386,8 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             //curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+            $user_agent = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Mobile Safari/537.36';
+            curl_setopt($ch, CURLOPT_USERAGENT, $user_agent); // 模拟用户使用的浏览器
             curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
             $img = curl_exec($ch);
             curl_close($ch);
@@ -411,8 +414,15 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         $fileSize = filesize($root);
         if($fileSize<=100)
         {
+           // echo "get img FileSize error:".$url."\n";
+          //  echo "process time:".(microtime(true)-$start_time)."\n";
+
             echo "get img FileSize error:".$url."\n";
             echo "process time:".(microtime(true)-$start_time)."\n";
+            if($type==1)
+            {
+                return getImage($url, $save_dir, $f_name, 2);
+            }
             return $url;
         }
         $upload = (new AliyunService())->upload2Oss([$root]);

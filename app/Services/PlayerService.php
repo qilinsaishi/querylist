@@ -20,6 +20,7 @@ class  PlayerService
 {
     public function insertPlayerData($mission_type, $game)
     {
+        $this->getPlayerListByCollectResult($game, $mission_type);
         $this->getScoreggPlayerDetail($game, $mission_type);
         $this->insertCpseoPlayer($game, $mission_type);
         return 'finish';
@@ -424,6 +425,80 @@ class  PlayerService
                 return false;
             }
             return true;
+        }
+    }
+
+    public function getPlayerListByCollectResult($game){
+        $collectResult=new CollectResultModel();
+        $teamInfoModel=new TeamModel();
+        $playerModel = new PlayerModel();
+        $missionModel = new MissionModel();
+        $teamParams=[
+            "fields"=>'tid,team_name,site_id,original_source,team_id',
+            "game"=>$game,
+            'page_size'=>5000,
+            "source"=>'scoregg'
+        ];
+        $teamList=$teamInfoModel->getTeamList($teamParams);//查出所有scoregg的数据
+        $clist=array_column($teamList,'site_id');
+        if(count($teamList) >0){
+            foreach ($teamList as $val){
+                $source_link='https://www.scoregg.com/big-data/team/'.$val['site_id'].'?tournamentID=&type=baike';
+                $list=$collectResult->getCollectResult($game,'team','scoregg',$source_link);
+                if(isset($list[0])){
+                    $content=isset($list[0]['content']) ? json_decode($list[0]['content'],true):[];
+                    if(isset($content['play_list']) && count($content['play_list'])>0){
+                        foreach ($content['play_list'] as $v){
+                            if(strpos($v['player_url'],'?type=baike')===false){
+                                $v['player_url']=$v['player_url'].'?type=baike';
+                            }
+                            $v['source'] = 'scoregg';
+                            $v['game'] = $game;
+                            $v['team_id']=$val['site_id'];
+                            $v['player_name']=$v['nickname'];
+                            $v['player_id']=$v['playerID'];
+                            $params = [
+                                'game' => $game,
+                                'mission_type' => 'player',
+                                'source_link' => $v['player_url'] ?? '',
+                            ];
+                            $playerInfo = $playerModel->getPlayerBySiteId($v['playerID'], $game, 'scoregg');
+                            $playerInfo = $playerInfo ?? [];
+
+                            if(count($playerInfo)==0){
+                                $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的文章
+                                $missionCount = $missionCount ?? 0;
+                                if ($missionCount !== 0) {
+                                    echo "exist-mission-scoregg-" . $game . '-' . $v['player_url'] . "\n";//表示Mission表记录已存在，跳出继续
+                                    continue; //表示Mission表记录已存在，跳出继续
+                                } else {
+                                    $adata = [
+                                        "asign_to" => 1,
+                                        "mission_type" => 'player',
+                                        "mission_status" => 1,
+                                        "game" => $game,
+                                        "source" => 'scoregg',
+                                        "title" => $v['player_chinese_name'] ?? '',
+                                        'source_link' => $v['player_url'],
+                                        "detail" => json_encode($v),
+                                    ];
+                                    $insert = (new oMission())->insertMission($adata);
+                                    echo $game ."-scoregg-team_player-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
+                                }
+
+                            } else {
+                                echo "exist-playerinfo-scoregg-" . $game . '-' . $v['player_url'] . "\n";//表示playerinfo表记录已存在，跳出继续
+                                continue;
+                            }
+                        }
+
+                    }else{
+                        continue;
+                    }
+
+                }
+
+            }
         }
     }
 }
