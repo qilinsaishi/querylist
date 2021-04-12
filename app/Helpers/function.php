@@ -412,18 +412,14 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         unset($img/*, $url*/);
         $root =  $save_dir . $new_name;
         $fileSize = filesize($root);
-        if($fileSize<=100)
+        if($fileSize<=100 && strpos($url,'https://') !==false)
         {
            // echo "get img FileSize error:".$url."\n";
           //  echo "process time:".(microtime(true)-$start_time)."\n";
-
+            $url = str_replace('https://','http://',$url);
             echo "get img FileSize error:".$url."\n";
             echo "process time:".(microtime(true)-$start_time)."\n";
-            if($type==1)
-            {
-                return getImage($url, $save_dir, $f_name, 2);
-            }
-            return $url;
+            return getImage($url, $save_dir, $f_name, 1);
         }
         $upload = (new AliyunService())->upload2Oss([$root]);
         //存储到redis,一天内不再重新获取
