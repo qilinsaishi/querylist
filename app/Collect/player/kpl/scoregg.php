@@ -109,6 +109,9 @@ class scoregg
          *      team_b_win => 3 //战队b比分
          * ]
          */
+        $qt = QueryList::get($arr['source_link']);
+        $player_name=$qt->find('.right-content h2')->text();
+        $arr['content']['player_name']=$player_name ?? $arr['content']['player_name'];
         $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","kpl");
         if(isset($teamInfo['team_id']))
         {
@@ -129,7 +132,6 @@ class scoregg
 
             $arr['content']['position'] = is_array($arr['content']['position'])?$arr['content']['position']['0']??"":$arr['content']['position'];
             $data = getDataFromMapping($this->data_map,$arr['content']);
-
             return $data;
         }
         else

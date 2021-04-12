@@ -110,6 +110,9 @@ class scoregg
          *      team_b_win => 3 //战队b比分
          * ]
          */
+        $qt = QueryList::get($arr['source_link']);
+        $player_name=$qt->find('.right-content h2')->text();
+        $arr['content']['player_name']=$player_name ?? $arr['content']['player_name'];
         $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","lol");
         if(isset($teamInfo['team_id']))
         {
