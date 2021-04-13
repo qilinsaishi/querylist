@@ -34,6 +34,7 @@ class scoregg
         $res = array_merge($res, $teamInfo);
         if (count($res) > 0) {
             //处理战队采集数据
+            $res['player_name'] =$res['player_name'] ?? '';
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
