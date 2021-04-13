@@ -158,7 +158,7 @@ class InformationModel extends Model
                 $data[$key] = json_encode($data[$key]);
             }
         }
-        $currentTime = getInformationList("Y-m-d H:i:s");
+        $currentTime = date("Y-m-d H:i:s");
         if (!isset($data['create_time'])) {
             $data['create_time'] = $currentTime;
         }
