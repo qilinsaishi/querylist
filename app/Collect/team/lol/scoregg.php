@@ -16,7 +16,7 @@ class scoregg
             "established_date"=>['path'=>"",'default'=>"未知"],
             "coach"=>['path'=>"",'default'=>"暂无"],
             "logo"=>['path'=>"team_image",'default'=>''],
-            "description"=>['path'=>"",'default'=>"暂无"],
+            "description"=>['path'=>"team_history",'default'=>"暂无"],
             "race_stat"=>['path'=>"raceStat",'default'=>[]],
             "original_source"=>['path'=>"",'default'=>"scoregg"],
             "site_id"=>['path'=>"team_id",'default'=>0],

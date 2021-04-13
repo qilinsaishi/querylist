@@ -27,7 +27,7 @@ class TeamResultService
     public function insertTeamData($mission_type,$game)
     {
         $this->insertCpseoTeam($game, $mission_type);
-        //$this->getScoreggTeamDetail($game);
+        $this->getScoreggTeamDetail($game);
         //采集玩加（www.wanplus.com）战队信息
          //$this->insertWanplus($game, $mission_type);
         //采集cpseo（2cpseo.com）战队信息
