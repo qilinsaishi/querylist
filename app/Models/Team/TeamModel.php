@@ -68,8 +68,6 @@ class TeamModel extends Model
         //数据来源
         if(isset($params['sources']) && count($params['source'])>=1)
         {
-            print_R($params);
-            die();
             $team_list = $team_list->whereIn("original_source",$params['source']);
         }
         //游戏类型
