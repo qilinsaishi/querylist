@@ -202,6 +202,10 @@ class MissionService
                         $classList = $this->getClass($classList, $modelClassName);
                         if (isset($classList[$modelClassName])) {
                             $modelClass = $classList[$modelClassName];
+                            if(isset($processResult['equipment_id']))
+                            {
+                                $processResult = [$processResult];
+                            }
                             foreach ($processResult as $equipment) {
                                 $save = $modelClass->saveEquipment($equipment);
                             }
