@@ -32,6 +32,7 @@ class scoregg
         $res = $url = $arr['detail'] ?? [];
         $res=array_merge($res,$teamInfo);
         if (count($res) >0) {
+            $res['en_name']=$res['en_name'] ?? '';
             //处理战队采集数据
             $cdata = [
                 'mission_id' => $arr['mission_id'],
@@ -109,10 +110,10 @@ class scoregg
                 team_a_win => 2  //战队a比分
                 team_b_win => 3 //战队b比分
         ],//荣誉信息数组*/
-        if(!preg_match('/[\x7f-\xff]/', $arr['content']['team_name']))
+        /*if(!preg_match('/[\x7f-\xff]/', $arr['content']['team_name']))
         {
             $arr['content']['en_name'] = $arr['content']['team_name'];
-        }
+        }*/
 
         $arr['content']['team_image'] = getImage($arr['content']['team_image']);
         $arr['content']['raceStat'] = ["win"=>intval($arr['content']['win']??0),"draw"=>0,"lose"=>intval($arr['content']['los']??0)];

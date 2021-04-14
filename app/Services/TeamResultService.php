@@ -26,7 +26,7 @@ class TeamResultService
 {
     public function insertTeamData($mission_type,$game)
     {
-        $this->insertCpseoTeam($game, $mission_type);
+        $this->insertCpseoTeam($game);
         $this->getScoreggTeamDetail($game);
         //采集玩加（www.wanplus.com）战队信息
          //$this->insertWanplus($game, $mission_type);
@@ -178,7 +178,7 @@ class TeamResultService
                             if ($result <= 0 && $title != '') {
                                 $data = [
                                     "asign_to" => 1,
-                                    "mission_type" => $mission_type,
+                                    "mission_type" => 'team',
                                     "mission_status" => 1,
                                     "game" => $game,
                                     "source" => 'wanplus',
@@ -218,7 +218,7 @@ class TeamResultService
     }
 
     //玩加电竞（wanplus）
-    public function insertCpseoTeam($game, $mission_type)
+    public function insertCpseoTeam($game)
     {
         $AjaxModel = new AjaxRequest();
         $missionModel = new MissionModel();
@@ -245,7 +245,7 @@ class TeamResultService
                 $team_url = $val;
                 $params = [
                     'game' => $game,
-                    'mission_type' => $mission_type,
+                    'mission_type' => 'team',
                     'source_link' => $team_url,
                 ];
 
@@ -257,7 +257,7 @@ class TeamResultService
                     if ($result == 0) {
                         $data = [
                             "asign_to" => 1,
-                            "mission_type" => $mission_type,
+                            "mission_type" => 'team',
                             "mission_status" => 1,
                             "game" => $game,
                             "source" => 'cpseo',
