@@ -119,7 +119,7 @@ class dota2Model extends Model
         {
             echo "toInsertEquip:"."\n";
             $insert = $this->insertEquipment($data);
-            $insert = ($insert==0)?1:0;
+            $insert = ($insert==0)?0:1;
             return $insert;
         }
         else
