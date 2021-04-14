@@ -51,7 +51,7 @@ class MissionService
                             try {
                                 //保存结果
                                 $rt = $collectModel->insertCollectResult($result);
-                                echo 'act:insert,mission_id='.$result['mission_id'].' lenth:'.strlen(json_encode($result)). "\n";
+                                echo 'act:insert_result,mission_id='.$result['mission_id'].' lenth:'.strlen(json_encode($result)). "\n";
                                 //如果保存成功
                                 if ($rt) {
                                     //更新任务状态，以后改成接口模式
