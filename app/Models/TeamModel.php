@@ -204,6 +204,13 @@ class TeamModel extends Model
 
     public function updateTeam($team_id=0,$data=[])
     {
+        foreach($this->toJson as $key)
+        {
+            if(isset($data[$key]))
+            {
+                $data[$key] = json_encode($data[$key]);
+            }
+        }
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
         {
@@ -297,12 +304,16 @@ class TeamModel extends Model
                     //判断字段是否有后台手动更新
                     $changeLogsModel=new ChangeLogsModel();
                     $check_result=$changeLogsModel->checkData($currentTeam['team_id'],$key,$type='team');
-                    if(!$check_result){
+                    if(!$check_result)
+                    {
                         unset($data[$key]);
+                        echo $key.":difference by modified,pass:\n";
                     }
-                    echo $key.":difference:\n";
+                    else
+                    {
+                        echo $key.":difference:\n";
+                    }
                 }
-
             }
             if(count($data))
             {
