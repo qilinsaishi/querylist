@@ -56,7 +56,7 @@ class Mission extends Command
         $game = ($this->argument("game")??"");
         $mission_type = ($this->argument("mission_type")??"");
         switch ($operation) {
-            case "collect":
+            case "insert_mission":
                 //资讯采集入任务表
                 if($mission_type=='information'){
                     (new InformationService())->insertData($game);
@@ -99,7 +99,8 @@ class Mission extends Command
                 if($mission_type=='match'){
                     (new MatchService())->insertMatchData($game);
                 }
-
+                break;
+            case "collect":
                 (new oMission())->collect($game,"",$mission_type);
                 break;
             case "process":
@@ -127,6 +128,9 @@ class Mission extends Command
                         $oKeyword->tfIdf($g);
                     }
                 }
+                break;
+            case "unpublished":
+                (new InformationService())->unPublishedList();//更新预发布脚本
                 break;
             default:
 

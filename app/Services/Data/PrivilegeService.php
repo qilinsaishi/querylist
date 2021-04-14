@@ -1254,7 +1254,7 @@ class PrivilegeService
                 $playerInfo = $intergrationService->getPlayerInfo(0,$pid,1);
                 if(strlen($playerInfo['data']['logo'])>=10)
                 {
-                    $data['playerList'][] = getFieldsFromArray($playerInfo['data']??[],"pid,player_name,logo");
+                    $data['playerList'][] = getFieldsFromArray($playerInfo['data']??[],"pid,player_name,logo,position");
                 }
             }
         }
@@ -1307,15 +1307,16 @@ class PrivilegeService
             if (isset($f['totalPlayerList']['class'])) {
                 $functionList["totalPlayerList"] = $f['totalPlayerList'];
             }
+            $sourceList = config('app.intergration.player');
             $data['playerList'] = [];
             $data['teamInfo'] = $ingergratedTeam;
             $modelClass = $functionList["totalPlayerList"]["class"];
             $function = $functionList["totalPlayerList"]['function'];
-            $pidList = $modelClass->$function(['team_id'=>$ingergratedTeam['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>100]);
+            $pidList = $modelClass->$function(["sources"=>array_column($sourceList,"source"),'except_pid'=>$data["pid"],'team_id'=>$ingergratedTeam['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>100]);
             $pidList = array_unique(array_column($pidList,"pid"));
             foreach($pidList as $pid)
             {
-                $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo");
+                $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo,position");
             }
         }
         else

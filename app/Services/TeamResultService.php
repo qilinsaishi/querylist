@@ -9,7 +9,7 @@ use App\Models\Match\scoregg\tournamentModel;
 use App\Models\MissionModel;
 use App\Models\TeamModel;
 use App\Models\PlayerModel;
-
+use App\Services\MissionService as oMission;
 use App\Models\Player\TotalPlayerModel as TotalPlayerModel;
 use App\Models\Player\PlayerMapModel as PlayerMapModel;
 use App\Models\Player\PlayerNameMapModel as PlayerNameMapModel;
@@ -27,7 +27,7 @@ class TeamResultService
     public function insertTeamData($mission_type,$game)
     {
         $this->insertCpseoTeam($game, $mission_type);
-        //$this->getScoreggTeamDetail($game);
+        $this->getScoreggTeamDetail($game);
         //采集玩加（www.wanplus.com）战队信息
          //$this->insertWanplus($game, $mission_type);
         //采集cpseo（2cpseo.com）战队信息
@@ -309,7 +309,7 @@ class TeamResultService
         {
             $nameList[$teamInfo['team_id']] = [];
             $aka = json_decode($teamInfo['aka'], true);
-            $detailNameList = $this->getNames($teamInfo,["team_name","en_name","cn_name"],["aka"]);
+            $detailNameList = getNames($teamInfo,["team_name","en_name","cn_name"],["aka"]);
             $nameList[$teamInfo['team_id']] = $detailNameList;
             $teamList[$key]['nameList'] = $detailNameList;
         }
@@ -327,14 +327,14 @@ class TeamResultService
                 $ourPlayer = [];
                 foreach($playerList_toProcess as $player_toProcess)
                 {
-                    $name = $this->generateNameHash($player_toProcess['player_name']);
+                    $name = generateNameHash($player_toProcess['player_name']);
                     if($name!="")
                     {
                         $ourPlayer[$player_toProcess['player_id']][] = $name;
                     }
                 }
                 //根据名称找到映射
-                $name = $this->generateNameHash($teamInfo['team_name']);
+                $name = generateNameHash($teamInfo['team_name']);
                 $currentMapList = $teamNameMapModel->getTeamByNameHash($name,$teamInfo['game']);
                 //循环现有映射 进行比对
                 //$tidList = array_column($currentMapList,"tid");
@@ -354,7 +354,7 @@ class TeamResultService
                             foreach($playerList_toMerge as $k => $playerInfo)
                             {
                                 $aka = json_decode($playerInfo['aka'], true);
-                                $playerNameList = $this->getNames($playerInfo,["player_name","en_name","cn_name"],["aka"]);
+                                $playerNameList = getNames($playerInfo,["player_name","en_name","cn_name"],["aka"]);
                                 foreach ($playerNameList as $key => $nameToCheck)
                                 {
 
@@ -475,7 +475,7 @@ class TeamResultService
                                 foreach($playerList_toProcess as $player_toProcess)
                                 {
                                     $insertPlayer = 0;
-                                    $nameToCheck = $this->generateNameHash($player_toProcess['player_name']);
+                                    $nameToCheck = generateNameHash($player_toProcess['player_name']);
                                     foreach($currentExistedPlayer as $p => $nameList)
                                     {
                                         if(in_array($nameToCheck,$nameList))
@@ -500,7 +500,7 @@ class TeamResultService
                                         }
                                         else
                                         {
-                                            $currentExistedPlayer[$insertPlayer] = $this->getNames($player_toProcess,["player_name","en_name","cn_name"],["aka"]);
+                                            $currentExistedPlayer[$insertPlayer] = getNames($player_toProcess,["player_name","en_name","cn_name"],["aka"]);
                                             echo "merged player ".$player_toProcess['player_id']." to created ".$insertPlayer."\n";
                                         }
                                     }
@@ -529,43 +529,8 @@ class TeamResultService
                 //不做操作
                 //修复缺失的映射
             }
-
-
         }
-
         //return $return;
-    }
-    function generateNameHash($name = "")
-    {
-        $name = strtolower($name);
-        $name = trim($name);
-        $replaceList = [" ","."];
-        foreach($replaceList as $key)
-        {
-            $name = str_replace($key,"",$name);
-        }
-        $name = $this->removeEmoji($name);
-        //echo "hash:".$name."\n";
-        return $name;
-    }
-    function removeEmoji($text) {
-        $clean_text = "";
-        // Match Emoticons
-        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
-        $clean_text = preg_replace($regexEmoticons, '', $text);
-        // Match Miscellaneous Symbols and Pictographs
-        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
-        $clean_text = preg_replace($regexSymbols, '', $clean_text);
-        // Match Transport And Map Symbols
-        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
-        $clean_text = preg_replace($regexTransport, '', $clean_text);
-        // Match Miscellaneous Symbols
-        $regexMisc = '/[\x{2600}-\x{26FF}]/u';
-        $clean_text = preg_replace($regexMisc, '', $clean_text);
-        // Match Dingbats
-        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
-        $clean_text = preg_replace($regexDingbats, '', $clean_text);
-        return $clean_text;
     }
     //把对于合并到已经查到的队伍映射
     function mergeToTeamMap($teamInfo = [],$tid,$teamMapModel,$teamNameMapModel)
@@ -574,7 +539,7 @@ class TeamResultService
         if($insertMap)
         {
             $aka = json_decode($teamInfo['aka'], true);
-            $nameList = $this->getNames($teamInfo,["team_name","en_name","cn_name"],["aka"]);
+            $nameList = getNames($teamInfo,["team_name","en_name","cn_name"],["aka"]);
             foreach ($nameList as $name)
             {
                 if($name != "")
@@ -590,32 +555,5 @@ class TeamResultService
             }
             return true;
         }
-    }
-    //从数组中拆解名称
-    function getNames($data,$keys=['team_name','cn_name','en_name'],$toJson=["aka"])
-    {
-        $return = [];
-        foreach($keys as $key => $value)
-        {
-            $value=$this->generateNameHash($data[$value]);
-            if($value!="")
-            {
-                $return[] = $value;
-            }
-        }
-        foreach($toJson  as $key)
-        {
-            $value=json_decode($data[$key],true);
-            foreach($value??[] as $value_detail)
-            {
-                $value_detail = $this->generateNameHash($value_detail);
-                if($value_detail!="")
-                {
-                    $return[] = $value_detail;
-                }
-            }
-        }
-        $return = array_unique($return);
-        return $return;
     }
 }

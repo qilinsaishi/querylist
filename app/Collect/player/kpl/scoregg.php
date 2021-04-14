@@ -2,6 +2,7 @@
 
 namespace App\Collect\player\kpl;
 use App\Models\TeamModel;
+use App\Services\MissionService as oMission;
 use QL\QueryList;
 
 class scoregg
@@ -29,11 +30,13 @@ class scoregg
         $cdata = [];
         $res = [];
         $url = $arr['detail']['player_url'] ?? '';
-        $teamInfo = $this->getScoreggInfo($url);
+        $team_id=$arr['detail']['team_id'] ?? 0;
+        $teamInfo = $this->getScoreggInfo($url,$team_id);
         $res = $url = $arr['detail'] ?? [];
         $res = array_merge($res, $teamInfo);
         if (count($res) > 0) {
             //处理战队采集数据
+            $res['player_name'] =$res['player_name'] ?? '';
             $cdata = [
                 'mission_id' => $arr['mission_id'],
                 'content' => json_encode($res),
@@ -109,30 +112,75 @@ class scoregg
          *      team_b_win => 3 //战队b比分
          * ]
          */
+        $qt = QueryList::get($arr['source_link']);
+        $player_name=$qt->find('.right-content h2')->text();
+        $arr['content']['player_name']=$player_name ?? $arr['content']['player_name'];
         $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","kpl");
         if(isset($teamInfo['team_id']))
         {
             $arr['content']['player_image'] = getImage($arr['content']['player_image']);
             $arr['content']['team_id'] = $teamInfo['team_id'];
             $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
-            if(!preg_match($patten, $arr['content']['player_name']))
-            {
-                $arr['content']['en_name'] = $arr['content']['player_name'];
+            if(isset($arr['content']['real_name']) && preg_match($patten, $arr['content']['real_name'])){
+                $arr['content']['cn_name'] = $arr['content']['real_name'];
             }else{
-                $arr['content']['cn_name'] = $arr['content']['player_name'];
+                $arr['content']['cn_name'] = preg_match($patten, $arr['content']['player_name']) ? $arr['content']['player_name']:'';
             }
+
+            if(isset($arr['content']['real_name']) && !preg_match($patten, $arr['content']['real_name'])){
+                $arr['content']['en_name'] = $arr['content']['real_name'];
+            }else{
+                $arr['content']['en_name'] = !preg_match($patten, $arr['content']['player_name']) ? $arr['content']['player_name']:'';
+            }
+
             $arr['content']['position'] = is_array($arr['content']['position'])?$arr['content']['position']['0']??"":$arr['content']['position'];
             $data = getDataFromMapping($this->data_map,$arr['content']);
             return $data;
         }
         else
         {
+            $infos = $qt->find('.left-content .game-history .hero-info .info-item')->texts()->all();
+            $cn_name=$en_name='';
+            if (count($infos) > 0) {
+                $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
+                foreach ($infos as $val) {
+                    if (strpos($val, '队伍：') !== false) {
+                        $name = str_replace('队伍：', '', $val);
+                        if(preg_match($patten, $name)){
+                            $cn_name=trim($name);
+                        }else{
+                            $en_name=trim($name);
+                        }
+                    }
+                }
+            }
+            $detail=[
+                'team_id'=>$arr['content']['team_id'] ?? 0,
+                'team_name'=>$arr['content']['team_name'] ?? 0,
+                'team_image'=>$arr['content']['team_image'] ?? 0,
+                'source' => 'scoregg',
+                'game'=>$arr['game'] ?? 'lol',
+                'team_url'=>'https://www.scoregg.com/big-data/team/'.$arr['content']['team_id'].'?tournamentID=&type=baike',
+                'cn_name'=>$cn_name,
+                'en_name'=>$en_name,
+            ];
+            $adata = [
+                "asign_to" => 1,
+                "mission_type" => 'team',
+                "mission_status" => 1,
+                "game" => $arr['game'] ?? 'lol',
+                "source" => 'scoregg',
+                "title" => $arr['content']['team_name'] ?? '',
+                'source_link' => 'https://www.scoregg.com/big-data/team/'.$arr['content']['team_id'].'?tournamentID=&type=baike',
+                "detail" => json_encode($detail),
+            ];
+            $insert = (new oMission())->insertMission($adata);
             return false;
         }
     }
 
     //获取战队scoregg战队详情
-    public function getScoreggInfo($url)
+    public function getScoreggInfo($url,$team_id)
     {
         $qt = QueryList::get($url);
         $infos = $qt->find('.left-content .game-history .hero-info .info-item')->texts()->all();
@@ -140,6 +188,23 @@ class scoregg
             foreach ($infos as $val) {
                 if (strpos($val, '国籍：') !== false) {
                     $country = str_replace('国籍： ', '', $val);
+                }
+                if (strpos($val, '队伍：') !== false) {
+                    $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
+                    $name = str_replace('队伍：', '', $val);
+                    if(preg_match($patten, $name)){
+                        $team_data['cn_name']=trim($name);
+                    }else{
+                        $team_data['en_name']=trim($name);
+                    }
+                    if(count($team_data)>0 && isset($team_id)){
+                        $teamModel=new TeamModel();
+                        //$rt=$teamModel->updateTeam($team_id,$team_data);
+                    }
+
+                }
+                if (strpos($val, '姓名：') !== false) {
+                    $real_name = str_replace('姓名： ', '', $val);
                 }
                 if (strpos($val, '出生：') !== false) {
                     $birthday = str_replace('出生：', '', $val);
@@ -207,6 +272,7 @@ class scoregg
         $birthday = substr($birthday, 0, 11);
         $baseinfo = [
             'country' => $country ?? '',//国家
+            'real_name'=>$real_name ?? '',//姓名
             'birthday' => $birthday ?? '',//出生
             'status' => trim($status) ?? '',//主力状态
             'position' => $position ?? '',//位置

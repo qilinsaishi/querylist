@@ -86,12 +86,12 @@ class BaiduKeywordModel extends Model
                 $id = $this->insert(['keyword'=>$keyword['tag']]);
                 if($id>0)
                 {
-                    $return[$keyword['tag']] = $id;
+                    $return[$id] = $keyword;
                 }
             }
             else
             {
-                $return[$keyword['tag']] = $word["id"];
+                $return[$word["id"]] = $keyword;
             }
         }
         return $return;

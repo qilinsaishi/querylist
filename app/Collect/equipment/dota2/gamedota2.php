@@ -8,6 +8,20 @@ class gamedota2
 {
     protected $data_map =
         [
+            "equipment_name" => ['path' => "dname", 'default' => ''],
+            "description" => ['path' => "desc", 'default' => '暂无'],
+            "logo" => ['path' => "img", 'default' => ''],
+            "cn_name" => ['path' => "dname", 'default' => ''],//中文名
+            "en_name" => ['path' => "en_name", 'default' => ''],//英文名
+            "price" => ['path' => "cost", 'default' => 0],//价格
+            "from_list" => ['path' => "requirements", 'default' => []],//合成需要的道具列表
+            "into_list" => ['path' => "info_list", 'default' => []],//可以合成的道具列表
+            "aka" => ['path' => "", 'default' => ""],//别名
+            "type" => ['path' => "type", 'default' => ""],//类型
+            "magic_cost" => ['path' => "mc", 'default' => []],//魔法消耗
+            "cool_down" => ['path' => "cd", 'default' => []],//冷却时间
+            "equipment_id" => ['path' => "id", 'default' => 0],//冷却时间
+
         ];
 
     public function collect($arr)
@@ -63,9 +77,12 @@ class gamedota2
          *
          *
          */
-
-
-        var_dump($arr);
+        $arr['content']['info_list'] = ["note"=>$arr['content']['notes']??'',"lore"=>$arr['content']['lore']??'',"atrrib"=>$arr['content']['attrib']??''];
+        $arr['content']['img'] = getImage($arr['content']['img']);
+        $arr['content']['mc'] = explode(" ",trim($arr['content']['mc']));
+        $arr['content']['cd'] = explode(" ",trim($arr['content']['cd']));
+        $data = getDataFromMapping($this->data_map,$arr['content']);
+        return $data;
     }
     //中立物品等级
     public function getLevelData($en_name){

@@ -87,6 +87,11 @@ class PlayerModel extends Model
         {
             $player_list = $player_list->where("player_id","!=",$params['except_player']);
         }
+        //不是队员
+        if(isset($params['except_pid']) && $params['except_pid']>0)
+        {
+            $player_list = $player_list->where("pid","!=",$params['except_pid']);
+        }
         //战队名称
         if(isset($params['player_name']) && strlen($params['player_name'])>=3)
         {
@@ -266,10 +271,15 @@ class PlayerModel extends Model
                     //判断字段是否有后台手动更新
                     $changeLogsModel=new ChangeLogsModel();
                     $check_result=$changeLogsModel->checkData($currentPlayer['player_id'],$key,$type='player');
-                    if(!$check_result){
+                    if(!$check_result)
+                    {
                         unset($data[$key]);
+                        echo $key.":difference by modified,pass:\n";
                     }
-                    echo $key.":difference:\n";
+                    else
+                    {
+                        echo $key.":difference:\n";
+                    }
                 }
             }
             if(count($data))
@@ -324,6 +334,11 @@ class PlayerModel extends Model
         if(isset($params['except_player']) && $params['except_player']>0)
         {
             $player_count = $player_count->where("player_id","!=",$params['except_player']);
+        }
+        //不是队员
+        if(isset($params['except_pid']) && $params['except_pid']>0)
+        {
+            $player_count = $player_count->where("pid","!=",$params['except_pid']);
         }
         //战队名称
         if(isset($params['player_name']) && strlen($params['player_name'])>=3)

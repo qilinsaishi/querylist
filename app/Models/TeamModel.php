@@ -55,6 +55,11 @@ class TeamModel extends Model
     {
         $fields = $params['fields']??"team_id,team_name,logo,team_history";
         $team_list =$this->select(explode(",",$fields));
+        //队伍ID
+        if(isset($params['ids']) && count($params['ids'])>0)
+        {
+            $team_list = $team_list->whereIn("team_id",$params['ids']);
+        }
         //总表队伍ID
         if(isset($params['tid']) && intval($params['tid'])>=0)
         {
@@ -199,6 +204,13 @@ class TeamModel extends Model
 
     public function updateTeam($team_id=0,$data=[])
     {
+        foreach($this->toJson as $key)
+        {
+            if(isset($data[$key]))
+            {
+                $data[$key] = json_encode($data[$key]);
+            }
+        }
         $currentTime = date("Y-m-d H:i:s");
         if(!isset($data['update_time']))
         {
@@ -292,12 +304,16 @@ class TeamModel extends Model
                     //判断字段是否有后台手动更新
                     $changeLogsModel=new ChangeLogsModel();
                     $check_result=$changeLogsModel->checkData($currentTeam['team_id'],$key,$type='team');
-                    if(!$check_result){
+                    if(!$check_result)
+                    {
                         unset($data[$key]);
+                        echo $key.":difference by modified,pass:\n";
                     }
-                    echo $key.":difference:\n";
+                    else
+                    {
+                        echo $key.":difference:\n";
+                    }
                 }
-
             }
             if(count($data))
             {
@@ -316,6 +332,11 @@ class TeamModel extends Model
     public function getTeamCount($params=[])
     {
         $team_count =$this;
+        //队伍ID
+        if(isset($params['ids']) && count($params['ids'])>0)
+        {
+            $team_count = $team_count->whereIn("team_id",$params['ids']);
+        }
         //总表队伍ID
         if(isset($params['tid']) && intval($params['tid'])>=0)
         {
@@ -359,7 +380,7 @@ class TeamModel extends Model
         $teamList = $this->getTeamList(["game"=>$game,"fields"=>"team_id,team_name,en_name,aka","page_size"=>10000]);
         foreach($teamList as $team_info)
         {
-            $t = array_unique(array_merge([$team_info['team_name']],[$team_info['en_name']],json_decode($team_info['aka'])));
+            $t = array_unique(array_merge([$team_info['team_name']],[$team_info['en_name']],json_decode($team_info['aka'],true)??[]));
             foreach($t as $value)
             {
                 if(trim($value) != "" && !isset($keywords[trim($value)]))

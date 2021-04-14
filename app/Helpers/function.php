@@ -311,6 +311,7 @@ if (!function_exists('randStr')) {
 //获取远程图片，并以文件的hash作为文件名保存
 function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type = 1)
 {
+    $f_name = $filename;
     if(substr($url,0,2)=='//')
     {
         if(substr_count($url,'shp.qpic.cn')>0)
@@ -385,6 +386,8 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             //curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+            $user_agent = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Mobile Safari/537.36';
+            curl_setopt($ch, CURLOPT_USERAGENT, $user_agent); // 模拟用户使用的浏览器
             curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
             $img = curl_exec($ch);
             curl_close($ch);
@@ -409,11 +412,14 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         unset($img/*, $url*/);
         $root =  $save_dir . $new_name;
         $fileSize = filesize($root);
-        if($fileSize<=100)
+        if($fileSize<=100 && strpos($url,'https://') !==false)
         {
+           // echo "get img FileSize error:".$url."\n";
+          //  echo "process time:".(microtime(true)-$start_time)."\n";
+            $url = str_replace('https://','http://',$url);
             echo "get img FileSize error:".$url."\n";
             echo "process time:".(microtime(true)-$start_time)."\n";
-            return $url;
+            return getImage($url, $save_dir, $f_name, 1);
         }
         $upload = (new AliyunService())->upload2Oss([$root]);
         //存储到redis,一天内不再重新获取
@@ -490,6 +496,65 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             }
         }
         return $array;
+    }
+    //从数组中拆解名称
+    function getNames($data,$keys=['team_name','cn_name','en_name'],$toJson=["aka"])
+    {
+        $return = [];
+        foreach($keys as $key => $value)
+        {
+            $value=generateNameHash($data[$value]);
+            if($value!="")
+            {
+                $return[] = $value;
+            }
+        }
+        foreach($toJson  as $key)
+        {
+            $value=is_array($data[$key])?$data[$key]:json_decode($data[$key],true);
+            foreach($value??[] as $value_detail)
+            {
+                $value_detail = generateNameHash($value_detail);
+                if($value_detail!="")
+                {
+                    $return[] = $value_detail;
+                }
+            }
+        }
+        $return = array_unique($return);
+        return $return;
+    }
+    function generateNameHash($name = "")
+    {
+        $name = strtolower($name);
+        $name = trim($name);
+        $replaceList = [" ","."];
+        foreach($replaceList as $key)
+        {
+            $name = str_replace($key,"",$name);
+        }
+        $name = removeEmoji($name);
+        //echo "hash:".$name."\n";
+        return $name;
+    }
+    function removeEmoji($text) {
+        $clean_text = "";
+        // Match Emoticons
+        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
+        $clean_text = preg_replace($regexEmoticons, '', $text);
+        // Match Miscellaneous Symbols and Pictographs
+        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
+        $clean_text = preg_replace($regexSymbols, '', $clean_text);
+        // Match Transport And Map Symbols
+        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
+        $clean_text = preg_replace($regexTransport, '', $clean_text);
+        // Match Miscellaneous Symbols
+        $regexMisc = '/[\x{2600}-\x{26FF}]/u';
+        $clean_text = preg_replace($regexMisc, '', $clean_text);
+        // Match Dingbats
+        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
+        $clean_text = preg_replace($regexDingbats, '', $clean_text);
+        return $clean_text;
     }
 
 

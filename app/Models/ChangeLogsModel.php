@@ -34,15 +34,13 @@ class ChangeLogsModel extends Model
     public function checkData($data_id = 0, $field, $type = 'team')
     {
         //获取change_log日志表最后一条数据
-        $obj =$this->getChangeLog($field, $data_id, $type);
-
-        if(!empty($obj))
+        $changeLog =$this->getChangeLog($field, $data_id, $type);
+        if(!empty($changeLog))
         {
             //如果为不为空的情况下，返回false
             return false;
         }
-
-        return $field;
+        return true;
     }
 
     /**
@@ -53,8 +51,7 @@ class ChangeLogsModel extends Model
      */
     public function getChangeLog($field, $data_id, $type)
     {
-        return $this->where(['type' => $type, 'data_id' => $data_id, 'fields' => $field,'status'=>0])->orderBy('id', 'desc')->first();
-
+        return $this->where(['type' => $type, 'data_id' => $data_id, 'fields' => $field,'status'=>0])->orderBy('id', 'desc')->get()->first();
     }
 
 

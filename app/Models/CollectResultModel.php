@@ -96,16 +96,19 @@ class CollectResultModel extends Model
      * @param int $limt
      * @return mixed
      */
-    public function getCollectResult($game='',$mission_type='',$source=''){
-        $collerObj=$this->select('mission_type','game','source','mission_type','source_link','title');
+    public function getCollectResult($game='',$mission_type='',$source='',$source_link=''){
+        $collerObj=$this->select('mission_type','game','source','mission_type','source_link','title','content');
         if($game !=''){
-            $collerObj->where('game',$game);
+            $collerObj=$collerObj->where('game',$game);
         }
         if($mission_type !=''){
-            $collerObj->where('mission_type',$mission_type);
+            $collerObj=$collerObj->where('mission_type',$mission_type);
         }
         if($source !=''){
-            $collerObj->where('source',$source);
+            $collerObj=$collerObj->where('source',$source);
+        }
+        if($source_link !=''){
+            $collerObj=$collerObj->where('source_link',$source_link);
         }
 
         return $collerObj->orderBy('id', 'ASC')

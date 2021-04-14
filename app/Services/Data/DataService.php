@@ -91,6 +91,7 @@ class DataService
                     $dataArr["data"] = (new ExtraProcessService())->process($dataType,$dataArr["data"]);
                 }
                 $dataArr['processTime'] = microtime(true)-$start;
+                $dataArr['cached'] = $toSave==1?0:1;
                 $return[$name] = $dataArr;
             }
         }
