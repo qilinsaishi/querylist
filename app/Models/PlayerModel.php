@@ -193,12 +193,16 @@ class PlayerModel extends Model
 
     public function savePlayer($game,$data)
     {
+        if($data['player_name'] == "")
+        {
+            $data['player_name'] == $data['en_name'];
+        }
         echo "player_name:".$data['player_name']."\n";
         $return  = ['player_id'=>0,"result"=>0];
         if($data['player_name'] == "")
         {
             echo "empty_player:\n";
-            sleep(1);
+            //sleep(1);
             return $return;
         }
         $data['player_name'] = preg_replace("/\s+/", "",$data['player_name']);

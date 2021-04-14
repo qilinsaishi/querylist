@@ -47,12 +47,12 @@ class InformationModel extends Model
     {
 
         $fields = $params['fields'] ?? "id,title,author,author_id,logo,create_time,status,type";
-        $information_list = $this->select(explode(",", $fields));
-        if(isset($params['status']) && $params['status']==3){
-            $information_list = $information_list->where("status", $params['status']);
+        if(isset($params['status'])){
+            $status=$params['status'];
         }else{
-            $information_list = $information_list->where("status", 1);
+            $status=1;
         }
+        $information_list = $this->select(explode(",", $fields))->where("status", $status);
         //排除的来源
         if (isset($params['except_source']) && strlen($params['except_source']) > 0) {
             $information_list = $information_list->where("source", '!=', $params['except_source']);
