@@ -3,6 +3,7 @@
 namespace App\Collect\information\lol;
 
 use App\Models\InformationModel;
+use App\Models\MissionModel as MissionModel;
 use QL\QueryList;
 
 class wanplus
@@ -37,15 +38,15 @@ class wanplus
         $content='';
         $res = $arr['detail'] ?? [];
         $content=$content=$qt->find('.content .ov #video-video')->html();
+
         if(strpos($content,'.mp4')!==false){
             $res['content'] = $content;
-
             $res['type'] = $type;
 
             $informationModel = new InformationModel();
             $info_count=0;
             if($site_id >0){
-                $informationInfo = $informationModel->getInformationBySiteId($site_id, 'dota2', $arr['source']);
+                $informationInfo = $informationModel->getInformationBySiteId($site_id, 'lol', $arr['source']);
                 $info_count=count($informationInfo);
             }
 
@@ -64,10 +65,14 @@ class wanplus
                     ];
 
                 }
+                return $cdata;
             }
+        }else{
+            $missionModel = new MissionModel();
+            $rt=$missionModel->updateMission($arr['mission_id'], ['mission_status' => 3]);
+            return $cdata=[];
         }
 
-        return $cdata;
     }
 
     public function process($arr)
