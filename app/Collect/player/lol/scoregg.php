@@ -55,7 +55,7 @@ class scoregg
     }
 
     public function process($arr)
-    {print_r($arr);exit;
+    {
         /**
          * [tournament_id] => 197 //赛事id
          * [player_id] => 3771  //队员id
