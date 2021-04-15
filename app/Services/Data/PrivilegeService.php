@@ -1251,10 +1251,13 @@ class PrivilegeService
             $pidList = array_unique(array_column($pidList,"pid"));
             foreach($pidList as $pid)
             {
-                $playerInfo = $intergrationService->getPlayerInfo(0,$pid,1);
-                if(strlen($playerInfo['data']['logo'])>=10)
+                if($pid>0)
                 {
-                    $data['playerList'][] = getFieldsFromArray($playerInfo['data']??[],"pid,player_name,logo,position");
+                    $playerInfo = $intergrationService->getPlayerInfo(0,$pid,1);
+                    if(strlen($playerInfo['data']['logo'])>=10)
+                    {
+                        $data['playerList'][] = getFieldsFromArray($playerInfo['data']??[],"pid,player_name,logo,position");
+                    }
                 }
             }
         }
@@ -1316,7 +1319,10 @@ class PrivilegeService
             $pidList = array_unique(array_column($pidList,"pid"));
             foreach($pidList as $pid)
             {
-                $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo,position");
+                if($pid>0)
+                {
+                    $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo,position");
+                }
             }
         }
         else

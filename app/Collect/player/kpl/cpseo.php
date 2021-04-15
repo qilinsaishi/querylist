@@ -29,12 +29,12 @@ class cpseo
     {
         $cdata = [];
         $url = $arr['detail']['url'] ?? '';
-        $team_id = $arr['detail']['team_id'] ?? '';
-        $current = $arr['detail']['current'] ?? '';
+        $team_id = $arr['detail']['team_id'] ?? -1;
+        $current = $arr['detail']['current'] ?? 1;
         $res = $this->cpSeoPlayer($url,$team_id);
 
         if (!empty($res)) {
-            $res['team_id'] = $team_id;
+           // $res['team_id'] = $team_id;
             $res['current'] = $current;
             $cdata = [
                 'mission_id' => $arr['mission_id'],//任务id
@@ -84,6 +84,17 @@ class cpseo
         $logo = $ql->find('.commonDetail-intro img')->attr('src');
         $name = $ql->find('.intro-content-block .intro-name')->text();
         $wraps = $ql->find('.intro-content p')->texts()->all();
+        $team_link= $ql->find('.intro-content p span a')->attr('href');
+        if($team_id==-1){
+            $site_id=intval(str_replace('http://www.2cpseo.com/team/','',$team_link));
+            $teamInfo = (new TeamModel())->getTeamBySiteId($site_id,"cpseo","kpl");
+            if(isset($teamInfo['team_id'])){
+                $team_id=$teamInfo['team_id'] ;
+            }
+
+        }
+
+        //print_r($source_link);exit;
         $wraps=$wraps ?? [];
         $realname=$nickname=$position=$area=$intro=$goodAtHeroes=$birthday=$team_name='';
 
@@ -160,10 +171,10 @@ class cpseo
         if($established_date !=''){
             $team_data['established_date']=$established_date;
         }
-        if(count($team_data)>0){
+        /*if(count($team_data)>0){
             $teamModel=new TeamModel();
             $rt=$teamModel->updateTeam($team_id,$team_data);
-        }
+        }*/
         $en_name=$ql->find('.commonDetail-intro .intro-name-block .intro-name')->text();
 
         $en_name = str_replace(array('('.$realname.')','（'.$realname.'）',''.$team_name.'.'), '', $en_name);
@@ -181,6 +192,7 @@ class cpseo
             'birthday' => $birthday ?? '',//生日
             'usedId' => $usedId ?? '',//曾用ID
             'intro' => $intro ?? '',//
+            'team_id'=>$team_id,
         ];
         return $baseInfo;
     }
