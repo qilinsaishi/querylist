@@ -325,7 +325,15 @@ class TeamResultService
             //如果没取到
             if(!isset($currentMap['tid']))
             {
+                //获取队员列表
                 $playerList_toProcess = $playerModel->getPlayerList(["team_id"=>$teamInfo['team_id'],"fields"=>"player_id,pid,player_name,cn_name,en_name,aka,game,original_source","page_size"=>1000]);
+                //如果队伍里没人
+                if(count($playerList_toProcess)==0)
+                {
+                    //跳过
+                    echo "empty team:".$teamInfo['team_id']." pass\n";
+                    continue;
+                }
                 $ourPlayer = [];
                 foreach($playerList_toProcess as $player_toProcess)
                 {
