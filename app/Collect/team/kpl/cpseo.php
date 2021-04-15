@@ -122,30 +122,6 @@ class cpseo
         $intro_content=$ql->find('.intro-content-block .intro-content')->html();
         $team_members=$ql->find('.l-m-team-member:eq(0) td a')->attrs('href')->all();
 
-        /*$history_match=$ql->rules([
-            'date' => ['.text:eq(0)', 'text'],
-            'score' => ['.score', 'text'],
-            'info' => ['.info', 'html'],
-            'teams' => ['.info a', 'texts'],
-        ])->range('.l-m-history-match .item')->queryData();
-        foreach ($history_match as &$val){
-            $info=$val['info'] ?? '';
-            $link=QueryList::html($info)->find('a')->attrs('href')->toArray();
-            $val['team_url']=$link ?? [];
-            unset($val['info']);
-        }*/
-/*
-        $article_list=$ql->rules([
-            'sTitle' => ['.article-title', 'text'],
-            'link' => ['a', 'href'],
-            'sDesc' => ['.article-content', 'text'],
-            'sIMG' => ['img', 'src'],
-        ])->range('.home-article-list .article-item')->queryData(function($item){
-            $item['sCreated'] = QueryList::get($item['link'])->find('.article-date')->text();
-            $item['type']=1761;//资讯
-            $item['content'] = QueryList::get($item['link'])->find('.article-content')->html();
-            return $item;
-        });*/
         $teamArr=explode('team/',$url);
         $team_id=end($teamArr);
 
@@ -162,9 +138,7 @@ class cpseo
 
         $res = [
             'baseInfo' => $baseInfo,
-            //'history_match' => $history_match,
             'team_members' => $team_members,
-            //'information'=>$article_list,
         ];
 
         return $res;
