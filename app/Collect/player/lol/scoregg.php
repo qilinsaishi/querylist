@@ -116,6 +116,8 @@ class scoregg
         $qt = QueryList::get($arr['source_link']);
         $player_name=$qt->find('.right-content h2')->text();
         $arr['content']['player_name']=$player_name ?? $arr['content']['player_name'];
+        $arr['content']['stat'] =
+            getFieldsFromArray($arr['content'],"KDA,PLAYS_TIMES,OFFERED_RATE,AVERAGE_KILLS,AVERAGE_ASSISTS,AVERAGE_DEATHS,MINUTE_ECONOMIC,MINUTE_HITS,MINUTE_DAMAGEDEALT,DAMAGEDEALT_RATE,MINUTE_DAMAGETAKEN,DAMAGETAKEN_RATE,MINUTE_WARDSPLACED,MINUTE_WARDKILLED,MVP,win,los,VICTORY_RATE,total_kills,total_deaths,total_assists");
         $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","lol");
         if(isset($teamInfo['team_id']))
         {
@@ -140,7 +142,9 @@ class scoregg
             }else{
                 $arr['content']['en_name'] = !preg_match($patten, $arr['content']['player_name']) ? $arr['content']['player_name']:'';
             }
-
+            if(isset($arr['content']['player_chinese_name']) && $arr['content']['player_chinese_name'] !=''){
+                $arr['content']['cn_name']=$arr['content']['player_chinese_name'];
+            }
             $arr['content']['position'] = is_array($arr['content']['position'])?$arr['content']['position']['0']??"":$arr['content']['position'];
             $data = getDataFromMapping($this->data_map,$arr['content']);
             return $data;

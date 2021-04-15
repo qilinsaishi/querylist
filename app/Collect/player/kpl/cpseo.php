@@ -132,8 +132,10 @@ class cpseo
 
                     return false;
                 }
+            }else{
+                echo "无战队信息"."\n";
+                return false;
             }
-            return false;
 
         }
         if(!isset($arr['content']['name'])){
@@ -154,7 +156,7 @@ class cpseo
         $data = getDataFromMapping($this->data_map,$arr['content']);
         if($data['player_name']==''){
             $data['player_name']=$arr['content']['name'];
-        }print_r($data);exit;
+        }
         return $data;
     }
     //王者荣耀队员信息
@@ -179,7 +181,6 @@ class cpseo
 
         }
 
-        //print_r($source_link);exit;
         $wraps=$wraps ?? [];
         $realname=$nickname=$position=$area=$intro=$goodAtHeroes=$birthday=$team_name='';
 
