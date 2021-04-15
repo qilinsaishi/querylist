@@ -54,7 +54,6 @@ class IntergrationService
         if($toGet==1)
         {
             $oTeam = new TeamModel();
-            $oTeamMap = new TeamMapModel();
             $oTotalTeam = new TotalTeamModel();
             //获取表结构
             $table = $oTotalTeam->getTableColumns();
@@ -64,12 +63,13 @@ class IntergrationService
             if($team_id>0)
             {
                 //找到单条详情
-                $singleTeamInfo = $oTeam->getTeamById($team_id);
+                $singleTeamInfo = $oTeam->getTeamById($team_id,"team_id,tid");
                 //找到
                 if(isset($singleTeamInfo['team_id']))
                 {
                     //获取当前映射
-                    $singleMap = $oTeamMap->getTeamByTeamId($singleTeamInfo['team_id']);
+                    //$singleMap = $oTeam->getTeamByTeamId($singleTeamInfo['team_id']);
+                    $singleMap = $singleTeamInfo;
                     //找到映射
                     if(isset($singleMap['tid']))
                     {
@@ -269,7 +269,7 @@ class IntergrationService
         if($toGet==1)
         {
             $oPlayer = new PlayerModel();
-            $oPlayerMap = new PlayerMapModel();
+            //$oPlayerMap = new PlayerMapModel();
             $oTotalPlayer = new TotalPlayerModel();
             //获取表结构
             $table = $oTotalPlayer->getTableColumns();
