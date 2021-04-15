@@ -134,6 +134,9 @@ class scoregg
             }else{
                 $arr['content']['cn_name'] = preg_match($patten, $arr['content']['player_name']) ? $arr['content']['player_name']:'';
             }
+            if(isset($arr['content']['player_chinese_name']) && $arr['content']['player_chinese_name'] !=''){
+                $arr['content']['cn_name']=$arr['content']['player_chinese_name'];
+            }
 
             if(isset($arr['content']['real_name']) && !preg_match($patten, $arr['content']['real_name'])){
                 $arr['content']['en_name'] = $arr['content']['real_name'];
