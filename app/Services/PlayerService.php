@@ -240,7 +240,6 @@ class  PlayerService
     {
         $intergrationService = new IntergrationService();
         $totalPlayerModel = new TotalPlayerModel();
-        $playerMapModel = new PlayerMapModel();
         $playerNameMapModel = new PlayerNameMapModel();
         $playerModel = new PlayerModel();
         $teamModel = new TeamModel();
@@ -278,7 +277,7 @@ class  PlayerService
                                 echo "to Merge\n";
                                 DB::beginTransaction();
                                 //合并入创建的映射里面
-                                $mergeToMap = $this->mergeToPlayerMap($playerInfo, $pid, $playerModel, $playerMapModel, $playerNameMapModel);
+                                $mergeToMap = $this->mergeToPlayerMap($playerInfo, $pid, $playerModel,  $playerNameMapModel);
                                 if (!$mergeToMap) {
                                     echo "merge to existed intergrated player Error\n";
                                     DB::rollBack();
@@ -300,7 +299,7 @@ class  PlayerService
                         //创建成功
                         if ($insertPlayer) {
                             //合并入创建的映射里面
-                            $mergeToMap = $this->mergeToPlayerMap($playerInfo, $insertPlayer, $playerModel, $playerMapModel, $playerNameMapModel);
+                            $mergeToMap = $this->mergeToPlayerMap($playerInfo, $insertPlayer, $playerModel,  $playerNameMapModel);
                             if (!$mergeToMap) {
                                 echo "create intergrated player Error\n";
                                 DB::rollBack();
@@ -352,10 +351,8 @@ class  PlayerService
     }
 
     //把对于合并到已经查到的队员映射
-    function mergeToPlayerMap($playerInfo = [], $pid, $playerModel, $playerMapModel, $playerNameMapModel)
+    function mergeToPlayerMap($playerInfo = [], $pid, $playerModel, $playerNameMapModel)
     {
-        $insertMap = $playerMapModel->insertMap(["pid" => $pid, "player_id" => $playerInfo['player_id']]);
-        if ($insertMap) {
             $aka = json_decode($playerInfo['aka'], true);
             $nameList = (array_merge([$playerInfo['player_name'], $playerInfo['en_name'], $playerInfo['cn_name']], $aka ?? []));
             foreach ($nameList as $key => $name) {
@@ -382,7 +379,6 @@ class  PlayerService
                 return false;
             }
             return true;
-        }
     }
 
     public function getPlayerListByCollectResult($game)
