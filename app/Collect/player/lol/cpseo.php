@@ -2,7 +2,9 @@
 
 namespace App\Collect\player\lol;
 
+use App\Models\MissionModel;
 use App\Models\TeamModel;
+use App\Services\MissionService as oMission;
 use QL\QueryList;
 
 class cpseo
@@ -67,29 +69,111 @@ class cpseo
          * "intro":"2020-11-17，由韩国明星金希澈投资的LCK联赛战队hyFresh Blade今日官宣两名选手加入。" //简介
          * }
          */
+        if($arr['content']['team_id']==-1 || $arr['content']['team_id']=='' ){
+            $ql = QueryList::get($arr['source_link']);
+            $team_link= $ql->find('.intro-content p span a')->attr('href');
+            $team_link=$team_link ?? '';
+            if($team_link !=''){//存在战队
+                $site_id=intval(str_replace('http://www.2cpseo.com/team/','',$team_link));
+                $teamInfo = (new TeamModel())->getTeamBySiteId($site_id,"cpseo","lol");
+                if(isset($teamInfo['team_id'])){//team_info表里面存在数据
+                    $arr['content']['team_id']=$teamInfo['team_id'];
+                }else{
+                    //不存在则创建战队任务
+                    $team_infos = $ql->find('.az-main-right .affiliation-team .content p')->texts()->all();
+                    $team_infos=$team_infos ?? [];
+                    $team_data=[];
+                    $location=$team_cn_name=$team_en_name=$established_date='';
+                    //获取战队信息
+                    if(count($team_infos)>0){
+                        foreach ($team_infos as $v){
+                            if (strpos($v, '地区：') !== false) {
+                                $location = str_replace('地区：', '', $v);
+                            }
+                            if (strpos($v, '中文名称：') !== false) {
+                                $team_cn_name = str_replace('中文名称：', '', $v);
+                            }
+                            if (strpos($v, '英文名称：') !== false) {
+                                $team_en_name = str_replace('英文名称：', '', $v);
+                            }
+                            if (strpos($v, '建队时间：') !== false) {
+                                $established_date = str_replace('建队时间：', '', $v);
+                            }
+                        }
+                    }
+                    $params = [
+                        'game' => 'lol',
+                        'mission_type' => 'team',
+                        'source_link' => $team_link,
+                    ];
+                    $missionModel = new MissionModel();
+                    $missionCount = $missionModel->getMissionCount($params);
+                    //过滤已经采集过的文章
+                    $missionCount = $missionCount ?? 0;
+                    if ($missionCount <= 0) {
+                        $team_data['location']=$location ?? '';
+                        $team_data['cn_name']=$team_cn_name ?? '';
+                        $team_data['en_name']=$team_en_name ?? '';
+                        $team_data['established_date']=$established_date ?? '';
+                        $team_data['url']=$team_link ?? '';
+                        $team_data['game']='lol';
+                        $team_data['source']='cpseo';
+                        $adata = [
+                            "asign_to" => 1,
+                            "mission_type" => 'team',
+                            "mission_status" => 1,
+                            "game" =>'lol',
+                            "source" => 'cpseo',
+                            "title" => $team_cn_name ?? '',
+                            'source_link' => $team_link,
+                            "detail" => json_encode($team_data),
+                        ];
+                        $insert = (new oMission())->insertMission($adata);
+                        echo "player-lol-cpseo-insert-team:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
+                    }
+
+                    return false;
+                }
+            }else{//不存在战队信息
+
+                return  false;
+            }
+
+
+        }
+        if(!isset($arr['content']['name'])){
+            $ql = QueryList::get($arr['source_link']);
+            $arr['content']['name'] = $ql->find('.intro-content-block .intro-name')->text();
+        }
+
+        //$teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","lol");
         $t = explode("/",$arr['source_link']);
         $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         $arr['content']['aka'] = explode(",",$arr['content']['real_name']);
         $arr['content']['cn_name'] = $arr['content']['real_name'];
+        $arr['content']['nickname']=$arr['content']['nickname'] ?? $arr['content']['name'] ;
         //     '/^[\x7f-\xff]+$/' 全是中文
         $arr['content']['en_name'] = $arr['content']['en_name'];
         $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
+        if($data['player_name']==''){
+            $data['player_name']=trim($arr['content']['name']);
+        }
         return $data;
     }
     //王者荣耀
     public function cpSeoPlayer($url,$team_id)
     {
         //判断url是否有效
-        //$headers=get_headers($url,1);
-       /* if(!preg_match('/200/',$headers[0])){
+        $headers=get_headers($url,1);
+       if(!preg_match('/200/',$headers[0])){
             return  [];
-        }*/
+        }
         $baseInfo = [];
         $ql = QueryList::get($url);
         $logo = $ql->find('.commonDetail-intro .intro-left img')->attr('src');
         $logo='http://www.2cpseo.com' . $logo;
-
+        $name = $ql->find('.intro-content-block .intro-name')->text();
         $wraps = $ql->find('.commonDetail-intro .intro-content p')->texts()->all();
         $team_link= $ql->find('.intro-content p span a')->attr('href');
         if($team_id==-1){
@@ -136,6 +220,10 @@ class cpseo
         }
 
         $team_infos = $ql->find('.az-main-right .affiliation-team .content p')->texts()->all();
+        if (strpos($name, '（') !== false) {
+            $replace_str='（'.$team_name.'）';
+            $name = str_replace($replace_str, '', $name);
+        }
         $team_infos=$team_infos ?? [];
         $location=$team_cn_name=$team_en_name=$established_date='';
         if(count($team_infos)>0){
@@ -177,6 +265,7 @@ class cpseo
         $baseInfo = [
             'logo' =>$logo,
             'nickname' => $nickname ?? '',
+            'name' => $name ?? '',//名称
             'real_name' => $realname ?? '',
             'en_name'=>$en_name ?? '',
             'position' => $position ?? '',
