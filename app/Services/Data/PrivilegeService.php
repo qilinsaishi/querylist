@@ -1238,7 +1238,7 @@ class PrivilegeService
         if($data['tid']>0)
         {
             $intergrationService = (new IntergrationService());
-            $data = $intergrationService->getTeamInfo(0,$data["tid"],1)['data'];
+            $data = $intergrationService->getTeamInfo(0,$data["tid"],1,$params['reset']??0)['data'];
             $f = $this->getFunction(['totalPlayerList' => []]);
             if (isset($f['totalPlayerList']['class'])) {
                 $functionList["totalPlayerList"] = $f['totalPlayerList'];
@@ -1253,7 +1253,7 @@ class PrivilegeService
             {
                 if($pid>0)
                 {
-                    $playerInfo = $intergrationService->getPlayerInfo(0,$pid,1);
+                    $playerInfo = $intergrationService->getPlayerInfo(0,$pid,1,$params['reset']??0);
                     if(strlen($playerInfo['data']['logo'])>=10)
                     {
                         $data['playerList'][] = getFieldsFromArray($playerInfo['data']??[],"pid,player_name,logo,position");
@@ -1274,7 +1274,7 @@ class PrivilegeService
         {
             if($detailData['tid']>0)
             {
-                $data[$key] = getFieldsFromArray($intergrationService->getTeamInfo(0,$detailData["tid"],1)['data'],$params['fields']??"*");
+                $data[$key] = getFieldsFromArray($intergrationService->getTeamInfo(0,$detailData["tid"],1,$params['reset']??0)['data'],$params['fields']??"*");
             }
             else
             {
@@ -1290,7 +1290,7 @@ class PrivilegeService
         {
             if($detailData['pid']>0)
             {
-                $data[$key] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$detailData["pid"],1)['data'],$params['fields']??"*");
+                $data[$key] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$detailData["pid"],1,$params['reset']??0)['data'],$params['fields']??"*");
             }
             else
             {
@@ -1304,8 +1304,8 @@ class PrivilegeService
         if($data['pid']>0)
         {
             $intergrationService = (new IntergrationService());
-            $data = $intergrationService->getPlayerInfo(0,$data["pid"],1)['data'];
-            $ingergratedTeam = $intergrationService->getTeamInfo($data['team_id'],0,1)['data'];
+            $data = $intergrationService->getPlayerInfo(0,$data["pid"],1,$params['reset']??0)['data'];
+            $ingergratedTeam = $intergrationService->getTeamInfo($data['team_id'],0,1,$params['reset']??0)['data'];
             $f = $this->getFunction(['totalPlayerList' => []]);
             if (isset($f['totalPlayerList']['class'])) {
                 $functionList["totalPlayerList"] = $f['totalPlayerList'];
@@ -1321,7 +1321,7 @@ class PrivilegeService
             {
                 if($pid>0)
                 {
-                    $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1)['data']??[],"pid,player_name,logo,position");
+                    $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1,$params['reset']??0)['data']??[],"pid,player_name,logo,position");
                 }
             }
         }
