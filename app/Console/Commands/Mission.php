@@ -126,6 +126,7 @@ class Mission extends Command
                     {
                         $oKeyword->information($g);
                         $oKeyword->tfIdf($g);
+                        $oKeyword->rewrite($g);
                     }
                 }
                 break;
