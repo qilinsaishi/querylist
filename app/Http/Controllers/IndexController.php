@@ -6,6 +6,7 @@ use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\Admin\DefaultConfig;
+use App\Models\Team\TotalTeamModel;
 use App\Services\Data\DataService;
 use App\Services\Data\ExtraProcessService;
 use App\Services\Data\IntergrationService;
@@ -39,11 +40,11 @@ class IndexController extends Controller
             case "team":
                 if(isset($data['team_id']))
                 {
-                    $return = (new IntergrationService())->getTeamInfo($data['team_id'],0,1);
+                    $return = (new IntergrationService())->getTeamInfo($data['team_id'],0,1,1);
                 }
                 elseif(isset($data['tid']))
                 {
-                    $return = (new IntergrationService())->getTeamInfo(0,$data['tid'],0,1);
+                    $return = (new IntergrationService())->getTeamInfo(0,$data['tid'],1,1);
                 }
                 else
                 {
@@ -53,15 +54,26 @@ class IndexController extends Controller
             case "player":
                 if(isset($data['player_id']))
                 {
-                    $return = (new IntergrationService())->getPlayerInfo($data['player_id'],0,1);
+                    $return = (new IntergrationService())->getPlayerInfo($data['player_id'],0,1,1);
                 }
                 elseif(isset($data['pid']))
                 {
-                    $return = (new IntergrationService())->getPlayerInfo(0,$data['pid'],0,1);
+                    $return = (new IntergrationService())->getPlayerInfo(0,$data['pid'],1,1);
                 }
                 else
                 {
                     $return = [];
+                }
+                break;
+            case "teamList":
+                $intergrationService = new IntergrationService();
+                $data["game"] = $data["game"]??"lol";
+                $teamList = (new TotalTeamModel())->getTeamList(["game"=>$data["game"],"page"=>$data["page"]??1,"page_size"=>$data['pageSize']??100]);
+                $data["fields"] = $data["fields"]??"tid,team_name,en_name,cn_name,team_full_name";
+                $return = [];
+                foreach($teamList as $team)
+                {
+                    $return[] = getFieldsFromArray($intergrationService->getTeamInfo(0, $team['tid'], 1)['data'], $data["fields"]);
                 }
                 break;
         }
