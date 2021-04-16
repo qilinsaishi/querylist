@@ -132,8 +132,10 @@ class cpseo
 
                     return false;
                 }
+            }else{
+                echo "无战队信息"."\n";
+                return false;
             }
-            return false;
 
         }
         if(!isset($arr['content']['name'])){

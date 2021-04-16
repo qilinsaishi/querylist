@@ -69,7 +69,7 @@ class cpseo
          * "intro":"2020-11-17，由韩国明星金希澈投资的LCK联赛战队hyFresh Blade今日官宣两名选手加入。" //简介
          * }
          */
-        if($arr['content']['team_id']==-1 || $arr['content']['team_id']=='' ){
+        if($arr['content']['team_id']==-1){
             $ql = QueryList::get($arr['source_link']);
             $team_link= $ql->find('.intro-content p span a')->attr('href');
             $team_link=$team_link ?? '';
@@ -134,11 +134,10 @@ class cpseo
 
                     return false;
                 }
-            }else{//不存在战队信息
-
-                return  false;
+            }else{
+                echo "无战队信息"."\n";
+                return false;
             }
-
 
         }
         if(!isset($arr['content']['name'])){

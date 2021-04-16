@@ -145,7 +145,9 @@ class scoregg
             }else{
                 $arr['content']['en_name'] = !preg_match($patten, $arr['content']['player_name']) ? $arr['content']['player_name']:'';
             }
-
+            if(isset($arr['content']['player_chinese_name']) && $arr['content']['player_chinese_name'] !=''){
+                $arr['content']['cn_name']=$arr['content']['player_chinese_name'];
+            }
             $arr['content']['position'] = is_array($arr['content']['position'])?$arr['content']['position']['0']??"":$arr['content']['position'];
             $data = getDataFromMapping($this->data_map,$arr['content']);
             return $data;
