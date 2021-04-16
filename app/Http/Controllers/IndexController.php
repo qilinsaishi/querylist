@@ -11,6 +11,7 @@ use App\Services\Data\DataService;
 use App\Services\Data\ExtraProcessService;
 use App\Services\Data\IntergrationService;
 use App\Services\Data\RedisService;
+use App\Services\TeamResultService;
 use Illuminate\Http\Request;
 
 
@@ -75,6 +76,17 @@ class IndexController extends Controller
                 {
                     $return[] = getFieldsFromArray($intergrationService->getTeamInfo(0, $team['tid'], 1)['data'], $data["fields"]);
                 }
+                break;
+        }
+        return $return;
+    }
+    public function intergration()
+    {
+        $data=$this->payload;
+        switch($data['type'])
+        {
+            case "mergeTeam2mergedTeam":
+                $return = (new TeamResultService())->mergeTeam2mergedTeam($data['team_id'],$data['team_id']);
                 break;
         }
         return $return;

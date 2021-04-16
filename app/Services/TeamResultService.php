@@ -751,10 +751,13 @@ class TeamResultService
     //把未整合的队伍合并到已经整合过的队伍中
     public function mergeTeam2mergedTeam($tid,$teamId2Merge=0)
     {
+        $return = ["result"=>false,"log"=>[]];
         //如果双方ID有问题
         if($tid<=0 || $teamId2Merge<=0)
         {
-            return false;
+            $return["result"] = false;
+            $return["log"][] = "ID有误";
+            return $return;
         }
         else
         {
@@ -764,20 +767,23 @@ class TeamResultService
             //没找到
             if(!isset($teamInfo['team_id']))
             {
-                echo "转入队伍不存在了\n";
-                return false;
+                $return["result"] = false;
+                $return["log"][] = "转入队伍不存在了";
+                return $return;
             }
             //同一个队伍
             elseif($teamInfo['tid'] == $tid)
             {
-                echo "同一个队伍，无需再次合并\n";
-                return true;
+                $return["result"] = false;
+                $return["log"][] = "同一个队伍，无需再次合并";
+                return $return;
             }
             //不是同一个且已经整合过
             elseif($teamInfo['tid'] > 0)
             {
-                echo "转入队伍已经被其他队伍整合了\n";
-                return false;
+                $return["result"] = false;
+                $return["log"][] = "转入队伍已经被其他队伍整合了";
+                return $return;
             }
             else
             {
@@ -787,15 +793,17 @@ class TeamResultService
                 $merge = $this->mergeToTeamMap($teamInfo,$tid,$teamModel,$teamNameMapModel);
                 if($merge)
                 {
-                    echo "合并成功\n";
                     DB::commit();
-                    return true;
+                    $return["result"] = true;
+                    $return["log"][] = "合并成功";
+                    return $return;
                 }
                 else
                 {
-                    echo "合并失败\n";
                     DB::rollBack();
-                    return false;
+                    $return["result"] = false;
+                    $return["log"][] = "合并失败";
+                    return $return;
                 }
             }
         }
