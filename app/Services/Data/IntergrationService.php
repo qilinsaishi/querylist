@@ -4,7 +4,6 @@ namespace App\Services\Data;
 use App\Services\Data\RedisService;
 use App\Models\TeamModel;
 use App\Models\Team\TotalTeamModel as TotalTeamModel;
-use App\Models\Team\TeamMapModel as TeamMapModel;
 use App\Models\Team\TeamNameMapModel as TeamNameMapModel;
 
 use App\Models\PlayerModel;
@@ -443,4 +442,5 @@ class IntergrationService
         }
         return $return;
     }
+
 }
