@@ -677,13 +677,13 @@ class TeamResultService
             $totalTeamModel = new totalTeamModel();
             $teamModel = new TeamModel();
             $teamNameMapModel = new TeamNameMapModel();
-
             $totalTeam1 = $totalTeamModel->getTeamById($tid,"tid,redirect");
             if(isset($totalTeam1['tid']))
             {
                 $totalTeam1['redirect'] = json_decode($totalTeam1['redirect'],true);
                 if(isset($totalTeam1['redirect']['team_id']) || isset($totalTeam1['redirect']['tid']) )
                 {
+                    echo "主队伍已经重定向了\n";
                     //主队伍已经重定向
                     return false;
                 }
@@ -691,6 +691,7 @@ class TeamResultService
                 //没有队伍
                 if(count($teamList2Merge)==0)
                 {
+                    echo "转入队伍找不到了\n";
                     return false;
                 }
                 elseif(count($teamList2Merge)==1)
@@ -742,6 +743,7 @@ class TeamResultService
             }
             else
             {
+                echo "主队伍不存在\n";
                 //需要合并的主队伍不存在
                 return false;
             }
@@ -750,7 +752,54 @@ class TeamResultService
     //把未整合的队伍合并到已经整合过的队伍中
     public function mergeTeam2mergedTeam($tid,$teamId2Merge=0)
     {
-
+        //如果双方ID有问题
+        if($tid<=0 || $teamId2Merge<=0)
+        {
+            return false;
+        }
+        else
+        {
+            $teamModel = new TeamModel();
+            $teamNameMapModel = new TeamNameMapModel();
+            $teamInfo = $teamModel->getTeamById($teamId2Merge);
+            //没找到
+            if(!isset($teamInfo['team_id']))
+            {
+                echo "转入队伍不存在了\n";
+                return false;
+            }
+            //同一个队伍
+            elseif($teamInfo['tid'] == $tid)
+            {
+                echo "同一个队伍，无需再次合并\n";
+                return true;
+            }
+            //不是同一个且已经整合过
+            elseif($teamInfo['tid'] > 0)
+            {
+                echo "转入队伍已经被其他队伍整合了\n";
+                return false;
+            }
+            else
+            {
+                //开启事务
+                DB::beginTransaction();
+                //合并
+                $merge = $this->mergeToTeamMap($teamInfo,$tid,$teamModel,$teamNameMapModel);
+                if($merge)
+                {
+                    echo "合并成功\n";
+                    DB::commit();
+                    return true;
+                }
+                else
+                {
+                    echo "合并失败\n";
+                    DB::rollBack();
+                    return false;
+                }
+            }
+        }
     }
     //合并2个未整合过的队伍
     public function merge2unmergedTeam($teamid=0,$teamId2Merge=0)

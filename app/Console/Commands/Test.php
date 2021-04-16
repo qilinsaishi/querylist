@@ -52,7 +52,10 @@ class Test extends Command
             case "team_disintergration":
             {
                 $team_ids = explode(",",$id);
-                $teamInfo = (new TeamResultService())->merge2mergedTeam($team_ids['0'],$team_ids['1']??0);
+                //整合两个已经整合的队伍
+                //$teamInfo = (new TeamResultService())->merge2mergedTeam($team_ids['0'],$team_ids['1']??0);
+                //整一个一个未整合的队伍到已经整合队伍中
+                $teamInfo = (new TeamResultService())->mergeTeam2mergedTeam($team_ids['0'],$team_ids['1']??0);
 
                 //$teamInfo = (new TeamResultService())->disintegration($id);
                 break;
