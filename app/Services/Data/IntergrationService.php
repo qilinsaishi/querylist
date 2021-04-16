@@ -91,6 +91,7 @@ class IntergrationService
             //获取集合数据
             $totalTeam = $oTotalTeam->getTeamById($tid);
             //----------检查是否需要跳转
+            /*
             $totalTeam['redirect'] = json_decode($totalTeam['redirect'],true);
             if(isset($totalTeam['redirect']['tid']) && $totalTeam['redirect']['tid']>0)
             {
@@ -100,6 +101,7 @@ class IntergrationService
             {
                 return $this->getTeamInfo($totalTeam['redirect']['team_id'],0,$get_data,$force);
             }
+            */
             //----------检查是否需要跳转
             $teamIdList = array_column($teamList,"team_id");
             //复制映射结构
