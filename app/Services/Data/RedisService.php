@@ -44,9 +44,14 @@ class RedisService
                 'expire' => 60,
             ],
 
+            "totalTeamInfo" => [//战队总表
+                'prefix' => "totalTeamInfo",
+                'expire' => 3600,
+            ],
+
             "totalTeamList" => [//战队总表
                 'prefix' => "totalTeamList",
-                'expire' => 60,
+                'expire' => 3600,
             ],
 
             "tournamentList" => [//赛事总表
