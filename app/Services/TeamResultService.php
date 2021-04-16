@@ -705,9 +705,21 @@ class TeamResultService
                         $merge = $this->mergeToTeamMap($team2Merge,$tid,$teamModel,$teamNameMapModel);
                         if($merge)
                         {
-                            echo "合并成功\n";
-                            DB::commit();
-                            return true;
+                            //更新映射
+                            $addRedict = $this->addRidirect($totalTeamModel,$tid2Merge,$team2Merge['team_id'],$tid);
+                            if(!$addRedict)
+                            {
+                                echo "映射更新失败\n";
+                                DB::rollBack();
+                                return false;
+                            }
+                            else
+                            {
+                                echo "映射更新成功\n";
+                                echo "合并成功\n";
+                                DB::commit();
+                                return true;
+                            }
                         }
                         else
                         {
@@ -744,5 +756,35 @@ class TeamResultService
     public function merge2unmergedTeam($teamid=0,$teamId2Merge=0)
     {
 
+    }
+    //在总表中更新到新数据的映射
+    public function addRidirect($totalTeamModel,$tid,$new_team_id=0,$new_tid=0)
+    {
+        $totalTeam = $totalTeamModel->getTeamById($tid,"tid,redirect");
+        if(isset($totalTeam['tid']))
+        {
+            $totalTeam['redirect'] = json_decode($totalTeam['redirect'],true)??[];
+            if($new_team_id>0)
+            {
+                $totalTeam['redirect']['team_id'] = $new_team_id;
+            }
+            else
+            {
+                unset($totalTeam['redirect']['team_id']);
+            }
+            if($new_tid>0)
+            {
+                $totalTeam['redirect']['tid'] = $new_tid;
+            }
+            else
+            {
+                unset($totalTeam['redirect']['tid']);
+            }
+            return $totalTeamModel->updateTeam($tid,$totalTeam);
+        }
+        else
+        {
+            return false;
+        }
     }
 }
