@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 
+use App\Services\TeamResultService;
 use Illuminate\Console\Command;
 use App\Services\Data\IntergrationService;
 class Test extends Command
@@ -46,6 +47,14 @@ class Test extends Command
             {
                 $teamInfo = (new IntergrationService())->getTeamInfo($id);
                 print_R($teamInfo);
+                break;
+            }
+            case "team_disintergration":
+            {
+                $team_ids = explode(",",$id);
+                $teamInfo = (new TeamResultService())->merge2mergedTeam($team_ids['0'],$team_ids['1']??0);
+
+                //$teamInfo = (new TeamResultService())->disintegration($id);
                 break;
             }
         }

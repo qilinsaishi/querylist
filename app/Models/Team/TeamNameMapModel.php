@@ -43,7 +43,13 @@ class TeamNameMapModel extends Model
     ];
     protected $keep = [
     ];
-
+    public function getHashByTid($tid = 0)
+    {
+        $team_list =$this->select("*")
+            ->where("tid",$tid)
+            ->get()->toArray();
+        return $team_list;
+    }
     public function getTeamByNameHash($name_hash,$game,$fields = "*")
     {
         $team_list =$this->select(explode(",",$fields))
@@ -79,6 +85,11 @@ class TeamNameMapModel extends Model
             $data['update_time'] = $currentTime;
         }
         return $this->insertGetId($data);
+    }
+    //删除单条映射
+    public function deleteMap($id)
+    {
+        return $this->where('id',$id)->delete();
     }
     public function saveMap($data)
     {

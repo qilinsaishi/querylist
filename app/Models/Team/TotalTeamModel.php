@@ -39,7 +39,7 @@ class TotalTeamModel extends Model
         "aka"=>[]
     ];
     protected $toJson = [
-        "aka"
+        "aka","redirect"
     ];
     protected $toAppend = [
     ];
@@ -146,6 +146,16 @@ class TotalTeamModel extends Model
         if(!isset($data['update_time']))
         {
             $data['update_time'] = $currentTime;
+        }
+        foreach($this->toJson as $key)
+        {
+            if(isset($data[$key]))
+            {
+                if(is_array($data[$key]))
+                {
+                    $data[$key] = json_encode($data[$key]);
+                }
+            }
         }
         foreach($this->keep as $key)
         {
