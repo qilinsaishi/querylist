@@ -24,6 +24,7 @@ class  PlayerService
         $this->getPlayerListByCollectResult($game, $mission_type);
         $this->getScoreggPlayerDetail($game, $mission_type);
         $this->insertCpseoPlayer($game, $mission_type);
+        //$this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
         return 'finish';
     }
 
@@ -517,4 +518,80 @@ class  PlayerService
         }
         return array_unique($playerData);
     }
+    //修复数据
+    public function repairPlayerData(){
+        $playerModel=new PlayerModel();
+        $params=[
+            'source'=>'scoregg','page_size'=>1000,'page'=>3,'fields'=>"team_id,player_id,site_id,game"];
+        $playerInfo=$playerModel->getPlayerList($params);
+        $playerInfo=$playerInfo ?? [];
+        if(count($playerInfo)>0) {
+            foreach($playerInfo as $val){
+                $score_url='https://www.scoregg.com/big-data/player/'.$val['site_id'].'?type=baike';
+                $qt = QueryList::get($score_url);
+                $team_url=$qt->find('.page-big-data-player-baike .left-content .game-history .hero-info .info-item a')->attr('href');
+                if($team_url){
+
+                    $site_id=intval(str_replace('/big-data/team/','',$team_url));
+                    $teamInfo = (new TeamModel())->getTeamBySiteId($site_id,"scoregg",$val['game']);
+
+                    if(isset($teamInfo['team_id'])){
+                        if($val['team_id']!=$teamInfo['team_id']){
+                            $data['team_id']=$teamInfo['team_id'];
+                            (new PlayerModel())->updatePlayer($val['player_id'],$data);
+                            continue;
+                        }
+
+                    }else{
+
+                        if($site_id >0){
+                            $team_name=$qt->find('.page-big-data-player-baike .left-content .game-history .hero-info .info-item a ')->text();
+                            $team_image=$qt->find('.page-big-data-player-baike .left-content .game-history .hero-info .info-item a img')->attr('src');
+                            $detail=[
+                                'team_id'=>$site_id,
+                                'team_url'=>'https://www.scoregg.com'.$team_url,
+                                'team_name'=>$team_name,
+                                'team_image'=>$team_image,
+                                'source'=>'scoregg',
+                                'game'=>$val['game'],
+                                'cn_name'=>'',
+                                'en_name'=>$team_name
+                            ];
+                            $params = [
+                                'game' =>$val['game'],
+                                'mission_type' => 'team',
+                                'source_link' => $detail['team_url'],
+                            ];
+                            $missionModel = new MissionModel();
+                            $missionCount = $missionModel->getMissionCount($params);
+                            $missionCount = $missionCount ?? 0;
+                            if ($missionCount <= 0) {
+                                $adata = [
+                                    "asign_to" => 1,
+                                    "mission_type" => 'team',
+                                    "mission_status" => 1,
+                                    "game" =>$val['game'],
+                                    "source" => 'scoregg',
+                                    "title" => $arr['content']['team_name'] ?? '',
+                                    'source_link' => $detail['team_url'],
+                                    "detail" => json_encode($detail),
+                                ];
+                                $insert = (new oMission())->insertMission($adata);
+                                echo $val['game']."player-scoregg-insert-team:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
+                                continue;
+                            }
+                        }
+
+
+                    }
+
+                }
+
+            }
+        }
+        return true;
+
+    }
+
+
 }
