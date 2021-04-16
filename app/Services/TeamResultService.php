@@ -774,7 +774,7 @@ class TeamResultService
             //同一个队伍
             elseif($teamInfo['tid'] == $tid)
             {
-                $return["result"] = false;
+                $return["result"] = true;
                 $return["log"][] = "同一个队伍，无需再次合并";
                 return $return;
             }
