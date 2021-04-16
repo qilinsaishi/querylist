@@ -1247,19 +1247,27 @@ class PrivilegeService
             $modelClass = $functionList["totalPlayerList"]["class"];
             $function = $functionList["totalPlayerList"]['function'];
             $sourceList = config('app.intergration.player');
-            $pidList = $modelClass->$function(['team_id'=>$data['intergrated_id_list'],"sources"=>array_column($sourceList,"source"),"fields"=>"player_id,pid","page_size"=>100]);
-            $pidList = array_unique(array_column($pidList,"pid"));
-            foreach($pidList as $pid)
+            if(count($data['intergrated_id_list']))
             {
-                if($pid>0)
+                $pidList = $modelClass->$function(['team_ids'=>$data['intergrated_id_list'],"sources"=>array_column($sourceList,"source"),"fields"=>"player_id,pid","page_size"=>100]);
+                $pidList = array_unique(array_column($pidList,"pid"));
+                foreach($pidList as $pid)
                 {
-                    $playerInfo = $intergrationService->getPlayerInfo(0,$pid,1,$params['reset']??0);
-                    if(strlen($playerInfo['data']['logo'])>=10)
+                    if($pid>0)
                     {
-                        $data['playerList'][] = getFieldsFromArray($playerInfo['data']??[],"pid,player_name,logo,position");
+                        $playerInfo = $intergrationService->getPlayerInfo(0,$pid,1,$params['reset']??0);
+                        if(strlen($playerInfo['data']['logo'])>=10)
+                        {
+                            $data['playerList'][] = getFieldsFromArray($playerInfo['data']??[],"pid,player_name,logo,position");
+                        }
                     }
                 }
             }
+            else
+            {
+                $data['playerList'] = [];
+            }
+
         }
         else
         {
@@ -1315,7 +1323,7 @@ class PrivilegeService
             $data['teamInfo'] = $ingergratedTeam;
             $modelClass = $functionList["totalPlayerList"]["class"];
             $function = $functionList["totalPlayerList"]['function'];
-            $pidList = $modelClass->$function(["sources"=>array_column($sourceList,"source"),'except_pid'=>$data["pid"],'team_id'=>$ingergratedTeam['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>100]);
+            $pidList = $modelClass->$function(["sources"=>array_column($sourceList,"source"),'except_pid'=>$data["pid"],'team_ids'=>$ingergratedTeam['intergrated_id_list'],"fields"=>"player_id,pid","page_size"=>100]);
             $pidList = array_unique(array_column($pidList,"pid"));
             foreach($pidList as $pid)
             {

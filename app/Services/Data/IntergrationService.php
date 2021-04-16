@@ -4,7 +4,6 @@ namespace App\Services\Data;
 use App\Services\Data\RedisService;
 use App\Models\TeamModel;
 use App\Models\Team\TotalTeamModel as TotalTeamModel;
-use App\Models\Team\TeamMapModel as TeamMapModel;
 use App\Models\Team\TeamNameMapModel as TeamNameMapModel;
 
 use App\Models\PlayerModel;
@@ -91,6 +90,19 @@ class IntergrationService
             $teamList = $oTeam->getTeamList(['tid'=>$tid,"fields"=>"*","sources"=>array_column($sourceList,"source")]);
             //获取集合数据
             $totalTeam = $oTotalTeam->getTeamById($tid);
+            //----------检查是否需要跳转
+            /*
+            $totalTeam['redirect'] = json_decode($totalTeam['redirect'],true);
+            if(isset($totalTeam['redirect']['tid']) && $totalTeam['redirect']['tid']>0)
+            {
+                return $this->getTeamInfo(0,$totalTeam['redirect']['tid'],$get_data,$force);
+            }
+            elseif(isset($totalTeam['redirect']['team_id']) && $totalTeam['redirect']['team_id']>0)
+            {
+                return $this->getTeamInfo($totalTeam['redirect']['team_id'],0,$get_data,$force);
+            }
+            */
+            //----------检查是否需要跳转
             $teamIdList = array_column($teamList,"team_id");
             //复制映射结构
             $totalTeamStructure = $totalTeam;
@@ -443,4 +455,5 @@ class IntergrationService
         }
         return $return;
     }
+
 }
