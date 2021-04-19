@@ -91,6 +91,9 @@ class IndexController extends Controller
             case "merge2mergedTeam":
                 $return = (new TeamResultService())->merge2mergedTeam($data['tid_1'],$data['tid_2']);
                 break;
+            case "merge2unmergedTeam":
+                $return = (new TeamResultService())->merge2unmergedTeam($data['team_id_1'],$data['team_id_2']);
+                break;
         }
         return $return;
     }
