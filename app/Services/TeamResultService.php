@@ -905,8 +905,16 @@ class TeamResultService
         if($insertTeam)
         {
             $return["log"][] = "创建整合队伍成功";
+            $updateTeam = $teamModel->updateTeam($teamid,['tid'=>$insertTeam]);
+            if(!$updateTeam)
+            {
+                DB::rollBack();
+                $return["result"] = false;
+                $return["log"][] = "更新原队伍映射失败";
+                return $return;
+            }
             //合并入查到的映射里面
-            $mergeToMap = $this->mergeToTeamMap($teamInfo, $insertTeam, $teamModel, $teamNameMapModel);
+            $mergeToMap = $this->mergeToTeamMap($team2MergeInfo, $insertTeam, $teamModel, $teamNameMapModel);
             if (!$mergeToMap)
             {
                 DB::rollBack();
