@@ -70,7 +70,7 @@ class IndexController extends Controller
                 $intergrationService = new IntergrationService();
                 $data["game"] = $data["game"]??"lol";
                 $teamList = (new TotalTeamModel())->getTeamList(["game"=>$data["game"],"page"=>$data["page"]??1,"page_size"=>$data['pageSize']??100]);
-                $data["fields"] = $data["fields"]??"tid,team_name,en_name,cn_name,team_full_name";
+                $data["fields"] = $data["fields"]??"tid,team_name,en_name,cn_name,team_full_name,intergrated_id_list";
                 $return = [];
                 foreach($teamList as $team)
                 {
