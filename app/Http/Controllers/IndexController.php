@@ -11,6 +11,7 @@ use App\Services\Data\DataService;
 use App\Services\Data\ExtraProcessService;
 use App\Services\Data\IntergrationService;
 use App\Services\Data\RedisService;
+use App\Services\TeamResultService;
 use Illuminate\Http\Request;
 
 
@@ -69,12 +70,29 @@ class IndexController extends Controller
                 $intergrationService = new IntergrationService();
                 $data["game"] = $data["game"]??"lol";
                 $teamList = (new TotalTeamModel())->getTeamList(["game"=>$data["game"],"page"=>$data["page"]??1,"page_size"=>$data['pageSize']??100]);
-                $data["fields"] = $data["fields"]??"tid,team_name,en_name,cn_name,team_full_name";
+                $data["fields"] = $data["fields"]??"tid,team_name,en_name,cn_name,team_full_name,intergrated_id_list";
                 $return = [];
                 foreach($teamList as $team)
                 {
                     $return[] = getFieldsFromArray($intergrationService->getTeamInfo(0, $team['tid'], 1)['data'], $data["fields"]);
                 }
+                break;
+        }
+        return $return;
+    }
+    public function intergration()
+    {
+        $data=$this->payload;
+        switch($data['type'])
+        {
+            case "mergeTeam2mergedTeam":
+                $return = (new TeamResultService())->mergeTeam2mergedTeam($data['tid'],$data['team_id']);
+                break;
+            case "merge2mergedTeam":
+                $return = (new TeamResultService())->merge2mergedTeam($data['tid_1'],$data['tid_2']);
+                break;
+            case "merge2unmergedTeam":
+                $return = (new TeamResultService())->merge2unmergedTeam($data['team_id_1'],$data['team_id_2']);
                 break;
         }
         return $return;

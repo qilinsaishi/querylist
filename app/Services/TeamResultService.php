@@ -16,7 +16,6 @@ use App\Models\Player\PlayerNameMapModel as PlayerNameMapModel;
 
 use App\Models\Team\TotalTeamModel as TotalTeamModel;
 use App\Models\Team\TeamNameMapModel as TeamNameMapModel;
-
 use App\Services\PlayerService;
 use Illuminate\Support\Facades\DB;
 use QL\QueryList;
@@ -317,7 +316,6 @@ class TeamResultService
             $currentExistedPlayer = [];
             //尝试获取总表到映射表的对应关系
             $currentMap = $teamInfo;
-            //$currentMap = $teamModel->getTeamById($teamInfo['team_id'],"team_id,tid");
             //如果没取到
             if($currentMap['tid']==0)
             {
@@ -550,18 +548,18 @@ class TeamResultService
     //解绑某个队伍
     function disintegration($team_id,$teamModel,$totalTeamModel,$teamNameMapModel,$transaction = 1)
     {
+        $return = ["result"=>false,"log"=>[]];
         //获取队伍信息
         $teamInfo = $teamModel->getTeamById($team_id,"team_id,tid,team_full_name,team_name,cn_name,en_name,aka");
         //找到队伍
         if(isset($teamInfo['team_id']))
         {
-
             if($teamInfo['tid']>0)
             {
                 if($transaction)
                 {
                     //自动打开事务
-                    echo "事务开启\n";
+                    $return["log"][] = "事务开启";
                     DB::beginTransaction();
                 }
                 //-----------------------------------删除名称映射
@@ -585,16 +583,17 @@ class TeamResultService
                         $deleteHash = $teamNameMapModel->deleteMap($hash['id']);
                         if(!$deleteHash)
                         {
-                            echo "映射:".$hash['id']."删除失败\n";
+                            $return["log"][] = "映射:".$hash['id']."删除失败";
                             if($transaction)
                             {
                                 DB::rollBack();
                             }
-                            return false;
+                            $return['result'] = false;
+                            return $return;
                         }
                         else
                         {
-                            echo "映射:".$hash['id']."删除成功\n";
+                            $return["log"][] = "映射:".$hash['id']."删除成功";
                         }
                     }
                 }
@@ -603,27 +602,29 @@ class TeamResultService
                 $updateTeam = $teamModel->updateTeam($teamInfo['team_id'],["tid"=>0]);
                 if(!$updateTeam)
                 {
-                    echo "队伍表：".$teamInfo['team_id']."改写失败\n";
+                    $return["log"][] = "队伍表：".$teamInfo['team_id']."改写失败";
                     if($transaction)
                     {
                         DB::rollBack();
                     }
-                    return false;
+                    $return['result'] = false;
+                    return $return;
                 }
                 else
                 {
-                    echo "队伍表：".$teamInfo['team_id']."改写成功\n";
+                    $return["log"][] = "队伍表：".$teamInfo['team_id']."改写成功";
                 }
                 //如果还有其他队伍
                 if(count($otherTeamList))
                 {
                     //总表记录不做修改
-                    echo "无需修改总表\n";
+                    $return["log"][] = "无需修改总表";
                     if($transaction)
                     {
-                        //DB::commit();
+                        DB::commit();
                     }
-                    return true;
+                    $return['result'] = true;
+                    return $return;
                 }
                 else
                 {
@@ -631,46 +632,57 @@ class TeamResultService
                     $updateTotalTeam = $totalTeamModel->updateTeam($teamInfo['tid'],["redirect"=>['team_id'=>$teamInfo['team_id']]]);
                     if($updateTotalTeam)
                     {
-                        echo "改写总表映射成功\n";
+                        $return["log"][] = "改写总表映射成功";
                         if($transaction)
                         {
-                            //DB::commit();
+                            DB::commit();
                         }
-                        return true;
+                        $return['result'] = true;
+                        return $return;
                     }
                     else
                     {
-                        echo "改写总表映射失败\n";
+                        $return["log"][] = "改写总表映射失败";
                         if($transaction)
                         {
                             DB::rollBack();
                         }
-                        return false;
+                        $return['result'] = false;
+                        return $return;
                     }
                 }
             }
             else//未整合 返回成功
             {
-                return true;
+                $return["log"][] = "队伍未进行整合，跳过";
+                $return['result'] = true;
+                return $return;
             }
         }
         else
         {
-            return false;
+            $return["log"][] = "队伍不存在";
+            $return['result'] = false;
+            return $return;
         }
     }
     //合并2个整合过的队伍
     public function merge2mergedTeam($tid=0,$tid2Merge=0)
     {
+        $return = ["result"=>false,"log"=>[]];
         //如果双方ID有问题
         if($tid<=0 || $tid2Merge<=0)
         {
-            return false;
+            $return["result"] = false;
+            $return["log"][] = "ID有误";
+            return $return;
         }
         //如果是同一个
         elseif($tid == $tid2Merge)
         {
-            return true;
+            $return["result"] = true;
+            $return["log"][] = "同一个队伍，无需再次合并";
+            return $return;
         }
         else
         {
@@ -683,16 +695,19 @@ class TeamResultService
                 $totalTeam1['redirect'] = json_decode($totalTeam1['redirect'],true);
                 if(isset($totalTeam1['redirect']['team_id']) || isset($totalTeam1['redirect']['tid']) )
                 {
-                    echo "主队伍已经重定向了\n";
                     //主队伍已经重定向
-                    return false;
+                    $return["result"] = false;
+                    $return["log"][] = "主队伍已经重定向了";
+                    return $return;
                 }
                 $teamList2Merge = $teamModel->getTeamList(["tid"=>$tid2Merge,"fields"=>"team_id,tid,game,team_name,en_name,cn_name,aka,team_full_name"]);
                 //没有队伍
                 if(count($teamList2Merge)==0)
                 {
-                    echo "转入队伍找不到了\n";
-                    return false;
+                    //主队伍已经重定向
+                    $return["result"] = false;
+                    $return["log"][] = "转入队伍找不到了";
+                    return $return;
                 }
                 elseif(count($teamList2Merge)==1)
                 {
@@ -701,8 +716,11 @@ class TeamResultService
                     $team2Merge = $teamList2Merge['0'];
                     //解绑队伍
                     $disintergration = $this->disintegration($team2Merge['team_id'],$teamModel,$totalTeamModel,$teamNameMapModel,0);
+                    $return['log'] = array_merge($return['log'],$disintergration['log']);
                     if($disintergration)
                     {
+                        $return["log"][] = "解绑成功";
+                        //合并
                         $merge = $this->mergeToTeamMap($team2Merge,$tid,$teamModel,$teamNameMapModel);
                         if($merge)
                         {
@@ -710,52 +728,63 @@ class TeamResultService
                             $addRedict = $this->addRidirect($totalTeamModel,$tid2Merge,$team2Merge['team_id'],$tid);
                             if(!$addRedict)
                             {
-                                echo "映射更新失败\n";
                                 DB::rollBack();
-                                return false;
+                                $return["result"] = false;
+                                $return["log"][] = "映射更新失败";
+                                return $return;
                             }
                             else
                             {
-                                echo "映射更新成功\n";
-                                echo "合并成功\n";
                                 DB::commit();
-                                return true;
+                                $return["result"] = true;
+                                $return["log"][] = "映射更新成功";
+                                $return["log"][] = "合并成功";
+                                return $return;
                             }
                         }
                         else
                         {
-                            echo "合并失败\n";
                             DB::rollBack();
-                            return false;
+                            $return["result"] = false;
+                            $return["log"][] = "合并失败";
+                            return $return;
                         }
                     }
                     else
                     {
-                        echo "解绑失败\n";
                         DB::rollBack();
-                        return false;
+                        $return["result"] = false;
+                        $return["log"][] = "解绑失败";
+                        return $return;
+
                     }
                 }
                 else
                 {
-
+                    $return["result"] = false;
+                    $return["log"][] = "暂不执行";
+                    return $return;
                 }
             }
             else
             {
-                echo "主队伍不存在\n";
                 //需要合并的主队伍不存在
-                return false;
+                $return["result"] = false;
+                $return["log"][] = "主队伍不存在";
+                return $return;
             }
         }
     }
     //把未整合的队伍合并到已经整合过的队伍中
     public function mergeTeam2mergedTeam($tid,$teamId2Merge=0)
     {
+        $return = ["result"=>false,"log"=>[]];
         //如果双方ID有问题
         if($tid<=0 || $teamId2Merge<=0)
         {
-            return false;
+            $return["result"] = false;
+            $return["log"][] = "ID有误";
+            return $return;
         }
         else
         {
@@ -765,20 +794,23 @@ class TeamResultService
             //没找到
             if(!isset($teamInfo['team_id']))
             {
-                echo "转入队伍不存在了\n";
-                return false;
+                $return["result"] = false;
+                $return["log"][] = "转入队伍不存在了";
+                return $return;
             }
             //同一个队伍
             elseif($teamInfo['tid'] == $tid)
             {
-                echo "同一个队伍，无需再次合并\n";
-                return true;
+                $return["result"] = true;
+                $return["log"][] = "同一个队伍，无需再次合并";
+                return $return;
             }
             //不是同一个且已经整合过
             elseif($teamInfo['tid'] > 0)
             {
-                echo "转入队伍已经被其他队伍整合了\n";
-                return false;
+                $return["result"] = false;
+                $return["log"][] = "转入队伍已经被其他队伍整合了";
+                return $return;
             }
             else
             {
@@ -788,15 +820,17 @@ class TeamResultService
                 $merge = $this->mergeToTeamMap($teamInfo,$tid,$teamModel,$teamNameMapModel);
                 if($merge)
                 {
-                    echo "合并成功\n";
                     DB::commit();
-                    return true;
+                    $return["result"] = true;
+                    $return["log"][] = "合并成功";
+                    return $return;
                 }
                 else
                 {
-                    echo "合并失败\n";
                     DB::rollBack();
-                    return false;
+                    $return["result"] = false;
+                    $return["log"][] = "合并失败";
+                    return $return;
                 }
             }
         }
@@ -804,7 +838,105 @@ class TeamResultService
     //合并2个未整合过的队伍
     public function merge2unmergedTeam($teamid=0,$teamId2Merge=0)
     {
-
+        $return = ["result"=>false,"log"=>[]];
+        $teamModel = new TeamModel();
+        $teamNameMapModel = new TeamNameMapModel();
+        $totalTeamModel = new TotalTeamModel();
+        if($teamid<=0 || $teamId2Merge<=0)
+        {
+            $return["result"] = false;
+            $return["log"][] = "ID有误";
+            return $return;
+        }
+        elseif($teamid == $teamId2Merge)
+        {
+            $return["result"] = false;
+            $return["log"][] = "同一个队伍不需要合并";
+            return $return;
+        }
+        else
+        {
+            $teamInfo = $teamModel->getTeamById($teamid);
+            $team2MergeInfo = $teamModel->getTeamById($teamId2Merge);
+            if(!$teamInfo['team_id'])
+            {
+                $return["result"] = false;
+                $return["log"][] = "转入队伍不存在";
+                return $return;
+            }
+            else
+            {
+                if($teamInfo['tid']>0)
+                {
+                    if($team2MergeInfo['tid']==$teamInfo['tid'])
+                    {
+                        $return["result"] = true;
+                        $return["log"][] = "属于同一个整合队伍";
+                        return $return;
+                    }
+                    else
+                    {
+                        $return["result"] = false;
+                        $return["log"][] = "转入队伍是一个已经整合了的队伍";
+                        return $return;
+                    }
+                }
+            }
+            if(!$team2MergeInfo['team_id'])
+            {
+                $return["result"] = false;
+                $return["log"][] = "被转入队伍不存在";
+                return $return;
+            }
+            else
+            {
+                if($team2MergeInfo['tid']>0)
+                {
+                    $return["result"] = false;
+                    $return["log"][] = "被转入队伍是一个已经整合了的队伍";
+                    return $return;
+                }
+            }
+        }
+        //开启事务
+        DB::beginTransaction();
+        $insertTeam = $totalTeamModel->insertTeam(['game'=>$teamInfo['game'],'original_source'=>$teamInfo['original_source']]);
+        //创建成功
+        if($insertTeam)
+        {
+            $return["log"][] = "创建整合队伍成功";
+            $updateTeam = $teamModel->updateTeam($teamid,['tid'=>$insertTeam]);
+            if(!$updateTeam)
+            {
+                DB::rollBack();
+                $return["result"] = false;
+                $return["log"][] = "更新原队伍映射失败";
+                return $return;
+            }
+            //合并入查到的映射里面
+            $mergeToMap = $this->mergeToTeamMap($team2MergeInfo, $insertTeam, $teamModel, $teamNameMapModel);
+            if (!$mergeToMap)
+            {
+                DB::rollBack();
+                $return["result"] = false;
+                $return["log"][] = "整合失败";
+                return $return;
+            }
+            else
+            {
+                DB::commit();
+                $return["result"] = true;
+                $return["log"][] = "整合成功";
+                return $return;
+            }
+        }
+        else
+        {
+            DB::rollBack();
+            $return["result"] = false;
+            $return["log"][] = "创建整合队伍失败";
+            return $return;
+        }
     }
     //在总表中更新到新数据的映射
     public function addRidirect($totalTeamModel,$tid,$new_team_id=0,$new_tid=0)
