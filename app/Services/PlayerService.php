@@ -24,7 +24,7 @@ class  PlayerService
         $this->getPlayerListByCollectResult($game, $mission_type);
         $this->getScoreggPlayerDetail($game, $mission_type);
         $this->insertCpseoPlayer($game, $mission_type);
-        //$this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
+        $this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
         return 'finish';
     }
 
@@ -549,7 +549,7 @@ class  PlayerService
                             $team_image=$qt->find('.page-big-data-player-baike .left-content .game-history .hero-info .info-item a img')->attr('src');
                             $detail=[
                                 'team_id'=>$site_id,
-                                'team_url'=>'https://www.scoregg.com'.$team_url,
+                                'team_url'=>'https://www.scoregg.com'.$team_url.'?tournamentID=&type=baike',
                                 'team_name'=>$team_name,
                                 'team_image'=>$team_image,
                                 'source'=>'scoregg',
