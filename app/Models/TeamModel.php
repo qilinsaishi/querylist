@@ -139,6 +139,10 @@ class TeamModel extends Model
     }
     public function getTeamById($team_id,$fields = "*")
     {
+        if(is_array($team_id))
+        {
+            $team_id = $team_id['0'];
+        }
         $team_info =$this->select(explode(",",$fields))
             ->where("team_id",$team_id)
             ->get()->first();
