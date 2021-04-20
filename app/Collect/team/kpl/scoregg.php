@@ -16,7 +16,7 @@ class scoregg
             "established_date"=>['path'=>"",'default'=>"未知"],
             "coach"=>['path'=>"",'default'=>"暂无"],
             "logo"=>['path'=>"team_image",'default'=>''],
-            "description"=>['path'=>"team_history",'default'=>"暂无"],
+            "description"=>['path'=>"description",'default'=>"暂无"],
             "race_stat"=>['path'=>"raceStat",'default'=>[]],
             "original_source"=>['path'=>"",'default'=>"scoregg"],
             "site_id"=>['path'=>"team_id",'default'=>0],
@@ -117,6 +117,7 @@ class scoregg
 
         $arr['content']['team_image'] = getImage($arr['content']['team_image']);
         $arr['content']['raceStat'] = ["win"=>intval($arr['content']['win']??0),"draw"=>0,"lose"=>intval($arr['content']['los']??0)];
+        $arr['content']['description'] = $arr['content']['team_history'];
         $arr['content']['team_history'] = json_encode($arr['content']['team_history']??[]);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
