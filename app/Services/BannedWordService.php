@@ -34,7 +34,7 @@ class BannedWordService extends Command
         if($toGet == 1)
         {
             $banned = [];
-            $filePath = "storage/banword";
+            $filePath = ROOT_PATH."/storage/banword";
             $fileList = $this->getFile($filePath);
             foreach($fileList as $key => $file)
             {
