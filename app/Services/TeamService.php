@@ -938,6 +938,70 @@ class TeamService
             return $return;
         }
     }
+    //合并1个未整合过的队伍
+    public function merge1unmergedTeam($teamid=0)
+    {
+        $return = ["result"=>false,"log"=>[]];
+        $teamModel = new TeamModel();
+        $teamNameMapModel = new TeamNameMapModel();
+        $totalTeamModel = new TotalTeamModel();
+        if($teamid<=0)
+        {
+            $return["result"] = false;
+            $return["log"][] = "ID有误";
+            return $return;
+        }
+        else
+        {
+            $teamInfo = $teamModel->getTeamById($teamid);
+            if(!$teamInfo['team_id'])
+            {
+                $return["result"] = false;
+                $return["log"][] = "队伍不存在";
+                return $return;
+            }
+            else
+            {
+                if($teamInfo['tid']>0)
+                {
+                    $return["result"] = true;
+                    $return["log"][] = "转入队伍是一个已经整合了的队伍";
+                    return $return;
+                }
+            }
+        }
+        //开启事务
+        DB::beginTransaction();
+        $insertTeam = $totalTeamModel->insertTeam(['game'=>$teamInfo['game'],'original_source'=>$teamInfo['original_source']]);
+        //创建成功
+        if($insertTeam)
+        {
+            $return["log"][] = "创建整合队伍成功";
+            //合并入查到的映射里面
+            $mergeToMap = $this->mergeToTeamMap($teamInfo, $insertTeam, $teamModel, $teamNameMapModel);
+            if (!$mergeToMap)
+            {
+                DB::rollBack();
+                $return["result"] = false;
+                $return["log"][] = "整合失败";
+                return $return;
+            }
+            else
+            {
+                DB::commit();
+                $return["result"] = true;
+                $return["log"][] = "整合成功";
+                return $return;
+            }
+        }
+        else
+        {
+            DB::rollBack();
+            $return["result"] = false;
+            $return["log"][] = "创建整合队伍失败";
+            return $return;
+        }
+    }
     //在总表中更新到新数据的映射
     public function addRidirect($totalTeamModel,$tid,$new_team_id=0,$new_tid=0)
     {
