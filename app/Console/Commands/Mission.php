@@ -15,7 +15,7 @@ use App\Services\PlayerService;
 use App\Services\RunesService;
 use App\Services\ScheduleService;
 use App\Services\SummonerService;
-use App\Services\TeamResultService;
+use App\Services\TeamService;
 use Illuminate\Console\Command;
 use App\Console\Commands\Information as oInformation;
 use App\Services\MissionService as oMission;
@@ -64,7 +64,7 @@ class Mission extends Command
 
                 //采集战队入库
                 if($mission_type=='team'){
-                    (new TeamResultService())->insertTeamData($mission_type,$game);
+                    (new TeamService())->insertTeamData($mission_type,$game);
                 }
                 //采集队员入库
                 if($mission_type=='player'){
