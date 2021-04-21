@@ -7,7 +7,7 @@ use App\Services\AliyunSercies;
 use App\Services\AliyunService;
 use App\Services\EquipmentService;
 use Illuminate\Console\Command;
-use App\Services\TeamResultService as TeamService;
+use App\Services\TeamService as TeamService;
 use App\Services\PlayerService as PlayerService;
 
 class Intergration extends Command
