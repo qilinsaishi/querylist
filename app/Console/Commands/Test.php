@@ -57,7 +57,9 @@ class Test extends Command
                 //整一个一个未整合的队伍到已经整合队伍中
                 //$teamInfo = (new TeamService())->mergeTeam2mergedTeam($team_ids['0'],$team_ids['1']??0);
                 //整合两个未整合的队伍
-                $teamInfo = (new TeamService())->merge2unmergedTeam($team_ids['0'],$team_ids['1']??0);
+                //$teamInfo = (new TeamService())->merge2unmergedTeam($team_ids['0'],$team_ids['1']??0);
+                $teamInfo = (new TeamService())->merge1unmergedTeam($team_ids['0']);
+
                 print_R($teamInfo);
                 die();
                 //$teamInfo = (new TeamService())->disintegration($id);
