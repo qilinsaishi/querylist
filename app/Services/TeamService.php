@@ -707,36 +707,42 @@ class TeamService
                     $return["log"][] = "转入队伍找不到了";
                     return $return;
                 }
-                elseif(count($teamList2Merge)==1)
+                elseif(count($teamList2Merge)>=1)
                 {
                     //开启事务
                     DB::beginTransaction();
-                    $team2Merge = $teamList2Merge['0'];
-                    //解绑队伍
-                    $disintergration = $this->disintegration($team2Merge['team_id'],$teamModel,$totalTeamModel,$teamNameMapModel,0);
-                    $return['log'] = array_merge($return['log'],$disintergration['log']);
-                    if($disintergration)
+                    foreach($teamList2Merge as $team2Merge)
                     {
-                        $return["log"][] = "解绑成功";
-                        //合并
-                        $merge = $this->mergeToTeamMap($team2Merge,$tid,$teamModel,$teamNameMapModel);
-                        if($merge)
+                        //$team2Merge = $teamList2Merge['0'];
+                        //解绑队伍
+                        $disintergration = $this->disintegration($team2Merge['team_id'],$teamModel,$totalTeamModel,$teamNameMapModel,0);
+                        $return['log'] = array_merge($return['log'],$disintergration['log']);
+                        if($disintergration)
                         {
-                            //更新映射
-                            $addRedict = $this->addRidirect($totalTeamModel,$tid2Merge,$team2Merge['team_id'],$tid);
-                            if(!$addRedict)
+                            $return["log"][] = "队伍:".$team2Merge['team_id']."解绑成功";
+                            //合并
+                            $merge = $this->mergeToTeamMap($team2Merge,$tid,$teamModel,$teamNameMapModel);
+                            if($merge)
                             {
-                                DB::rollBack();
-                                $return["result"] = false;
-                                $return["log"][] = "映射更新失败";
-                                return $return;
+                                //更新映射
+                                $addRedict = $this->addRidirect($totalTeamModel,$tid2Merge,$team2Merge['team_id'],$tid);
+                                if(!$addRedict)
+                                {
+                                    DB::rollBack();
+                                    $return["result"] = false;
+                                    $return["log"][] = "映射更新失败";
+                                    return $return;
+                                }
+                                else
+                                {
+                                    $return["log"][] = "队伍:".$team2Merge['team_id']."并入成功";
+                                }
                             }
                             else
                             {
-                                DB::commit();
-                                $return["result"] = true;
-                                $return["log"][] = "映射更新成功";
-                                $return["log"][] = "合并成功";
+                                DB::rollBack();
+                                $return["result"] = false;
+                                $return["log"][] = "合并失败";
                                 return $return;
                             }
                         }
@@ -744,18 +750,28 @@ class TeamService
                         {
                             DB::rollBack();
                             $return["result"] = false;
-                            $return["log"][] = "合并失败";
+                            $return["log"][] = "解绑失败";
                             return $return;
                         }
                     }
-                    else
+                    //更新映射
+                    $addRedict = $this->addRidirect($totalTeamModel,$tid2Merge,0,$tid);
+                    if(!$addRedict)
                     {
                         DB::rollBack();
                         $return["result"] = false;
-                        $return["log"][] = "解绑失败";
+                        $return["log"][] = "映射更新失败";
                         return $return;
-
                     }
+                    else
+                    {
+                        $return["log"][] = "映射更新成功";
+                        DB::commit();
+                        $return["result"] = true;
+                        $return["log"][] = "合并成功";
+                        return $return;
+                    }
+
                 }
                 else
                 {
