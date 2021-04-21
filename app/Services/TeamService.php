@@ -531,9 +531,7 @@ class TeamService
                 $saveMap = $teamNameMapModel->saveMap(["name_hash" => $name, "game" => $teamInfo['game'], "tid" => $tid]);
                 if (!$saveMap)
                 {
-                    //echo "insertTeamMapError";
                     return false;
-                    //break;
                 }
             }
         }

@@ -11,7 +11,6 @@ use App\Models\PlayerModel;
 use App\Models\TeamModel;
 use App\Services\MissionService as oMission;
 use App\Models\Player\TotalPlayerModel as TotalPlayerModel;
-use App\Models\Player\PlayerMapModel as PlayerMapModel;
 use App\Models\Player\PlayerNameMapModel as PlayerNameMapModel;
 use App\Services\Data\IntergrationService;
 use Illuminate\Support\Facades\DB;
@@ -375,8 +374,8 @@ class  PlayerService
                     }
                 }
             }
-            $updateTid = $playerModel->updatePlayer($playerInfo['player_id'], ["pid" => $pid]);
-            if (!$updateTid) {
+            $updatePid = $playerModel->updatePlayer($playerInfo['player_id'], ["pid" => $pid]);
+            if (!$updatePid) {
                 return false;
             }
             return true;
@@ -590,7 +589,71 @@ class  PlayerService
             }
         }
         return true;
-
+    }
+    //合并1个未整合过的队伍
+    public function merge1unmergedPlayer($playerid=0)
+    {
+        $return = ["result"=>false,"log"=>[]];
+        $teamModel = new TeamModel();
+        $playerModel = new PlayerModel();
+        $totalPlayerModel = new TotalPlayerModel();
+        $playerNameMapModel = new PlayerNameMapModel();
+        if($playerid<=0)
+        {
+            $return["result"] = false;
+            $return["log"][] = "ID有误";
+            return $return;
+        }
+        else
+        {
+            $playerInfo = $playerModel->getPlayerById($playerid);
+            if(!$playerInfo['player_id'])
+            {
+                $return["result"] = false;
+                $return["log"][] = "队员不存在";
+                return $return;
+            }
+            else
+            {
+                if($playerInfo['pid']>0)
+                {
+                    $return["result"] = true;
+                    $return["log"][] = "转入队员是一个已经整合了的队员";
+                    return $return;
+                }
+            }
+        }
+        //开启事务
+        DB::beginTransaction();
+        $insertPlayer = $totalPlayerModel->insertPlayer(['game'=>$playerInfo['game'],'original_source'=>$playerInfo['original_source']]);
+        //创建成功
+        if($insertPlayer)
+        {
+            $return["log"][] = "创建整合队员成功";
+            //合并入查到的映射里面
+            $mergeToMap = $this->mergeToPlayerMap($playerInfo, $insertPlayer, $playerModel, $playerNameMapModel);
+            if (!$mergeToMap)
+            {
+                DB::rollBack();
+                $return["result"] = false;
+                $return["log"][] = "整合失败";
+                return $return;
+            }
+            else
+            {
+                DB::commit();
+                $return["result"] = true;
+                $return["log"][] = "整合成功";
+                return $return;
+            }
+        }
+        else
+        {
+            DB::rollBack();
+            $return["result"] = false;
+            $return["log"][] = "创建整合队员失败";
+            return $return;
+        }
     }
 
 
