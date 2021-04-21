@@ -2,7 +2,7 @@
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
-
+define ('ROOT_PATH',dirname(dirname(__FILE__)));
 define('LARAVEL_START', microtime(true));
 
 /*

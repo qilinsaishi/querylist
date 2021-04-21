@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 
+use App\Services\PlayerService;
 use App\Services\TeamService;
 use Illuminate\Console\Command;
 use App\Services\Data\IntergrationService;
@@ -45,12 +46,6 @@ class Test extends Command
         {
             case "team_intergration":
             {
-                $teamInfo = (new IntergrationService())->getTeamInfo($id);
-                print_R($teamInfo);
-                break;
-            }
-            case "team_disintergration":
-            {
                 $team_ids = explode(",",$id);
                 //整合两个已经整合的队伍
                 //$teamInfo = (new TeamService())->merge2mergedTeam($team_ids['0'],$team_ids['1']??0);
@@ -58,7 +53,25 @@ class Test extends Command
                 //$teamInfo = (new TeamService())->mergeTeam2mergedTeam($team_ids['0'],$team_ids['1']??0);
                 //整合两个未整合的队伍
                 $teamInfo = (new TeamService())->merge2unmergedTeam($team_ids['0'],$team_ids['1']??0);
+                //$teamInfo = (new TeamService())->merge1unmergedTeam($team_ids['0']);
+
                 print_R($teamInfo);
+                die();
+                //$teamInfo = (new TeamService())->disintegration($id);
+                break;
+            }
+            case "player_intergration":
+            {
+                $player_ids = explode(",",$id);
+                //整合两个已经整合的队伍
+                //$teamInfo = (new TeamService())->merge2mergedTeam($team_ids['0'],$team_ids['1']??0);
+                //整一个一个未整合的队伍到已经整合队员中
+                $playerInfo = (new PlayerService())->mergePlayer2mergedPlayer($player_ids['0'],$player_ids['1']??0);
+                //整合两个未整合的队员
+                //$playerInfo = (new PlayerService())->merge2unmergedPlayer($player_ids['0'],$player_ids['1']??0);
+                //$playerInfo = (new PlayerService())->merge1unmergedPlayer($player_ids['0']);
+
+                print_R($playerInfo);
                 die();
                 //$teamInfo = (new TeamService())->disintegration($id);
                 break;
