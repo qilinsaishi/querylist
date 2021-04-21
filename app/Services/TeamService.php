@@ -300,7 +300,7 @@ class TeamService
         $return = [];
         $teamList = $teamModel->getTeamList(["fields"=>"team_id,tid,team_name,en_name,cn_name,aka,original_source,game","tid"=>0,"game"=>$game,"sources"=>array_column($team_intergration,"source"),"page_size"=>99999999]);
         echo count($teamList);
-        //die();//生成所有队伍的可用名称列表
+        //生成所有队伍的可用名称列表
         foreach($teamList as $key => $teamInfo)
         {
             $nameList[$teamInfo['team_id']] = [];
@@ -852,43 +852,36 @@ class TeamService
             $return["log"][] = "同一个队伍不需要合并";
             return $return;
         }
-        else
-        {
+        else {
             $teamInfo = $teamModel->getTeamById($teamid);
             $team2MergeInfo = $teamModel->getTeamById($teamId2Merge);
-            if(!$teamInfo['team_id'])
+            if (!$teamInfo['team_id'])
             {
                 $return["result"] = false;
                 $return["log"][] = "转入队伍不存在";
                 return $return;
             }
-            else
+            elseif ($teamInfo['tid'] > 0)
             {
-                if($teamInfo['tid']>0)
-                {
-                    if($team2MergeInfo['tid']==$teamInfo['tid'])
-                    {
-                        $return["result"] = true;
-                        $return["log"][] = "属于同一个整合队伍";
-                        return $return;
-                    }
-                    else
-                    {
-                        $return["result"] = false;
-                        $return["log"][] = "转入队伍是一个已经整合了的队伍";
-                        return $return;
-                    }
-                }
+                $return["result"] = false;
+                $return["log"][] = "转入队伍是一个已经整合了的队伍";
+                return $return;
             }
-            if(!$team2MergeInfo['team_id'])
+            if (!$team2MergeInfo['team_id'])
             {
                 $return["result"] = false;
                 $return["log"][] = "被转入队伍不存在";
                 return $return;
             }
-            else
+            elseif ($team2MergeInfo['tid'] > 0)
             {
-                if($team2MergeInfo['tid']>0)
+                if ($team2MergeInfo['tid'] == $teamInfo['tid'])
+                {
+                    $return["result"] = true;
+                    $return["log"][] = "属于同一个整合队伍";
+                    return $return;
+                }
+                else
                 {
                     $return["result"] = false;
                     $return["log"][] = "被转入队伍是一个已经整合了的队伍";
@@ -902,22 +895,22 @@ class TeamService
         //创建成功
         if($insertTeam)
         {
-            $return["log"][] = "创建整合队伍成功";
-            $updateTeam = $teamModel->updateTeam($teamid,['tid'=>$insertTeam]);
-            if(!$updateTeam)
+            //合并入新增的映射里面
+            $mergeToMap1 = $this->mergeToTeamMap($teamInfo, $insertTeam, $teamModel, $teamNameMapModel);
+            if (!$mergeToMap1)
             {
                 DB::rollBack();
                 $return["result"] = false;
-                $return["log"][] = "更新原队伍映射失败";
+                $return["log"][] = "整合队伍1失败";
                 return $return;
             }
-            //合并入查到的映射里面
-            $mergeToMap = $this->mergeToTeamMap($team2MergeInfo, $insertTeam, $teamModel, $teamNameMapModel);
-            if (!$mergeToMap)
+            //合并入新增的映射里面
+            $mergeToMap2 = $this->mergeToTeamMap($team2MergeInfo, $insertTeam, $teamModel, $teamNameMapModel);
+            if (!$mergeToMap2)
             {
                 DB::rollBack();
                 $return["result"] = false;
-                $return["log"][] = "整合失败";
+                $return["log"][] = "整合队伍2失败";
                 return $return;
             }
             else
