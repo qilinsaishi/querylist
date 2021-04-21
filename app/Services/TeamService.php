@@ -20,7 +20,7 @@ use App\Services\PlayerService;
 use Illuminate\Support\Facades\DB;
 use QL\QueryList;
 
-class TeamResultService
+class TeamService
 {
     public function insertTeamData($mission_type,$game)
     {
