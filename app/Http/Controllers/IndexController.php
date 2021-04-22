@@ -12,6 +12,7 @@ use App\Services\Data\ExtraProcessService;
 use App\Services\Data\IntergrationService;
 use App\Services\Data\RedisService;
 use App\Services\TeamService;
+use App\Services\PlayerService;
 use Illuminate\Http\Request;
 
 
@@ -93,6 +94,15 @@ class IndexController extends Controller
                 break;
             case "merge2unmergedTeam":
                 $return = (new TeamService())->merge2unmergedTeam($data['team_id_1'],$data['team_id_2']);
+                break;
+            case "mergePlayer2mergedPlayer":
+                $return = (new PlayerService())->mergeTeam2mergedTeam($data['pid'],$data['player_id']);
+                break;
+            case "merge2mergedPlayer":
+                $return = (new PlayerService())->merge2mergedPlayer($data['pid_1'],$data['pid_2']);
+                break;
+            case "merge2unmergedPlayer":
+                $return = (new PlayerService())->merge2unmergedPlayer($data['player_id_1'],$data['player_id_2']);
                 break;
         }
         return $return;
