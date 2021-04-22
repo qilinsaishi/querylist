@@ -894,7 +894,7 @@ class  PlayerService
                     $return["log"][] = "转入队伍找不到了";
                     return $return;
                 }
-                elseif(count($playerList2Merge)>=1)
+                else
                 {
                     //队员1的详情列表
                     $playerList1Merge = $playerModel->getPlayerList(["pid"=>$pid,"fields"=>"player_id,pid,team_id,game,player_name,en_name,cn_name,aka"]);
@@ -914,19 +914,19 @@ class  PlayerService
                         $return['log'] = array_merge($return['log'],$disintergration['log']);
                         if($disintergration)
                         {
-                            $return["log"][] = "队伍:".$player2Merge['player_id']."解绑成功";
+                            $return["log"][] = "队员:".$player2Merge['player_id']."解绑成功";
                             //合并
                             $merge = $this->mergeToPlayerMap($player2Merge,$pid,$playerModel,$playerNameMapModel);
                             if($merge)
                             {
-                                $return["log"][] = "队伍:".$player2Merge['player_id']."并入成功";
+                                $return["log"][] = "队员:".$player2Merge['player_id']."并入成功";
 
                             }
                             else
                             {
                                 DB::rollBack();
                                 $return["result"] = false;
-                                $return["log"][] = "合并失败";
+                                $return["log"][] = "队员:".$player2Merge['player_id']."并入失败";
                                 return $return;
                             }
                         }
@@ -934,13 +934,13 @@ class  PlayerService
                         {
                             DB::rollBack();
                             $return["result"] = false;
-                            $return["log"][] = "解绑失败";
+                            $return["log"][] = "队员:".$player2Merge['player_id']."解绑失败";
                             return $return;
                         }
                     }
                     //更新映射
-                    $addRedict = $this->addRidirect($totalPlayerModel,$pid2Merge,0,$pid);
-                    if(!$addRedict)
+                    $addRedirect = $this->addRedirect($totalPlayerModel,$pid2Merge,0,$pid);
+                    if(!$addRedirect)
                     {
                         DB::rollBack();
                         $return["result"] = false;
@@ -955,13 +955,6 @@ class  PlayerService
                         $return["log"][] = "合并成功";
                         return $return;
                     }
-
-                }
-                else
-                {
-                    $return["result"] = false;
-                    $return["log"][] = "暂不执行";
-                    return $return;
                 }
             }
             else
@@ -974,7 +967,7 @@ class  PlayerService
         }
     }
     //在总表中更新到新数据的映射
-    public function addRidirect($totalPlayerModel,$pid,$new_player_id=0,$new_pid=0)
+    public function addRedirect($totalPlayerModel,$pid,$new_player_id=0,$new_pid=0)
     {
         $totalPlayer = $totalPlayerModel->getPlayerById($pid,"pid,redirect");
         if(isset($totalPlayer['pid']))
@@ -982,7 +975,7 @@ class  PlayerService
             $totalPlayer['redirect'] = json_decode($totalPlayer['redirect'],true)??[];
             if($new_player_id>0)
             {
-                $totalTeam['redirect']['player_id'] = $new_player_id;
+                $totalPlayer['redirect']['player_id'] = $new_player_id;
             }
             else
             {
@@ -990,7 +983,7 @@ class  PlayerService
             }
             if($new_pid>0)
             {
-                $totalTeam['redirect']['tid'] = $new_pid;
+                $totalPlayer['redirect']['pid'] = $new_pid;
             }
             else
             {
@@ -1008,7 +1001,7 @@ class  PlayerService
     {
         $return = ["result"=>false,"log"=>[]];
         //获取队员信息
-        $playerInfo = $playerModel->getTeamById($player_id,"player_id,tid,player_name,cn_name,en_name,aka");
+        $playerInfo = $playerModel->getPlayerById($player_id,"player_id,tid,player_name,cn_name,en_name,aka");
         //找到队伍
         if(isset($playerInfo['player_id']))
         {
@@ -1025,7 +1018,7 @@ class  PlayerService
                 $currentHashList = $playerNameMapModel->getHashByPid($playerInfo['pid']);
                 //获取团队中其他队伍需要占用的名称列表
                 $toKeepHashList = [];
-                $otherPlayerList = $playerModel->getTeamList(['pid'=>$playerInfo['pid'],"except_player"=>$player_id,"fields"=>"player_id,game,pid,player_name,cn_name,en_name,aka"]);
+                $otherPlayerList = $playerModel->getPlayerList(['pid'=>$playerInfo['pid'],"except_player"=>$player_id,"fields"=>"player_id,game,pid,player_name,cn_name,en_name,aka"]);
                 foreach($otherPlayerList as $otherPlayer)
                 {
                     $aka = json_decode($otherPlayer['aka'], true);
@@ -1057,7 +1050,7 @@ class  PlayerService
                 }
                 //-----------------------------------删除名称映射
                 //改写队伍记录
-                $updatePlayer = $playerModel->updateTeam($playerInfo['player_id'],["pid"=>0]);
+                $updatePlayer = $playerModel->updatePlayer($playerInfo['player_id'],["pid"=>0]);
                 if(!$updatePlayer)
                 {
                     $return["log"][] = "队员表：".$playerInfo['player_id']."改写失败";
@@ -1087,7 +1080,7 @@ class  PlayerService
                 else
                 {
                     //总表记录需要写入新的映射
-                    $updateTotalPlayer = $totalPlayerModel->updatePlayer($playerInfo['pid'],["redirect"=>['player_id'=>$playerInfo['player_id']]]);
+                    $updateTotalPlayer = $this->addRedirect($totalPlayerModel,$playerInfo['pid'],$playerInfo['player_id'],0);
                     if($updateTotalPlayer)
                     {
                         $return["log"][] = "改写总表映射成功";
