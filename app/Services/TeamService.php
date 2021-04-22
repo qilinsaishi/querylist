@@ -724,19 +724,7 @@ class TeamService
                             $merge = $this->mergeToTeamMap($team2Merge,$tid,$teamModel,$teamNameMapModel);
                             if($merge)
                             {
-                                //更新映射
-                                $addRedict = $this->addRidirect($totalTeamModel,$tid2Merge,$team2Merge['team_id'],$tid);
-                                if(!$addRedict)
-                                {
-                                    DB::rollBack();
-                                    $return["result"] = false;
-                                    $return["log"][] = "映射更新失败";
-                                    return $return;
-                                }
-                                else
-                                {
-                                    $return["log"][] = "队伍:".$team2Merge['team_id']."并入成功";
-                                }
+                                $return["log"][] = "队伍:".$team2Merge['team_id']."并入成功";
                             }
                             else
                             {

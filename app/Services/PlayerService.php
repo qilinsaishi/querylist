@@ -846,79 +846,119 @@ class  PlayerService
             return $return;
         }
     }
-    public function merge2mergedPlayer($pid,$playerId2Merge=0)
+    //合并2个整合过的队员
+    public function merge2mergedPlayer($pid=0,$pid2Merge=0)
     {
         $return = ["result"=>false,"log"=>[]];
-        $teamModel = new TeamModel();
-        $playerModel = new PlayerModel();
-        $totalPlayerModel = new TotalPlayerModel();
-        $playerNameMapModel = new PlayerNameMapModel();
-        if($pid<=0 || $playerId2Merge<=0)
+        //如果双方ID有问题
+        if($pid<=0 || $pid2Merge<=0)
         {
             $return["result"] = false;
             $return["log"][] = "ID有误";
             return $return;
         }
+        //如果是同一个
+        elseif($pid == $pid2Merge)
+        {
+            $return["result"] = true;
+            $return["log"][] = "同一个队员，无需再次合并";
+            return $return;
+        }
         else
         {
-            $player2MergeInfo = $playerModel->getPlayerById($playerId2Merge);
-            if(!$player2MergeInfo['player_id'])
+            $totalTeamModel = new totalTeamModel();
+            $totalPlayerModel = new totalPlayerModel();
+            $teamModel = new TeamModel();
+            $playerModel = new PlayerModel();
+            $playerNameMapModel = new PlayerNameMapModel();
+            $totalPlayer1 = $totalPlayerModel->getPlayerById($pid,"pid,redirect");
+            if(isset($totalPlayer1['pid']))
             {
-                $return["result"] = false;
-                $return["log"][] = "被转入队员不存在";
-                return $return;
-            }
-            elseif($player2MergeInfo['pid']>0)
-            {
-                if($player2MergeInfo['pid']==$pid)
+                $totalPlayer1['redirect'] = json_decode($totalPlayer1['redirect'],true);
+                if(isset($totalPlayer1['redirect']['player_id']) || isset($totalPlayer1['redirect']['pid']) )
                 {
-                    $return["result"] = true;
-                    $return["log"][] = "属于同一个整合队员";
+                    //主队员已经重定向
+                    $return["result"] = false;
+                    $return["log"][] = "主队员已经重定向了";
                     return $return;
+                }
+                $playerList2Merge = $playerModel->getPlayerList(["pid"=>$pid2Merge,"fields"=>"player_id,pid,game,player_name,en_name,cn_name,aka"]);
+                //没有队员
+                if(count($playerList2Merge)==0)
+                {
+                    //主队伍已经重定向
+                    $return["result"] = false;
+                    $return["log"][] = "转入队伍找不到了";
+                    return $return;
+                }
+                elseif(count($playerList2Merge)>=1)
+                {
+                    //开启事务
+                    DB::beginTransaction();
+                    foreach($playerList2Merge as $player2Merge)
+                    {
+                        //解绑队伍
+                        $disintergration = $this->disintegration($player2Merge['player_id'],$playerModel,$totalPlayerModel,$playerNameMapModel,0);
+                        $return['log'] = array_merge($return['log'],$disintergration['log']);
+                        if($disintergration)
+                        {
+                            $return["log"][] = "队伍:".$player2Merge['player_id']."解绑成功";
+                            //合并
+                            $merge = $this->mergeToPlayerMap($player2Merge,$pid,$playerModel,$playerNameMapModel);
+                            if($merge)
+                            {
+                                $return["log"][] = "队伍:".$player2Merge['player_id']."并入成功";
+
+                            }
+                            else
+                            {
+                                DB::rollBack();
+                                $return["result"] = false;
+                                $return["log"][] = "合并失败";
+                                return $return;
+                            }
+                        }
+                        else
+                        {
+                            DB::rollBack();
+                            $return["result"] = false;
+                            $return["log"][] = "解绑失败";
+                            return $return;
+                        }
+                    }
+                    //更新映射
+                    $addRedict = $this->addRidirect($totalPlayerModel,$pid2Merge,0,$pid);
+                    if(!$addRedict)
+                    {
+                        DB::rollBack();
+                        $return["result"] = false;
+                        $return["log"][] = "映射更新失败";
+                        return $return;
+                    }
+                    else
+                    {
+                        $return["log"][] = "映射更新成功";
+                        DB::commit();
+                        $return["result"] = true;
+                        $return["log"][] = "合并成功";
+                        return $return;
+                    }
+
                 }
                 else
                 {
                     $return["result"] = false;
-                    $return["log"][] = "被转入队员是一个已经整合了的队伍";
+                    $return["log"][] = "暂不执行";
                     return $return;
                 }
-            }
-            //获取整合前的用户列表
-            $playerList = $playerModel->getPlayerList(["pid"=>$pid,"fields"=>"team_id,pid"]);
-            if(!in_array($player2MergeInfo['team_id'],array_column($playerList,'team_id')))
-            {
-                $return["result"] = false;
-                $return["log"][] = "不属于同一整合队伍中的队员不做整合操作";
-                return $return;
             }
             else
             {
-                $teamInfo_2 = $teamModel->getTeamById($player2MergeInfo['team_id'],"team_id,tid");
-                if($teamInfo_2['tid'] ==0)
-                {
-                    $return["result"] = false;
-                    $return["log"][] = "未整合的队伍中的队员不做整合操作";
-                    return $return;
-                }
+                //需要合并的主队伍不存在
+                $return["result"] = false;
+                $return["log"][] = "主队员不存在";
+                return $return;
             }
-        }
-        //开启事务
-        DB::beginTransaction();
-        //合并入新增的映射里面
-        $mergeToMap = $this->mergeToPlayerMap($player2MergeInfo, $pid, $playerModel, $playerNameMapModel);
-        if (!$mergeToMap)
-        {
-            DB::rollBack();
-            $return["result"] = false;
-            $return["log"][] = "整合队员失败";
-            return $return;
-        }
-        else
-        {
-            DB::commit();
-            $return["result"] = true;
-            $return["log"][] = "整合成功";
-            return $return;
         }
     }
     //在总表中更新到新数据的映射
