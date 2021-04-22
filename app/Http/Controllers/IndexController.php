@@ -6,6 +6,8 @@ use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\Admin\DefaultConfig;
+use App\Models\PlayerModel;
+use App\Models\TeamModel;
 use App\Models\Team\TotalTeamModel;
 use App\Services\Data\DataService;
 use App\Services\Data\ExtraProcessService;
@@ -76,6 +78,22 @@ class IndexController extends Controller
                 foreach($teamList as $team)
                 {
                     $return[] = getFieldsFromArray($intergrationService->getTeamInfo(0, $team['tid'], 1)['data'], $data["fields"]);
+                }
+                break;
+            case "playerList":
+                $intergrationService = new IntergrationService();
+                $data["tid"] = $data["tid"]??0;
+                $teamList = (new TeamModel())->getTeamList(["tid"=>$data["tid"],"fields"=>"team_id,tid","page"=>$data["page"]??1,"page_size"=>$data['pageSize']??100]);
+                $playerList = (new PlayerModel())->getPlayerList(["fields"=>"player_id,pid","team_ids"=>array_unique(array_column($teamList,"team_id")),"page"=>$data["page"]??1,"page_size"=>$data['pageSize']??100]);
+                $data["fields"] = $data["fields"]??"pid,player_name,en_name,cn_name,intergrated_id_list";
+                $return = [];
+                foreach($playerList as $player)
+                {
+                    if($player['pid']>0)
+                    {
+                        $playerInfo = $intergrationService->getPlayerInfo(0, $player['pid'], 1);
+                        $return[] = getFieldsFromArray($intergrationService->getPlayerInfo(0, $player['pid'], 1)['data'], $data["fields"]);
+                    }
                 }
                 break;
         }
