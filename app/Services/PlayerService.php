@@ -846,4 +846,230 @@ class  PlayerService
             return $return;
         }
     }
+    public function merge2mergedPlayer($pid,$playerId2Merge=0)
+    {
+        $return = ["result"=>false,"log"=>[]];
+        $teamModel = new TeamModel();
+        $playerModel = new PlayerModel();
+        $totalPlayerModel = new TotalPlayerModel();
+        $playerNameMapModel = new PlayerNameMapModel();
+        if($pid<=0 || $playerId2Merge<=0)
+        {
+            $return["result"] = false;
+            $return["log"][] = "ID有误";
+            return $return;
+        }
+        else
+        {
+            $player2MergeInfo = $playerModel->getPlayerById($playerId2Merge);
+            if(!$player2MergeInfo['player_id'])
+            {
+                $return["result"] = false;
+                $return["log"][] = "被转入队员不存在";
+                return $return;
+            }
+            elseif($player2MergeInfo['pid']>0)
+            {
+                if($player2MergeInfo['pid']==$pid)
+                {
+                    $return["result"] = true;
+                    $return["log"][] = "属于同一个整合队员";
+                    return $return;
+                }
+                else
+                {
+                    $return["result"] = false;
+                    $return["log"][] = "被转入队员是一个已经整合了的队伍";
+                    return $return;
+                }
+            }
+            //获取整合前的用户列表
+            $playerList = $playerModel->getPlayerList(["pid"=>$pid,"fields"=>"team_id,pid"]);
+            if(!in_array($player2MergeInfo['team_id'],array_column($playerList,'team_id')))
+            {
+                $return["result"] = false;
+                $return["log"][] = "不属于同一整合队伍中的队员不做整合操作";
+                return $return;
+            }
+            else
+            {
+                $teamInfo_2 = $teamModel->getTeamById($player2MergeInfo['team_id'],"team_id,tid");
+                if($teamInfo_2['tid'] ==0)
+                {
+                    $return["result"] = false;
+                    $return["log"][] = "未整合的队伍中的队员不做整合操作";
+                    return $return;
+                }
+            }
+        }
+        //开启事务
+        DB::beginTransaction();
+        //合并入新增的映射里面
+        $mergeToMap = $this->mergeToPlayerMap($player2MergeInfo, $pid, $playerModel, $playerNameMapModel);
+        if (!$mergeToMap)
+        {
+            DB::rollBack();
+            $return["result"] = false;
+            $return["log"][] = "整合队员失败";
+            return $return;
+        }
+        else
+        {
+            DB::commit();
+            $return["result"] = true;
+            $return["log"][] = "整合成功";
+            return $return;
+        }
+    }
+    //在总表中更新到新数据的映射
+    public function addRidirect($totalPlayerModel,$pid,$new_player_id=0,$new_pid=0)
+    {
+        $totalPlayer = $totalPlayerModel->getPlayerById($pid,"pid,redirect");
+        if(isset($totalPlayer['pid']))
+        {
+            $totalPlayer['redirect'] = json_decode($totalPlayer['redirect'],true)??[];
+            if($new_player_id>0)
+            {
+                $totalTeam['redirect']['player_id'] = $new_player_id;
+            }
+            else
+            {
+                unset($totalPlayer['redirect']['player_id']);
+            }
+            if($new_pid>0)
+            {
+                $totalTeam['redirect']['tid'] = $new_pid;
+            }
+            else
+            {
+                unset($totalPlayer['redirect']['pid']);
+            }
+            return $totalPlayerModel->updatePlayer($pid,$totalPlayer);
+        }
+        else
+        {
+            return false;
+        }
+    }
+    //解绑某个队伍
+    function disintegration($player_id,$playerModel,$totalPlayerModel,$playerNameMapModel,$transaction = 1)
+    {
+        $return = ["result"=>false,"log"=>[]];
+        //获取队员信息
+        $playerInfo = $playerModel->getTeamById($player_id,"player_id,tid,player_name,cn_name,en_name,aka");
+        //找到队伍
+        if(isset($playerInfo['player_id']))
+        {
+            if($playerInfo['pid']>0)
+            {
+                if($transaction)
+                {
+                    //自动打开事务
+                    $return["log"][] = "事务开启";
+                    DB::beginTransaction();
+                }
+                //-----------------------------------删除名称映射
+                //获取当前占用的名称列表
+                $currentHashList = $playerNameMapModel->getHashByPid($playerInfo['pid']);
+                //获取团队中其他队伍需要占用的名称列表
+                $toKeepHashList = [];
+                $otherPlayerList = $playerModel->getTeamList(['pid'=>$playerInfo['pid'],"except_player"=>$player_id,"fields"=>"player_id,game,pid,player_name,cn_name,en_name,aka"]);
+                foreach($otherPlayerList as $otherPlayer)
+                {
+                    $aka = json_decode($otherPlayer['aka'], true);
+                    //合并 去重
+                    $toKeepHashList = array_unique(array_merge($toKeepHashList, getNames($otherPlayer,["team_name","en_name","cn_name"],["aka"])));
+                }
+                foreach($currentHashList as $hash)
+                {
+                    //不在其他队伍需要占用的列表中
+                    if(!in_array($hash['name_hash'],$toKeepHashList))
+                    {
+                        //删除
+                        $deleteHash = $playerNameMapModel->deleteMap($hash['id']);
+                        if(!$deleteHash)
+                        {
+                            $return["log"][] = "映射:".$hash['id']."删除失败";
+                            if($transaction)
+                            {
+                                DB::rollBack();
+                            }
+                            $return['result'] = false;
+                            return $return;
+                        }
+                        else
+                        {
+                            $return["log"][] = "映射:".$hash['id']."删除成功";
+                        }
+                    }
+                }
+                //-----------------------------------删除名称映射
+                //改写队伍记录
+                $updatePlayer = $playerModel->updateTeam($playerInfo['player_id'],["pid"=>0]);
+                if(!$updatePlayer)
+                {
+                    $return["log"][] = "队员表：".$playerInfo['player_id']."改写失败";
+                    if($transaction)
+                    {
+                        DB::rollBack();
+                    }
+                    $return['result'] = false;
+                    return $return;
+                }
+                else
+                {
+                    $return["log"][] = "队员表：".$playerInfo['player_id']."改写成功";
+                }
+                //如果还有其他队伍
+                if(count($otherPlayerList))
+                {
+                    //总表记录不做修改
+                    $return["log"][] = "无需修改总表";
+                    if($transaction)
+                    {
+                        DB::commit();
+                    }
+                    $return['result'] = true;
+                    return $return;
+                }
+                else
+                {
+                    //总表记录需要写入新的映射
+                    $updateTotalPlayer = $totalPlayerModel->updatePlayer($playerInfo['pid'],["redirect"=>['player_id'=>$playerInfo['player_id']]]);
+                    if($updateTotalPlayer)
+                    {
+                        $return["log"][] = "改写总表映射成功";
+                        if($transaction)
+                        {
+                            DB::commit();
+                        }
+                        $return['result'] = true;
+                        return $return;
+                    }
+                    else
+                    {
+                        $return["log"][] = "改写总表映射失败";
+                        if($transaction)
+                        {
+                            DB::rollBack();
+                        }
+                        $return['result'] = false;
+                        return $return;
+                    }
+                }
+            }
+            else//未整合 返回成功
+            {
+                $return["log"][] = "队员未进行整合，跳过";
+                $return['result'] = true;
+                return $return;
+            }
+        }
+        else
+        {
+            $return["log"][] = "队员不存在";
+            $return['result'] = false;
+            return $return;
+        }
+    }
 }
