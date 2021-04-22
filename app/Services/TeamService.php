@@ -627,7 +627,7 @@ class TeamService
                 else
                 {
                     //总表记录需要写入新的映射
-                    $updateTotalTeam = $totalTeamModel->updateTeam($teamInfo['tid'],["redirect"=>['team_id'=>$teamInfo['team_id']]]);
+                    $updateTotalTeam = $this->addRedirect($totalTeamModel,$teamInfo['tid'],$teamInfo['team_id'],0 );
                     if($updateTotalTeam)
                     {
                         $return["log"][] = "改写总表映射成功";
@@ -707,13 +707,12 @@ class TeamService
                     $return["log"][] = "转入队伍找不到了";
                     return $return;
                 }
-                elseif(count($teamList2Merge)>=1)
+                else
                 {
                     //开启事务
                     DB::beginTransaction();
                     foreach($teamList2Merge as $team2Merge)
                     {
-                        //$team2Merge = $teamList2Merge['0'];
                         //解绑队伍
                         $disintergration = $this->disintegration($team2Merge['team_id'],$teamModel,$totalTeamModel,$teamNameMapModel,0);
                         $return['log'] = array_merge($return['log'],$disintergration['log']);
@@ -724,25 +723,13 @@ class TeamService
                             $merge = $this->mergeToTeamMap($team2Merge,$tid,$teamModel,$teamNameMapModel);
                             if($merge)
                             {
-                                //更新映射
-                                $addRedict = $this->addRidirect($totalTeamModel,$tid2Merge,$team2Merge['team_id'],$tid);
-                                if(!$addRedict)
-                                {
-                                    DB::rollBack();
-                                    $return["result"] = false;
-                                    $return["log"][] = "映射更新失败";
-                                    return $return;
-                                }
-                                else
-                                {
-                                    $return["log"][] = "队伍:".$team2Merge['team_id']."并入成功";
-                                }
+                                $return["log"][] = "队伍:".$team2Merge['team_id']."并入成功";
                             }
                             else
                             {
                                 DB::rollBack();
                                 $return["result"] = false;
-                                $return["log"][] = "合并失败";
+                                $return["log"][] = "队伍:".$team2Merge['team_id']."并入失败";
                                 return $return;
                             }
                         }
@@ -750,12 +737,12 @@ class TeamService
                         {
                             DB::rollBack();
                             $return["result"] = false;
-                            $return["log"][] = "解绑失败";
+                            $return["log"][] = "队伍:".$team2Merge['team_id']."解绑失败";
                             return $return;
                         }
                     }
                     //更新映射
-                    $addRedict = $this->addRidirect($totalTeamModel,$tid2Merge,0,$tid);
+                    $addRedict = $this->addRedirect($totalTeamModel,$tid2Merge,0,$tid);
                     if(!$addRedict)
                     {
                         DB::rollBack();
@@ -771,13 +758,6 @@ class TeamService
                         $return["log"][] = "合并成功";
                         return $return;
                     }
-
-                }
-                else
-                {
-                    $return["result"] = false;
-                    $return["log"][] = "暂不执行";
-                    return $return;
                 }
             }
             else
@@ -1010,7 +990,7 @@ class TeamService
         }
     }
     //在总表中更新到新数据的映射
-    public function addRidirect($totalTeamModel,$tid,$new_team_id=0,$new_tid=0)
+    public function addRedirect($totalTeamModel,$tid,$new_team_id=0,$new_tid=0)
     {
         $totalTeam = $totalTeamModel->getTeamById($tid,"tid,redirect");
         if(isset($totalTeam['tid']))

@@ -43,7 +43,13 @@ class PlayerNameMapModel extends Model
     ];
     protected $keep = [
     ];
-
+    public function getHashByPid($pid = 0)
+    {
+        $player_list =$this->select("*")
+            ->where("pid",$pid)
+            ->get()->toArray();
+        return $player_list;
+    }
     public function getPlayerByNameHash($name_hash,$game,$fields = "*")
     {
         $player_info =$this->select(explode(",",$fields))
@@ -87,6 +93,11 @@ class PlayerNameMapModel extends Model
             $data['update_time'] = $currentTime;
         }
         return $this->insertGetId($data);
+    }
+    //删除单条映射
+    public function deleteMap($id)
+    {
+        return $this->where('id',$id)->delete();
     }
     public function saveMap($data)
     {
