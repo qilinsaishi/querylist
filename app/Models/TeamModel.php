@@ -65,6 +65,11 @@ class TeamModel extends Model
         {
             $team_list = $team_list->where("tid",$params['tid']);
         }
+        //队伍ID
+        if(isset($params['team_ids']) && count($params['team_ids'])>=0)
+        {
+            $team_list = $team_list->whereIn("team_id",$params['team_ids']);
+        }
         //数据来源
         if(isset($params['source']) && strlen($params['source'])>=2)
         {
@@ -346,6 +351,11 @@ class TeamModel extends Model
         if(isset($params['tid']) && intval($params['tid'])>=0)
         {
             $team_count = $team_count->where("tid",$params['tid']);
+        }
+        //队伍ID
+        if(isset($params['team_ids']) && count($params['team_ids'])>=0)
+        {
+            $team_count = $team_count->whereIn("team_id",$params['team_ids']);
         }
         //数据来源
         if(isset($params['source']) && strlen($params['source'])>=2)

@@ -713,7 +713,6 @@ class TeamService
                     DB::beginTransaction();
                     foreach($teamList2Merge as $team2Merge)
                     {
-                        //$team2Merge = $teamList2Merge['0'];
                         //解绑队伍
                         $disintergration = $this->disintegration($team2Merge['team_id'],$teamModel,$totalTeamModel,$teamNameMapModel,0);
                         $return['log'] = array_merge($return['log'],$disintergration['log']);

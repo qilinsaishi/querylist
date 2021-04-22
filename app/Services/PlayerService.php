@@ -10,6 +10,7 @@ use App\Models\MissionModel;
 use App\Models\PlayerModel;
 use App\Models\TeamModel;
 use App\Services\MissionService as oMission;
+use App\Models\Team\TotalTeamModel as TotalTeamModel;
 use App\Models\Player\TotalPlayerModel as TotalPlayerModel;
 use App\Models\Player\PlayerNameMapModel as PlayerNameMapModel;
 use App\Services\Data\IntergrationService;
@@ -866,8 +867,8 @@ class  PlayerService
         }
         else
         {
-            $totalTeamModel = new totalTeamModel();
-            $totalPlayerModel = new totalPlayerModel();
+            $totalTeamModel = new TotalTeamModel();
+            $totalPlayerModel = new TotalPlayerModel();
             $teamModel = new TeamModel();
             $playerModel = new PlayerModel();
             $playerNameMapModel = new PlayerNameMapModel();
@@ -882,7 +883,9 @@ class  PlayerService
                     $return["log"][] = "主队员已经重定向了";
                     return $return;
                 }
-                $playerList2Merge = $playerModel->getPlayerList(["pid"=>$pid2Merge,"fields"=>"player_id,pid,game,player_name,en_name,cn_name,aka"]);
+
+                //队员2的详情列表
+                $playerList2Merge = $playerModel->getPlayerList(["pid"=>$pid2Merge,"fields"=>"player_id,pid,team_id,game,player_name,en_name,cn_name,aka"]);
                 //没有队员
                 if(count($playerList2Merge)==0)
                 {
@@ -893,6 +896,15 @@ class  PlayerService
                 }
                 elseif(count($playerList2Merge)>=1)
                 {
+                    //队员1的详情列表
+                    $playerList1Merge = $playerModel->getPlayerList(["pid"=>$pid,"fields"=>"player_id,pid,team_id,game,player_name,en_name,cn_name,aka"]);
+                    $teamList = $teamModel->getTeamList(["fields"=>"team_id,tid","team_ids"=>array_merge(array_unique(array_column($playerList1Merge,'team_id')),array_unique(array_column($playerList2Merge,'team_id')))]);
+                    if(count(array_unique(array_column($teamList,"tid")))>1)
+                    {
+                        $return["result"] = false;
+                        $return["log"][] = "不属于同一整合队伍中的队员不做整合操作";
+                        return $return;
+                    }
                     //开启事务
                     DB::beginTransaction();
                     foreach($playerList2Merge as $player2Merge)
