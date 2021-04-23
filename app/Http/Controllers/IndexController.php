@@ -80,7 +80,25 @@ class IndexController extends Controller
                     $return[] = getFieldsFromArray($intergrationService->getTeamInfo(0, $team['tid'], 1)['data'], $data["fields"]);
                 }
                 break;
-            case "playerList":
+            case "playerList_team_id":
+                $intergrationService = new IntergrationService();
+                $data["team_id"] = $data["team_id"]??0;
+                $teamInfo = (new TeamModel)->getTeamById($data["team_id"],"team_id,tid");
+                $teamList = (new TeamModel())->getTeamList(["tid"=>$teamInfo['tid'],"fields"=>"team_id,tid","page"=>$data["page"]??1,"page_size"=>$data['pageSize']??100]);
+                $playerList = (new PlayerModel())->getPlayerList(["fields"=>"player_id,pid","team_ids"=>array_unique(array_column($teamList,"team_id")),"page"=>$data["page"]??1,"page_size"=>$data['pageSize']??100]);
+                $data["fields"] = $data["fields"]??"pid,player_name,en_name,cn_name,intergrated_id_list";
+                $return = [];
+                foreach($playerList as $player)
+                {
+                    if($player['pid']>0 && !isset($return[$player['pid']]))
+                    {
+                        $playerInfo = $intergrationService->getPlayerInfo(0, $player['pid'], 1);
+                        $return[$player['pid']] = getFieldsFromArray($intergrationService->getPlayerInfo(0, $player['pid'], 1)['data'], $data["fields"]);
+                    }
+                }
+                $return = array_values($return);
+                break;
+            case "playerList_tid_id":
                 $intergrationService = new IntergrationService();
                 $data["tid"] = $data["tid"]??0;
                 $teamList = (new TeamModel())->getTeamList(["tid"=>$data["tid"],"fields"=>"team_id,tid","page"=>$data["page"]??1,"page_size"=>$data['pageSize']??100]);
