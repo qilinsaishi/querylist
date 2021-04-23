@@ -253,12 +253,15 @@ class wanplus
             //战队关联英雄
             if (isset($playData['bpList']['bans']) && $playData['bpList']['bans']) {
                 foreach ($playData['bpList']['bans'] as $key => &$val) {
-                    if ($val) {
-                        foreach ($val as $k => &$v) {
-                            $v['img_url'] = 'https://static.wanplus.com/data/lol/hero/square/' . $v['cpherokey'] . '.' . $playData['info']['heroImgSuffix'];
-                            $matchInfo['teamHero'][$key][$k]['hero_img'] = $v['img_url'];
-                            $matchInfo['teamHero'][$key][$k]['teamid'] = $v['teamid'];
-                            $matchInfo['teamHero'][$key][$k]['en_name'] = $v['cpherokey'];
+                    if (is_array($val)) {
+                        foreach ($val as $k => $v) {
+                            if(is_array($v))
+                            {
+                                $v['img_url'] = 'https://static.wanplus.com/data/lol/hero/square/' . $v['cpherokey'] . '.' . $playData['info']['heroImgSuffix'];
+                                $matchInfo['teamHero'][$key][$k]['hero_img'] = $v['img_url'];
+                                $matchInfo['teamHero'][$key][$k]['teamid'] = $v['teamid'];
+                                $matchInfo['teamHero'][$key][$k]['en_name'] = $v['cpherokey'];
+                            }
                         }
                     }
                 }
