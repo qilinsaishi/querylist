@@ -90,12 +90,13 @@ class IndexController extends Controller
                 $return = [];
                 foreach($playerList as $player)
                 {
-                    if($player['pid']>0)
+                    if($player['pid']>0 && !isset($return[$player['pid']]))
                     {
                         $playerInfo = $intergrationService->getPlayerInfo(0, $player['pid'], 1);
-                        $return[] = getFieldsFromArray($intergrationService->getPlayerInfo(0, $player['pid'], 1)['data'], $data["fields"]);
+                        $return[$player['pid']] = getFieldsFromArray($intergrationService->getPlayerInfo(0, $player['pid'], 1)['data'], $data["fields"]);
                     }
                 }
+                $return = array_values($return);
                 break;
             case "playerList_tid_id":
                 $intergrationService = new IntergrationService();
