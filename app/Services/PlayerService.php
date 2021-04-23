@@ -1029,7 +1029,7 @@ class  PlayerService
                 {
                     $aka = json_decode($otherPlayer['aka'], true);
                     //合并 去重
-                    $toKeepHashList = array_unique(array_merge($toKeepHashList, getNames($otherPlayer,["team_name","en_name","cn_name"],["aka"])));
+                    $toKeepHashList = array_unique(array_merge($toKeepHashList, getNames($otherPlayer,["player_name","en_name","cn_name"],["aka"])));
                 }
                 foreach($currentHashList as $hash)
                 {
