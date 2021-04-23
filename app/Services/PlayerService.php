@@ -718,7 +718,13 @@ class  PlayerService
             {
                 $teamInfo_1 = $teamModel->getTeamById($playerInfo['team_id'],"team_id,tid");
                 $teamInfo_2 = $teamModel->getTeamById($player2MergeInfo['team_id'],"team_id,tid");
-                if($teamInfo_1['tid'] ==0 || $teamInfo_2['tid'] ==0)
+                if(!isset($teamInfo_1['tid']) || !isset($teamInfo_2['tid']))
+                {
+                    $return["result"] = false;
+                    $return["log"][] = "队伍数据有误";
+                    return $return;
+                }
+                elseif($teamInfo_1['tid'] ==0 || $teamInfo_2['tid'] ==0)
                 {
                     $return["result"] = false;
                     $return["log"][] = "未整合的队伍中的队员不做整合操作";
