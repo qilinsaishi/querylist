@@ -132,7 +132,7 @@ class IndexController extends Controller
                 $return = (new TeamService())->merge2unmergedTeam($data['team_id_1'],$data['team_id_2']);
                 break;
             case "mergePlayer2mergedPlayer":
-                $return = (new PlayerService())->mergeTeam2mergedTeam($data['pid'],$data['player_id']);
+                $return = (new PlayerService())->mergePlayer2mergedPlayer($data['pid'],$data['player_id']);
                 break;
             case "merge2mergedPlayer":
                 $return = (new PlayerService())->merge2mergedPlayer($data['pid_1'],$data['pid_2']);

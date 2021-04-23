@@ -57,7 +57,7 @@ class ScheduleService
             foreach ($list['scheduleList'] as $val) {
                 //https://www.wanplus.com/schedule/68605.html
                 $val['list'] = $val['list'] ?? [];
-                if (isset($val['list']) && count($val['list']) > 0) {
+                if (is_array($val['list']) && count($val['list']) > 0) {
                     foreach ($val['list'] as $v) {
                         $url = 'https://www.wanplus.com/schedule/' . $v['scheduleid'] . '.html';
                         $params1 = [
