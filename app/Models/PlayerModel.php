@@ -364,6 +364,10 @@ class PlayerModel extends Model
     }
 
     public function getPlayerById($player_id){
+        if(is_array($player_id))
+        {
+            $player_id = $player_id["0"]??($player_id["0"]??$player_id["player_id"]);
+        }
         $player_info =$this->select("*")
             ->where("player_id",$player_id)
             ->get()->first();
