@@ -131,6 +131,7 @@ class Mission extends Command
                 }
                 break;
             case "unpublished":
+                //php artisan mission:collect unpublished  information all (手动发布脚本命令)
                 (new InformationService())->unPublishedList();//更新预发布脚本
                 break;
             default:
