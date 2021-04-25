@@ -2,6 +2,8 @@
 
 namespace App\Services\Data;
 
+use App\Models\Admin\Site;
+use App\Models\InformationModel;
 use PhpParser\Node\Stmt\Else_;
 
 class RedisService
@@ -230,6 +232,42 @@ class RedisService
                     $redis->del($key);
                 }
 
+            }
+            //资讯类型数据需要刷新相关站点列表页第一页
+            if($dataType == "information")
+            {
+                //查找数据，获取类型和对应游戏
+                $info = (new InformationModel())->getInformationById($params['0'],["id","type","game"]);
+                if(isset($info['id']))
+                {
+                    if($info['type']==4)
+                    {
+                        $type="/strategylist/1/reset";
+                    }
+                    elseif(in_array($info['type'],[1,2,3,5]))
+                    {
+                        $type = "/newslist/1/reset";
+                    }
+
+                    switch($info['game'])
+                    {
+                        case "lol":
+                            $id=1;
+                            break;
+                        case "kpl":
+                            $id=2;
+                            break;
+                        case "dota2":
+                            $id=4;
+                            break;
+                    }
+                    //请求浏览器刷新缓存
+                    $siteInfo=(new Site())->getSiteById($id);
+                    $domain=$siteInfo['domain'] ?? '';
+                    $url=$domain.$type;
+                    $rt=file_get_contents($url);
+                    
+                }
             }
             return $params_list;
 
