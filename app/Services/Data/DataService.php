@@ -92,23 +92,28 @@ class DataService
                 if(isset($dataType) && $dataType='informationList') {
                     $dataArr["data"] = (new ExtraProcessService())->process($dataType,$dataArr["data"]);
                 }
-                foreach($dataArr["data"] as $k_1 => $v_1)
+
+                if(in_array($dataType,['information','informationList']))
                 {
-                    if(is_array($v_1))
+                    foreach($dataArr["data"] as $k_1 => $v_1)
                     {
-                        foreach($v_1 as $k_2 => $v_2)
+                        if(is_array($v_1))
                         {
-                            if(!is_array($v_2))
+                            foreach($v_1 as $k_2 => $v_2)
                             {
-                                $dataArr["data"][$k_1][$k_2] = $bannedWordService->sensitive($v_2);
+                                if(!is_array($v_2))
+                                {
+                                    $dataArr["data"][$k_1][$k_2] = $bannedWordService->sensitive($v_2);
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        $dataArr["data"][$k_1] = $bannedWordService->sensitive($v_1);
+                        else
+                        {
+                            $dataArr["data"][$k_1] = $bannedWordService->sensitive($v_1);
+                        }
                     }
                 }
+
                 $dataArr['processTime'] = microtime(true)-$start;
                 $dataArr['cached'] = $toSave==1?0:1;
                 $return[$name] = $dataArr;
