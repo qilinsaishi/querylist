@@ -210,8 +210,18 @@ class RedisService
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
-                    if ($dataType == 'information') {
-
+                    if ($dataType == 'information')
+                    {
+                        $redis->del($key);
+                        $params_list[] = $data['params'];
+                    }
+                    if ($dataType == 'totalTeamInfo')
+                    {
+                        $redis->del($key);
+                        $params_list[] = $data['params'];
+                    }
+                    if ($dataType == 'totalPlayerInfo')
+                    {
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
