@@ -817,7 +817,9 @@ class  PlayerService
             }
             //获取整合前的用户列表
             $playerList = $playerModel->getPlayerList(["pid"=>$pid,"fields"=>"team_id,pid"]);
-            if(!in_array($player2MergeInfo['team_id'],array_column($playerList,'team_id')))
+            $teamList = $teamModel->getTeamList(["team_ids"=>array_column($playerList,'team_id'),"fields"=>"tid,team_id"]);
+            $teamList = $teamModel->getTeamList(['tid'=>array_unique(array_column($teamList,"tid"))['0'],"fields"=>"team_id"]);
+            if(!in_array($player2MergeInfo['team_id'],array_column($teamList,'team_id')))
             {
                 $return["result"] = false;
                 $return["log"][] = "不属于同一整合队伍中的队员不做整合操作";
