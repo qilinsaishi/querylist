@@ -83,8 +83,12 @@ class RedisService
                 'prefix' => "lolHeroList",
                 'expire' => 86400,
             ],
-            "lolEquipmentList" => [//lolHeroList
+            "lolEquipmentList" => [//lolEquipmentList
                 'prefix' => "lolEquipmentList",
+                'expire' => 86400,
+            ],
+            "lolSummonerList" => [//lolSummonerList
+                'prefix' => "lolSummonerList",
                 'expire' => 86400,
             ],
         ];
