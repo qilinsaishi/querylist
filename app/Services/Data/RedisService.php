@@ -81,6 +81,18 @@ class RedisService
                 'prefix' => "intergratedPlayerList",
                 'expire' => 86400,
             ],
+            "lolHeroList" => [//lolHeroList
+                'prefix' => "lolHeroList",
+                'expire' => 86400,
+            ],
+            "lolEquipmentList" => [//lolEquipmentList
+                'prefix' => "lolEquipmentList",
+                'expire' => 86400,
+            ],
+            "lolSummonerList" => [//lolSummonerList
+                'prefix' => "lolSummonerList",
+                'expire' => 86400,
+            ],
         ];
         return $cacheConfig;
     }
