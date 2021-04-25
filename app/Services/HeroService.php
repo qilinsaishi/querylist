@@ -91,7 +91,7 @@ class HeroService
     //王者荣耀英雄入库
     public function insertKplHero()
     {
-        echo "开始处理lol英雄数据\n";
+        echo "开始处理kpl英雄数据\n";
         $url = 'https://pvp.qq.com/web201605/js/herolist.json';
         $missionModel=new MissionModel();
         $client = new ClientServices();
