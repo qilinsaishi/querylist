@@ -24,7 +24,7 @@ class  PlayerService
         $this->getPlayerListByCollectResult($game, $mission_type);
         $this->getScoreggPlayerDetail($game, $mission_type);
         $this->insertCpseoPlayer($game, $mission_type);
-        $this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
+        //$this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
         return 'finish';
     }
 
