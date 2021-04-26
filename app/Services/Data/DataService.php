@@ -89,10 +89,9 @@ class DataService
 
                     $redisService->saveCache($dataType,$p,$dataArr);
                 }
-                if(isset($dataType) && $dataType='informationList') {
+                if(isset($dataType) && $dataType=='informationList') {
                     $dataArr["data"] = (new ExtraProcessService())->process($dataType,$dataArr["data"]);
                 }
-
                 if(in_array($dataType,['information','informationList']))
                 {
                     foreach($dataArr["data"] as $k_1 => $v_1)
