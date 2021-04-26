@@ -492,7 +492,7 @@ class InformationService
         $curTime=time();
         foreach ($informationList as $val)
         {
-            if(strtotime($val['time_to_publish']) <=$curTime)
+            if((strtotime($val['time_to_publish'])-8*3600) <=$curTime)
             {
                 echo "start to process:".$val['id']."\n";
                 $data['status']=1;
