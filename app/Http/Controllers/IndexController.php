@@ -158,6 +158,13 @@ class IndexController extends Controller
 
         return $return;
     }
+    public function truncate()
+    {
+        $redisService = new RedisService();
+        $prefix = $this->request->get("prefix","");
+        $return = $redisService->truncate($prefix);
+        return $return;
+    }
 
     public function sitemap()
     {
