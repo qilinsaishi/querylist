@@ -278,12 +278,25 @@ class RedisService
                     $domain=$siteInfo['domain'] ?? '';
                     $url=$domain.$type;
                     $rt=file_get_contents($url);
-                    
+
                 }
             }
             return $params_list;
 
         }
     }
-
+    public function truncate($prefix="")
+    {
+        $redis = app("redis.connection");
+        $keyList = $redis->keys($prefix . "_*");
+        $params_list = [];
+        $return = ["cleard"=>0,"cleard_list"=>[]];
+        foreach ($keyList as $key)
+        {
+            $return["cleard_list"][] = $key;
+            $redis->del($key);
+        }
+        $return["cleard"] = count($return["cleard_list"]);
+        return $return;
+    }
 }
