@@ -27,3 +27,5 @@ Route::post('sitemap','IndexController@sitemap');
 Route::any('lol/team_info','HomeController@teamInfo');
 Route::any('lol/refresh','lolIndexController@refresh');
 Route::any('refresh','IndexController@refresh');
+Route::any('truncate','IndexController@truncate');
+
