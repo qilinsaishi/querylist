@@ -31,24 +31,19 @@ class RedisService
             ],
             "imageList" => [//图片列表
                 'prefix' => "imageList",
-                'expire' => 86400,
+                'expire' => 3600,
             ],
             "links" => [//友链
                 'prefix' => "links",
-                'expire' => 86400,
-            ],
-            "information" => [//资讯
-                'prefix'=>"info",
-                'expire'=>86400,
+                'expire' => 3600,
             ],
             "totalPlayerList" => [//队员总表
                 'prefix' => "totalPlayerList",
-                'expire' => 60,
+                'expire' => 3600,
             ],
-
             "totalTeamInfo" => [//战队总表
                 'prefix' => "totalTeamInfo",
-                'expire' => 3600,
+                'expire' => 86400,
             ],
 
             "totalTeamList" => [//战队总表
@@ -62,7 +57,7 @@ class RedisService
             ],
             "tournament" => [//赛事
                 'prefix' => "tournament",
-                'expire' => 3600,
+                'expire' => 86400,
             ],
 
             "intergratedTeam" => [//整合队伍
@@ -81,8 +76,28 @@ class RedisService
                 'prefix' => "intergratedPlayerList",
                 'expire' => 86400,
             ],
+            "lolHero" => [//lolHero
+                'prefix' => "lolHero",
+                'expire' => 86400,
+            ],
+            "kplHero" => [//kplHero
+                'prefix' => "kplHero",
+                'expire' => 86400,
+            ],
+            "dota2Hero" => [//dota2Hero
+                'prefix' => "dota2Hero",
+                'expire' => 86400,
+            ],
             "lolHeroList" => [//lolHeroList
                 'prefix' => "lolHeroList",
+                'expire' => 86400,
+            ],
+            "kplHeroList" => [//kplHeroList
+                'prefix' => "kplHeroList",
+                'expire' => 86400,
+            ],
+            "dota2HeroList" => [//dota2HeroList
+                'prefix' => "dota2HeroList",
                 'expire' => 86400,
             ],
             "lolEquipmentList" => [//lolEquipmentList
