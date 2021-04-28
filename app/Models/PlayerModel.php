@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class PlayerModel extends Model
 {
     protected $table = "player_info";
-    protected $primaryKey = "player_id";
+    public $primaryKey = "player_id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -363,12 +363,13 @@ class PlayerModel extends Model
         return $player_count->count();
     }
 
-    public function getPlayerById($player_id){
+    public function getPlayerById($player_id,$fields = "*"){
         if(is_array($player_id))
         {
-            $player_id = $player_id["0"]??($player_id["0"]??$player_id["player_id"]);
+            $player_id = $player_id['0']??($player_id['player_id']??0);
         }
-        $player_info =$this->select("*")
+        $fields = is_array($fields)?$fields:explode(",",$fields);
+        $player_info =$this->select($fields)
             ->where("player_id",$player_id)
             ->get()->first();
         if(isset($player_info->player_id))
