@@ -18,6 +18,7 @@ class DataService
         {
             $start = microtime(true);
             $dataType = $params['dataType']??$name;
+            $view = $redisService->addViews($dataType,$params);
             if(isset($functionList[$dataType]))
             {
                 $toSave = 1;
@@ -115,6 +116,7 @@ class DataService
 
                 $dataArr['processTime'] = microtime(true)-$start;
                 $dataArr['cached'] = $toSave==1?0:1;
+                $dataArr['view_key'] = $view;
                 $return[$name] = $dataArr;
             }
         }
