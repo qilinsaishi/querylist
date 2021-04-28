@@ -20,6 +20,7 @@ class RedisService
             "information" => [
                 'prefix' => "information",
                 'expire' => 86400,
+                'views'=> 1
             ],
             "teamList" => [//团队列表
                 'prefix' => "teamList",
@@ -41,9 +42,15 @@ class RedisService
                 'prefix' => "totalPlayerList",
                 'expire' => 3600,
             ],
+            "totalPlayerInfo" => [//队员总表
+                'prefix' => "totalPlayerInfo",
+                'expire' => 3600,
+                'views'=>1,
+            ],
             "totalTeamInfo" => [//战队总表
                 'prefix' => "totalTeamInfo",
                 'expire' => 86400,
+                'views'=> 1
             ],
 
             "totalTeamList" => [//战队总表
@@ -313,5 +320,103 @@ class RedisService
         }
         $return["cleard"] = count($return["cleard_list"]);
         return $return;
+    }
+    //更新缓存中的浏览数量
+    public function addViews($dataType = "",$params = [])
+    {
+        $cacheConfig = $this->getCacheConfig();
+        if (isset($cacheConfig[$dataType]))
+        {
+            if(($cacheConfig[$dataType]['views']??0) == 1)
+            {
+                $id = 0;
+                switch ($dataType)
+                {
+                    case "totalTeamInfo":
+                        if(is_array($params))
+                        {
+                            $id = $params['0']??($params['team_id']??0);
+                        }
+                        break;
+                    case "totalPlayerInfo":
+                        if(is_array($params))
+                        {
+                            $id = $params['0']??($params['player_id']??0);
+                        }
+                        break;
+                    case "information":
+                        if(is_array($params))
+                        {
+                            $id = $params['0']??($params['id']??0);
+                        }
+                        break;
+                    case "lolHero":
+                        if(is_array($params))
+                        {
+                            $id = $params['0']??($params['id']??0);
+                        }
+                        break;
+                    case "kplHero":
+                        if(is_array($params))
+                        {
+                            $id = $params['0']??($params['id']??0);
+                        }
+                        break;
+                    case "dota2Hero":
+                        if(is_array($params))
+                        {
+                            $id = $params['0']??($params['id']??0);
+                        }
+                        break;
+                }
+                $redis = app("redis.connection");
+                $redis_key = "views_".$cacheConfig[$dataType]["prefix"]."_".$id;
+                $redis->incr($redis_key);
+                return $redis_key;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    //保存缓存中的浏览数量
+    public function saveViews()
+    {
+        $redis = app("redis.connection");
+        $redisKey = "views_*_*";
+        $keys = $redis->keys($redisKey);
+        $priviligeList = (new PrivilegeService())->getPriviliege();
+        foreach($keys as $redisKey)
+        {
+            $views = intval($redis->get($redisKey));
+            if($views>0)
+            {
+                $t = explode("_",$redisKey);
+                if(isset($priviligeList[$t['1']]))
+                {
+                    $modelName = $priviligeList[$t['1']]['list']['0']['model'];
+                    $functionGet = $priviligeList[$t['1']]['functionSingle'];
+                    $functionUpdate = $priviligeList[$t['1']]['functionUpdate'];
+                    $model = new $modelName;
+                    $current = $model->$functionGet($t['2'],($model->primaryKey.","."views"));
+                    if(isset($current[$model->primaryKey]))
+                    {
+                        $current['views'] += $views;
+                        print_R($current);
+                        $update = $model->$functionUpdate($t['2'],$current);
+                        if($update)
+                        {
+                            $redis->del($redisKey);
+                        }
+                    }
+                }
+            }
+
+        }
     }
 }
