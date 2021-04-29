@@ -12,7 +12,7 @@ use App\Models\PlayerModel as PlayerModel;
 class MissionService
 {
     //爬取数据
-    public function collect($game = "", $source = "", $mission_type = '',$count=50)
+    public function collect($game = "", $source = "", $mission_type = '',$count=1000)
     {
         //获取爬取任务列表
         $mission_list = $this->getMission($game, $source, $mission_type, $count);

@@ -59,9 +59,21 @@ class TotalTeamModel extends Model
             $team_list = $team_list->where("tid",$params['tid']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']))
         {
-            $team_list = $team_list->where("game",$params['game']);
+            if(is_array($params['game'])){
+                if(count($params['game'])>0){
+                    $gameArr=$params['game'];
+                    $team_list = $team_list->whereIn("game",$gameArr);
+                }
+            }else{
+                if( strlen($params['game'])>=3){
+                    $gameArr[]=$params['game'];
+                    $team_list = $team_list->whereIn("game",$gameArr);
+                }
+
+            }
+
         }
         //不所属战队
         if(isset($params['except_team']) && $params['except_team']>0)
@@ -175,9 +187,21 @@ class TotalTeamModel extends Model
             $team_count = $team_count->where("tid",$params['tid']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']))
         {
-            $team_count = $team_count->where("game",$params['game']);
+            if(is_array($params['game'])){
+                if(count($params['game'])>0){
+                    $gameArr=$params['game'];
+                    $team_count = $team_count->whereIn("game",$gameArr);
+                }
+            }else{
+                if( strlen($params['game'])>=3){
+                    $gameArr[]=$params['game'];
+                    $team_count = $team_count->whereIn("game",$gameArr);
+                }
+
+            }
+
         }
         //不所属战队
         if(isset($params['except_team']) && $params['except_team']>0)
