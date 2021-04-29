@@ -67,7 +67,6 @@ class MatchService
                     echo $game . "match-gamedota2-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                 } else {
                     echo "exits-match-gamedota2-" . $val['id'] . "\n";
-                    continue;
                 }
 
             }
@@ -139,7 +138,6 @@ class MatchService
                     echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                 } else {
                     echo "exits" . "\n";//Mission 表存在记录跳过
-                    continue;
                 }
 
             }
@@ -185,7 +183,6 @@ class MatchService
                     echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                 } else {
                     echo "exits" . "\n";//表示Mission 任务表不存记录
-                    continue;
                 }
 
             }
@@ -248,7 +245,6 @@ class MatchService
                                         } else {
                                             //表示Mission表记录已存在，跳出继续
                                             echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
-                                            continue;
                                         }
                                         /*} else {
                                             //表示scoregg_match_info表记录已存在，跳出继续
