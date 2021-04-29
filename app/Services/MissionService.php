@@ -66,6 +66,7 @@ class MissionService
                             }
                         } else {
                            echo "missionId:".$mission['mission_id']." empty\n";
+                           $missionModel->updateMission($mission['mission_id'], ['mission_status' => 3]);
                         }
                     }
                 }
