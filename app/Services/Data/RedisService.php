@@ -291,7 +291,7 @@ class RedisService
                             $id=1;
                             break;
                         case "kpl":
-                            $id=2;
+                            $id=3;
                             break;
                         case "dota2":
                             $id=4;
