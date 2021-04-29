@@ -274,6 +274,7 @@ class RedisService
                 $info = (new InformationModel())->getInformationById($params['0'],["id","type","game"]);
                 if(isset($info['id']))
                 {
+                    $type = "";
                     if($info['type']==4)
                     {
                         $type="/strategylist/1/reset";
@@ -282,14 +283,15 @@ class RedisService
                     {
                         $type = "/newslist/1/reset";
                     }
-
+                    if($type!="")
+                    {
                     switch($info['game'])
                     {
                         case "lol":
                             $id=1;
                             break;
                         case "kpl":
-                            $id=2;
+                            $id=3;
                             break;
                         case "dota2":
                             $id=4;
@@ -300,6 +302,7 @@ class RedisService
                     $domain=$siteInfo['domain'] ?? '';
                     $url=$domain.$type;
                     $rt=file_get_contents($url);
+                    }
 
                 }
             }
