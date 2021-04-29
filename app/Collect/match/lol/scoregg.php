@@ -26,23 +26,72 @@ class scoregg
             ],
             'list'=>[
                 'match_id'=>['path'=>"matchID",'default'=>0],//比赛唯一ID
+                'match_status'=>['path'=>"status",'default'=>0],//比赛状态
                 'game'=>['path'=>"",'default'=>"lol"],//游戏
                 'home_score'=>['path'=>"team_a_win",'default'=>0],//主队得分
                 'away_score'=>['path'=>"team_a_win",'default'=>0],//客队得分
                 'home_id'=>['path'=>"teamID_a",'default'=>0],//主队id
                 'away_id'=>['path'=>"teamID_b",'default'=>0],//客队id
                 'logo'=>['path'=>"",'default'=>""],//logo
+                "round_id"=>['path'=>"roundID",'default'=>""],//轮次唯一ID
                 "tournament_id"=>['path'=>"tournamentID",'default'=>""],//赛事唯一ID
-                "extra"=>['path'=>"result_list",'default'=>[]],//额外信息
                 "start_time"=>['path'=>"start_time",'default'=>[]],
+                "match_pre"=>['path'=>"match_pre",'default'=>[]],//赛前数据
+                "match_live"=>['path'=>"livedata",'default'=>[]],//赛事进程
+                "match_data"=>['path'=>"match_data",'default'=>[]],//赛事数据
+                "round"=>['path'=>"round_list",'default'=>[]]//轮次数据
             ]
         ];
 
     public function collect($arr)
     {
         $cdata = [];
-        $res = $url = $arr['detail'] ?? [];
+        $res =$arr['detail'] ?? [];
+        $matchID=$arr['detail']['matchID'] ?? 0;
+        $status=$arr['detail']['status'] ?? 0;
         $type = $arr['detail']['type'] ?? '';
+        if($type=='match'){//赛程
+            //status=0 未开始;status=1表示正在开始，status=2表示已经结束
+            //表示赛前分析接口
+            $match_pre_url='https://img1.famulei.com/match_pre/'.$matchID.'.json';
+            $match_pre=curl_get($match_pre_url);
+            if($match_pre['code']==200) {
+                $res['match_pre']=$match_pre['data'] ?? [];
+            }else{
+                $res['match_pre']=[];
+            }
+            //复盘（正在进行或者已结束）
+            if($status !=0){
+                $livedata_url='https://img1.famulei.com/lol/livedata/'.$matchID.'.json';
+                $livedata=curl_get($livedata_url);//获取复盘数据接口
+                if($livedata['code']==200) {
+                    $res['livedata']=$livedata['data'] ?? [];
+                    if(isset($res['livedata']) && count($res['livedata']) >0){
+                        foreach ($res['livedata'] as &$vo){
+                            $web_url=$vo['web_url'] ?? '';
+                            if($web_url !='' ){//判断url不为空
+
+                                $weblivedata=curl_get($web_url);//获取比赛中的详情数据
+                                $vo['info']=$weblivedata['data'] ?? [];
+                                unset($vo['web_url']);
+                                unset($vo['url']);
+                            }else{
+                                $vo['info']=[];
+                            }
+
+                        }
+                    }else{
+                        $res['livedata']=[];
+                    }
+                }else{
+                    $res['livedata']=[];
+                }
+            }else{
+                $res['livedata']=[];
+            }
+
+        }
+
         if (!empty($res)) {
             //处理战队采集数据
             $cdata = [
@@ -100,28 +149,40 @@ class scoregg
         }
         else
         {
+            $currentKeyList = array_column($this->data_map['list'],'path');
+            $keyList = array_keys($arr['content']);
             /*
-            $team = [
-                ['site_id'=>$arr['content']['teamID_a'],'team_name'=>$arr['content']['team_a_name'],'logo'=>getImage($arr['content']['team_a_image'])],
-                ['site_id'=>$arr['content']['teamID_b'],'team_name'=>$arr['content']['team_b_name'],'logo'=>getImage($arr['content']['team_b_image'])],
-            ];
-            foreach($team as $key => $teamInfo)
+            foreach($keyList as $key)
             {
-                $data['team'][] =  getDataFromMapping($this->data_map['team'],$teamInfo);
+                if(is_array($arr['content'][$key]))
+                {
+                    echo "key:".$key."\n";
+                    $subKeyList = array_keys($arr['content'][$key]);
+                    foreach($subKeyList as $key2)
+                    {
+                        echo "        subKey:".$key2."\n";
+                    }
+                }
             }
             */
-            foreach($arr['content']['result_list'] as $key => $data)
+            $arr['content']['match_data'] = [];
+            $arr['content']['start_time'] = date("Y-m-d H:i:s",$arr['content']['start_time']);
+            //unset($arr['content']['type'],$arr['content']['game']);
+
+            foreach($keyList as $key)
             {
-                if(isset($data['record_list_a']))
+                if(!in_array($key,$currentKeyList))
                 {
-                    unset($arr['content']['result_list'][$key]['record_list_a']);
-                }
-                if(isset($data['record_list_b']))
-                {
-                    unset($arr['content']['result_list'][$key]['record_list_b']);
+                    echo "key:".$key."\n";
+                    $arr['content']['match_data'][$key] = $arr['content'][$key];
+                    unset($arr['content'][$key]);
                 }
             }
-            $arr['content']['start_time'] = date("Y-m-d H:i:s",$arr['content']['start_time']);
+            foreach($arr['content']['round_list'] as $key => $round)
+            {
+                $roundInfo = ['tournament_id'=>$arr['content']['tournamentID'],'round_name'=>$round['name'],'round_id'=>$round['roundID']];
+                $arr['content']['round_list'][$key] = $roundInfo;
+            }
             $data['match_list'][] = getDataFromMapping($this->data_map['list'],$arr['content']);
         }
         return $data;

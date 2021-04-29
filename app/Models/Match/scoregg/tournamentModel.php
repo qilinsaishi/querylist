@@ -44,6 +44,11 @@ class tournamentModel extends Model
     {
         $fields = isset($params["fields"])?explode(",",$params["fields"],true):["*"];
         $tournament_list =$this->select($fields);
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $tournament_list = $tournament_list->where("game",$params['game']);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $tournament_list = $tournament_list

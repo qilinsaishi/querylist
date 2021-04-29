@@ -263,6 +263,17 @@ class MissionService
                                 {
                                     $save = $ModelClass->saveMatch($value);
                                     echo "saveMatch:".$save."\n";
+                                    if (isset($value['round']) && count($value['round'])>0)
+                                    {
+                                        $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\roundModel';
+                                        $classList = $this->getClass($classList, $ModelClassName);
+                                        $ModelClass = $classList[$ModelClassName];
+                                        foreach($value['round'] as  $round)
+                                        {
+                                            $saveRound = $ModelClass->saveRound(array_merge(["game"=>$result['game']],$round));
+                                            echo "saveRound:".$saveRound."\n";
+                                        }
+                                    }
                                 }
                             }
                             if(!isset($save))
@@ -291,8 +302,8 @@ class MissionService
                                         echo "saveTeam:".$saveTeam."\n";
                                     }
                                 }
-
                             }
+
                             if (isset($processResult['tournament']) && count($processResult['tournament'])>0) {
                                 $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
                                 $classList = $this->getClass($classList, $ModelClassName);
