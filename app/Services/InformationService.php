@@ -21,22 +21,22 @@ class InformationService
         switch ($game) {
             case "lol":
                 $this->insertWanplusVideo($game);
-                $this->insertLolInformation();
+                $this->insertLolInformation();//lol官网资讯采集
                 break;
             case "kpl":
                 $this->insertWanplusVideo($game);
-                $this->insertKplInformation();
+                $this->insertKplInformation();//kpl官网资讯采集
                 break;
             case "dota2":
                 $typeList = ['news', 'gamenews', 'competition', 'news_update'];
                 $raidersList = ['raiders', 'newer', 'step', 'skill'];
                 foreach ($typeList as $v1) {
-                    $this->insertDota2Information($v1);
+                    $this->insertDota2Information($v1);//dota2资讯采集
                 }
                 foreach ($raidersList as $v2) {
-                    $this->insertDota2Raiders($v2);
+                    $this->insertDota2Raiders($v2);//攻略采集
                 }
-                $this->insertWanplusVideo($val);
+                $this->insertWanplusVideo($game);//资讯视频采集方法
 
                 break;
             case "csgo":
