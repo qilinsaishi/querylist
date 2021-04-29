@@ -86,8 +86,6 @@ class ScheduleService
                         }
 
                     }
-                } else {
-                    continue;
                 }
             }
         }
@@ -192,12 +190,10 @@ class ScheduleService
                                 echo $game . $key . "-scoregg-match-tournament-mission-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                             } else {
                                 echo "exits--scoregg-match-tournament-mission" . $key . '-' . $val['ajax_url'] . "\n";//表示Mission表记录已存在，跳出继续
-                                continue;
                             }
                         } else {
                             //表示scoregg_tournament_info表记录已存在，跳出继续
                             echo "exits-scoregg_tournament_info" . $key . '-' . $val['ajax_url'] . "\n";
-                            continue;
                         }
 
                     }
