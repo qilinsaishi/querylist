@@ -139,6 +139,10 @@ class gamedota2
                 $arr['content']['content'] = str_replace($img,$src,$arr['content']['content']);
             }
         }
+        if(!isset($arr['content']['create_time']) || strtotime($arr['content']['create_time'])==0)
+        {
+            $arr['content']['create_time'] = date("Y-m-d H:i:s");
+        }
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }

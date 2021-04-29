@@ -12,10 +12,10 @@ use App\Models\PlayerModel as PlayerModel;
 class MissionService
 {
     //爬取数据
-    public function collect($game = "", $source = "", $mission_type = '')
+    public function collect($game = "", $source = "", $mission_type = '',$count=50)
     {
         //获取爬取任务列表
-        $mission_list = $this->getMission($game, $source, $mission_type, 2000);
+        $mission_list = $this->getMission($game, $source, $mission_type, $count);
         $collectModel = new CollectModel();
         $missionModel = new MissionModel();
         //初始化空的类库列表
@@ -47,7 +47,7 @@ class MissionService
                         //执行爬取操作
                         $result = $class->collect($mission);
                         //如果爬取成功
-                        if (count($result) >0) {
+                        if (is_array($result) && count($result) >0) {
                             try {
                                 //保存结果
                                 $rt = $collectModel->insertCollectResult($result);
@@ -65,7 +65,8 @@ class MissionService
                                 return $e->getMessage();
                             }
                         } else {
-                           continue;
+                           echo "missionId:".$mission['mission_id']." empty\n";
+                           $missionModel->updateMission($mission['mission_id'], ['mission_status' => 3]);
                         }
                     }
                 }
