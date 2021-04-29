@@ -41,8 +41,52 @@ class scoregg
     public function collect($arr)
     {
         $cdata = [];
-        $res = $url = $arr['detail'] ?? [];
+        $res = $arr['detail'] ?? [];
+        $matchID=$arr['detail']['matchID'] ?? 0;
+        $status=$arr['detail']['status'] ?? 0;
         $type = $arr['detail']['type'] ?? '';
+        if($type=='match'){//赛程
+            //status=0 未开始;status=1表示正在开始，status=2表示已经结束
+            //表示赛前分析接口
+            $match_pre_url='https://img1.famulei.com/match_pre/'.$matchID.'.json';
+            $match_pre=curl_get($match_pre_url);
+            if($match_pre['code']==200) {
+                $res['match_pre']=$match_pre['data'] ?? [];
+            }else{
+                $res['match_pre']=[];
+            }
+            //复盘（正在进行或者已结束）
+            if($status !=0){
+                $livedata_url='https://img1.famulei.com/lol/livedata/'.$matchID.'.json';
+                $livedata=curl_get($livedata_url);//获取复盘数据接口
+                if($livedata['code']==200) {
+                    $res['livedata']=$livedata['data'] ?? [];
+                    if(isset($res['livedata']) && count($res['livedata']) >0){
+                       foreach ($res['livedata'] as &$vo){
+                           $web_url=$vo['web_url'] ?? '';
+                           if($web_url !='' ){//判断url不为空
+
+                               $weblivedata=curl_get($web_url);//获取比赛中的详情数据
+                               $vo['info']=$weblivedata['data'] ?? [];
+                               unset($vo['web_url']);
+                               unset($vo['url']);
+                           }else{
+                               $vo['info']=[];
+                           }
+
+                       }
+                    }else{
+                        $res['livedata']=[];
+                    }
+                }else{
+                    $res['livedata']=[];
+                }
+            }else{
+                $res['livedata']=[];
+            }
+
+        }
+
         if (!empty($res)) {
             //处理战队采集数据
             $cdata = [
