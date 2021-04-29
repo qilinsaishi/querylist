@@ -59,10 +59,10 @@ class MissionService
                                 } else {
                                     //失败
                                     $missionModel->updateMission($mission['mission_id'], ['mission_status' => 3]);
-                                    continue;
                                 }
                             } catch (\Exception $e) {
-                                return $e->getMessage();
+                                echo "missionId:".$mission['mission_id']." error\n";
+                                $missionModel->updateMission($mission['mission_id'], ['mission_status' => 3]);
                             }
                         } else {
                            echo "missionId:".$mission['mission_id']." empty\n";
