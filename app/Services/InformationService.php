@@ -36,7 +36,7 @@ class InformationService
                 foreach ($raidersList as $v2) {
                     $this->insertDota2Raiders($v2);
                 }
-                $this->insertWanplusVideo($val);
+                $this->insertWanplusVideo($game);
 
                 break;
             case "csgo":
