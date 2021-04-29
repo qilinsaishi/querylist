@@ -83,9 +83,19 @@ class InformationModel extends Model
             $information_list = $information_list->where("baidu_word", $params['baidu_word'] > 0 ? 1 : 0);
         }
         //游戏类型
-        if (isset($params['game']) && strlen($params['game']) >= 3) {
-            $information_list = $information_list->where("game", $params['game']);
+        if(is_array($params['game'])){
+            if(count($params['game'])>0){
+                $gameArr=$params['game'];
+                $information_list = $information_list->whereIn("game",$gameArr);
+            }
+        }else{
+            if( strlen($params['game'])>=3){
+                $gameArr[]=$params['game'];
+                $information_list = $information_list->whereIn("game",$gameArr);
+            }
+
         }
+
         $hot = $params['hot'] ?? 0;
         if ($hot == 1) {
             $information_list->where("hot", $hot);
@@ -262,9 +272,18 @@ class InformationModel extends Model
             $information_count = $information_count->where("baidu_word", $params['baidu_word'] > 0 ? 1 : 0);
         }
         //游戏类型
-        if (isset($params['game']) && strlen($params['game']) >= 3) {
-            $information_count = $information_count->where("game", $params['game']);
+        if(is_array($params['game'])){
+            if(count($params['game'])>0){
+                $gameArr=$params['game'];
+                $information_count = $information_count->whereIn("game",$gameArr);
+            }
+        }else{
+            if( strlen($params['game'])>=3){
+                $gameArr[]=$params['game'];
+                $information_count = $information_count->whereIn("game",$gameArr);
+            }
         }
+
         $hot = $params['hot'] ?? 0;
         if ($hot == 1) {
             $information_count = $information_count->where("hot", $hot);

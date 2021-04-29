@@ -44,6 +44,19 @@ class tournamentModel extends Model
     {
         $fields = isset($params["fields"])?explode(",",$params["fields"],true):["*"];
         $tournament_list =$this->select($fields);
+        //游戏类型
+        if(is_array($params['game'])){
+            if(count($params['game'])>0){
+                $gameArr=$params['game'];
+                $tournament_list = $tournament_list->whereIn("game",$gameArr);
+            }
+        }else{
+            if( strlen($params['game'])>=3){
+                $gameArr[]=$params['game'];
+                $tournament_list = $tournament_list->whereIn("game",$gameArr);
+            }
+
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $tournament_list = $tournament_list
@@ -55,6 +68,19 @@ class tournamentModel extends Model
     }
     public function getTournamentCount($params)
     {
+        $tournament_count = $this;
+        if(is_array($params['game'])){
+            if(count($params['game'])>0){
+                $gameArr=$params['game'];
+                $tournament_count = $tournament_count->whereIn("game",$gameArr);
+            }
+        }else{
+            if( strlen($params['game'])>=3){
+                $gameArr[]=$params['game'];
+                $tournament_count = $tournament_count->whereIn("game",$gameArr);
+            }
+
+        }
         $tournament_count =$this->count();
         return $tournament_count;
     }
