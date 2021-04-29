@@ -47,7 +47,7 @@ class MissionService
                         //执行爬取操作
                         $result = $class->collect($mission);
                         //如果爬取成功
-                        if (count($result) >0) {
+                        if (is_array($result) && count($result) >0) {
                             try {
                                 //保存结果
                                 $rt = $collectModel->insertCollectResult($result);
