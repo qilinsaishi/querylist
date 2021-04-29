@@ -102,7 +102,8 @@ class Mission extends Command
                 }
                 break;
             case "collect":
-                (new oMission())->collect($game,"",$mission_type);
+                $count = $this->option("count")??50;
+                (new oMission())->collect($game,"",$mission_type,$count);
                 break;
             case "process":
                 if($game != "all")

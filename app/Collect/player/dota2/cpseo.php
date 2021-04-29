@@ -68,13 +68,27 @@ class cpseo
         $t = explode("/",$arr['source_link']);
         $arr['content']['site_id'] = intval($t[count($t)-1]??0);
         $arr['content']['aka'] = explode(",",$arr['content']['real_name']);
-        //     '/^[\x7f-\xff]+$/' 全是中文
-        if(preg_match('/[\x7f-\xff]/', $arr['content']['nickname']))
-        {
-            $arr['content']['cn_name'] = $arr['content']['nickname'];
+        $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
+        //中文
+        if(isset($arr['content']['real_name']) && preg_match($patten, $arr['content']['real_name'])){
+            $arr['content']['cn_name'] = $arr['content']['real_name'];
         }else{
-            $arr['content']['en_name'] = $arr['content']['nickname'];
+            if(preg_match($patten, $arr['content']['nickname']))
+            {
+                $arr['content']['cn_name'] = $arr['content']['nickname'] ?? '';
+            }
         }
+        //英文
+        if(isset($arr['content']['real_name']) && !preg_match($patten, $arr['content']['real_name'])){
+            $arr['content']['en_name'] = $arr['content']['real_name'];
+        }else{
+            if(!preg_match($patten, $arr['content']['nickname']))
+            {
+                $arr['content']['en_name'] = $arr['content']['nickname'];
+            }
+
+        }
+
         $arr['content']['logo'] = getImage($arr['content']['logo']);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
