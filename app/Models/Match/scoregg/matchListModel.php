@@ -37,7 +37,7 @@ class matchListModel extends Model
     protected $attributes = [
     ];
     protected $toJson = [
-        "extra"
+        "match_pre","match_data","match_live"
     ];
     protected $toAppend = [
     ];
@@ -142,6 +142,10 @@ class matchListModel extends Model
 
     public function saveMatch($data)
     {
+        if(isset($data['round']))
+        {
+            unset($data['round']);
+        }
         $currentMatch = $this->getMatchById($data['match_id']);
         if(!isset($currentMatch['match_id']))
         {
