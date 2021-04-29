@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class InformationModel extends Model
 {
     protected $table = "information";
-    protected $primaryKey = "id";
+    public $primaryKey = "id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -132,6 +132,11 @@ class InformationModel extends Model
 
     public function getInformationById($id, $fields = "*")
     {
+        if(is_array($id))
+        {
+            $id = $id['0']??($id['id']??0);
+        }
+        $fields = is_array($fields)?$fields:explode(",",$fields);
         $information = $this->select($fields)
             ->where("id", $id)
             ->get()->first();

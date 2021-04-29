@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 
 use App\Services\AliyunSercies;
 use App\Services\AliyunService;
+use App\Services\Data\RedisService;
 use App\Services\EquipmentService;
 use App\Services\HeroService;
 use App\Services\InformationService;
@@ -133,6 +134,10 @@ class Mission extends Command
             case "unpublished":
                 //php artisan mission:collect unpublished  information all (手动发布脚本命令)
                 (new InformationService())->unPublishedList();//更新预发布脚本
+                break;
+            case "views":
+                //php artisan mission:collect views  update all (保存缓存中的浏览数据)
+                (new RedisService())->saveViews();
                 break;
             default:
 

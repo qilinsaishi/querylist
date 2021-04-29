@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class TeamModel extends Model
 {
     protected $table = "team_info";
-    protected $primaryKey = "team_id";
+    public $primaryKey = "team_id";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -148,7 +148,8 @@ class TeamModel extends Model
         {
             $team_id = $team_id['0']??($team_id['team_id']??0);
         }
-        $team_info =$this->select(explode(",",$fields))
+        $fields = is_array($fields)?$fields:explode(",",$fields);
+        $team_info =$this->select($fields)
             ->where("team_id",$team_id)
             ->get()->first();
         if(isset($team_info->team_id))

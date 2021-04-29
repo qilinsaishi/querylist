@@ -127,7 +127,8 @@ class PrivilegeService
                 'function' => "getTeamById",
                 'functionCount' => "getTeamCount",
                 'functionSingle' => "getTeamById",
-                'functionProcess' => "processTotalTeam"
+                'functionProcess' => "processTotalTeam",
+                'functionUpdate' => "updateTeam",
             ],
             "totalPlayerList" => [//队员总列表
                 'list' => [
@@ -177,7 +178,8 @@ class PrivilegeService
                 'function' => "getPlayerById",
                 'functionCount' => "getPlayerCount",
                 'functionSingle' => "getPlayerById",
-                'functionProcess' => "processTotalPlayer"
+                'functionProcess' => "processTotalPlayer",
+                'functionUpdate' => "updatePlayer",
             ],
             "information" => [//资讯
                 'list' => [
@@ -187,7 +189,8 @@ class PrivilegeService
                 'function' => "getInformationById",
                 'functionCount' => "",
                 'functionSingle' => "getInformationById",
-                'functionProcess' => "processInformation"
+                'functionProcess' => "processInformation",
+                'functionUpdate' => "updateInformation",
             ],
             "lolHeroList" => [//lol英雄列表
                 'list' => [
@@ -494,7 +497,11 @@ class PrivilegeService
                                         $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
                                     } else {
                                         $functionList[$dataType]['functionSingle'] = "";
-
+                                    }
+                                    if (isset($priviliegeList[$dataType]['functionUpdate']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionUpdate'])) {
+                                        $functionList[$dataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
+                                    } else {
+                                        $functionList[$dataType]['functionUpdate'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionProcess'])) {
                                         $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
@@ -551,6 +558,11 @@ class PrivilegeService
                             } else {
                                 $functionList[$dataType]['functionSingle'] = "";
                             }
+                            if (isset($priviliegeList[$dataType]['functionUpdate']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionUpdate'])) {
+                                $functionList[$dataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
+                            } else {
+                                $functionList[$dataType]['functionUpdate'] = "";
+                            }
                             if (isset($priviliegeList[$dataType]['functionProcess'])) {
                                 $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
                             } else {
@@ -588,6 +600,11 @@ class PrivilegeService
                                             $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
                                         } else {
                                             $functionList[$dataType]['functionSingle'] = "";
+                                        }
+                                        if (isset($priviliegeList[$dataType]['functionUpdate']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionUpdate'])) {
+                                            $functionList[$dataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
+                                        } else {
+                                            $functionList[$dataType]['functionUpdate'] = "";
                                         }
                                         if (isset($priviliegeList[$dataType]['functionProcess'])) {
                                             $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
@@ -637,6 +654,11 @@ class PrivilegeService
                                         $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
                                     } else {
                                         $functionList[$dataType]['functionSingle'] = "";
+                                    }
+                                    if (isset($priviliegeList[$dataType]['functionUpdate']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionUpdate'])) {
+                                        $functionList[$dataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
+                                    } else {
+                                        $functionList[$dataType]['functionUpdate'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionProcess'])) {
                                         $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];

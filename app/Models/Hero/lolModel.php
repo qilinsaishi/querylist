@@ -191,6 +191,10 @@ class lolModel extends Model
     }
 
     public function getHeroById($hero_id){
+        if(is_array($hero_id))
+        {
+            $hero_id = $hero_id['0']??($hero_id['id']??0);
+        }
         $hero_info =$this->select("*")
             ->where("hero_id",$hero_id)
             ->get()->first();
