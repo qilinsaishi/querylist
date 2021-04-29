@@ -154,6 +154,8 @@ class scoregg
                 $data['team'][] =  getDataFromMapping($this->data_map['team'],$teamInfo);
             }
             */
+            print_r($arr);exit;
+
             foreach($arr['content']['result_list'] as $key => $data)
             {
                 if(isset($data['record_list_a']))
