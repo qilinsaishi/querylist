@@ -173,7 +173,7 @@ class scoregg
             {
                 if(!in_array($key,$currentKeyList))
                 {
-                    echo "key:".$key."\n";
+                    //echo "key:".$key."\n";
                     $arr['content']['match_data'][$key] = $arr['content'][$key];
                     unset($arr['content'][$key]);
                 }
