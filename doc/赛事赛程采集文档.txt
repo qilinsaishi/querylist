@@ -1,0 +1,9 @@
+一、采集赛事
+1.采集赛事入mission_list任务表：php artisan mission:collect  insert_mission schedule  lol/kpl         (App\Services\ScheduleService)  
+2.处理赛事入collect_result表：php artisan mission:collect  collect  schedule  lol/kpl
+3.同步到主表scoregg_tournament_info 表：php artisan mission:collect  process schedule  lol/kpl
+
+二、采集比赛
+1.通过赛事id采集比赛入mission_list任务表：php artisan mission:collect  insert_mission match  lol/kpl   (App\Services\MatchService)
+2.处理比赛入collect_result表：php artisan mission:collect  collect  match  lol/kpl   (App\Collect\match\lol\scoregg)
+3.同步到主表scoregg_match_list 表：php artisan mission:collect  process match  lol/kpl   (App\Collect\match\lol\scoregg)
