@@ -19,10 +19,10 @@ class ScheduleService
         if ($game == 'kpl' || $game == 'lol') {
             $this->tournamentList($game);
         }
-        $this->insertWanplusSchedule($game);
-        if ($game == 'dota2') {
+        //$this->insertWanplusSchedule($game);暂时不需要采集玩家赛事方法
+        /*if ($game == 'dota2') {//dota 赛事是不用改，这个没有新的数据
             $this->tournament($game);
-        }
+        }*/
 
         return 'finish';
     }

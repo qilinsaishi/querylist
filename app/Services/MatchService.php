@@ -19,10 +19,10 @@ class MatchService
     {
 
         if ($game == 'kpl' || $game == 'lol') {
-            //$this->saveMissionByCcoreggMatchId(12280,$game);
+            //$this->saveMissionByCcoreggMatchId(12280,$game);//这个是测试单个比赛的方法案例
             $this->scoreggMatch($game);//scoregg 比赛数据
         }
-        /* if ($game == 'dota2') {
+        /* if ($game == 'dota2') {//这个dota2的数据不用改，是拼接起来的专题。暂时不用改
              $this->getDota2International($game);
              $this->getBilibiliDota2($game);
              $this->pwesports($game);
