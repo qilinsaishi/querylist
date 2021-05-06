@@ -93,9 +93,17 @@ class InformationModel extends Model
         if (isset($params['author_id']) && $params['author_id'] > 0) {
             $information_list->where("author_id", $params['author_id']);
         }
-        if (isset($params['type'])) {
-            $types = explode(",", $params['type']);
-            $information_list->whereIn("type", $types);
+        if (isset($params['type']))
+        {
+            if(!is_array($params['type']))
+            {
+                $types = explode(",", $params['type']);
+                $information_list->whereIn("type", $types);
+            }
+            else
+            {
+                $information_list->whereIn("type", $params['type']);
+            }
         }
         if (isset($params['ids'])) {
             //$types = explode(",",$params['type']);
@@ -272,13 +280,19 @@ class InformationModel extends Model
         if (isset($params['author_id']) && $params['author_id'] > 0) {
             $information_count = $information_count->where("author_id", $params['author_id']);
         }
-        if (isset($params['type'])) {
-            $types = explode(",", $params['type']);
-
-            $information_count = $information_count->whereIn("type", $types);
+        if (isset($params['type']))
+        {
+            if(!is_array($params['type']))
+            {
+                $types = explode(",", $params['type']);
+                $information_count->whereIn("type", $types);
+            }
+            else
+            {
+                $information_count->whereIn("type", $params['type']);
+            }
         }
         if (isset($params['ids'])) {
-            //$types = explode(",",$params['type']);
             $information_count = $information_count->whereIn("id", $params['ids']);
         }
         if (isset($params['expect_id'])) {
