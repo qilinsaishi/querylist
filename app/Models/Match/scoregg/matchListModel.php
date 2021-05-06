@@ -43,29 +43,35 @@ class matchListModel extends Model
     ];
     public function getMatchList($params)
     {
-        $match_list =$this->select("*");
+        $start = microtime(true);
+        $fields = $params['fields'] ?? "match_id,game,match_status,round_id,tournament_id,home_id,away_id,home_score,away_score,start_time";
+        $match_list =$this->select(explode(",",$fields));
         $pageSizge = $params['page_size']??4;
         $page = $params['page']??1;
+        /*
         if (isset($params['tournament_id']) && $params['tournament_id']!="") {
             $match_list = $match_list ->where("tournament_id", $params['tournament_id']);
         }
-        $match_list = $match_list
+        */
+        $match_list = $match_list->where("home_id",">",0)->where("away_id",">",0)
             ->limit($pageSizge)
-            ->whereHas('getHomeInfo', function($query){
+        /*    ->whereHas('getHomeInfo', function($query){
                 return $query->select('team_name');
             })->whereHas('getawayInfo', function($query){
                 return $query->select('team_name');
-            })->offset(($page-1)*$pageSizge)
+            })
+        */
+        ->offset(($page-1)*$pageSizge)
             ->orderBy("start_time","desc")
             ->get()->toArray();
-        //print_r($match_list);exit;
+        $end = microtime(true);
         return $match_list;
     }
     public function getHomeInfo(){
-        return $this->belongsTo(TeamModel::class,'home_id','team_id');
+        return $this->belongsTo(TeamModel::class,'home_id','site_id');
     }
     public function getawayInfo(){
-        return $this->belongsTo(TeamModel::class,'away_id','team_id');
+        return $this->belongsTo(TeamModel::class,'away_id','site_id');
     }
     public function getTournamentInfo(){
         return $this->belongsTo(tournamentModel::class,'tournament_id','tournament_id');

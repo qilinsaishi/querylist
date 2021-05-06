@@ -96,6 +96,7 @@ class PrivilegeService
                 ],
                 'withSource' => 1,
                 'function' => "getTournamentById",
+                'functionSingle' => "getTournamentById",
             ],
             "teamList" => [//团队列表
                 'list' => [
@@ -117,7 +118,6 @@ class PrivilegeService
                 'functionSingle' => "getTeamById",
                 'functionSingleBySite' => "getTeamBySiteId",
                 'functionSingleByName' => "getTeamByName"
-
             ],
             "totalTeamInfo" => [//团队总列表
                 'list' => [
@@ -513,6 +513,11 @@ class PrivilegeService
                                     } else {
                                         $functionList[$dataType]['functionProcessCount'] = "";
                                     }
+                                    if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
+                                        $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                    } else {
+                                        $functionList[$dataType]['functionSingleBySite'] = "";
+                                    }
                                     $found = 1;
                                 } else {
                                     //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." not found\n";
@@ -573,6 +578,11 @@ class PrivilegeService
                             } else {
                                 $functionList[$dataType]['functionProcessCount'] = "";
                             }
+                            if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
+                                $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                            } else {
+                                $functionList[$dataType]['functionSingleBySite'] = "";
+                            }
                         }
                     }
                     //如果没找到
@@ -615,6 +625,11 @@ class PrivilegeService
                                             $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
                                         } else {
                                             $functionList[$dataType]['functionProcessCount'] = "";
+                                        }
+                                        if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
+                                            $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                        } else {
+                                            $functionList[$dataType]['functionSingleBySite'] = "";
                                         }
                                         //标记为找到
                                         $found = 1;
@@ -669,6 +684,11 @@ class PrivilegeService
                                         $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
                                     } else {
                                         $functionList[$dataType]['functionProcessCount'] = "";
+                                    }
+                                    if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
+                                        $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                    } else {
+                                        $functionList[$dataType]['functionSingleBySite'] = "";
                                     }
                                     $found = 1;
                                 } else {
@@ -735,20 +755,15 @@ class PrivilegeService
                 $functionList["totalTeamList"] = $f['totalTeamList'];
             }
         }
-        if (!isset($functionList["totalTeamList"]["class"]) || !isset($functionList['totalTeamList']['functionSingle'])) {
+        if (!isset($functionList["totalTeamList"]["class"]) || !isset($functionList['totalTeamList']['functionSingleBySite'])) {
             return $data;
         }
         $modelClass = $functionList["totalTeamList"]["class"];
-        $functionSingle = $functionList["totalTeamList"]['functionSingle'];
+        $functionSingle = $functionList["totalTeamList"]['functionSingleBySite'];
 
         $teamList = [];
         $tournament = [];
         foreach ($data as $key => $matchInfo) {
-            if(isset($matchInfo['extra']))
-            {
-                $matchInfo['extra'] = json_decode($matchInfo['extra'],true);
-            }
-            /*
             //赛事信息
             if (!isset($tournament[$matchInfo['tournament_id']])) {
                 $tournamentInfo = $modelTournamentClass->$functionTournamentSingle($matchInfo['tournament_id']);
@@ -756,7 +771,6 @@ class PrivilegeService
                     $tournament[$matchInfo['tournament_id']] = $tournamentInfo;
                 }
             }
-            */
             //战队信息
             if (!isset($teamList[$matchInfo['home_id']])) {
                 if(isset($matchInfo['extra']['function']))

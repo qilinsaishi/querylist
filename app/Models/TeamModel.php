@@ -53,7 +53,7 @@ class TeamModel extends Model
     ];
     public function getTeamList($params)
     {
-        $fields = $params['fields']??"team_id,team_name,logo,team_history";
+        $fields = $params['fields']??"team_id,team_name,logo";
         $team_list =$this->select(explode(",",$fields));
         //队伍ID
         if(isset($params['ids']) && count($params['ids'])>0)
@@ -164,15 +164,16 @@ class TeamModel extends Model
     }
     public function getTeamBySiteId($team_id,$original_source='',$game='')
     {
-        $team_obj =$this->select("*")
+        $fields = "team_id,team_name,logo,tid,game";
+        $team_info =$this->select(explode(",",$fields))
             ->where("site_id",$team_id);
         if($original_source !=''){
-            $team_obj=$team_obj->where("original_source",$original_source);
+            $team_info=$team_info->where("original_source",$original_source);
         }
         if($game !=''){
-            $team_obj=$team_obj->where("game",$game);
+            $team_info=$team_info->where("game",$game);
         }
-        $team_info=$team_obj->get()->first();
+        $team_info=$team_info->get()->first();
         if(isset($team_info->team_id))
         {
             $team_info = $team_info->toArray();
