@@ -71,6 +71,7 @@ class RedisService
                 'prefix' => "intergratedTeam",
                 'expire' => 86400,
             ],
+
             "intergratedTeamList" => [//整合队伍列表
                 'prefix' => "intergratedTeamList",
                 'expire' => 86400,
@@ -147,6 +148,10 @@ class RedisService
                 unset($params['reset']);
             }
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
+            if(isset($params['game']) && trim($params['game'])!="")
+            {
+                $keyConfig = $keyConfig."_".trim($params['game']);
+            }
             $exists = $redis->exists($keyConfig);
             if ($exists) {
                 $data = json_decode($redis->get($keyConfig), true);
@@ -177,7 +182,10 @@ class RedisService
             }
             ksort($params);
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
-
+            if(isset($params['game']) && trim($params['game'])!="")
+            {
+                $keyConfig = $keyConfig."_".trim($params['game']);
+            }
             //如果接口指定了缓存时间
             if(isset($params['cache_time']))
             {
