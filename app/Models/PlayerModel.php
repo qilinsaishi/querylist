@@ -382,8 +382,9 @@ class PlayerModel extends Model
         }
         return $player_info;
     }
-    public function getPlayerBySiteId($site_id,$game,$source){
-        $player_info =$this->select("*")
+    public function getPlayerBySiteId($site_id,$game,$source,$fields = "player_id,player_name,logo,pid,game")
+    {
+        $player_info =$this->select(explode(",",$fields))
             ->where("site_id",$site_id)
             ->where("game",$game)
             ->where("original_source",$source)

@@ -162,9 +162,8 @@ class TeamModel extends Model
         }
         return $team_info;
     }
-    public function getTeamBySiteId($team_id,$original_source='',$game='')
+    public function getTeamBySiteId($team_id,$original_source='',$game='',$fields = "team_id,team_name,logo,tid,game")
     {
-        $fields = "team_id,team_name,logo,tid,game";
         $team_info =$this->select(explode(",",$fields))
             ->where("site_id",$team_id);
         if($original_source !=''){
