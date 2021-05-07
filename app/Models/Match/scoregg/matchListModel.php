@@ -94,6 +94,10 @@ class matchListModel extends Model
     }
     public function getMatchById($match_id)
     {
+        if(is_array($match_id))
+        {
+            $match_id = $match_id['0']??($match_id['match_id']??0);
+        }
         $match_info =$this->select("*")
             ->where("match_id",$match_id)
             ->get()->first();

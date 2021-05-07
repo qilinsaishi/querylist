@@ -75,6 +75,15 @@ class PrivilegeService
                 'functionCount' => "getMatchCount",//获取列表方法
                 'functionProcess' => "processMatchList",//格式化的处理方法
             ],
+            "matchDetail" => [
+                'list' => [
+                    ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'scoregg'],
+                ],
+                'withSource' => 1,
+                'function' => "getMatchById",//获取数据方法
+                'functionCount' => "getMatchCount",//获取列表方法
+                'functionProcess' => "processMatch",//格式化的处理方法
+            ],
             "tournamentList" => [
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
@@ -807,6 +816,69 @@ class PrivilegeService
         }
         return $data;
     }
+    public function processMatch($data, $functionList)
+    {
+        //判断赛事
+        if (isset($functionList['tournament']) && isset($functionList['tournament']['functionSingle'])) {
+
+        } else {
+            $f = $this->getFunction(['tournament' => []], $functionList['matchDetail']['source']);
+            if (isset($f['tournament']['class'])) {
+                $functionList["tournament"] = $f['tournament'];
+            }
+        }
+        if (!isset($functionList["tournament"]["class"]) || !isset($functionList['tournament']['functionSingle'])) {
+            // return $data;(没有跳过)
+        }
+        $modelTournamentClass = $functionList["tournament"]["class"];
+        $functionTournamentSingle = $functionList["tournament"]['functionSingle'];
+        //判断战队
+        if (isset($functionList['teamList']) && isset($functionList['teamList']['functionSingle'])) {
+
+        } else {
+            $f = $this->getFunction(['totalTeamList' => []], $functionList['matchDetail']['source']);
+            if (isset($f['totalTeamList']['class'])) {
+                $functionList["totalTeamList"] = $f['totalTeamList'];
+            }
+        }
+        if (!isset($functionList["totalTeamList"]["class"]) || !isset($functionList['totalTeamList']['functionSingleBySite'])) {
+            return $data;
+        }
+        $modelClass = $functionList["totalTeamList"]["class"];
+        $functionSingle = $functionList["totalTeamList"]['functionSingleBySite'];
+        $teamList = [];
+        $tournament = [];
+            //赛事信息
+            if (!isset($tournament[$data['tournament_id']])) {
+                $tournamentInfo = $modelTournamentClass->$functionTournamentSingle($data['tournament_id']);
+                if (isset($tournamentInfo['tournament_id'])) {
+                    $tournament[$data['tournament_id']] = $tournamentInfo;
+                }
+            }
+            //战队信息
+            if (!isset($teamList[$data['home_id']]))
+            {
+                $teamInfo = $modelClass->$functionSingle($data['home_id']);
+                if (isset($teamInfo['team_id']))
+                {
+                    $teamList[$data['home_id']] = $teamInfo;
+                }
+
+            }
+            if (!isset($teamList[$data['away_id']]))
+            {
+                $teamInfo = $modelClass->$functionSingle($data['away_id']);
+                if (isset($teamInfo['team_id']))
+                {
+                    $teamList[$data['away_id']] = $teamInfo;
+                }
+            }
+            $data['home_team_info'] = $teamList[$data['home_id']] ?? [];//战队
+            $data['away_team_info'] = $teamList[$data['away_id']] ?? [];
+            $data['tournament_info'] = $tournament[$data['tournament_id']] ?? [];
+
+        return $data;
+    }
 
     public function processPlayerList($data, $functionList)
     {
@@ -840,7 +912,6 @@ class PrivilegeService
                 if(isset($val['stat'])){
                     $val['stat']=json_decode($val['stat'],true);
                 }
-
             }
         }
         if($data){
