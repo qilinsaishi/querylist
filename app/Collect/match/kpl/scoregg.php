@@ -89,9 +89,17 @@ class scoregg
             }else{
                 $res['livedata']=[];
             }
-
         }
 
+        foreach($res['result_list'] as $key => $result)
+        {
+            $microtime =  substr(microtime(false),3,3);
+            $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.time().$microtime;
+            $result_data=curl_get($result_data_url);//获取复盘数据接口
+            if($result_data['code']==200) {
+                $res['result_list'][$key]['detail'] = $result_data['data'];
+            }
+        }
         if (!empty($res)) {
             //处理战队采集数据
             $cdata = [
@@ -105,9 +113,7 @@ class scoregg
                 'status' => 1,
             ];
             //处理战队采集数据
-
         }
-
         return $cdata;
     }
 
