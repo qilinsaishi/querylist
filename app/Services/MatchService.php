@@ -192,7 +192,7 @@ class MatchService
     }
 
     //https://www.scoregg.com 赛事
-    public function scoreggMatch($game,$force = 0)
+    public function scoreggMatch($game,$force = 1)
     {
         $collectResultModel = new CollectResultModel();
         $missionModel = new MissionModel();
@@ -353,7 +353,7 @@ class MatchService
 
     }
 
-    //https://www.scoregg.com/services/api_url.php
+    //获取比赛详情
     public function getMatchDetail($matchID)
     {
         $url = 'https://www.scoregg.com/services/api_url.php';
@@ -370,6 +370,131 @@ class MatchService
         return $cdata;
 
     }
+    //
+    public function updateScoreggMatchList($game){
+        $scoreggMatchModel = new matchListModel();
+        $params=[
+            'page_size'=>100,
+            'page'=>1,
+            'game'=>$game,
+            'round_detailed'=>'0',
+            'fields'=>"match_id,game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
+        ];
 
+        $matchList=$scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
+        $matchList=$matchList ?? [];
+        if(count($matchList)>0){
+            foreach ($matchList as &$val){
+                //判断match_data不为空
+                if(strlen($val['match_data'])>0){
+                    $match_data=$this->getMatchDetail($val['match_id']);
+                    $match_data=$match_data ?? [];
+                    if(count($match_data)>0){
+                        if($match_data['result_list'] && count($match_data['result_list'] )>0){
+                            foreach($match_data['result_list'] as $key => $result)
+                            {
+                                $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.msectime();
+                                $result_data=curl_get($result_data_url);//获取复盘数据接口
+                                if($result_data['code']==200) {
+                                    $match_data['result_list'][$key]['detail'] = $result_data['data'];
+                                }
+                            }
+
+                        }
+                        if($match_data['status']!=$val['match_status']){
+                            $val['match_status']=$match_data['status'];
+                        }
+
+                        if($match_data['teamID_a']!=$val['home_id']){
+                            $val['home_id']=$match_data['teamID_a'];
+                        }
+                        if($match_data['teamID_b']!=$val['away_id']){
+                            $val['away_id']=$match_data['teamID_b'];
+                        }
+                        if($match_data['team_a_win']!=$val['home_score']){
+                            $val['home_score']=$match_data['team_a_win'];
+                        }
+                        if($match_data['team_b_win']!=$val['away_score']){
+                            $val['away_score']=$match_data['team_b_win'];
+                        }
+                        //原先数据不存在时重新调取接口获取数据
+                        $val['match_data']=json_encode($match_data);
+                    }else{
+                        $val['match_data']='';
+                    }
+
+                }else{
+                    //echo "match_id:".$val['match_id']."\n";//exit;
+                    //为空时重新请求接口
+                    $match_data=$this->getMatchDetail($val['match_id']);
+                    $match_data=$match_data ?? [];
+
+                    if(count($match_data)>0){
+                        if($match_data['result_list'] && count($match_data['result_list'] )>0){
+                            foreach($match_data['result_list'] as $key => $result)
+                            {
+                                $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.msectime();
+                                $result_data=curl_get($result_data_url);//获取复盘数据接口
+                                if($result_data['code']==200) {
+                                    $match_data['result_list'][$key]['detail'] = $result_data['data'];
+                                }
+                            }
+
+                            $val['match_data']=json_encode($match_data);
+                        }
+                        //更新状态
+                        if($match_data['status']!=$val['match_status']){
+                            $val['match_status']=$match_data['status'];
+                        }
+                        if($match_data['teamID_a']!=$val['home_id']){
+                            $val['home_id']=$match_data['teamID_a'];
+                        }
+                        if($match_data['teamID_b']!=$val['away_id']){
+                            $val['away_id']=$match_data['teamID_b'];
+                        }
+                        if($match_data['team_a_win']!=$val['home_score']){
+                            $val['home_score']=$match_data['team_a_win'];
+                        }
+                        if($match_data['team_b_win']!=$val['away_score']){
+                            $val['away_score']=$match_data['team_b_win'];
+                        }
+                    }else{
+                        $val['match_data']='';
+                    }
+
+                }
+                //判断赛前数据为空数组时
+
+                if(count(json_decode($val['match_pre'],true))==0){
+                    $match_pre_url='https://img1.famulei.com/match_pre/'.$val['match_id'].'.json'.'?_='.msectime();
+                    $match_pre=curl_get($match_pre_url);
+                    if($match_pre['code']==200) {
+                        $val['match_pre']=$match_pre['data'] ?? [];
+                        $val['match_pre']= json_encode($val['match_pre']);
+                    }
+                }
+
+                $updateMatchData=[
+                    'match_data'=>$val['match_data'],
+                    'round_detailed'=>1,
+                    'match_pre'=>$val['match_pre'],
+                    'match_status'=>$val['match_status'],
+                    'home_id'=>$val['home_id'],
+                    'away_id'=>$val['away_id'],
+                    'home_score'=>$val['home_score'],
+                    'away_score'=>$val['away_score'],
+                ];
+                $rt=$scoreggMatchModel->updateMatch($val['match_id'],$updateMatchData);
+                if($rt){
+                    echo "match_id：".$val['match_id']."更新成功"."\n";
+                }else{
+                    echo "match_id：".$val['match_id']."更新失败"."\n";
+                }
+
+            }
+        }
+        return "第".$params['page']."页游戏".$params['game']."执行完毕";
+
+    }
 
 }
