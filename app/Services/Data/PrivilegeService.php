@@ -917,6 +917,7 @@ class PrivilegeService
                     {
                         if(isset($result['detail']))
                         {
+                            $data['match_data']['result_list'][$key]['dragon_list'] = $result['detail']['dragon_list']??[];
                             foreach($result['detail']['result_list'] as $key_b => $value_b)
                             {
                                 if(!is_array($value_b))
@@ -942,8 +943,8 @@ class PrivilegeService
                                 }
                             }
                             unset($data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_image_thumb']);
-                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['logo'] = $playerList[$player['playerID']]['logo'];
-                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name'];
+                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['logo'] = $playerList[$player['playerID']]['logo']??"";
+                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name']??"";
 
                             if(isset($result['detail']))
                             {
@@ -951,9 +952,7 @@ class PrivilegeService
                                 {
                                     if(!is_array($value_b) && (substr($key_b,0,strlen($color)+1)==$color."_") && strpos($key_b,"_".$firstChar."_")>0)
                                     {
-                                        //echo $key_b."\n";
                                         $new_key = str_replace([$color."_","_".$firstChar."_"],"_",$key_b);
-                                        //echo $key_b."-".$new_key."-".$value_b."\n";
                                         $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a][$new_key] = $value_b;
                                         unset($data['match_data']['result_list'][$key_b]);
                                     }
