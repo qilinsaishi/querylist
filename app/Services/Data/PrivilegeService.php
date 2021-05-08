@@ -910,44 +910,58 @@ class PrivilegeService
                 {
                     unset($data['match_data']['result_list'][$key]['team_a_image_thumb']);
                     unset($data['match_data']['result_list'][$key]['team_b_image_thumb']);
-                    foreach($result['record_list_a'] as $key_a => $player)
+
+                    //主客队和颜色的映射
+                    $teamMap = ["a"=>"blue","b"=>"red"];
+                    foreach($teamMap as $side => $color)
                     {
-                        if(!isset($playerList[$player['playerID']]))
+                        if(isset($result['detail']))
                         {
-                            $playerInfo = $oPlayerModel->$oPlayerFunction($player['playerID'],$data['game'],$functionList['matchDetail']['source']);
-                            if(isset($playerInfo['tid']) && $playerInfo['tid']>0)
+                            $data['match_data']['result_list'][$key]['dragon_list'] = $result['detail']['dragon_list']??[];
+                            foreach($result['detail']['result_list'] as $key_b => $value_b)
                             {
-                                $playerInfo = getFieldsFromArray((new IntergrationService())->getPlayerInfo(0,$playerInfo['tid'],1,0)['data'],"pid,player_name,logo");
-                                $playerList[$player['playerID']] = $playerInfo;
-                            }
-                            else
-                            {
-                                $playerList[$player['playerID']] = $playerInfo;
+                                if(!is_array($value_b))
+                                {
+                                    $data['match_data']['result_list'][$key][$key_b] = $value_b;
+                                }
                             }
                         }
-                        unset($data['match_data']['result_list'][$key]['record_list_a'][$key_a]['player_image_thumb']);
-                        $data['match_data']['result_list'][$key]['record_list_a'][$key_a]['logo'] = $playerList[$player['playerID']]['logo'];
-                        $data['match_data']['result_list'][$key]['record_list_a'][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name'];
-                    }
-                    foreach($result['record_list_b'] as $key_a => $player)
-                    {
-                        if(!isset($playerList[$player['playerID']]))
+                        $firstChar = "a";
+                        foreach($result['record_list_'.$side] as $key_a => $player)
                         {
-                            $playerInfo = $oPlayerModel->$oPlayerFunction($player['playerID'],$data['game'],$functionList['matchDetail']['source']);
-                            if(isset($playerInfo['tid']) && $playerInfo['tid']>0)
+                            if(!isset($playerList[$player['playerID']]))
                             {
-                                $playerInfo = getFieldsFromArray((new IntergrationService())->getPlayerInfo(0,$playerInfo['tid'],1,0)['data'],"pid,player_name,logo");
-                                $playerList[$player['playerID']] = $playerInfo;
+                                $playerInfo = $oPlayerModel->$oPlayerFunction($player['playerID'],$data['game'],$functionList['matchDetail']['source']);
+                                if(isset($playerInfo['tid']) && $playerInfo['tid']>0)
+                                {
+                                    $playerInfo = getFieldsFromArray((new IntergrationService())->getPlayerInfo(0,$playerInfo['tid'],1,0)['data'],"pid,player_name,logo");
+                                    $playerList[$player['playerID']] = $playerInfo;
+                                }
+                                else
+                                {
+                                    $playerList[$player['playerID']] = $playerInfo;
+                                }
                             }
-                            else
+                            unset($data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_image_thumb']);
+                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['logo'] = $playerList[$player['playerID']]['logo']??"";
+                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name']??"";
+
+                            if(isset($result['detail']))
                             {
-                                $playerList[$player['playerID']] = $playerInfo;
+                                foreach($result['detail']['result_list'] as $key_b => $value_b)
+                                {
+                                    if(!is_array($value_b) && (substr($key_b,0,strlen($color)+1)==$color."_") && strpos($key_b,"_".$firstChar."_")>0)
+                                    {
+                                        $new_key = str_replace([$color."_","_".$firstChar."_"],"_",$key_b);
+                                        $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a][$new_key] = $value_b;
+                                        unset($data['match_data']['result_list'][$key_b]);
+                                    }
+                                }
                             }
+                            $firstChar++;
                         }
-                        unset($data['match_data']['result_list'][$key]['record_list_b'][$key_a]['player_image_thumb']);
-                        $data['match_data']['result_list'][$key]['record_list_b'][$key_a]['logo'] = $playerList[$player['playerID']]['logo'];
-                        $data['match_data']['result_list'][$key]['record_list_b'][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name'];
                     }
+                unset($data['match_data']['result_list'][$key]['detail']);
                 }
             }
         }
