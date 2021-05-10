@@ -27,7 +27,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=}';
+    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=} {--force=}';
 
     /**
      * The console command description.
@@ -98,7 +98,8 @@ class Mission extends Command
                 }
                 //采集赛事详情入库
                 if($mission_type=='match'){
-                    (new MatchService())->insertMatchData($game);
+                    $force = $this->option("force")??0;
+                    (new MatchService())->insertMatchData($game,$force);
                 }
                 break;
             case "collect":

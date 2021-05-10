@@ -81,6 +81,15 @@ class MissionModel extends Model
         }
         return $mission_info;
     }
+    public function getMissionbyId($mission_id){
+        $mission_info = $this->where("mission_id",$mission_id)->get()->first();
+        if (isset($mission_info->mission_id)) {
+            $mission_info = $mission_info->toArray();
+        } else {
+            $mission_info = [];
+        }
+        return $mission_info;
+    }
 
     public function insertMission($data)
     {
