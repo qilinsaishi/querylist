@@ -343,9 +343,9 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
     }
     $start_time = microtime(true);
     $redis = app("redis.connection");
-    $fileKey = "file_get_" . $url;
+    $fileKey = "file_url2_" . $url;
     $currentFile = $redis->get($fileKey);
-    echo "url:".$url."\n";
+    //echo "url:".$url."\n";
     echo "cache:".$currentFile."\n";
     if ($currentFile && strlen($currentFile) > 5) {
         return $currentFile;

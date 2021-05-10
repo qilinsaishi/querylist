@@ -39,7 +39,7 @@ class scoregg
                 "match_pre"=>['path'=>"match_pre",'default'=>[]],//赛前数据
                 "match_live"=>['path'=>"livedata",'default'=>[]],//赛事进程
                 "match_data"=>['path'=>"match_data",'default'=>[]],//赛事数据
-                "round"=>['path'=>"round_list",'default'=>[]]//轮次数据
+               // "round"=>['path'=>"round_list",'default'=>[]]//轮次数据
             ]
         ];
 
@@ -125,7 +125,8 @@ class scoregg
     }
 
     public function process($arr)
-    { //status:0表示即将开始，1表示正在进行，2已结结束
+    {
+        //status:0表示即将开始，1表示正在进行，2已结结束
         /*
         tournamentID 赛事id
             tournament_name  赛事名称
@@ -186,18 +187,93 @@ class scoregg
             {
                 if(!in_array($key,$currentKeyList))
                 {
-                    echo "key:".$key."\n";
+                   // echo "key:".$key."\n";
                     $arr['content']['match_data'][$key] = $arr['content'][$key];
+
                     unset($arr['content'][$key]);
                 }
             }
-            foreach($arr['content']['round_list'] as $key => $round)
+            foreach($arr['content']['match_data']['round_list'] as $key => $round)
             {
                 $roundInfo = ['tournament_id'=>$arr['content']['tournamentID'],'round_name'=>$round['name'],'round_id'=>$round['roundID']];
-                $arr['content']['round_list'][$key] = $roundInfo;
+                $arr['content']['match_data']['round_list'][$key] = $roundInfo;
+            }
+            //print_R( array_keys($arr['content']['match_data']['result_list'][0]));die();
+            if(isset($arr['content']['match_data']['result_list']) && count($arr['content']['match_data']['result_list']) >0) {
+                foreach($arr['content']['match_data']['result_list'] as $round_key => $round_info){
+                    /*
+                    if(!is_array($round_info))
+                    {
+                        $arr['content']['match_data']['result_list'][$round_key] = getImage($round_info);
+                    }
+                    else
+                    {
+                        foreach($round_info as $round_key_2 => $round_data2)
+                        {
+                            if(!is_array($round_data2))
+                            {
+                                echo $round_key_2;
+                                $arr['content']['match_data']['result_list'][$round_key][$round_key_2] = getImage($round_data2);
+                            }
+                            else
+                            {
+                                print_R(array_keys($round_data2));
+                            }
+                        }
+                    }
+                    */
+                    //判断是否存在
+                    if(isset($round_info['detail'])) {
+                        foreach($round_info['detail'] as $k1 => $v1)
+                        {
+                            if(is_array($v1))
+                            {
+                                foreach($v1 as $k2 => $v2)
+                                {
+
+                                    if(!is_array($v2))
+                                    {
+                                        $arr['content']['match_data']['result_list'][$round_key][$k1][$k2] = $this->checkImg($v2);
+                                    }
+                                    else
+                                    {
+                                        foreach($v2 as $k3 => $v3)
+                                        {
+                                           // print_R(array_keys($v2));sleep(1);
+                                            if(!is_array($v3))
+                                            {
+                                                $arr['content']['match_data']['result_list'][$round_key][$k1][$k2][$k3] = $this->checkImg($v3);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                $arr['content']['match_data']['result_list'][$round_key][$k1] = $this->checkImg($v1);
+                            }
+                        }
+                    }
+                }
             }
             $data['match_list'][] = getDataFromMapping($this->data_map['list'],$arr['content']);
+            //print_r(array_keys($data['match_list'][0]));exit;
         }
+        //print_r($data);exit;
+
         return $data;
+    }
+    public function checkImg($data){
+        $suffixList = [".png",".jpg"];
+        foreach($suffixList as $suffix)
+        {
+            if(strpos($data,$suffix)>0)
+            {
+                $data=str_replace('https','http',$data);
+                $image_url=getImage($data);
+                return $image_url;
+            }
+        }
+
     }
 }

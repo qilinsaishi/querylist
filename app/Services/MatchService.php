@@ -15,12 +15,12 @@ use QL\QueryList;
 
 class MatchService
 {
-    public function insertMatchData($game)
+    public function insertMatchData($game,$force)
     {
 
         if ($game == 'kpl' || $game == 'lol') {
             //$this->saveMissionByScoreggMatchId(12280,$game);//这个是测试单个比赛的方法案例
-            $this->scoreggMatch($game);//scoregg 比赛数据
+            $this->scoreggMatch($game,$force);//scoregg 比赛数据
         }
         /* if ($game == 'dota2') {//这个dota2的数据不用改，是拼接起来的专题。暂时不用改
              $this->getDota2International($game);
@@ -192,7 +192,7 @@ class MatchService
     }
 
     //https://www.scoregg.com 赛事
-    public function scoreggMatch($game,$force = 1)
+    public function scoreggMatch($game, $force = 0)
     {
         $collectResultModel = new CollectResultModel();
         $missionModel = new MissionModel();
@@ -204,12 +204,12 @@ class MatchService
             'game' => $game
         ];
         $tournamentList = $tournamentModel->getTournamentList($tournamentParams);
-
+        $mission_repeat = 0;
         $tournamentList = $tournamentList ?? [];//赛事结果
         if (count($tournamentList) > 0) {
+
             foreach ($tournamentList as $key => $tournament) {
                 $ajax_url = 'https://img1.famulei.com/tr/' . $tournament['tournament_id'] . '.json';
-
                 $cdata = curl_get($ajax_url);//获取赛事下面的一级分类
                 $cdata = $cdata ?? [];
                 if (count($cdata) > 0) {
@@ -227,27 +227,28 @@ class MatchService
                                         $cdetail['game'] = $game;
                                         $cdetail['r_type'] = $v['r_type'];//赛事下面的一级分类类型
                                         //　强制爬取
-                                        if($force==1)
-                                        {
+                                        if ($force == 1) {
                                             $toGet = 1;
-                                        }
-                                        elseif($force==0)
-                                        {
+                                        } elseif ($force == 0) {
                                             //获取当前比赛数据
                                             $scoreggMatchInfo = $scoreggMatchModel->getMatchById($v2['matchID']);
                                             //找到
-                                            if(isset($scoreggMatchInfo['match_id']))
-                                            {
+                                            if (isset($scoreggMatchInfo['match_id'])) {
                                                 $toGet = 0;
-                                                echo "exits-scoregg_match-matchID:" . $v2['matchID'] . "\n";
-                                            }
-                                            else
-                                            {
+                                                $mission_repeat ++;
+                                                echo "exits-round_son_scoregg_match-matchID:" . $v2['matchID'] . "\n";
+                                                if($mission_repeat>=100)
+                                                {
+                                                    echo "重复任务过多，任务终止\n";
+                                                    return;
+                                                }
+                                            } else {
+                                                $mission_repeat = 0;
                                                 $toGet = 1;
                                             }
                                         }
-                                        if($toGet==1)
-                                        {
+
+                                        if ($toGet == 1) {
                                             $params1 = [
                                                 'game' => $game,
                                                 'mission_type' => 'match',
@@ -257,6 +258,7 @@ class MatchService
                                             $result = $result ?? 0;
                                             if ($result == 0) {
                                                 $insertMissionResult = $this->saveMissionByScoreggMatchId($v2['matchID'], $game);
+                                                $mission_repeat = 0;
                                                 if ($insertMissionResult) {
                                                     echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务成功' . "\n";
                                                 } else {
@@ -264,9 +266,16 @@ class MatchService
                                                 }
                                             } else {
                                                 //表示Mission表记录已存在，跳出继续
+                                                $mission_repeat ++ ;//重复记录加一
                                                 echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
+                                                if($mission_repeat>=100)
+                                                {
+                                                    echo "重复任务过多，任务终止\n";
+                                                    return;
+                                                }
                                             }
                                         }
+
                                     }
                                 }
 
@@ -279,27 +288,28 @@ class MatchService
                             if (count($roundData) > 0) {
                                 foreach ($roundData as $v2) {//获取比赛的具体数据
                                     //　强制爬取
-                                    if($force==1)
-                                    {
+                                    if ($force == 1) {
                                         $toGet = 1;
-                                    }
-                                    elseif($force==0)
-                                    {
+                                    } elseif ($force == 0) {
                                         //获取当前比赛数据
                                         $scoreggMatchInfo = $scoreggMatchModel->getMatchById($v2['matchID']);
                                         //找到
-                                        if(isset($scoreggMatchInfo['match_id']))
-                                        {
+                                        if (isset($scoreggMatchInfo['match_id'])) {
                                             $toGet = 0;
+                                            $mission_repeat ++;
                                             echo "exits-scoregg_match-matchID:" . $v2['matchID'] . "\n";
-                                        }
-                                        else
-                                        {
+                                            if($mission_repeat>=100)
+                                            {
+                                                echo "重复任务过多，任务终止\n";
+                                                return;
+                                            }
+                                        } else {
+                                            $mission_repeat = 0;
                                             $toGet = 1;
                                         }
                                     }
-                                    if($toGet==1)
-                                    {
+
+                                    if ($toGet == 1) {
                                         $params1 = [
                                             'game' => $game,
                                             'mission_type' => 'match',
@@ -309,6 +319,7 @@ class MatchService
                                         $result = $result ?? 0;
                                         if ($result == 0) {
                                             $insertMissionResult = $this->saveMissionByScoreggMatchId($v2['matchID'], $game);
+                                            $mission_repeat = 0;
                                             if ($insertMissionResult) {
                                                 echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务成功' . "\n";
                                             } else {
@@ -316,9 +327,16 @@ class MatchService
                                             }
                                         } else {
                                             //表示Mission表记录已存在，跳出继续
+                                            $mission_repeat ++ ;//重复记录加一
                                             echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
+                                            if($mission_repeat>=100)
+                                            {
+                                                echo "重复任务过多，任务终止\n";
+                                                return;
+                                            }
                                         }
                                     }
+
                                 }
                             }
 
@@ -370,130 +388,186 @@ class MatchService
         return $cdata;
 
     }
+
     //
-    public function updateScoreggMatchList($game){
+    public function updateScoreggMatchList($game)
+    {
         $scoreggMatchModel = new matchListModel();
-        $params=[
-            'page_size'=>100,
-            'page'=>1,
-            'game'=>$game,
-            'round_detailed'=>'0',
-            'fields'=>"match_id,game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
+        $params = [
+            'page_size' => 1000,
+            'page' => 1,
+            'game' => $game,
+            'round_detailed' => '0',
+            'fields' => "match_id,game",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
         ];
+        $collectClassList = [];
+        $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
+        $matchList = $matchList ?? [];
+        $classList = [];
+        if (count($matchList) > 0) {
+            foreach ($matchList as &$val) {
+                $insert_mission = $this->saveMissionByScoreggMatchId($val['match_id'],$val['game']);
 
-        $matchList=$scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
-        $matchList=$matchList ?? [];
-        if(count($matchList)>0){
-            foreach ($matchList as &$val){
+                $mission = (new MissionModel())->getMissionbyId($insert_mission);
+                //判断类库存在
+                if(!isset($collectClassList[$val['game']]))
+                {
+                    $className = "App\Collect\match\\".$val['game'].'\scoregg';
+                    if(class_exists($className))
+                    {
+                        $collectClassList[$val['game']] = new $className;
+                    }
+                }
+
+                $collectClass = $collectClassList[$val['game']];
+                $mission['detail'] = json_decode($mission['detail'], true);
+                $mission['detail']['type']='match';
+
+                $collectData = $collectClass->collect($mission);
+
+                $collectData['content']=json_decode($collectData['content'], true);
+                ksort($collectData['content']);
+
+
+                $processData = $collectClass->process($collectData);
+
+                $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
+
+                if ($rt) {
+                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
+                } else {
+                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
+                }exit;
+
+// json_decode($result['content'], true);
                 //判断match_data不为空
-                if(strlen($val['match_data'])>0){
-                    $match_data=$this->getMatchDetail($val['match_id']);
-                    $match_data=$match_data ?? [];
-                    if(count($match_data)>0){
-                        if($match_data['result_list'] && count($match_data['result_list'] )>0){
-                            foreach($match_data['result_list'] as $key => $result)
-                            {
-                                $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.msectime();
-                                $result_data=curl_get($result_data_url);//获取复盘数据接口
-                                if($result_data['code']==200) {
-                                    $match_data['result_list'][$key]['detail'] = $result_data['data'];
-                                }
-                            }
 
-                        }
-                        if($match_data['status']!=$val['match_status']){
-                            $val['match_status']=$match_data['status'];
-                        }
-
-                        if($match_data['teamID_a']!=$val['home_id']){
-                            $val['home_id']=$match_data['teamID_a'];
-                        }
-                        if($match_data['teamID_b']!=$val['away_id']){
-                            $val['away_id']=$match_data['teamID_b'];
-                        }
-                        if($match_data['team_a_win']!=$val['home_score']){
-                            $val['home_score']=$match_data['team_a_win'];
-                        }
-                        if($match_data['team_b_win']!=$val['away_score']){
-                            $val['away_score']=$match_data['team_b_win'];
-                        }
-                        //原先数据不存在时重新调取接口获取数据
-                        $val['match_data']=json_encode($match_data);
-                    }else{
-                        $val['match_data']='';
-                    }
-
-                }else{
-                    //echo "match_id:".$val['match_id']."\n";//exit;
-                    //为空时重新请求接口
-                    $match_data=$this->getMatchDetail($val['match_id']);
-                    $match_data=$match_data ?? [];
-
-                    if(count($match_data)>0){
-                        if($match_data['result_list'] && count($match_data['result_list'] )>0){
-                            foreach($match_data['result_list'] as $key => $result)
-                            {
-                                $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.msectime();
-                                $result_data=curl_get($result_data_url);//获取复盘数据接口
-                                if($result_data['code']==200) {
-                                    $match_data['result_list'][$key]['detail'] = $result_data['data'];
-                                }
-                            }
-
-                            $val['match_data']=json_encode($match_data);
-                        }
-                        //更新状态
-                        if($match_data['status']!=$val['match_status']){
-                            $val['match_status']=$match_data['status'];
-                        }
-                        if($match_data['teamID_a']!=$val['home_id']){
-                            $val['home_id']=$match_data['teamID_a'];
-                        }
-                        if($match_data['teamID_b']!=$val['away_id']){
-                            $val['away_id']=$match_data['teamID_b'];
-                        }
-                        if($match_data['team_a_win']!=$val['home_score']){
-                            $val['home_score']=$match_data['team_a_win'];
-                        }
-                        if($match_data['team_b_win']!=$val['away_score']){
-                            $val['away_score']=$match_data['team_b_win'];
-                        }
-                    }else{
-                        $val['match_data']='';
-                    }
-
-                }
-                //判断赛前数据为空数组时
-
-                if(count(json_decode($val['match_pre'],true))==0){
-                    $match_pre_url='https://img1.famulei.com/match_pre/'.$val['match_id'].'.json'.'?_='.msectime();
-                    $match_pre=curl_get($match_pre_url);
-                    if($match_pre['code']==200) {
-                        $val['match_pre']=$match_pre['data'] ?? [];
-                        $val['match_pre']= json_encode($val['match_pre']);
-                    }
-                }
-
-                $updateMatchData=[
-                    'match_data'=>$val['match_data'],
-                    'round_detailed'=>1,
-                    'match_pre'=>$val['match_pre'],
-                    'match_status'=>$val['match_status'],
-                    'home_id'=>$val['home_id'],
-                    'away_id'=>$val['away_id'],
-                    'home_score'=>$val['home_score'],
-                    'away_score'=>$val['away_score'],
+                /*$updateMatchData = [
+                    'match_data' => $val['match_data'],
+                    'round_detailed' => 1,
+                    'match_pre' => $val['match_pre'],
+                    'match_status' => $val['match_status'],
+                    'home_id' => $val['home_id'],
+                    'away_id' => $val['away_id'],
+                    'home_score' => $val['home_score'],
+                    'away_score' => $val['away_score'],
                 ];
-                $rt=$scoreggMatchModel->updateMatch($val['match_id'],$updateMatchData);
-                if($rt){
-                    echo "match_id：".$val['match_id']."更新成功"."\n";
-                }else{
-                    echo "match_id：".$val['match_id']."更新失败"."\n";
-                }
+                $rt = $scoreggMatchModel->updateMatch($val['match_id'], $updateMatchData);
+                if ($rt) {
+                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
+                } else {
+                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
+                }*/
 
             }
         }
-        return "第".$params['page']."页游戏".$params['game']."执行完毕";
+        return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
+
+    }
+    public function getClass($classList, $modelClassName)
+    {
+        //判断类库存在
+        $exist = class_exists($modelClassName);
+        if (!$exist) {
+
+        } else {
+            //之前没有初始化过
+            if (!isset($classList[$modelClassName])) {
+                //初始化，存在列表中
+                $modelClass = new $modelClassName;
+                $classList[$modelClassName] = $modelClass;
+            } else {
+                ////直接调用
+                //$modelClass = $classList[$modelClassName];
+            }
+        }
+        return $classList;
+    }
+    //把图片都更新oss
+    public function updateMatchListImagesOss($data,$match_id){
+        //判断赛前数据为空数组时
+
+        //if (count(json_decode($data['match_pre'], true)) == 0) {
+            $match_pre_url = 'https://img1.famulei.com/match_pre/' . $match_id . '.json' . '?_=' . msectime();
+            $match_pre = curl_get($match_pre_url);
+            if ($match_pre['code'] == 200) {
+                $preData = $match_pre['data'] ?? [];
+                if(count($preData)>0){
+                    //=================比赛数据match_data转换OSS开始========================
+                    if (isset($preData['match_data']) && count($preData['match_data'])>0){
+                        foreach($preData['match_data'] as &$v1){
+                            //队员缩略图
+                            if(strpos($v1['player_image_thumb'],'http://qilingsaishi')===false){
+                                $v1['player_image_thumb']=getImage($v1['player_image_thumb']);
+                            }
+                            //战队缩略图
+                            if(strpos($v1['team_image_thumb'],'http://qilingsaishi')===false){
+                                $v1['team_image_thumb']=getImage($v1['team_image_thumb']);
+                            }
+                            //国标缩略图
+                            if(strpos($v1['country_image'],'http://qilingsaishi')===false){
+                                $v1['team_image_thumb']=getImage($v1['country_image']);
+                            }
+                            //英雄缩略图
+                            if(isset($v1['hero_win_lose']) && count($v1['hero_win_lose'])){
+                                foreach($v1['hero_win_lose'] as &$v11){
+                                    if(strpos($v11['hero_image'],'http://qilingsaishi')===false){
+                                        $v11['hero_image']=getImage($v11['hero_image']);
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                    //===================比赛数据match_data转换OSS结束====================
+                    //=================比赛记录match_record转换OSS开始====================
+
+                    if (isset($preData['match_record']['list']) && count($preData['match_record'])>0){
+                        foreach ($preData['match_record']['list'] as &$v2){
+                            //战队a缩略图
+                            if(strpos($v2['team_a_image'],'http://qilingsaishi')===false){
+                                $v2['team_a_image']=getImage($v2['team_a_image']);
+                            }
+                            //战队b缩略图
+                            if(strpos($v2['team_b_image'],'http://qilingsaishi')===false){
+                                $v2['team_b_image']=getImage($v2['team_b_image']);
+                            }
+                            print_r($v2);exit;
+                        }
+                    }
+                }
+
+                print_r($preData);exit;
+
+                //$val['match_pre'] = json_encode($val['match_pre']);
+            }
+       /* }else{
+            $preData=json_decode($data['match_pre'], true);
+            $preData=$preData ?? [];
+            if(count($preData)>0){
+                //判断$preData['match_data'] 是否有数据
+               if (isset($preData['match_data']) && count($preData['match_data'])>0){
+                   foreach($preData['match_data'] as &$v1){
+                       if(strpos($v1['player_image_thumb'],'http://qilingsaishi')!==false){
+                           echo 11;exit;
+                       }else{
+                           $v1['player_image_thumb']=getImage($v1['player_image_thumb']);
+                           echo $v1['player_image_thumb'];echo $match_id;exit;
+                       }
+                       print_r($v1);exit;
+                       //http://qilingsaishi
+
+
+                   }
+                   print_r();exit;
+
+               }
+            }
+
+        }*/
+        print_r($data);
+      echo   $match_id;
+        exit;
 
     }
 
