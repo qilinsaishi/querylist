@@ -43,6 +43,7 @@ class matchListModel extends Model
     ];
     public function getMatchList($params)
     { //\DB::connection()->enableQueryLog();
+
         $start = microtime(true);
         $fields = $params['fields'] ?? "match_id,game,match_status,round_id,tournament_id,home_id,away_id,home_score,away_score,start_time";
         $match_list =$this->select(explode(",",$fields));
@@ -71,6 +72,24 @@ class matchListModel extends Model
             {
                 $match_list = $match_list->where("game",$params['game']);
             }
+        }
+        //状态
+        if (isset($params['match_status']))
+        {
+            if(!is_array($params['match_status']))
+            {
+                $status = explode(",", $params['match_status']);
+                $match_list=$match_list->whereIn("match_status", $status);
+            }
+            else
+            {
+                $match_list=$match_list->whereIn("match_status", $params['match_status']);
+            }
+        }
+        //比赛开始时间start_time=1表示启动开始时间条件
+        if (isset($params['start_time']) && $params['start_time'] > 0) {
+            $time = date("Y-m-d H:i:s", time() - 8 * 3600);
+            $match_list = $match_list->where("start_time", '<=', $time);
         }
 
         $match_list = $match_list->where("home_id",">",0)->where("away_id",">",0)

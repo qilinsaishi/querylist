@@ -394,7 +394,7 @@ class MatchService
     {
         $scoreggMatchModel = new matchListModel();
         $params = [
-            'page_size' => 1000,
+            'page_size' => 10,
             'page' => 1,
             'game' => $game,
             'round_detailed' => '0',
@@ -406,169 +406,79 @@ class MatchService
         $classList = [];
         if (count($matchList) > 0) {
             foreach ($matchList as &$val) {
-                $insert_mission = $this->saveMissionByScoreggMatchId($val['match_id'],$val['game']);
-
-                $mission = (new MissionModel())->getMissionbyId($insert_mission);
-                //判断类库存在
-                if(!isset($collectClassList[$val['game']]))
-                {
-                    $className = "App\Collect\match\\".$val['game'].'\scoregg';
-                    if(class_exists($className))
-                    {
-                        $collectClassList[$val['game']] = new $className;
-                    }
+                $rt=$this->getOneScoreggMatchList($val);
+                if ($rt) {
+                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
+                } else {
+                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
                 }
-
-                $collectClass = $collectClassList[$val['game']];
-                $mission['detail'] = json_decode($mission['detail'], true);
-                $mission['detail']['type']='match';
-
-                $collectData = $collectClass->collect($mission);
-
-                $collectData['content']=json_decode($collectData['content'], true);
-                ksort($collectData['content']);
-
-
-                $processData = $collectClass->process($collectData);
-
-                $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
-
-                if ($rt) {
-                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
-                } else {
-                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
-                }exit;
-
-// json_decode($result['content'], true);
-                //判断match_data不为空
-
-                /*$updateMatchData = [
-                    'match_data' => $val['match_data'],
-                    'round_detailed' => 1,
-                    'match_pre' => $val['match_pre'],
-                    'match_status' => $val['match_status'],
-                    'home_id' => $val['home_id'],
-                    'away_id' => $val['away_id'],
-                    'home_score' => $val['home_score'],
-                    'away_score' => $val['away_score'],
-                ];
-                $rt = $scoreggMatchModel->updateMatch($val['match_id'], $updateMatchData);
-                if ($rt) {
-                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
-                } else {
-                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
-                }*/
 
             }
         }
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
 
     }
-    public function getClass($classList, $modelClassName)
-    {
-        //判断类库存在
-        $exist = class_exists($modelClassName);
-        if (!$exist) {
-
-        } else {
-            //之前没有初始化过
-            if (!isset($classList[$modelClassName])) {
-                //初始化，存在列表中
-                $modelClass = new $modelClassName;
-                $classList[$modelClassName] = $modelClass;
-            } else {
-                ////直接调用
-                //$modelClass = $classList[$modelClassName];
-            }
-        }
-        return $classList;
-    }
-    //把图片都更新oss
-    public function updateMatchListImagesOss($data,$match_id){
-        //判断赛前数据为空数组时
-
-        //if (count(json_decode($data['match_pre'], true)) == 0) {
-            $match_pre_url = 'https://img1.famulei.com/match_pre/' . $match_id . '.json' . '?_=' . msectime();
-            $match_pre = curl_get($match_pre_url);
-            if ($match_pre['code'] == 200) {
-                $preData = $match_pre['data'] ?? [];
-                if(count($preData)>0){
-                    //=================比赛数据match_data转换OSS开始========================
-                    if (isset($preData['match_data']) && count($preData['match_data'])>0){
-                        foreach($preData['match_data'] as &$v1){
-                            //队员缩略图
-                            if(strpos($v1['player_image_thumb'],'http://qilingsaishi')===false){
-                                $v1['player_image_thumb']=getImage($v1['player_image_thumb']);
-                            }
-                            //战队缩略图
-                            if(strpos($v1['team_image_thumb'],'http://qilingsaishi')===false){
-                                $v1['team_image_thumb']=getImage($v1['team_image_thumb']);
-                            }
-                            //国标缩略图
-                            if(strpos($v1['country_image'],'http://qilingsaishi')===false){
-                                $v1['team_image_thumb']=getImage($v1['country_image']);
-                            }
-                            //英雄缩略图
-                            if(isset($v1['hero_win_lose']) && count($v1['hero_win_lose'])){
-                                foreach($v1['hero_win_lose'] as &$v11){
-                                    if(strpos($v11['hero_image'],'http://qilingsaishi')===false){
-                                        $v11['hero_image']=getImage($v11['hero_image']);
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    //===================比赛数据match_data转换OSS结束====================
-                    //=================比赛记录match_record转换OSS开始====================
-
-                    if (isset($preData['match_record']['list']) && count($preData['match_record'])>0){
-                        foreach ($preData['match_record']['list'] as &$v2){
-                            //战队a缩略图
-                            if(strpos($v2['team_a_image'],'http://qilingsaishi')===false){
-                                $v2['team_a_image']=getImage($v2['team_a_image']);
-                            }
-                            //战队b缩略图
-                            if(strpos($v2['team_b_image'],'http://qilingsaishi')===false){
-                                $v2['team_b_image']=getImage($v2['team_b_image']);
-                            }
-                            print_r($v2);exit;
-                        }
-                    }
+    //查询scoreggMatchList里面所有不等于2的数据重新采集更新
+    public function updateScoreggMatchListStatus($game){
+        $scoreggMatchModel = new matchListModel();
+        $params = [
+            'page_size' => 1,
+            'page' => 1,
+            'game' => $game,
+            'start_time'=>1,//表示启动开始时间条件
+            'match_status' => ["0","1"],
+            'fields' => "match_id,game",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
+        ];
+        $collectClassList = [];
+        $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
+        $matchList = $matchList ?? [];
+        $classList = [];
+        if (count($matchList) > 0) {
+            foreach ($matchList as &$val) {
+                $rt=$this->getOneScoreggMatchList($val);
+                if ($rt) {
+                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
+                } else {
+                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
                 }
 
-                print_r($preData);exit;
-
-                //$val['match_pre'] = json_encode($val['match_pre']);
             }
-       /* }else{
-            $preData=json_decode($data['match_pre'], true);
-            $preData=$preData ?? [];
-            if(count($preData)>0){
-                //判断$preData['match_data'] 是否有数据
-               if (isset($preData['match_data']) && count($preData['match_data'])>0){
-                   foreach($preData['match_data'] as &$v1){
-                       if(strpos($v1['player_image_thumb'],'http://qilingsaishi')!==false){
-                           echo 11;exit;
-                       }else{
-                           $v1['player_image_thumb']=getImage($v1['player_image_thumb']);
-                           echo $v1['player_image_thumb'];echo $match_id;exit;
-                       }
-                       print_r($v1);exit;
-                       //http://qilingsaishi
+        }
+        return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
+    }
 
+    //封装更新一条ScoreggMatchList数据
+    public function getOneScoreggMatchList($val){
+        $scoreggMatchModel = new matchListModel();
+        $insert_mission = $this->saveMissionByScoreggMatchId($val['match_id'],$val['game']);
 
-                   }
-                   print_r();exit;
-
-               }
+        $mission = (new MissionModel())->getMissionbyId($insert_mission);
+        //判断类库存在
+        if(!isset($collectClassList[$val['game']]))
+        {
+            $className = "App\Collect\match\\".$val['game'].'\scoregg';
+            if(class_exists($className))
+            {
+                $collectClassList[$val['game']] = new $className;
             }
+        }
 
-        }*/
-        print_r($data);
-      echo   $match_id;
-        exit;
+        $collectClass = $collectClassList[$val['game']];
+        $mission['detail'] = json_decode($mission['detail'], true);
+        $mission['detail']['type']='match';
+
+        $collectData = $collectClass->collect($mission);
+
+        $collectData['content']=json_decode($collectData['content'], true);
+        ksort($collectData['content']);
+
+        $processData = $collectClass->process($collectData);
+        //$processData['match_list'][0]['round_detailed']=1;
+        $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
+        return $rt;
 
     }
+
+
 
 }
