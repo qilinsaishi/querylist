@@ -66,9 +66,13 @@ class TotalPlayerModel extends Model
             $player_list = $player_list->where("pid",$params['pid']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $player_list = $player_list->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game'])) {
+            $player_list = $player_list->whereIn("game", $params['game']);
         }
 
         //不是队员
@@ -183,9 +187,13 @@ class TotalPlayerModel extends Model
             $player_count = $player_count->where("pid",$params['pid']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $player_count = $player_count->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game'])) {
+            $player_count = $player_count->whereIn("game", $params['game']);
         }
 
         //不是队员

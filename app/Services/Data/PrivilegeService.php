@@ -910,9 +910,9 @@ class PrivilegeService
                 {
                     unset($data['match_data']['result_list'][$key]['team_a_image_thumb']);
                     unset($data['match_data']['result_list'][$key]['team_b_image_thumb']);
-
                     //主客队和颜色的映射
                     $teamMap = ["a"=>"blue","b"=>"red"];
+                    $keyMap = ["a","b","c","d","e","f","g"];
                     foreach($teamMap as $side => $color)
                     {
                         if(isset($result['detail']))
@@ -920,13 +920,27 @@ class PrivilegeService
                             $data['match_data']['result_list'][$key]['dragon_list'] = $result['detail']['dragon_list']??[];
                             foreach($result['detail']['result_list'] as $key_b => $value_b)
                             {
+                                foreach($keyMap as $k => $c)
+                                {
+                                    if (!is_array($value_b) && (substr($key_b, 0, strlen($color) + 1) == $color . "_") && strpos($key_b, "_" . $c . "_") > 0)
+                                    {
+                                        $new_key = str_replace([$color . "_", "_" . $c . "_"], "_", $key_b);
+                                        // echo $key_b . "-" . $new_key . "-" . $value_b . "\n";
+                                        $data['match_data']['result_list'][$key]['record_list_' . $side][$k][$new_key] = $value_b;
+                                        unset($result['detail']['result_list'][$key_b]);
+                                        unset($data['match_data']['result_list'][$key]['detail']['result_list'][$key_b]);
+                                    }
+                                }
+                            }
+                            foreach($result['detail']['result_list'] as $key_b => $value_b)
+                            {
                                 if(!is_array($value_b))
                                 {
                                     $data['match_data']['result_list'][$key][$key_b] = $value_b;
                                 }
+                                unset($data['match_data']['result_list'][$key]['detail']);
                             }
                         }
-                        $firstChar = "a";
                         foreach($result['record_list_'.$side] as $key_a => $player)
                         {
                             if(!isset($playerList[$player['playerID']]))
@@ -945,23 +959,8 @@ class PrivilegeService
                             unset($data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_image_thumb']);
                             $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['logo'] = $playerList[$player['playerID']]['logo']??"";
                             $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name']??"";
-
-                            if(isset($result['detail']))
-                            {
-                                foreach($result['detail']['result_list'] as $key_b => $value_b)
-                                {
-                                    if(!is_array($value_b) && (substr($key_b,0,strlen($color)+1)==$color."_") && strpos($key_b,"_".$firstChar."_")>0)
-                                    {
-                                        $new_key = str_replace([$color."_","_".$firstChar."_"],"_",$key_b);
-                                        $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a][$new_key] = $value_b;
-                                        unset($data['match_data']['result_list'][$key_b]);
-                                    }
-                                }
-                            }
-                            $firstChar++;
                         }
                     }
-                unset($data['match_data']['result_list'][$key]['detail']);
                 }
             }
         }
