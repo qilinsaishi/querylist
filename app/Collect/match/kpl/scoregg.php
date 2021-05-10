@@ -39,7 +39,7 @@ class scoregg
                     "match_pre"=>['path'=>"match_pre",'default'=>[]],//赛前数据
                     "match_live"=>['path'=>"livedata",'default'=>[]],//赛事进程
                     "match_data"=>['path'=>"match_data",'default'=>[]],//赛事数据
-                    "round"=>['path'=>"round_list",'default'=>[]]//轮次数据
+                    //"round"=>['path'=>"round_list",'default'=>[]]//轮次数据
             ]
         ];
 
@@ -191,13 +191,44 @@ class scoregg
                     unset($arr['content'][$key]);
                 }
             }
-            foreach($arr['content']['round_list'] as $key => $round)
+            foreach($arr['content']['match_data']['round_list'] as $key => $round)
             {
                 $roundInfo = ['tournament_id'=>$arr['content']['tournamentID'],'round_name'=>$round['name'],'round_id'=>$round['roundID']];
-                $arr['content']['round_list'][$key] = $roundInfo;
+                $arr['content']['match_data']['round_list'][$key] = $roundInfo;
             }
+            $arr['content']['match_data'] = $this->processImg($arr['content']['match_data']);
             $data['match_list'][] = getDataFromMapping($this->data_map['list'],$arr['content']);
         }
         return $data;
+    }
+
+    public function checkImg($data)
+    {
+        $suffixList = [".png",".jpg"];
+        foreach($suffixList as $suffix)
+        {
+            if(strpos($data,$suffix)>0)
+            {
+                $data=str_replace('https','http',$data);
+                $image_url=getImage($data);
+                echo $image_url."\n";
+                return $image_url;
+            }
+        }
+    }
+    public function processImg($arr)
+    {
+        foreach($arr as $key => $value)
+        {
+            if(is_array($value))
+            {
+                $arr[$key] = $this->processImg($value);
+            }
+            else
+            {
+                $arr[$key] = $this->checkImg($value);
+            }
+        }
+        return $arr;
     }
 }

@@ -394,7 +394,7 @@ class MatchService
     {
         $scoreggMatchModel = new matchListModel();
         $params = [
-            'page_size' => 10,
+            'page_size' => 100,
             'page' => 1,
             'game' => $game,
             'round_detailed' => '0',
@@ -412,8 +412,9 @@ class MatchService
                 } else {
                     echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
                 }
-
+                sleep(1);
             }
+
         }
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
 
@@ -473,7 +474,7 @@ class MatchService
         ksort($collectData['content']);
 
         $processData = $collectClass->process($collectData);
-        //$processData['match_list'][0]['round_detailed']=1;
+        $processData['match_list'][0]['round_detailed']=1;
         $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
         return $rt;
 
