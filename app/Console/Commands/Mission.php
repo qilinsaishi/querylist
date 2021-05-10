@@ -102,7 +102,7 @@ class Mission extends Command
                 }
                 break;
             case "collect":
-                $count = $this->option("count")??50;
+                $count = $this->option("count")??1000;
                 (new oMission())->collect($game,"",$mission_type,$count);
                 break;
             case "process":
@@ -139,6 +139,10 @@ class Mission extends Command
             case "views":
                 //php artisan mission:collect views  update all (保存缓存中的浏览数据)
                 (new RedisService())->saveViews();
+                break;
+            case "updateScoreggMatchList":
+                //php artisan mission:collect updateScoreggMatchList  match all (更新scoregg_match_list表里面的result_list数据)
+                (new MatchService())->updateScoreggMatchList($game);
                 break;
             default:
 

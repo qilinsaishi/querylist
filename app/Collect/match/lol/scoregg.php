@@ -29,7 +29,7 @@ class scoregg
                 'match_status'=>['path'=>"status",'default'=>0],//比赛状态
                 'game'=>['path'=>"",'default'=>"lol"],//游戏
                 'home_score'=>['path'=>"team_a_win",'default'=>0],//主队得分
-                'away_score'=>['path'=>"team_a_win",'default'=>0],//客队得分
+                'away_score'=>['path'=>"team_b_win",'default'=>0],//客队得分
                 'home_id'=>['path'=>"teamID_a",'default'=>0],//主队id
                 'away_id'=>['path'=>"teamID_b",'default'=>0],//客队id
                 'logo'=>['path'=>"",'default'=>""],//logo
@@ -62,7 +62,7 @@ class scoregg
             }
             //复盘（正在进行或者已结束）
             if($status !=0){
-                $livedata_url='https://img1.famulei.com/lol/livedata/'.$matchID.'.json';
+                $livedata_url='https://img1.famulei.com/lol/livedata/'.$matchID.'.json'.'?_='.msectime();
                 $livedata=curl_get($livedata_url);//获取复盘数据接口
                 if($livedata['code']==200) {
                     $res['livedata']=$livedata['data'] ?? [];
@@ -88,6 +88,19 @@ class scoregg
                 }
             }else{
                 $res['livedata']=[];
+            }
+            if($res['result_list'] && count($res['result_list'] )>0){
+                foreach($res['result_list'] as $key => $result)
+                {
+                    $microtime =  substr(microtime(false),3,3);
+                    $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.msectime();
+                    $result_data=curl_get($result_data_url);//获取复盘数据接口
+                    if($result_data['code']==200) {
+                        $res['result_list'][$key]['detail'] = $result_data['data'];
+                    }
+                }
+            }else{
+                $res['result_list']=[];
             }
 
         }

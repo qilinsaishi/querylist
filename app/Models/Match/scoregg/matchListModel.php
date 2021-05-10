@@ -42,7 +42,7 @@ class matchListModel extends Model
     protected $toAppend = [
     ];
     public function getMatchList($params)
-    {
+    { //\DB::connection()->enableQueryLog();
         $start = microtime(true);
         $fields = $params['fields'] ?? "match_id,game,match_status,round_id,tournament_id,home_id,away_id,home_score,away_score,start_time";
         $match_list =$this->select(explode(",",$fields));
@@ -53,6 +53,26 @@ class matchListModel extends Model
             $match_list = $match_list ->where("tournament_id", $params['tournament_id']);
         }
         */
+        if (isset($params['round_detailed'])) {//主要修复match_data里面的数据
+            $match_list = $match_list ->where("round_detailed", $params['round_detailed']);
+        }
+        //游戏类型
+        if(isset($params['game']))
+        {
+            if(is_array($params['game']) && count($params['game'])>1)
+            {//数组里面多个元素
+                $match_list = $match_list->whereIn("game",$params['game']);
+            }
+            elseif(is_array($params['game']) && count($params['game'])==1)
+            {
+                $match_list = $match_list->where("game",$params['game']['0']);
+            }
+            else
+            {
+                $match_list = $match_list->where("game",$params['game']);
+            }
+        }
+
         $match_list = $match_list->where("home_id",">",0)->where("away_id",">",0)
             ->limit($pageSizge)
         /*    ->whereHas('getHomeInfo', function($query){
@@ -64,6 +84,7 @@ class matchListModel extends Model
         ->offset(($page-1)*$pageSizge)
             ->orderBy("start_time","desc")
             ->get()->toArray();
+        //print_r(\DB::getQueryLog());exit;
         $end = microtime(true);
         return $match_list;
     }

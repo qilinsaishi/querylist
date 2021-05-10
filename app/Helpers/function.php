@@ -18,10 +18,10 @@ function curl_get($url, $referer = '')
     //设置头文件的信息作为数据流输出
     curl_setopt($curl, CURLOPT_HEADER, 0);
     // 超时设置,以秒为单位
-    curl_setopt($curl, CURLOPT_TIMEOUT, 1);
-
+    //curl_setopt($curl, CURLOPT_TIMEOUT, 1);
+    curl_setopt($curl, CURLOPT_NOSIGNAL, true);
     // 超时设置，以毫秒为单位
-   curl_setopt($curl, CURLOPT_TIMEOUT_MS, 5000);
+   curl_setopt($curl, CURLOPT_TIMEOUT_MS, 30000);
 
     // 设置请求头
      curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
@@ -128,9 +128,9 @@ function curl_post($url = '', $postdata = '',$header = [])
 //毫秒级时间戳
 function msectime()
 {
-    list($msec, $sec) = explode(' ', microtime());
-    $msectime = (float)sprintf('%.0f', (floatval($msec) + floatval($sec)) * 1000);
-    return intval($msectime);
+    $microtime =  substr(microtime(false),3,3);
+    $msectime =time().$microtime;
+    return $msectime;
 
 }
 
