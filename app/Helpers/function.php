@@ -574,6 +574,8 @@ function checkImg($data)
             return $image_url;
         }
     }
+    return $data;
+
 }
 
 
