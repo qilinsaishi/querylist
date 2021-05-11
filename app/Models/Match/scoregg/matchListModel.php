@@ -42,18 +42,17 @@ class matchListModel extends Model
     protected $toAppend = [
     ];
     public function getMatchList($params)
-    { //\DB::connection()->enableQueryLog();
-
+    {
         $start = microtime(true);
-        $fields = $params['fields'] ?? "match_id,game,match_status,round_id,tournament_id,home_id,away_id,home_score,away_score,start_time";
+        $fields = $params['fields'] ?? "match_id,game,match_status,round_id,tournament_id,home_id,away_id,home_score,away_score,start_time,match_data";
         $match_list =$this->select(explode(",",$fields));
         $pageSizge = $params['page_size']??4;
         $page = $params['page']??1;
-        /*
-        if (isset($params['tournament_id']) && $params['tournament_id']!="") {
+
+        if (isset($params['tournament_id']) && $params['tournament_id']>0) {
             $match_list = $match_list ->where("tournament_id", $params['tournament_id']);
         }
-        */
+
         if (isset($params['round_detailed'])) {//主要修复match_data里面的数据
             $match_list = $match_list ->where("round_detailed", $params['round_detailed']);
         }
@@ -90,6 +89,12 @@ class matchListModel extends Model
         if (isset($params['start_time']) && $params['start_time'] > 0) {
             $time = date("Y-m-d H:i:s", time() - 8 * 3600);
             $match_list = $match_list->where("start_time", '<=', $time);
+        }
+        //比赛日期
+        if (isset($params['start_date']) && strtotime($params['start_date']) > 0)
+        {
+            $match_list = $match_list->where("start_time",">=" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600));
+            $match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600+86400));
         }
 
         $match_list = $match_list->where("home_id",">",0)->where("away_id",">",0)

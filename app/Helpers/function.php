@@ -577,6 +577,8 @@ function checkImg($data,$redis)
             return $image_url;
         }
     }
+    return $data;
+
 }
 
 
