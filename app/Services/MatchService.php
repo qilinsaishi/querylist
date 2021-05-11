@@ -483,6 +483,9 @@ class MatchService
             $processData = $collectClass->process($collectData);
             $processData['match_list'][0]['round_detailed']=1;
             $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
+        }else{
+            $updateData['round_detailed']=1;//原站点数据删除，把round_detailed转成1；
+            $scoreggMatchModel->updateMatch($val['match_id'],$updateData);
         }
 
         return $rt;

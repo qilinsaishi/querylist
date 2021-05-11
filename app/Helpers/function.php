@@ -311,6 +311,10 @@ if (!function_exists('randStr')) {
 //获取远程图片，并以文件的hash作为文件名保存
 function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type = 1)
 {
+    $bucket = config('aliyun.oss.bucket');
+    if(strpos($url,$bucket)!==false){
+        return $url;
+    }
     $f_name = $filename;
     if(substr($url,0,2)=='//')
     {
@@ -556,6 +560,21 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         $clean_text = preg_replace($regexDingbats, '', $clean_text);
         return $clean_text;
     }
+//检测图片,如果是其他网站图片则上传到我们自己的OSS
+function checkImg($data)
+{
+    $suffixList = [".png",".jpg",".gif"];
+    foreach($suffixList as $suffix)
+    {
+        if(strpos($data,$suffix)>0)
+        {
+            $data=str_replace('https','http',$data);
+            $image_url=getImage($data);
+            echo $image_url."\n";
+            return $image_url;
+        }
+    }
+}
 
 
 

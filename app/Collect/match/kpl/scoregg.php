@@ -202,20 +202,6 @@ class scoregg
         return $data;
     }
 
-    public function checkImg($data)
-    {
-        $suffixList = [".png",".jpg"];
-        foreach($suffixList as $suffix)
-        {
-            if(strpos($data,$suffix)>0)
-            {
-                $data=str_replace('https','http',$data);
-                $image_url=getImage($data);
-                echo $image_url."\n";
-                return $image_url;
-            }
-        }
-    }
     public function processImg($arr)
     {
         foreach($arr as $key => $value)
@@ -226,7 +212,7 @@ class scoregg
             }
             else
             {
-                $arr[$key] = $this->checkImg($value);
+                $arr[$key] = checkImg($value);
             }
         }
         return $arr;
