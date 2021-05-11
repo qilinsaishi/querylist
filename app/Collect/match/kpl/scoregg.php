@@ -125,7 +125,9 @@ class scoregg
     }
 
     public function process($arr)
-    { //status:0表示即将开始，1表示正在进行，2已结结束
+    {
+        $redis = app("redis.connection");
+        //status:0表示即将开始，1表示正在进行，2已结结束
         /*
         tournamentID 赛事id
             tournament_name  赛事名称
@@ -155,7 +157,7 @@ class scoregg
         $data = ['tournament'=>[],'match_list'=>[],'team'=>[]];
         if($arr['content']['type']=="tournament")
         {
-            $arr['content']['image_thumb'] = getImage($arr['content']['image_thumb']);
+            $arr['content']['image_thumb'] = getImage($arr['content']['image_thumb'],$redis);
             $arr['content']['start_time'] = strtotime($arr['content']['start_date']);
             $arr['content']['end_time'] = strtotime($arr['content']['start_date'])+86400-1;
             $data['tournament'][] = getDataFromMapping($this->data_map['tournament'],$arr['content']);
@@ -196,23 +198,27 @@ class scoregg
                 $roundInfo = ['tournament_id'=>$arr['content']['tournamentID'],'round_name'=>$round['name'],'round_id'=>$round['roundID']];
                 $arr['content']['match_data']['round_list'][$key] = $roundInfo;
             }
-            $arr['content']['match_data'] = $this->processImg($arr['content']['match_data']);
+            $arr['content']['match_data'] = $this->processImg($arr['content']['match_data'],$redis);
             $data['match_list'][] = getDataFromMapping($this->data_map['list'],$arr['content']);
         }
         return $data;
     }
 
-    public function processImg($arr)
+    public function processImg($arr,$redis = null)
     {
+        if(is_null($redis))
+        {
+            $redis = app("redis.connection");
+        }
         foreach($arr as $key => $value)
         {
             if(is_array($value))
             {
-                $arr[$key] = $this->processImg($value);
+                $arr[$key] = $this->processImg($value,$redis);
             }
             else
             {
-                $arr[$key] = checkImg($value);
+                $arr[$key] = checkImg($value,$redis);
             }
         }
         return $arr;
