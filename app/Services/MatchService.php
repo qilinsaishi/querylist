@@ -259,7 +259,7 @@ class MatchService
                                             if ($result == 0) {
                                                 $insertMissionResult = $this->saveMissionByScoreggMatchId($v2['matchID'], $game);
                                                 $mission_repeat = 0;
-                                                if ($insertMissionResult) {
+                                                if ($insertMissionResult>0) {
                                                     echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务成功' . "\n";
                                                 } else {
                                                     echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务失败' . "\n";
@@ -320,7 +320,7 @@ class MatchService
                                         if ($result == 0) {
                                             $insertMissionResult = $this->saveMissionByScoreggMatchId($v2['matchID'], $game);
                                             $mission_repeat = 0;
-                                            if ($insertMissionResult) {
+                                            if ($insertMissionResult>0) {
                                                 echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务成功' . "\n";
                                             } else {
                                                 echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务失败' . "\n";
@@ -351,20 +351,26 @@ class MatchService
     public function saveMissionByScoreggMatchId($matchID, $game)
     {
         $cdetail = $this->getMatchDetail($matchID);
-        $cdetail['source'] = 'scoregg';
-        $cdetail['type'] = 'match';
-        $cdetail['game'] = $game;
-        $cdata = [
-            "asign_to" => 1,
-            "mission_type" => 'match',//赛事
-            "mission_status" => 1,
-            "game" => $game,
-            "source" => 'scoregg',//
-            'title' => $game . '-' . $cdetail['tournament_name'] . '-' . $cdetail['round_name'],
-            'source_link' => 'https://www.scoregg.com/match/' . $matchID,
-            "detail" => json_encode($cdetail),
-        ];
-        $insert = (new oMission())->insertMission($cdata);
+        $cdetail=$cdetail ?? [];
+        $insert=0;
+        if(count($cdetail)>0){
+            $cdetail['source'] = 'scoregg';
+            $cdetail['type'] = 'match';
+            $cdetail['game'] = $game;
+            $cdetail['tournament_name'] =$cdetail['tournament_name'] ?? '';
+            $cdata = [
+                "asign_to" => 1,
+                "mission_type" => 'match',//赛事
+                "mission_status" => 1,
+                "game" => $game,
+                "source" => 'scoregg',//
+                'title' => $game . '-' . $cdetail['tournament_name'] . '-' . $cdetail['round_name'],
+                'source_link' => 'https://www.scoregg.com/match/' . $matchID,
+                "detail" => json_encode($cdetail),
+            ];
+            $insert = (new oMission())->insertMission($cdata);
+        }
+
 
         return $insert;
 
@@ -407,7 +413,7 @@ class MatchService
         if (count($matchList) > 0) {
             foreach ($matchList as &$val) {
                 $rt=$this->getOneScoreggMatchList($val);
-                if ($rt) {
+                if ($rt>0) {
                     echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
                 } else {
                     echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
@@ -437,7 +443,7 @@ class MatchService
         if (count($matchList) > 0) {
             foreach ($matchList as &$val) {
                 $rt=$this->getOneScoreggMatchList($val);
-                if ($rt) {
+                if ($rt>0) {
                     echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
                 } else {
                     echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
@@ -451,31 +457,34 @@ class MatchService
     //封装更新一条ScoreggMatchList数据
     public function getOneScoreggMatchList($val){
         $scoreggMatchModel = new matchListModel();
+        $rt=0;
         $insert_mission = $this->saveMissionByScoreggMatchId($val['match_id'],$val['game']);
-
-        $mission = (new MissionModel())->getMissionbyId($insert_mission);
-        //判断类库存在
-        if(!isset($collectClassList[$val['game']]))
-        {
-            $className = "App\Collect\match\\".$val['game'].'\scoregg';
-            if(class_exists($className))
+        if($insert_mission>0){
+            $mission = (new MissionModel())->getMissionbyId($insert_mission);
+            //判断类库存在
+            if(!isset($collectClassList[$val['game']]))
             {
-                $collectClassList[$val['game']] = new $className;
+                $className = "App\Collect\match\\".$val['game'].'\scoregg';
+                if(class_exists($className))
+                {
+                    $collectClassList[$val['game']] = new $className;
+                }
             }
+
+            $collectClass = $collectClassList[$val['game']];
+            $mission['detail'] = json_decode($mission['detail'], true);
+            $mission['detail']['type']='match';
+
+            $collectData = $collectClass->collect($mission);
+
+            $collectData['content']=json_decode($collectData['content'], true);
+            ksort($collectData['content']);
+
+            $processData = $collectClass->process($collectData);
+            $processData['match_list'][0]['round_detailed']=1;
+            $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
         }
 
-        $collectClass = $collectClassList[$val['game']];
-        $mission['detail'] = json_decode($mission['detail'], true);
-        $mission['detail']['type']='match';
-
-        $collectData = $collectClass->collect($mission);
-
-        $collectData['content']=json_decode($collectData['content'], true);
-        ksort($collectData['content']);
-
-        $processData = $collectClass->process($collectData);
-        $processData['match_list'][0]['round_detailed']=1;
-        $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
         return $rt;
 
     }
