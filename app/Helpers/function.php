@@ -351,6 +351,8 @@ function getImage($url ,$redis = null,$save_dir = 'storage/downloads', $filename
         $redis = app("redis.connection");
     }
     $fileKey = "file_url2_" . $url;
+    echo "666";
+    print_r(strlen($url));
     $currentFile = $redis->get($fileKey);
     //echo "url:".$url."\n";
     echo "cache:".$currentFile."\n";
@@ -426,7 +428,7 @@ function getImage($url ,$redis = null,$save_dir = 'storage/downloads', $filename
             $url = str_replace('https://','http://',$url);
             echo "get img FileSize error:".$url."\n";
             echo "process time:".(microtime(true)-$start_time)."\n";
-            return getImage($url, $save_dir, $f_name, 1);
+            return getImage($url, $redis,$save_dir, $f_name, 1);
         }
         $upload = (new AliyunService())->upload2Oss([$root]);
         //存储到redis,一天内不再重新获取

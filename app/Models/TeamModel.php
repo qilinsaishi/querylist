@@ -43,13 +43,13 @@ class TeamModel extends Model
         "race_stat"=>[],
     ];
     public $toJson = [
-        "race_stat","honor_list","aka","race_stat"
+        "race_stat","honor_list","aka","team_stat"
     ];
     public $toAppend = [
         "aka"=>["team_name","en_name","cn_name","aka"]
     ];
     protected $keep = [
-        "original_source","team_history"
+        "original_source",//"team_history"
     ];
     public function getTeamList($params)
     {
@@ -162,7 +162,7 @@ class TeamModel extends Model
         }
         return $team_info;
     }
-    public function getTeamBySiteId($team_id,$original_source='',$game='',$fields = "team_id,team_name,logo,tid,game")
+    public function getTeamBySiteId($team_id,$original_source='',$game='',$fields = "team_id,team_name,logo,tid,game,original_source")
     {
         $team_info =$this->select(explode(",",$fields))
             ->where("site_id",$team_id);
@@ -256,7 +256,7 @@ class TeamModel extends Model
         }
         if($data['site_id'] != "" || $data['site_id'] != 0)
         {
-            $currentTeam = $this->getTeamBySiteId($data['site_id'],$data['original_source'],$game);
+            $currentTeam = $this->getTeamBySiteId($data['site_id'],$data['original_source'],$game,"*");
         }
         else
         {
@@ -271,7 +271,7 @@ class TeamModel extends Model
         }
         else
         {
-            echo "source:".$currentTeam['original_source'] ."-". $data['original_source']."\n";
+           // echo "source:".$currentTeam['original_source'] ."-". $data['original_source']."\n";
             //非同来源不做覆盖
             if($currentTeam['original_source'] != $data['original_source'])
             {
@@ -326,7 +326,7 @@ class TeamModel extends Model
                 }
             }
             if(count($data))
-            {
+            {   $data['aka']=$currentTeam['aka'] ?? '[]';
                 $return['result'] = $this->updateTeam($currentTeam['team_id'],$data);
                 $return['site_id'] = $site_id;
                 return $return;

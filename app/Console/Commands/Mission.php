@@ -117,7 +117,7 @@ class Mission extends Command
                 }
                 foreach($gameList as $g)
                 {
-                    $count = $this->option("count")??5;
+                    $count = $this->option("count")??100;
                     $sleepmin = $this->option("sleepmin")??1;
                     $sleepmax = $this->option("sleepmax")??2;
                     (new oMission())->process($g,"",$mission_type,$count,$sleepmin,$sleepmax);

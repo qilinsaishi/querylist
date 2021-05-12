@@ -371,9 +371,7 @@ class MatchService
             $insert = (new oMission())->insertMission($cdata);
         }
 
-
         return $insert;
-
 
     }
 
@@ -434,7 +432,7 @@ class MatchService
             'game' => $game,
             'start_time'=>1,//表示启动开始时间条件
             'match_status' => ["0","1"],
-            'fields' => "match_id,game",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
+            'fields' => "match_id,game",
         ];
         $collectClassList = [];
         $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
