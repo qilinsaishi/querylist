@@ -792,6 +792,7 @@ class PrivilegeService
         $teamList = [];
         $playerList = [];
         $tournament = [];
+        $teamMap = ["a"=>"home","b"=>"away"];
         foreach ($data as $key => $matchInfo) {
             //赛事信息
             if (!isset($tournament[$matchInfo['tournament_id']])) {
@@ -799,6 +800,10 @@ class PrivilegeService
                 if (isset($tournamentInfo['tournament_id'])) {
                     $tournament[$matchInfo['tournament_id']] = $tournamentInfo;
                 }
+            }
+            foreach($teamMap as $side => $color)
+            {
+                $data[$key][$color.'_player_id_list'] = [];
             }
             //战队信息
             if (!isset($teamList[$matchInfo['home_id']]))
@@ -808,7 +813,7 @@ class PrivilegeService
                 {
                     if(isset($teamInfo['tid']) && $teamInfo['tid']>0)
                     {
-                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,description,logo");
+                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,logo");
                     }
                     $teamList[$matchInfo['home_id']] = $teamInfo;
                 }
@@ -820,19 +825,18 @@ class PrivilegeService
                 {
                     if(isset($teamInfo['tid']) && $teamInfo['tid']>0)
                     {
-                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,description,logo");
+                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,logo");
                     }
                     $teamList[$matchInfo['away_id']] = $teamInfo;
                 }
             }
             $matchData = json_decode($matchInfo['match_data'],true);
-            $teamMap = ["a"=>"home","b"=>"away"];
             $playerIdList = [];
             if(is_array($matchData['result_list']))
             {
-                foreach($matchData['result_list'] as $round => $round_info)
+                foreach($teamMap as $side => $color)
                 {
-                    foreach($teamMap as $side => $color)
+                    foreach($matchData['result_list'] as $round => $round_info)
                     {
                         if(isset($round_info['record_list_' . $side]))
                         {
@@ -840,8 +844,10 @@ class PrivilegeService
                         }
                     }
                 }
+                //print_R(array_keys($data[$key]));
                 $data[$key]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
                 $data[$key]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
+
                 foreach($teamMap as $side => $color)
                 {
                     foreach($data[$key][$color.'_player_id_list'] as $k => $player_id)
@@ -849,13 +855,19 @@ class PrivilegeService
                         if (!isset($playerList[$player_id]))
                         {
                             $playerInfo = $playerModelClass->$functionPlayerSingle($player_id,$matchInfo['game'],$functionList['matchList']['source']);
-                            if(isset($playerInfo['pid']) && $playerInfo['pid']>0)
+                            if(isset($playerInfo['player_id']))
                             {
-                                $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0,$playerInfo['pid'],1,0)['data'],"pid,player_name,logo");
+                                if(isset($playerInfo['pid']) && $playerInfo['pid']>0)
+                                {
+                                    $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0,$playerInfo['pid'],1,0)['data'],"pid,player_name,logo");
+                                }
+                                $playerList[$player_id] = $playerInfo;
                             }
-                            $playerList[$player_id] = $playerInfo;
                         }
-                        $data[$key][$color.'_player_list'][] = $playerList[$player_id];
+                        if(isset($playerList[$player_id]))
+                        {
+                            $data[$key][$color.'_player_list'][] = $playerList[$player_id];
+                        }
                     }
                 }
                 $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
