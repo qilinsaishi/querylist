@@ -400,7 +400,7 @@ class MatchService
     {
         $scoreggMatchModel = new matchListModel();
         $params = [
-            'page_size' => 100,
+            'page_size' => 500,
             'page' => 1,
             'game' => $game,
             'round_detailed' => '0',
