@@ -784,7 +784,19 @@ class PrivilegeService
             }
         }
         if (!isset($functionList["totalPlayerInfo"]["class"]) || !isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
-            return $data;
+            //return $data;
+        }
+        //判断队员
+        if (isset($functionList['totalPlayerList']) && isset($functionList['totalPlayerList']['function'])) {
+
+        } else {
+            $f = $this->getFunction(['totalPlayerList' => []], $functionList['matchList']['source']);
+            if (isset($f['totalPlayerList']['class'])) {
+                $functionList["totalPlayerList"] = $f['totalPlayerList'];
+            }
+        }
+        if (!isset($functionList["totalPlayerList"]["class"]) || !isset($functionList['totalPlayerList']['function'])) {
+            //return $data;
         }
         $playerModelClass = $functionList["totalPlayerInfo"]["class"];
         $functionPlayerSingle = $functionList["totalPlayerInfo"]['functionSingleBySite'];
@@ -813,7 +825,7 @@ class PrivilegeService
                 {
                     if(isset($teamInfo['tid']) && $teamInfo['tid']>0)
                     {
-                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,logo");
+                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,logo,intergrated_id_list");
                     }
                     $teamList[$matchInfo['home_id']] = $teamInfo;
                 }
@@ -825,7 +837,7 @@ class PrivilegeService
                 {
                     if(isset($teamInfo['tid']) && $teamInfo['tid']>0)
                     {
-                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,logo");
+                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,logo,intergrated_id_list");
                     }
                     $teamList[$matchInfo['away_id']] = $teamInfo;
                 }
@@ -867,6 +879,26 @@ class PrivilegeService
                         if(isset($playerList[$player_id]))
                         {
                             $data[$key][$color.'_player_list'][] = $playerList[$player_id];
+                        }
+                    }
+                    //如果没有对阵的队员
+                    if(count($data[$key][$color.'_player_list']??[])==0)
+                    {
+                        $teamId = $data[$key][$color.'_team_info']['intergrated_id_list']??$data[$key][$color.'_id'];
+                        $functionPlayerList =$functionList["totalPlayerList"]["function"];
+                        $playerList = $functionList["totalPlayerList"]["class"]->$functionPlayerList(['team_ids'=>$teamId,"pageSize"=>999]);
+                        foreach($playerList as $player)
+                        {
+                            if($player['pid']>0)
+                            {
+                                $data[$key][$color.'_player_id_list'][] = $player['player_id'];
+                                $data[$key][$color.'_player_list'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$player['pid'],1,0)['data'],"pid,player_name,logo");
+                                $countPlayer = count($data[$key][$color.'_player_list']);
+                                if($countPlayer>5)
+                                {
+                                    break;
+                                }
+                            }
                         }
                     }
                 }

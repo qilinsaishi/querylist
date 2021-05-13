@@ -81,9 +81,13 @@ class TeamModel extends Model
             $team_list = $team_list->whereIn("original_source",$params['sources']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $team_list = $team_list->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game'])) {
+            $team_list = $team_list->whereIn("game", $params['game']);
         }
         //不所属战队
         if(isset($params['except_team']) && $params['except_team']>0)
@@ -368,9 +372,14 @@ class TeamModel extends Model
             $team_count = $team_count->whereIn("original_source",$params['sources']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $team_count = $team_count->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game']))
+        {
+            $team_count = $team_count->whereIn("game", $params['game']);
         }
         //不所属战队
         if(isset($params['except_team']) && $params['except_team']>0)

@@ -45,7 +45,7 @@ class PlayerModel extends Model
     ];
     public function getPlayerList($params)
     {
-        $fields = $params['fields']??"player_id,player_name,logo,position";
+        $fields = $params['fields']??"player_id,player_name,logo,position,pid";
         $player_list =$this->select(explode(",",$fields));
         //总表队员ID
         if(isset($params['pid']) && intval($params['pid'])>=0)
@@ -53,9 +53,14 @@ class PlayerModel extends Model
             $player_list = $player_list->where("pid",$params['pid']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $player_list = $player_list->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game']))
+        {
+            $player_list = $player_list->whereIn("game", $params['game']);
         }
         //数据来源
         if(isset($params['source']) && strlen($params['source'])>=2)
@@ -305,9 +310,14 @@ class PlayerModel extends Model
             $player_count = $player_count->where("pid",$params['pid']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $player_count = $player_count->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game']))
+        {
+            $player_count = $player_count->whereIn("game", $params['game']);
         }
         //数据来源
         if(isset($params['source']) && strlen($params['source'])>=2)
