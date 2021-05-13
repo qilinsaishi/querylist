@@ -1587,6 +1587,10 @@ class PrivilegeService
             if($detailData['pid']>0)
             {
                 $data[$key] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$detailData["pid"],1,$params['reset']??0)['data'],$params['fields']??"*");
+                if($data[$key]['player_name']==0)
+                {
+                    $data[$key] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$detailData["pid"],1,1)['data'],$params['fields']??"*");
+                }
             }
             else
             {
