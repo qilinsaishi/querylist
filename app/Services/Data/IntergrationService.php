@@ -10,6 +10,7 @@ use App\Models\PlayerModel;
 use App\Models\Player\TotalPlayerModel as TotalPlayerModel;
 use App\Models\Player\PlayerMapModel as PlayerMapModel;
 use App\Models\Player\PlayerNameMapModel as PlayerNameMapModel;
+use function AlibabaCloud\Client\json;
 
 class IntergrationService
 {
@@ -169,7 +170,9 @@ class IntergrationService
                             }
                             else
                             {
-                                $append[$column] = array_merge($append[$column],json_decode($teamInfo[$column],true)??[]);
+                                $teamInfo[$column] = json_decode($teamInfo[$column],true);
+                                $teamInfo[$column] = is_array($teamInfo[$column])?$teamInfo[$column]:[];
+                                $append[$column] = array_merge($append[$column]??[],$teamInfo[$column]);
                             }
                         }
                         $append[$column] = array_unique($append[$column]);
