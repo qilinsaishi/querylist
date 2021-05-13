@@ -38,7 +38,7 @@ class PlayerModel extends Model
     protected $attributes = [
     ];
     public $toJson = [
-        "team_history","event_history","aka","stat"
+        "team_history","event_history","aka","stat","aka"
     ];
     public $toAppend = [
         "aka"=>["player_name","en_name","cn_name","aka"]
@@ -392,7 +392,7 @@ class PlayerModel extends Model
         }
         return $player_info;
     }
-    public function getPlayerBySiteId($site_id,$game,$source,$fields = "player_id,player_name,logo,pid,game")
+    public function getPlayerBySiteId($site_id,$game,$source,$fields = "player_id,player_name,logo,pid,game,original_source,aka")
     {
         $player_info =$this->select(explode(",",$fields))
             ->where("site_id",$site_id)

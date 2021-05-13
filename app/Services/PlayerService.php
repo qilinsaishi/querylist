@@ -21,9 +21,9 @@ class  PlayerService
 {
     public function insertPlayerData($mission_type, $game)
     {
-        $this->getPlayerListByCollectResult($game, $mission_type);
+        //$this->getPlayerListByCollectResult($game, $mission_type);
         $this->getScoreggPlayerDetail($game, $mission_type);
-        $this->insertCpseoPlayer($game, $mission_type);
+       // $this->insertCpseoPlayer($game, $mission_type);
         //$this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
         return 'finish';
     }
@@ -148,7 +148,7 @@ class  PlayerService
                                 if ($v['player_id'] > 0) {
                                     $playerInfo = $playerModel->getPlayerBySiteId($v['player_id'], $game, 'scoregg');
                                     $playerInfo = $playerInfo ?? [];
-                                    if (count($playerInfo) == 0) {
+                                    //if (count($playerInfo) == 0) {
                                         $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的文章
                                         $missionCount = $missionCount ?? 0;
                                         if ($missionCount !== 0) {
@@ -168,13 +168,13 @@ class  PlayerService
                                             $insert = (new oMission())->insertMission($adata);
                                             echo $game . $key . $k . "-scoregg-player-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
                                         }
-                                    } else {
+                                    /*} else {
                                         echo "exist-playerinfo-scoregg-" . $game . '-' . $v['player_url'] . "\n";//表示playerinfo表记录已存在，跳出继续
                                         continue;
-                                    }
+                                    }*/
                                 } else {
                                     echo "player_id:" . $v['player_id'];
-                                    continue;
+
                                 }
 
                             }
@@ -1125,4 +1125,148 @@ class  PlayerService
             return $return;
         }
     }
+
+    //通过scoregg站点的team_id获取战队的基础数据
+    public function getScoreggPlayerInfo($player_id=0){
+        $scoregg_url='https://www.scoregg.com/big-data/player/'.$player_id;
+        $qt=QueryList::get($scoregg_url);
+
+        //联赛胜率相关统计
+        $victory_rate=$qt->find('.left-content .basic-data .data-progress .win-rate .progress-top-text .title')->text();//胜率
+        $victory_rate=trim($victory_rate,'%');
+        $victory_detail=$qt->find('.left-content .basic-data .data-progress .win-rate .progress-top-text .r-text')->text();
+        $victory_detail=explode(" ",$victory_detail);
+        $total_count=isset($victory_detail[0]) ? trim($victory_detail[0],'场'):0;//总场数
+        $win_count=isset($victory_detail[1]) ? trim($victory_detail[1],'胜'):0;//胜场数
+        $lose_count=isset($victory_detail[2]) ? trim($victory_detail[2],'负'):0;//负场数
+
+        //参团率相关
+        $join_rate=$qt->find('.left-content .basic-data .data-progress .join-rate .progress-top-text .title')->text();
+        $join_rate=trim($join_rate,'%');
+        //参团排名
+        $join_rank=$qt->find('.left-content .basic-data .data-progress .join-rate .progress-top-text .light-text')->text();
+
+        //kda相关
+        $kda=$qt->find('.left-content .basic-data .data-progress .kda .kda-progress-text .kda-num')->text();
+        $kda=trim($kda,'KDA');
+        //kda排名
+        $kda_rank=$qt->find('.left-content .basic-data .data-progress .kda .kda-progress-text .kda-des span')->text();
+        $kda_detail=$qt->find('.left-content .basic-data .data-progress .kda .kda-progress-text .r-text span')->text();
+        $kda_detail=explode(" / ",$kda_detail);
+        //总击杀
+        $total_kills=isset($kda_detail[0]) ? trim($kda_detail[0]):0;//总击杀
+        $total_deaths=isset($kda_detail[1]) ? trim($kda_detail[1]):0;//总死亡
+        $total_assists=isset($kda_detail[2]) ? trim($kda_detail[2]):0;//总助攻
+        $base_ability_detail=[];
+        $base_ability_detail['kda']=[
+            'score-num'=>$kda,
+            'score-des'=>"KDA",
+            'score-rank'=>$kda_rank
+        ];
+
+
+        //获取数据明细
+        $data_list_item=$qt->rules(array(
+            'score-num' => array('.score-num','text'),
+            'score-des' => array('.score-des','text'),
+            'score-rank' => array('.score-rank','text'),
+        ))->range('.left-content .basic-data  .data-list-item .item')->queryData();
+        $data_list_item=$data_list_item ?? [];
+        if(count($data_list_item) >0) {
+            foreach ($data_list_item as $key=>$val){
+                //击杀
+                if(strpos($val['score-des'],'击杀')!==false ){
+                    $base_ability_detail['kills']['score-num']=$val['score-num'];
+                    $base_ability_detail['kills']['score-des']=$val['score-des'];
+                    $base_ability_detail['kills']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //死亡
+                if(strpos($val['score-des'],'死亡')!==false ){
+                    $base_ability_detail['deaths']['score-num']=$val['score-num'];
+                    $base_ability_detail['deaths']['score-des']=$val['score-des'];
+                    $base_ability_detail['deaths']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //助攻
+                if(strpos($val['score-des'],'助攻')!==false ){
+                    $base_ability_detail['assists']['score-num']=$val['score-num'];
+                    $base_ability_detail['assists']['score-des']=$val['score-des'];
+                    $base_ability_detail['assists']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //分均伤害injury
+                if(strpos($val['score-des'],'分均伤害')!==false ){
+                    $base_ability_detail['minute_injury']['score-num']=$val['score-num'];
+                    $base_ability_detail['minute_injury']['score-des']=$val['score-des'];
+                    $base_ability_detail['minute_injury']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //伤害占比
+                if(strpos($val['score-des'],'伤害占比')!==false ){
+                    $base_ability_detail['injury_rate']['score-num']=trim($val['score-num'],"%");
+                    $base_ability_detail['injury_rate']['score-des']=$val['score-des'];
+                    $base_ability_detail['injury_rate']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //伤害转化率
+                if(strpos($val['score-des'],'伤害转化率')!==false ){
+                    $base_ability_detail['injury_inversion_rate']['score-num']=trim($val['score-num'],"%");
+                    $base_ability_detail['injury_inversion_rate']['score-des']=$val['score-des'];
+                    $base_ability_detail['injury_inversion_rate']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //分均承伤
+                if(strpos($val['score-des'],'分均承伤')!==false ){
+                    $base_ability_detail['minute_damagetaken']['score-num']=trim($val['score-num'],"%");
+                    $base_ability_detail['minute_damagetaken']['score-des']=$val['score-des'];
+                    $base_ability_detail['minute_damagetaken']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //承伤占比
+                if(strpos($val['score-des'],'伤害占比')!==false ){
+                    $base_ability_detail['damagetaken_rate']['score-num']=trim($val['score-num'],"%");
+                    $base_ability_detail['damagetaken_rate']['score-des']=$val['score-des'];
+                    $base_ability_detail['damagetaken_rate']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //分均补刀
+                if(strpos($val['score-des'],'分均补刀')!==false ){
+                    $base_ability_detail['minute_hits']['score-num']=trim($val['score-num']);
+                    $base_ability_detail['minute_hits']['score-des']=$val['score-des'];
+                    $base_ability_detail['minute_hits']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //分均插眼
+                if(strpos($val['score-des'],'分均插眼')!==false ){
+                    $base_ability_detail['minute_wardsplaced']['score-num']=trim($val['score-num']);
+                    $base_ability_detail['minute_wardsplaced']['score-des']=$val['score-des'];
+                    $base_ability_detail['minute_wardsplaced']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //分均排眼
+                if(strpos($val['score-des'],'分均排眼')!==false ){
+                    $base_ability_detail['minute_wardkilled']['score-num']=trim($val['score-num']);
+                    $base_ability_detail['minute_wardkilled']['score-des']=$val['score-des'];
+                    $base_ability_detail['minute_wardkilled']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //英雄池
+                if(strpos($val['score-des'],'英雄池')!==false ){
+                    $base_ability_detail['hero_pool']['score-num']=trim($val['score-num'],"%");
+                    $base_ability_detail['hero_pool']['score-des']=$val['score-des'];
+                    $base_ability_detail['hero_pool']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+
+            }
+
+        }
+
+        $player_ability_and_base=[
+            'victory_rate'=>$victory_rate,//胜率
+            'total_count'=>$total_count,//比赛场数
+            'win'=>$win_count,//胜利场数
+            'lose'=>$lose_count,//失败场数
+            'total_kills'=>$total_kills,//总击杀数
+            'total_deaths'=>$total_deaths,//总死亡数
+            'total_assists'=>$total_assists,//总助攻数
+            'base_ability_detail'=>$base_ability_detail,//基础数据明细
+            'join_rate'=>$join_rate,//参团率
+            'join_rank'=>$join_rank,//参团排名
+            'kda'=>$kda,//kda
+            'kda_rank'=>$kda_rank,//kda排名
+
+        ];
+        return $player_ability_and_base;
+    }
+
 }
