@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Collect\player\kpl;
+use App\Models\MissionModel;
 use App\Models\TeamModel;
 use App\Services\MissionService as oMission;
+use App\Services\PlayerService;
 use QL\QueryList;
 
 class scoregg
@@ -18,6 +20,7 @@ class scoregg
             "team_history"=>['path'=>'','default'=>[]],
             "event_history"=>['path'=>'','default'=>[]],
             "stat"=>['path'=>'stat','default'=>[]],
+            "player_stat"=>['path'=>'player_stat','default'=>[]],
             "team_id"=>['path'=>'team_id','default'=>0],
             "logo"=>['path'=>'player_image','default'=>0],
             "original_source"=>['path'=>"",'default'=>"scoregg"],
@@ -31,24 +34,34 @@ class scoregg
         $res = [];
         $url = $arr['detail']['player_url'] ?? '';
         $team_id=$arr['detail']['team_id'] ?? 0;
-        $teamInfo = $this->getScoreggInfo($url,$team_id);
-        $res = $url = $arr['detail'] ?? [];
-        $res = array_merge($res, $teamInfo);
-        if (count($res) > 0) {
-            //处理战队采集数据
-            $res['player_name'] =$res['player_name'] ?? '';
-            $cdata = [
-                'mission_id' => $arr['mission_id'],
-                'content' => json_encode($res),
-                'game' => $arr['game'],
-                'source_link' => $arr['source_link'],
-                'title' => $arr['title'] ?? '',
-                'mission_type' => $arr['mission_type'],
-                'source' => $arr['source'],
-                'status' => 1,
-            ];
-            //处理战队采集数据
+        $player_id=$arr['detail']['player_id'] ?? 0;
+        if($player_id >0){
+            $teamInfo = $this->getScoreggInfo($url,$team_id);
+            $res = $url = $arr['detail'] ?? [];
+            $res = array_merge($res, $teamInfo);
+            $player_stat=(new PlayerService())->getScoreggPlayerInfo($player_id);
+            $res['player_stat']=$player_stat;
+            if (count($res) > 0) {
+                //处理战队采集数据
+                $res['player_name'] =$res['player_name'] ?? '';
+                $cdata = [
+                    'mission_id' => $arr['mission_id'],
+                    'content' => json_encode($res),
+                    'game' => $arr['game'],
+                    'source_link' => $arr['source_link'],
+                    'title' => $arr['title'] ?? '',
+                    'mission_type' => $arr['mission_type'],
+                    'source' => $arr['source'],
+                    'status' => 1,
+                ];
+                //处理战队采集数据
+            }
+        }else{
+            //失败
+            (new MissionModel())->updateMission($arr['mission_id'], ['mission_status' => 3]);
+            echo "mission_id:".$arr['mission_id'] .',player_id:'.$player_id."\n";
         }
+
 
         return $cdata;
     }

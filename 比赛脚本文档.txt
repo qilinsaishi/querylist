@@ -1,0 +1,10 @@
+一、插入比赛数据force
+1.php artisan mission:collect insert_mission match lol --force=0  //（--force=0  表示scoregg_match_list 里面的数据进行匹配，不存在怎加入任务表）
+php artisan mission:collect insert_mission match lol --force=1  //（--force=1  表示直接加入到任务表）
+
+2.php artisan mission:collect collect  match lol   对任务表里面的数据进行进一步的处理
+
+3.php artisan mission:collect process  match lol   同步到scoregg_match_list
+
+二.对比赛数据进行更新
+1.php artisan mission:collect updateScoreggMatchList  match lol  对scoregg_match_list表里面的数据进行更新（主要针对之前缺少了比赛结果的接口和图片oss进行修复)，

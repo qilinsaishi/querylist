@@ -21,6 +21,7 @@ class scoregg
             "team_history"=>['path'=>'','default'=>[]],
             "event_history"=>['path'=>'','default'=>[]],
             "stat"=>['path'=>'stat','default'=>[]],
+            "player_stat"=>['path'=>'player_stat','default'=>[]],
             "team_id"=>['path'=>'team_id','default'=>0],
             "logo"=>['path'=>'player_image','default'=>0],
             "original_source"=>['path'=>"",'default'=>"scoregg"],
@@ -39,8 +40,8 @@ class scoregg
             $teamInfo = $this->getScoreggInfo($url,$team_id);
             $res = $url = $arr['detail'] ?? [];
             $res = array_merge($res, $teamInfo);
-            $stat=(new PlayerService())->getScoreggPlayerInfo($player_id);
-            $res['stat']=$stat;
+            $player_stat=(new PlayerService())->getScoreggPlayerInfo($player_id);
+            $res['player_stat']=$player_stat;
             if (count($res) > 0) {
                 //处理战队采集数据
                 $res['player_name'] =$res['player_name'] ?? '';
@@ -59,7 +60,7 @@ class scoregg
         }else{
             //失败
             (new MissionModel())->updateMission($arr['mission_id'], ['mission_status' => 3]);
-            echo "mission_id:".$arr['mission_id'] .',team_id:'.$team_id."\n";
+            echo "mission_id:".$arr['mission_id'] .',player_id:'.$player_id."\n";
         }
 
 
@@ -128,9 +129,9 @@ class scoregg
         $qt = QueryList::get($arr['source_link']);
         $player_name=$qt->find('.right-content h2')->text();
         $arr['content']['player_name']=$player_name ?? $arr['content']['player_name'];
-       /* $arr['content']['stat'] =
+        $arr['content']['stat'] =
             getFieldsFromArray($arr['content'],"KDA,PLAYS_TIMES,OFFERED_RATE,AVERAGE_KILLS,AVERAGE_ASSISTS,AVERAGE_DEATHS,MINUTE_ECONOMIC,MINUTE_HITS,MINUTE_DAMAGEDEALT,DAMAGEDEALT_RATE,MINUTE_DAMAGETAKEN,DAMAGETAKEN_RATE,MINUTE_WARDSPLACED,MINUTE_WARDKILLED,MVP,win,los,VICTORY_RATE,total_kills,total_deaths,total_assists");
-        */
+
         $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","lol");
         if(isset($teamInfo['team_id']))
         {

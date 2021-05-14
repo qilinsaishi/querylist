@@ -38,7 +38,7 @@ class PlayerModel extends Model
     protected $attributes = [
     ];
     public $toJson = [
-        "team_history","event_history","aka","stat","aka"
+        "team_history","event_history","aka","stat","aka","player_stat"
     ];
     public $toAppend = [
         "aka"=>["player_name","en_name","cn_name","aka"]
