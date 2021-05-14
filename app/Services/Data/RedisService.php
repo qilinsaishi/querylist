@@ -87,12 +87,12 @@ class RedisService
                 'prefix' => "matchList",
                 'expire' => 86400,
             ],
-            /*
+
             "matchDetail" => [//比赛详情
                 'prefix' => "matchDetail",
                 'expire' => 86400,
             ],
-            */
+
 
             "lolHero" => [//lolHero
                 'prefix' => "lolHero",
