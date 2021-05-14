@@ -293,6 +293,13 @@ class PlayerModel extends Model
             }
             if(count($data))
             {
+                if(!isset($data['logo']) || (isset($data['logo']) && strlen($data['logo'])<=10)){
+                    $data['logo']=$currentPlayer['logo'] ?? '';
+                }
+                if(!isset($data['aka']) || (isset($data['aka']) && $data['aka']=='') || is_null($data['aka']) )
+                {
+                    $data['aka']=$currentPlayer['aka'] ?? [];
+                }
                 return $this->updatePlayer($currentPlayer['player_id'],$data);
             }
             else
