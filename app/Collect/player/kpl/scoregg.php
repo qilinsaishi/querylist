@@ -68,6 +68,7 @@ class scoregg
 
     public function process($arr)
     {
+        $redis = app("redis.connection");
         /**
          * [tournament_id] => 197 //赛事id
          * [player_id] => 3771  //队员id
@@ -133,7 +134,7 @@ class scoregg
         $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","kpl");
         if(isset($teamInfo['team_id']))
         {
-            $arr['content']['player_image'] = getImage($arr['content']['player_image']);
+            $arr['content']['player_image'] = getImage($arr['content']['player_image'],$redis);
             $arr['content']['team_id'] = $teamInfo['team_id'];
             $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
             if(isset($arr['content']['real_name']) && preg_match($patten, $arr['content']['real_name'])){
