@@ -394,7 +394,9 @@ class IntergrationService
                             }
                             else
                             {
-                                $append[$column] = array_merge($append[$column],json_decode($playerInfo[$column],true)??[]);
+                                $playerInfo[$column] = json_decode($playerInfo[$column],true);
+                                $playerInfo[$column] = is_array($playerInfo[$column])?$playerInfo[$column]:[];
+                                $append[$column] = array_merge($append[$column],$playerInfo[$column]);
                             }
                         }
                         $append[$column] = array_unique($append[$column]);
