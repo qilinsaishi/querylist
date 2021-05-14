@@ -107,6 +107,15 @@ class PrivilegeService
                 'withSource' => 1,
                 'function' => "getTournamentById",
                 'functionSingle' => "getTournamentById",
+                'functionProcess' => "processTournament",
+            ],
+            "roundList" => [
+                'list' => [
+                    ['model' => 'App\Models\Match\#source#\roundModel', 'source' => 'scoregg'],
+                ],
+                'withSource' => 1,
+                'function' => "getRoundList",
+                'functionSingle' => "getRoundById",
             ],
             "teamList" => [//团队列表
                 'list' => [
@@ -1061,13 +1070,27 @@ class PrivilegeService
         }
         return $data;
     }
+    public function processTournament($data, $functionList)
+    {
+        if (isset($functionList['roundList']) && isset($functionList['roundList']['functionSingle'])) {
 
+        } else {
+            $f = $this->getFunction(['roundList' => []], $functionList['tournament']['source']);
+            if (isset($f['roundList']['class'])) {
+                $functionList["roundList"] = $f['roundList'];
+            }
+        }
+        $modelClass = $functionList["roundList"]["class"];
+        $function = $functionList["roundList"]['function'];
+        $data['roundList'] = array_values($modelClass->$function(["tournament_id"=>$data['tournament_id']]));
+        return $data;
+    }
     public function processPlayerList($data, $functionList)
     {
         if (isset($functionList['playerList']) && isset($functionList['playerList']['functionSingle'])) {
 
         } else {
-            $f = $this->getFunction(['playerList' => []], $functionList['teamList']['source']);
+            $f = $this->getFunction(['playerList' => []], $functionList['playerList']['source']);
             if (isset($f['playerList']['class'])) {
                 $functionList["playerList"] = $f['playerList'];
             }

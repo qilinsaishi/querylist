@@ -44,6 +44,11 @@ class roundModel extends Model
     {
         $fields = isset($params["fields"])?explode(",",$params["fields"],true):["*"];
         $round_list =$this->select($fields);
+        //赛事
+        if(isset($params['tournament_id']) && $params['tournament_id']>0)
+        {
+            $round_list = $round_list->where("tournament_id",$params['tournament_id']);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $round_list = $round_list
@@ -55,7 +60,13 @@ class roundModel extends Model
     }
     public function getRoundCount($params)
     {
-        $round_count =$this->count();
+        $round_count = $this;
+        //赛事
+        if(isset($params['tournament_id']) && $params['tournament_id']>0)
+        {
+            $round_count = $round_count->where("tournament_id",$params['tournament_id']);
+        }
+        $round_count = $round_count->count();
         return $round_count;
     }
     public function getRoundByName($round_name,$game)
