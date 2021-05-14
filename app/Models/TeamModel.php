@@ -330,7 +330,14 @@ class TeamModel extends Model
                 }
             }
             if(count($data))
-            {   $data['aka']=$currentTeam['aka'] ?? '[]';
+            {
+                if(!isset($data['logo']) || (isset($data['logo']) && strlen($data['logo'])<=10)){
+                    $data['logo']=$currentPlayer['logo'] ?? '';
+                }
+                if(!isset($data['aka']) || (isset($data['aka']) && $data['aka']=='') || is_null($data['aka']) )
+                {
+                    $data['aka']=$currentPlayer['aka'] ?? [];
+                }
                 $return['result'] = $this->updateTeam($currentTeam['team_id'],$data);
                 $return['site_id'] = $site_id;
                 return $return;
