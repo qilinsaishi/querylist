@@ -85,8 +85,8 @@ class matchListModel extends Model
                 $match_list=$match_list->whereIn("match_status", $params['match_status']);
             }
         }
-        //比赛开始时间start_time=1表示启动开始时间条件
-        if (isset($params['start_time']) && $params['start_time'] > 0) {
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['start']) && $params['start'] > 0) {
             $time = date("Y-m-d H:i:s", time() - 8 * 3600);
             $match_list = $match_list->where("start_time", '<=', $time);
         }

@@ -430,7 +430,7 @@ class MatchService
             'page_size' => 1,
             'page' => 1,
             'game' => $game,
-            'start_time'=>1,//表示启动开始时间条件
+            'start'=>1,//表示启动开始时间条件
             'match_status' => ["0","1"],
             'fields' => "match_id,game",
         ];
