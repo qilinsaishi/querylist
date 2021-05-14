@@ -778,7 +778,7 @@ class PrivilegeService
             }
         }
         if (!isset($functionList["totalTeamList"]["class"]) || !isset($functionList['totalTeamList']['functionSingleBySite'])) {
-            return $data;
+            //return $data;
         }
         $modelClass = $functionList["totalTeamList"]["class"];
         $functionSingle = $functionList["totalTeamList"]['functionSingleBySite'];
@@ -814,7 +814,8 @@ class PrivilegeService
         $playerList = [];
         $tournament = [];
         $teamMap = ["a"=>"home","b"=>"away"];
-        foreach ($data as $key => $matchInfo) {
+        foreach ($data as $key => $matchInfo)
+        {
             //赛事信息
             if (!isset($tournament[$matchInfo['tournament_id']])) {
                 $tournamentInfo = $modelTournamentClass->$functionTournamentSingle($matchInfo['tournament_id']);
@@ -865,7 +866,6 @@ class PrivilegeService
                         }
                     }
                 }
-                //print_R(array_keys($data[$key]));
                 $data[$key]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
                 $data[$key]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
 
@@ -911,9 +911,10 @@ class PrivilegeService
                         }
                     }
                 }
-                $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
-                unset($data[$key]['match_data']);
+
             }
+            $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
+            unset($data[$key]['match_data']);
         }
         return $data;
     }
@@ -1080,8 +1081,45 @@ class PrivilegeService
                 $functionList["roundList"] = $f['roundList'];
             }
         }
+        if (isset($functionList['matchList']) && isset($functionList['matchList']['functionSingle'])) {
+
+        } else {
+            $f = $this->getFunction(['matchList' => []], $functionList['tournament']['source']);
+            if (isset($f['matchList']['class'])) {
+                $functionList["matchList"] = $f['matchList'];
+            }
+        }
+        if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['functionSingle'])) {
+
+        } else {
+            $f = $this->getFunction(['totalTeamInfo' => []], $functionList['tournament']['source']);
+            if (isset($f['totalTeamInfo']['class'])) {
+                $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
+            }
+        }
         $modelClass = $functionList["roundList"]["class"];
         $function = $functionList["roundList"]['function'];
+        $matchModelClass = $functionList["matchList"]["class"];
+        $matchFunction = $functionList["matchList"]['function'];
+        $teamModelClass = $functionList["totalTeamInfo"]["class"];
+        $teamFunction = $functionList["totalTeamInfo"]['functionSingleBySite'];
+        $matchList = $matchModelClass->$matchFunction(['tournament_id'=>$data['tournament_id'],"page_size"=>1000,"fields"=>"match_id,home_id,away_id"]);
+        $teamIdList = array_unique(array_merge(array_column($matchList,"home_id"),array_column($matchList,"away_id")));
+        $intergrationService = new IntergrationService();
+        $teamList = [];
+        foreach($teamIdList as $team_id)
+        {
+            $teamInfo = $teamModelClass->$teamFunction($team_id,$functionList['tournament']['source'],$data['game'],"team_id,tid");
+            if(isset($teamInfo['tid']) && $teamInfo['tid']>0)
+            {
+                $teamInfo = $intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0);
+                if(isset($teamInfo['data']['tid']))
+                {
+                    $teamList[$teamInfo['data']['tid']] = getFieldsFromArray($teamInfo['data'],"tid,logo,team_name");
+                }
+            }
+        }
+        $data['teamList'] = array_values($teamList);
         $data['roundList'] = array_values($modelClass->$function(["tournament_id"=>$data['tournament_id']]));
         return $data;
     }
