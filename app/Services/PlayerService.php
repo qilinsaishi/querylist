@@ -1217,7 +1217,7 @@ class  PlayerService
                     $base_ability_detail['minute_damagetaken']['score-rank']=trim($val['score-rank'],' 联赛第 ');
                 }
                 //承伤占比
-                if(strpos($val['score-des'],'伤害占比')!==false ){
+                if(strpos($val['score-des'],'承伤占比')!==false ){
                     $base_ability_detail['damagetaken_rate']['score-num']=trim($val['score-num'],"%");
                     $base_ability_detail['damagetaken_rate']['score-des']=$val['score-des'];
                     $base_ability_detail['damagetaken_rate']['score-rank']=trim($val['score-rank'],' 联赛第 ');
