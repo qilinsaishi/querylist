@@ -38,14 +38,14 @@ class PlayerModel extends Model
     protected $attributes = [
     ];
     public $toJson = [
-        "team_history","event_history","aka","stat"
+        "team_history","event_history","aka","stat","aka","player_stat"
     ];
     public $toAppend = [
         "aka"=>["player_name","en_name","cn_name","aka"]
     ];
     public function getPlayerList($params)
     {
-        $fields = $params['fields']??"player_id,player_name,logo,position";
+        $fields = $params['fields']??"player_id,player_name,logo,position,pid";
         $player_list =$this->select(explode(",",$fields));
         //总表队员ID
         if(isset($params['pid']) && intval($params['pid'])>=0)
@@ -53,9 +53,14 @@ class PlayerModel extends Model
             $player_list = $player_list->where("pid",$params['pid']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $player_list = $player_list->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game']))
+        {
+            $player_list = $player_list->whereIn("game", $params['game']);
         }
         //数据来源
         if(isset($params['source']) && strlen($params['source'])>=2)
@@ -288,6 +293,13 @@ class PlayerModel extends Model
             }
             if(count($data))
             {
+                if(!isset($data['logo']) || (isset($data['logo']) && strlen($data['logo'])<=10)){
+                    $data['logo']=$currentPlayer['logo'] ?? '';
+                }
+                if(!isset($data['aka']) || (isset($data['aka']) && $data['aka']=='') || is_null($data['aka']) )
+                {
+                    $data['aka']=$currentPlayer['aka'] ?? [];
+                }
                 return $this->updatePlayer($currentPlayer['player_id'],$data);
             }
             else
@@ -305,9 +317,14 @@ class PlayerModel extends Model
             $player_count = $player_count->where("pid",$params['pid']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $player_count = $player_count->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game']))
+        {
+            $player_count = $player_count->whereIn("game", $params['game']);
         }
         //数据来源
         if(isset($params['source']) && strlen($params['source'])>=2)
@@ -382,8 +399,9 @@ class PlayerModel extends Model
         }
         return $player_info;
     }
-    public function getPlayerBySiteId($site_id,$game,$source){
-        $player_info =$this->select("*")
+    public function getPlayerBySiteId($site_id,$game,$source,$fields = "player_id,player_name,logo,pid,game,original_source,aka")
+    {
+        $player_info =$this->select(explode(",",$fields))
             ->where("site_id",$site_id)
             ->where("game",$game)
             ->where("original_source",$source)

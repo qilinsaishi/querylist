@@ -29,7 +29,7 @@ class scoregg
                 'match_status'=>['path'=>"status",'default'=>0],//比赛状态
                 'game'=>['path'=>"",'default'=>"lol"],//游戏
                 'home_score'=>['path'=>"team_a_win",'default'=>0],//主队得分
-                'away_score'=>['path'=>"team_a_win",'default'=>0],//客队得分
+                'away_score'=>['path'=>"team_b_win",'default'=>0],//客队得分
                 'home_id'=>['path'=>"teamID_a",'default'=>0],//主队id
                 'away_id'=>['path'=>"teamID_b",'default'=>0],//客队id
                 'logo'=>['path'=>"",'default'=>""],//logo
@@ -39,7 +39,7 @@ class scoregg
                 "match_pre"=>['path'=>"match_pre",'default'=>[]],//赛前数据
                 "match_live"=>['path'=>"livedata",'default'=>[]],//赛事进程
                 "match_data"=>['path'=>"match_data",'default'=>[]],//赛事数据
-                "round"=>['path'=>"round_list",'default'=>[]]//轮次数据
+               // "round"=>['path'=>"round_list",'default'=>[]]//轮次数据
             ]
         ];
 
@@ -62,7 +62,7 @@ class scoregg
             }
             //复盘（正在进行或者已结束）
             if($status !=0){
-                $livedata_url='https://img1.famulei.com/lol/livedata/'.$matchID.'.json';
+                $livedata_url='https://img1.famulei.com/lol/livedata/'.$matchID.'.json'.'?_='.msectime();
                 $livedata=curl_get($livedata_url);//获取复盘数据接口
                 if($livedata['code']==200) {
                     $res['livedata']=$livedata['data'] ?? [];
@@ -89,6 +89,19 @@ class scoregg
             }else{
                 $res['livedata']=[];
             }
+            if($res['result_list'] && count($res['result_list'] )>0){
+                foreach($res['result_list'] as $key => $result)
+                {
+                    $microtime =  substr(microtime(false),3,3);
+                    $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.msectime();
+                    $result_data=curl_get($result_data_url);//获取复盘数据接口
+                    if($result_data['code']==200) {
+                        $res['result_list'][$key]['detail'] = $result_data['data'];
+                    }
+                }
+            }else{
+                $res['result_list']=[];
+            }
 
         }
 
@@ -112,7 +125,9 @@ class scoregg
     }
 
     public function process($arr)
-    { //status:0表示即将开始，1表示正在进行，2已结结束
+    {
+        $redis = app("redis.connection");
+        //status:0表示即将开始，1表示正在进行，2已结结束
         /*
         tournamentID 赛事id
             tournament_name  赛事名称
@@ -142,7 +157,7 @@ class scoregg
         $data = ['tournament'=>[],'match_list'=>[],'team'=>[]];
         if($arr['content']['type']=="tournament")
         {
-            $arr['content']['image_thumb'] = getImage($arr['content']['image_thumb']);
+            $arr['content']['image_thumb'] = getImage($arr['content']['image_thumb'],$redis);
             $arr['content']['start_time'] = strtotime($arr['content']['start_date']);
             $arr['content']['end_time'] = strtotime($arr['content']['start_date'])+86400-1;
             $data['tournament'][] = getDataFromMapping($this->data_map['tournament'],$arr['content']);
@@ -151,40 +166,44 @@ class scoregg
         {
             $currentKeyList = array_column($this->data_map['list'],'path');
             $keyList = array_keys($arr['content']);
-            /*
-            foreach($keyList as $key)
-            {
-                if(is_array($arr['content'][$key]))
-                {
-                    echo "key:".$key."\n";
-                    $subKeyList = array_keys($arr['content'][$key]);
-                    foreach($subKeyList as $key2)
-                    {
-                        echo "        subKey:".$key2."\n";
-                    }
-                }
-            }
-            */
             $arr['content']['match_data'] = [];
             $arr['content']['start_time'] = date("Y-m-d H:i:s",$arr['content']['start_time']);
-            //unset($arr['content']['type'],$arr['content']['game']);
-
             foreach($keyList as $key)
             {
                 if(!in_array($key,$currentKeyList))
                 {
-                    //echo "key:".$key."\n";
                     $arr['content']['match_data'][$key] = $arr['content'][$key];
                     unset($arr['content'][$key]);
                 }
             }
-            foreach($arr['content']['round_list'] as $key => $round)
+            foreach($arr['content']['match_data']['round_list'] as $key => $round)
             {
                 $roundInfo = ['tournament_id'=>$arr['content']['tournamentID'],'round_name'=>$round['name'],'round_id'=>$round['roundID']];
-                $arr['content']['round_list'][$key] = $roundInfo;
+                $arr['content']['match_data']['round_list'][$key] = $roundInfo;
             }
+            $arr['content']['match_data'] = $this->processImg($arr['content']['match_data'],$redis);
             $data['match_list'][] = getDataFromMapping($this->data_map['list'],$arr['content']);
         }
         return $data;
+    }
+
+    public function processImg($arr,$redis = null)
+    {
+        if(is_null($redis))
+        {
+            $redis = app("redis.connection");
+        }
+        foreach($arr as $key => $value)
+        {
+            if(is_array($value))
+            {
+                $arr[$key] = $this->processImg($value,$redis);
+            }
+            else
+            {
+                $arr[$key] = checkImg($value,$redis);
+            }
+        }
+        return $arr;
     }
 }

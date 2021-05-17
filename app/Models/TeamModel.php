@@ -43,17 +43,17 @@ class TeamModel extends Model
         "race_stat"=>[],
     ];
     public $toJson = [
-        "race_stat","honor_list","aka","race_stat"
+        "race_stat","honor_list","aka","team_stat","team_history"
     ];
     public $toAppend = [
         "aka"=>["team_name","en_name","cn_name","aka"]
     ];
     protected $keep = [
-        "original_source","team_history"
+        "original_source",//"team_history"
     ];
     public function getTeamList($params)
     {
-        $fields = $params['fields']??"team_id,team_name,logo,team_history";
+        $fields = $params['fields']??"team_id,team_name,logo";
         $team_list =$this->select(explode(",",$fields));
         //队伍ID
         if(isset($params['ids']) && count($params['ids'])>0)
@@ -81,9 +81,13 @@ class TeamModel extends Model
             $team_list = $team_list->whereIn("original_source",$params['sources']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $team_list = $team_list->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game'])) {
+            $team_list = $team_list->whereIn("game", $params['game']);
         }
         //不所属战队
         if(isset($params['except_team']) && $params['except_team']>0)
@@ -162,17 +166,17 @@ class TeamModel extends Model
         }
         return $team_info;
     }
-    public function getTeamBySiteId($team_id,$original_source='',$game='')
+    public function getTeamBySiteId($team_id,$original_source='',$game='',$fields = "team_id,team_name,logo,tid,game,original_source,site_id")
     {
-        $team_obj =$this->select("*")
+        $team_info =$this->select(explode(",",$fields))
             ->where("site_id",$team_id);
         if($original_source !=''){
-            $team_obj=$team_obj->where("original_source",$original_source);
+            $team_info=$team_info->where("original_source",$original_source);
         }
         if($game !=''){
-            $team_obj=$team_obj->where("game",$game);
+            $team_info=$team_info->where("game",$game);
         }
-        $team_info=$team_obj->get()->first();
+        $team_info=$team_info->get()->first();
         if(isset($team_info->team_id))
         {
             $team_info = $team_info->toArray();
@@ -256,7 +260,7 @@ class TeamModel extends Model
         }
         if($data['site_id'] != "" || $data['site_id'] != 0)
         {
-            $currentTeam = $this->getTeamBySiteId($data['site_id'],$data['original_source'],$game);
+            $currentTeam = $this->getTeamBySiteId($data['site_id'],$data['original_source'],$game,"*");
         }
         else
         {
@@ -271,7 +275,7 @@ class TeamModel extends Model
         }
         else
         {
-            echo "source:".$currentTeam['original_source'] ."-". $data['original_source']."\n";
+           // echo "source:".$currentTeam['original_source'] ."-". $data['original_source']."\n";
             //非同来源不做覆盖
             if($currentTeam['original_source'] != $data['original_source'])
             {
@@ -327,6 +331,13 @@ class TeamModel extends Model
             }
             if(count($data))
             {
+                if(!isset($data['logo']) || (isset($data['logo']) && strlen($data['logo'])<=10)){
+                    $data['logo']=$currentPlayer['logo'] ?? '';
+                }
+                if(!isset($data['aka']) || (isset($data['aka']) && $data['aka']=='') || is_null($data['aka']) )
+                {
+                    $data['aka']=$currentPlayer['aka'] ?? [];
+                }
                 $return['result'] = $this->updateTeam($currentTeam['team_id'],$data);
                 $return['site_id'] = $site_id;
                 return $return;
@@ -368,9 +379,14 @@ class TeamModel extends Model
             $team_count = $team_count->whereIn("original_source",$params['sources']);
         }
         //游戏类型
-        if(isset($params['game']) && strlen($params['game'])>=3)
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $team_count = $team_count->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game']))
+        {
+            $team_count = $team_count->whereIn("game", $params['game']);
         }
         //不所属战队
         if(isset($params['except_team']) && $params['except_team']>0)

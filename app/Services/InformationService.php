@@ -508,17 +508,20 @@ class InformationService
                         case "kpl":
                             $id=2;
                             break;
-                        case "dota2":
+                        /*case "dota2":
                             $id=4;
                             break;
+                        */
                     }
-                    //请求浏览器刷新缓存
-                    $siteInfo=$siteModel->getSiteById($id);
-                    $domain=$siteInfo['domain'] ?? '';
-                    $url=$domain.$type;
-                    $rt=file_get_contents($url);
-                    echo $rt."\n";
-
+                    if($id>0)
+                    {
+                        //请求浏览器刷新缓存
+                        $siteInfo=$siteModel->getSiteById($id);
+                        $domain=$siteInfo['domain'] ?? '';
+                        $url=$domain.$type;
+                        $rt=file_get_contents($url);
+                        echo $rt."\n";
+                    }
                 }
             }
 

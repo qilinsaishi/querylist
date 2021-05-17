@@ -75,10 +75,15 @@ class ScwsMapModel extends Model
     {
         $connection = DB::connection($this->connection);
         $keyword_list =$this->select("content_id",$connection->raw('sum(weight) as weight'));
-        //目标ID
-        if(isset($params['game']) && strlen($params['game'])>0)
+        //游戏类型
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $keyword_list = $keyword_list->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game']))
+        {
+            $keyword_list = $keyword_list->whereIn("game", $params['game']);
         }
         //类型
         if(isset($params['type']) && strlen($params['type'])>0)
@@ -121,10 +126,15 @@ class ScwsMapModel extends Model
     public function getCount($params)
     {
         $keyword_count =$this;
-        //目标ID
-        if(isset($params['game']) && strlen($params['game'])>0)
+        //游戏类型
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>=3)
         {
             $keyword_count = $keyword_count->where("game",$params['game']);
+        }
+        //游戏类型
+        if (isset($params['game']) && is_array($params['game']))
+        {
+            $keyword_count = $keyword_count->whereIn("game", $params['game']);
         }
         //类型
         if(isset($params['type']) && strlen($params['type'])>0)

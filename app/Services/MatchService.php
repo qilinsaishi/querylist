@@ -15,12 +15,13 @@ use QL\QueryList;
 
 class MatchService
 {
-    public function insertMatchData($game)
+    const MISSION_REPEAT=100;//调用重复多少条数量就终止
+    public function insertMatchData($game,$force)
     {
 
         if ($game == 'kpl' || $game == 'lol') {
             //$this->saveMissionByScoreggMatchId(12280,$game);//这个是测试单个比赛的方法案例
-            $this->scoreggMatch($game);//scoregg 比赛数据
+            $this->scoreggMatch($game,$force);//scoregg 比赛数据
         }
         /* if ($game == 'dota2') {//这个dota2的数据不用改，是拼接起来的专题。暂时不用改
              $this->getDota2International($game);
@@ -192,7 +193,7 @@ class MatchService
     }
 
     //https://www.scoregg.com 赛事
-    public function scoreggMatch($game,$force = 0)
+    public function scoreggMatch($game, $force = 0)
     {
         $collectResultModel = new CollectResultModel();
         $missionModel = new MissionModel();
@@ -204,12 +205,12 @@ class MatchService
             'game' => $game
         ];
         $tournamentList = $tournamentModel->getTournamentList($tournamentParams);
-
+        $mission_repeat = 0;
         $tournamentList = $tournamentList ?? [];//赛事结果
         if (count($tournamentList) > 0) {
+
             foreach ($tournamentList as $key => $tournament) {
                 $ajax_url = 'https://img1.famulei.com/tr/' . $tournament['tournament_id'] . '.json';
-
                 $cdata = curl_get($ajax_url);//获取赛事下面的一级分类
                 $cdata = $cdata ?? [];
                 if (count($cdata) > 0) {
@@ -227,27 +228,28 @@ class MatchService
                                         $cdetail['game'] = $game;
                                         $cdetail['r_type'] = $v['r_type'];//赛事下面的一级分类类型
                                         //　强制爬取
-                                        if($force==1)
-                                        {
+                                        if ($force == 1) {
                                             $toGet = 1;
-                                        }
-                                        elseif($force==0)
-                                        {
+                                        } elseif ($force == 0) {
                                             //获取当前比赛数据
                                             $scoreggMatchInfo = $scoreggMatchModel->getMatchById($v2['matchID']);
                                             //找到
-                                            if(isset($scoreggMatchInfo['match_id']))
-                                            {
+                                            if (isset($scoreggMatchInfo['match_id'])) {
                                                 $toGet = 0;
-                                                echo "exits-scoregg_match-matchID:" . $v2['matchID'] . "\n";
-                                            }
-                                            else
-                                            {
+                                                $mission_repeat ++;
+                                                echo "exits-round_son_scoregg_match-matchID:" . $v2['matchID'] . "\n";
+                                                if($mission_repeat>=self::MISSION_REPEAT)
+                                                {
+                                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                                    return;
+                                                }
+                                            } else {
+                                                $mission_repeat = 0;
                                                 $toGet = 1;
                                             }
                                         }
-                                        if($toGet==1)
-                                        {
+
+                                        if ($toGet == 1) {
                                             $params1 = [
                                                 'game' => $game,
                                                 'mission_type' => 'match',
@@ -257,16 +259,24 @@ class MatchService
                                             $result = $result ?? 0;
                                             if ($result == 0) {
                                                 $insertMissionResult = $this->saveMissionByScoreggMatchId($v2['matchID'], $game);
-                                                if ($insertMissionResult) {
+                                                $mission_repeat = 0;
+                                                if ($insertMissionResult>0) {
                                                     echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务成功' . "\n";
                                                 } else {
                                                     echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务失败' . "\n";
                                                 }
                                             } else {
                                                 //表示Mission表记录已存在，跳出继续
+                                                $mission_repeat ++ ;//重复记录加一
                                                 echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
+                                                if($mission_repeat>=self::MISSION_REPEAT)
+                                                {
+                                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                                    return;
+                                                }
                                             }
                                         }
+
                                     }
                                 }
 
@@ -279,27 +289,28 @@ class MatchService
                             if (count($roundData) > 0) {
                                 foreach ($roundData as $v2) {//获取比赛的具体数据
                                     //　强制爬取
-                                    if($force==1)
-                                    {
+                                    if ($force == 1) {
                                         $toGet = 1;
-                                    }
-                                    elseif($force==0)
-                                    {
+                                    } elseif ($force == 0) {
                                         //获取当前比赛数据
                                         $scoreggMatchInfo = $scoreggMatchModel->getMatchById($v2['matchID']);
                                         //找到
-                                        if(isset($scoreggMatchInfo['match_id']))
-                                        {
+                                        if (isset($scoreggMatchInfo['match_id'])) {
                                             $toGet = 0;
+                                            $mission_repeat ++;
                                             echo "exits-scoregg_match-matchID:" . $v2['matchID'] . "\n";
-                                        }
-                                        else
-                                        {
+                                            if($mission_repeat>=100)
+                                            {
+                                                echo "重复任务过多，任务终止\n";
+                                                return;
+                                            }
+                                        } else {
+                                            $mission_repeat = 0;
                                             $toGet = 1;
                                         }
                                     }
-                                    if($toGet==1)
-                                    {
+
+                                    if ($toGet == 1) {
                                         $params1 = [
                                             'game' => $game,
                                             'mission_type' => 'match',
@@ -309,16 +320,24 @@ class MatchService
                                         $result = $result ?? 0;
                                         if ($result == 0) {
                                             $insertMissionResult = $this->saveMissionByScoreggMatchId($v2['matchID'], $game);
-                                            if ($insertMissionResult) {
+                                            $mission_repeat = 0;
+                                            if ($insertMissionResult>0) {
                                                 echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务成功' . "\n";
                                             } else {
                                                 echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务失败' . "\n";
                                             }
                                         } else {
                                             //表示Mission表记录已存在，跳出继续
+                                            $mission_repeat ++ ;//重复记录加一
                                             echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
+                                            if($mission_repeat>=100)
+                                            {
+                                                echo "重复任务过多，任务终止\n";
+                                                return;
+                                            }
                                         }
                                     }
+
                                 }
                             }
 
@@ -333,27 +352,31 @@ class MatchService
     public function saveMissionByScoreggMatchId($matchID, $game)
     {
         $cdetail = $this->getMatchDetail($matchID);
-        $cdetail['source'] = 'scoregg';
-        $cdetail['type'] = 'match';
-        $cdetail['game'] = $game;
-        $cdata = [
-            "asign_to" => 1,
-            "mission_type" => 'match',//赛事
-            "mission_status" => 1,
-            "game" => $game,
-            "source" => 'scoregg',//
-            'title' => $game . '-' . $cdetail['tournament_name'] . '-' . $cdetail['round_name'],
-            'source_link' => 'https://www.scoregg.com/match/' . $matchID,
-            "detail" => json_encode($cdetail),
-        ];
-        $insert = (new oMission())->insertMission($cdata);
+        $cdetail=$cdetail ?? [];
+        $insert=0;
+        if(count($cdetail)>0){
+            $cdetail['source'] = 'scoregg';
+            $cdetail['type'] = 'match';
+            $cdetail['game'] = $game;
+            $cdetail['tournament_name'] =$cdetail['tournament_name'] ?? '';
+            $cdata = [
+                "asign_to" => 1,
+                "mission_type" => 'match',//赛事
+                "mission_status" => 1,
+                "game" => $game,
+                "source" => 'scoregg',//
+                'title' => $game . '-' . $cdetail['tournament_name'] . '-' . $cdetail['round_name'],
+                'source_link' => 'https://www.scoregg.com/match/' . $matchID,
+                "detail" => json_encode($cdetail),
+            ];
+            $insert = (new oMission())->insertMission($cdata);
+        }
 
         return $insert;
 
-
     }
 
-    //https://www.scoregg.com/services/api_url.php
+    //获取比赛详情
     public function getMatchDetail($matchID)
     {
         $url = 'https://www.scoregg.com/services/api_url.php';
@@ -370,6 +393,106 @@ class MatchService
         return $cdata;
 
     }
+
+    //
+    public function updateScoreggMatchList($game)
+    {
+        $scoreggMatchModel = new matchListModel();
+        $params = [
+            'page_size' => 500,
+            'page' => 1,
+            'all'=>1,//表示不管home_id和away_id是否有值
+            'game' => $game,
+            'round_detailed' => '0',
+            'fields' => "match_id,game",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
+        ];
+        $collectClassList = [];
+        $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
+        $matchList = $matchList ?? [];
+        $classList = [];
+        if (count($matchList) > 0) {
+            foreach ($matchList as &$val) {
+                $rt=$this->getOneScoreggMatchList($val);
+                if ($rt>0) {
+                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
+                } else {
+                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
+                }
+                sleep(1);
+            }
+
+        }
+        return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
+
+    }
+    //查询scoreggMatchList里面所有不等于2的数据重新采集更新
+    public function updateScoreggMatchListStatus($game){
+        $scoreggMatchModel = new matchListModel();
+        $params = [
+            'page_size' => 1,
+            'page' => 1,
+            'game' => $game,
+            'start'=>1,//表示启动开始时间条件
+            'all'=>1,//表示不管home_id和away_id是否有值
+            'match_status' => ["0","1"],
+            'fields' => "match_id,game",
+        ];
+        $collectClassList = [];
+        $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
+        $matchList = $matchList ?? [];
+        $classList = [];
+        if (count($matchList) > 0) {
+            foreach ($matchList as &$val) {
+                $rt=$this->getOneScoreggMatchList($val);
+                if ($rt>0) {
+                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
+                } else {
+                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
+                }
+
+            }
+        }
+        return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
+    }
+
+    //封装更新一条ScoreggMatchList数据
+    public function getOneScoreggMatchList($val){
+        $scoreggMatchModel = new matchListModel();
+        $rt=0;
+        $insert_mission = $this->saveMissionByScoreggMatchId($val['match_id'],$val['game']);
+        if($insert_mission>0){
+            $mission = (new MissionModel())->getMissionbyId($insert_mission);
+            //判断类库存在
+            if(!isset($collectClassList[$val['game']]))
+            {
+                $className = "App\Collect\match\\".$val['game'].'\scoregg';
+                if(class_exists($className))
+                {
+                    $collectClassList[$val['game']] = new $className;
+                }
+            }
+
+            $collectClass = $collectClassList[$val['game']];
+            $mission['detail'] = json_decode($mission['detail'], true);
+            $mission['detail']['type']='match';
+
+            $collectData = $collectClass->collect($mission);
+
+            $collectData['content']=json_decode($collectData['content'], true);
+            ksort($collectData['content']);
+
+            $processData = $collectClass->process($collectData);
+            $processData['match_list'][0]['round_detailed']=1;
+            $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
+        }else{
+            $updateData['round_detailed']=1;//原站点数据删除，把round_detailed转成1；
+            $scoreggMatchModel->updateMatch($val['match_id'],$updateData);
+        }
+
+        return $rt;
+
+    }
+
 
 
 }

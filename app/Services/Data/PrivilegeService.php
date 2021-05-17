@@ -3,6 +3,7 @@
 namespace App\Services\Data;
 
 use App\Collect\hero\dota2\gamedota2;
+use App\Models\PlayerModel;
 
 class PrivilegeService
 {
@@ -75,6 +76,15 @@ class PrivilegeService
                 'functionCount' => "getMatchCount",//获取列表方法
                 'functionProcess' => "processMatchList",//格式化的处理方法
             ],
+            "matchDetail" => [
+                'list' => [
+                    ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'scoregg'],
+                ],
+                'withSource' => 1,
+                'function' => "getMatchById",//获取数据方法
+                'functionCount' => "getMatchCount",//获取列表方法
+                'functionProcess' => "processMatch",//格式化的处理方法
+            ],
             "tournamentList" => [
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "cpseo"],
@@ -96,6 +106,16 @@ class PrivilegeService
                 ],
                 'withSource' => 1,
                 'function' => "getTournamentById",
+                'functionSingle' => "getTournamentById",
+                'functionProcess' => "processTournament",
+            ],
+            "roundList" => [
+                'list' => [
+                    ['model' => 'App\Models\Match\#source#\roundModel', 'source' => 'scoregg'],
+                ],
+                'withSource' => 1,
+                'function' => "getRoundList",
+                'functionSingle' => "getRoundById",
             ],
             "teamList" => [//团队列表
                 'list' => [
@@ -117,7 +137,6 @@ class PrivilegeService
                 'functionSingle' => "getTeamById",
                 'functionSingleBySite' => "getTeamBySiteId",
                 'functionSingleByName' => "getTeamByName"
-
             ],
             "totalTeamInfo" => [//团队总列表
                 'list' => [
@@ -129,6 +148,7 @@ class PrivilegeService
                 'functionSingle' => "getTeamById",
                 'functionProcess' => "processTotalTeam",
                 'functionUpdate' => "updateTeam",
+                'functionSingleBySite' => "getTeamBySiteId",
             ],
             "totalPlayerList" => [//队员总列表
                 'list' => [
@@ -180,6 +200,7 @@ class PrivilegeService
                 'functionSingle' => "getPlayerById",
                 'functionProcess' => "processTotalPlayer",
                 'functionUpdate' => "updatePlayer",
+                'functionSingleBySite' => "getPlayerBySiteId",
             ],
             "information" => [//资讯
                 'list' => [
@@ -513,6 +534,11 @@ class PrivilegeService
                                     } else {
                                         $functionList[$dataType]['functionProcessCount'] = "";
                                     }
+                                    if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
+                                        $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                    } else {
+                                        $functionList[$dataType]['functionSingleBySite'] = "";
+                                    }
                                     $found = 1;
                                 } else {
                                     //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." not found\n";
@@ -573,6 +599,11 @@ class PrivilegeService
                             } else {
                                 $functionList[$dataType]['functionProcessCount'] = "";
                             }
+                            if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
+                                $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                            } else {
+                                $functionList[$dataType]['functionSingleBySite'] = "";
+                            }
                         }
                     }
                     //如果没找到
@@ -615,6 +646,11 @@ class PrivilegeService
                                             $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
                                         } else {
                                             $functionList[$dataType]['functionProcessCount'] = "";
+                                        }
+                                        if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
+                                            $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                        } else {
+                                            $functionList[$dataType]['functionSingleBySite'] = "";
                                         }
                                         //标记为找到
                                         $found = 1;
@@ -670,6 +706,11 @@ class PrivilegeService
                                     } else {
                                         $functionList[$dataType]['functionProcessCount'] = "";
                                     }
+                                    if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
+                                        $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                    } else {
+                                        $functionList[$dataType]['functionSingleBySite'] = "";
+                                    }
                                     $found = 1;
                                 } else {
                                     echo "class:" . $modelName . ",function:" . $priviliegeList[$dataType]['function'] . " not found\n";
@@ -712,6 +753,7 @@ class PrivilegeService
 
     public function processMatchList($data, $functionList)
     {
+        $intergrationService = new IntergrationService();
         //判断赛事
         if (isset($functionList['tournament']) && isset($functionList['tournament']['functionSingle'])) {
 
@@ -735,20 +777,45 @@ class PrivilegeService
                 $functionList["totalTeamList"] = $f['totalTeamList'];
             }
         }
-        if (!isset($functionList["totalTeamList"]["class"]) || !isset($functionList['totalTeamList']['functionSingle'])) {
-            return $data;
+        if (!isset($functionList["totalTeamList"]["class"]) || !isset($functionList['totalTeamList']['functionSingleBySite'])) {
+            //return $data;
         }
         $modelClass = $functionList["totalTeamList"]["class"];
-        $functionSingle = $functionList["totalTeamList"]['functionSingle'];
+        $functionSingle = $functionList["totalTeamList"]['functionSingleBySite'];
+
+        //判断队员
+        if (isset($functionList['totalPlayerInfo']) && isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
+
+        } else {
+            $f = $this->getFunction(['totalPlayerInfo' => []], $functionList['matchList']['source']);
+            if (isset($f['totalPlayerInfo']['class'])) {
+                $functionList["totalPlayerInfo"] = $f['totalPlayerInfo'];
+            }
+        }
+        if (!isset($functionList["totalPlayerInfo"]["class"]) || !isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
+            //return $data;
+        }
+        //判断队员
+        if (isset($functionList['totalPlayerList']) && isset($functionList['totalPlayerList']['function'])) {
+
+        } else {
+            $f = $this->getFunction(['totalPlayerList' => []], $functionList['matchList']['source']);
+            if (isset($f['totalPlayerList']['class'])) {
+                $functionList["totalPlayerList"] = $f['totalPlayerList'];
+            }
+        }
+        if (!isset($functionList["totalPlayerList"]["class"]) || !isset($functionList['totalPlayerList']['function'])) {
+            //return $data;
+        }
+        $playerModelClass = $functionList["totalPlayerInfo"]["class"];
+        $functionPlayerSingle = $functionList["totalPlayerInfo"]['functionSingleBySite'];
 
         $teamList = [];
+        $playerList = [];
         $tournament = [];
-        foreach ($data as $key => $matchInfo) {
-            if(isset($matchInfo['extra']))
-            {
-                $matchInfo['extra'] = json_decode($matchInfo['extra'],true);
-            }
-            /*
+        $teamMap = ["a"=>"home","b"=>"away"];
+        foreach ($data as $key => $matchInfo)
+        {
             //赛事信息
             if (!isset($tournament[$matchInfo['tournament_id']])) {
                 $tournamentInfo = $modelTournamentClass->$functionTournamentSingle($matchInfo['tournament_id']);
@@ -756,50 +823,312 @@ class PrivilegeService
                     $tournament[$matchInfo['tournament_id']] = $tournamentInfo;
                 }
             }
-            */
+            foreach($teamMap as $side => $color)
+            {
+                $data[$key][$color.'_player_id_list'] = [];
+            }
             //战队信息
-            if (!isset($teamList[$matchInfo['home_id']])) {
-                if(isset($matchInfo['extra']['function']))
+            if (!isset($teamList[$matchInfo['home_id']]))
+            {
+                $teamInfo = $modelClass->$functionSingle($matchInfo['home_id'],$functionList['matchList']['source'],$matchInfo['game']);
+                if (isset($teamInfo['team_id']))
                 {
-                    $functionName = $matchInfo['extra']['function'];
-                    $teamInfo = $modelClass->$functionName($matchInfo['home_id'],$matchInfo['extra']['source'],$matchInfo['game']);
-                }
-                else
-                {
-                    $teamInfo = $modelClass->$functionSingle($matchInfo['home_id']);
-                }
-                if (isset($teamInfo['team_id'])) {
+                    if(isset($teamInfo['tid']) && $teamInfo['tid']>0)
+                    {
+                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,logo,intergrated_id_list");
+                    }
                     $teamList[$matchInfo['home_id']] = $teamInfo;
                 }
-
             }
-            if (!isset($teamList[$matchInfo['away_id']])) {
-                if(isset($matchInfo['extra']['function']))
+            if (!isset($teamList[$matchInfo['away_id']]))
+            {
+                $teamInfo = $modelClass->$functionSingle($matchInfo['away_id'],$functionList['matchList']['source'],$matchInfo['game']);
+                if (isset($teamInfo['team_id']))
                 {
-                    $functionName = $matchInfo['extra']['function'];
-                    $teamInfo = $modelClass->$functionName($matchInfo['away_id'],$matchInfo['extra']['source'],$matchInfo['game']);
-                }
-                else
-                {
-                    $teamInfo = $modelClass->$functionSingle($matchInfo['away_id']);
-                }
-                if (isset($teamInfo['team_id'])) {
+                    if(isset($teamInfo['tid']) && $teamInfo['tid']>0)
+                    {
+                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0)['data'],"tid,team_name,logo,intergrated_id_list");
+                    }
                     $teamList[$matchInfo['away_id']] = $teamInfo;
                 }
             }
-            $data[$key]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
-            $data[$key]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
+            $matchData = json_decode($matchInfo['match_data'],true);
+            $playerIdList = [];
+            if(is_array($matchData['result_list']))
+            {
+                foreach($teamMap as $side => $color)
+                {
+                    foreach($matchData['result_list'] as $round => $round_info)
+                    {
+                        if(isset($round_info['record_list_' . $side]))
+                        {
+                            $data[$key][$color.'_player_id_list'] = array_unique(array_merge($data[$key][$color.'_team_info']??[],array_column($round_info['record_list_' . $side],"playerID")));
+                        }
+                    }
+                }
+                $data[$key]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
+                $data[$key]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
+
+                foreach($teamMap as $side => $color)
+                {
+                    foreach($data[$key][$color.'_player_id_list'] as $k => $player_id)
+                    {
+                        if (!isset($playerList[$player_id]))
+                        {
+                            $playerInfo = $playerModelClass->$functionPlayerSingle($player_id,$matchInfo['game'],$functionList['matchList']['source']);
+                            if(isset($playerInfo['player_id']))
+                            {
+                                if(isset($playerInfo['pid']) && $playerInfo['pid']>0)
+                                {
+                                    $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0,$playerInfo['pid'],1,0)['data'],"pid,player_name,logo");
+                                }
+                                $playerList[$player_id] = $playerInfo;
+                            }
+                        }
+                        if(isset($playerList[$player_id]))
+                        {
+                            $data[$key][$color.'_player_list'][] = $playerList[$player_id];
+                        }
+                    }
+                    //如果没有对阵的队员
+                    if(count($data[$key][$color.'_player_list']??[])==0)
+                    {
+                        $teamId = $data[$key][$color.'_team_info']['intergrated_id_list']??$data[$key][$color.'_id'];
+                        $functionPlayerList =$functionList["totalPlayerList"]["function"];
+                        $playerList = $functionList["totalPlayerList"]["class"]->$functionPlayerList(['team_ids'=>$teamId,"pageSize"=>999]);
+                        foreach($playerList as $player)
+                        {
+                            if($player['pid']>0)
+                            {
+                                $data[$key][$color.'_player_id_list'][] = $player['player_id'];
+                                $data[$key][$color.'_player_list'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$player['pid'],1,0)['data'],"pid,player_name,logo");
+                                $countPlayer = count($data[$key][$color.'_player_list']);
+                                if($countPlayer>5)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
             $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
+            unset($data[$key]['match_data']);
         }
         return $data;
     }
+    public function processMatch($data, $functionList)
+    {
+        $intergrationService = new IntergrationService();
+        //判断赛事
+        if (isset($functionList['tournament']) && isset($functionList['tournament']['functionSingle'])) {
 
+        } else {
+            $f = $this->getFunction(['tournament' => []], $functionList['matchDetail']['source']);
+            if (isset($f['tournament']['class'])) {
+                $functionList["tournament"] = $f['tournament'];
+            }
+        }
+        if (!isset($functionList["tournament"]["class"]) || !isset($functionList['tournament']['functionSingle'])) {
+            // return $data;(没有跳过)
+        }
+        $modelTournamentClass = $functionList["tournament"]["class"];
+        $functionTournamentSingle = $functionList["tournament"]['functionSingle'];
+        //判断战队
+        if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['functionSingle'])) {
+
+        } else {
+            $f = $this->getFunction(['totalTeamInfo' => []], $functionList['matchDetail']['source']);
+            if (isset($f['totalTeamInfo']['class'])) {
+                $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
+            }
+        }
+        if (!isset($functionList["totalTeamInfo"]["class"]) || !isset($functionList['totalTeamInfo']['functionSingleBySite'])) {
+            return $data;
+        }
+        //判断队员
+        if (isset($functionList['totalPlayerInfo']) && isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
+
+        } else {
+            $f = $this->getFunction(['totalPlayerInfo' => []], $functionList['matchDetail']['source']);
+            if (isset($f['totalPlayerInfo']['class'])) {
+                $functionList["totalPlayerInfo"] = $f['totalPlayerInfo'];
+            }
+        }
+        if (!isset($functionList["totalPlayerInfo"]["class"]) || !isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
+            return $data;
+        }
+        $modelClass = $functionList["totalTeamInfo"]["class"];
+        $functionSingle = $functionList["totalTeamInfo"]['functionSingleBySite'];
+        $teamList = [];
+        $tournament = [];
+        //赛事信息
+        if (!isset($tournament[$data['tournament_id']])) {
+            $tournamentInfo = $modelTournamentClass->$functionTournamentSingle($data['tournament_id']);
+            if (isset($tournamentInfo['tournament_id'])) {
+                $tournament[$data['tournament_id']] = $tournamentInfo;
+            }
+        }
+        //战队信息
+        if (!isset($teamList[$data['home_id']]))
+        {
+            $teamInfo = $modelClass->$functionSingle($data['home_id'],$functionList['matchDetail']['source'],"","team_id,tid,team_name,logo,description");
+            if (isset($teamInfo['team_id']))
+            {
+                $teamList[$data['home_id']] = $teamInfo;
+            }
+        }
+        if (!isset($teamList[$data['away_id']]))
+        {
+            $teamInfo = $modelClass->$functionSingle($data['away_id'],$functionList['matchDetail']['source'],"","team_id,tid,team_name,logo,description");
+            if (isset($teamInfo['team_id']))
+            {
+                $teamList[$data['away_id']] = $teamInfo;
+            }
+        }
+        $data['home_team_info'] = $teamList[$data['home_id']] ?? [];//战队
+        $data['away_team_info'] = $teamList[$data['away_id']] ?? [];
+        $data['tournament_info'] = $tournament[$data['tournament_id']] ?? [];
+        if(isset($data['home_team_info']['tid']) && $data['home_team_info']['tid']>0)
+        {
+            $data['home_team_info'] = getFieldsFromArray($intergrationService->getTeamInfo(0,$data['home_team_info']['tid'],1,0)['data'],"tid,team_name,description,logo");
+        }
+        if(isset($data['away_team_info']['tid']) && $data['away_team_info']['tid']>0)
+        {
+            $data['away_team_info'] = getFieldsFromArray($intergrationService->getTeamInfo(0,$data['away_team_info']['tid'],1,0)['data'],"tid,team_name,description,logo");
+        }
+        $playerList = [];
+        //处理比赛数据
+        if(isset($data['match_data']))
+        {
+            $oPlayerModel = $functionList["totalPlayerInfo"]["class"];
+            $oPlayerFunction = $functionList["totalPlayerInfo"]["functionSingleBySite"];
+            $data['match_data'] = json_decode($data['match_data'],true);
+            if(isset($data['match_data']['result_list']) && count($data['match_data']['result_list'])>0)
+            {
+                foreach($data['match_data']['result_list'] as $key => $result)
+                {
+                    unset($data['match_data']['result_list'][$key]['team_a_image_thumb']);
+                    unset($data['match_data']['result_list'][$key]['team_b_image_thumb']);
+                    //主客队和颜色的映射
+                    $teamMap = ["a"=>"blue","b"=>"red"];
+                    $keyMap = ["a","b","c","d","e","f","g"];
+                    foreach($teamMap as $side => $color)
+                    {
+                        if(isset($result['detail']))
+                        {
+                            $data['match_data']['result_list'][$key]['dragon_list'] = $result['detail']['dragon_list']??[];
+                            foreach($result['detail']['result_list'] as $key_b => $value_b)
+                            {
+                                foreach($keyMap as $k => $c)
+                                {
+                                    if (!is_array($value_b) && (substr($key_b, 0, strlen($color) + 1) == $color . "_") && strpos($key_b, "_" . $c . "_") > 0)
+                                    {
+                                        $new_key = str_replace([$color . "_", "_" . $c . "_"], "_", $key_b);
+                                        // echo $key_b . "-" . $new_key . "-" . $value_b . "\n";
+                                        $data['match_data']['result_list'][$key]['record_list_' . $side][$k][$new_key] = $value_b;
+                                        unset($result['detail']['result_list'][$key_b]);
+                                        unset($data['match_data']['result_list'][$key]['detail']['result_list'][$key_b]);
+                                    }
+                                }
+                            }
+                            foreach($result['detail']['result_list'] as $key_b => $value_b)
+                            {
+                                if(!is_array($value_b))
+                                {
+                                    $data['match_data']['result_list'][$key][$key_b] = $value_b;
+                                }
+                                unset($data['match_data']['result_list'][$key]['detail']);
+                            }
+                        }
+                        foreach($result['record_list_'.$side] as $key_a => $player)
+                        {
+                            if(!isset($playerList[$player['playerID']]))
+                            {
+
+                                $playerInfo = $oPlayerModel->$oPlayerFunction($player['playerID'],$data['game'],$functionList['matchDetail']['source']);
+                               // print_R($playerInfo);
+                                //die();
+                                if(isset($playerInfo['tid']) && $playerInfo['tid']>0)
+                                {
+                                //    print_R($intergrationService->getPlayerInfo(0,$playerInfo['tid'],1,0));
+                                    $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0,$playerInfo['tid'],1,0)['data'],"pid,player_name,logo");
+                                    $playerList[$player['playerID']] = $playerInfo;
+                                }
+                                else
+                                {
+                                    $playerList[$player['playerID']] = $playerInfo;
+                                }
+                            }
+                            unset($data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_image_thumb']);
+                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['logo'] = $playerList[$player['playerID']]['logo']??"";
+                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name']??"";
+                        }
+                    }
+                }
+            }
+        }
+        return $data;
+    }
+    public function processTournament($data, $functionList)
+    {
+        if (isset($functionList['roundList']) && isset($functionList['roundList']['functionSingle'])) {
+
+        } else {
+            $f = $this->getFunction(['roundList' => []], $functionList['tournament']['source']);
+            if (isset($f['roundList']['class'])) {
+                $functionList["roundList"] = $f['roundList'];
+            }
+        }
+        if (isset($functionList['matchList']) && isset($functionList['matchList']['functionSingle'])) {
+
+        } else {
+            $f = $this->getFunction(['matchList' => []], $functionList['tournament']['source']);
+            if (isset($f['matchList']['class'])) {
+                $functionList["matchList"] = $f['matchList'];
+            }
+        }
+        if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['functionSingle'])) {
+
+        } else {
+            $f = $this->getFunction(['totalTeamInfo' => []], $functionList['tournament']['source']);
+            if (isset($f['totalTeamInfo']['class'])) {
+                $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
+            }
+        }
+        $modelClass = $functionList["roundList"]["class"];
+        $function = $functionList["roundList"]['function'];
+        $matchModelClass = $functionList["matchList"]["class"];
+        $matchFunction = $functionList["matchList"]['function'];
+        $teamModelClass = $functionList["totalTeamInfo"]["class"];
+        $teamFunction = $functionList["totalTeamInfo"]['functionSingleBySite'];
+        $matchList = $matchModelClass->$matchFunction(['tournament_id'=>$data['tournament_id'],"page_size"=>1000,"fields"=>"match_id,home_id,away_id"]);
+        $teamIdList = array_unique(array_merge(array_column($matchList,"home_id"),array_column($matchList,"away_id")));
+        $intergrationService = new IntergrationService();
+        $teamList = [];
+        foreach($teamIdList as $team_id)
+        {
+            $teamInfo = $teamModelClass->$teamFunction($team_id,$functionList['tournament']['source'],$data['game'],"team_id,tid");
+            if(isset($teamInfo['tid']) && $teamInfo['tid']>0)
+            {
+                $teamInfo = $intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0);
+                if(isset($teamInfo['data']['tid']))
+                {
+                    $teamList[$teamInfo['data']['tid']] = getFieldsFromArray($teamInfo['data'],"tid,logo,team_name");
+                }
+            }
+        }
+        $data['teamList'] = array_values($teamList);
+        $data['roundList'] = array_values($modelClass->$function(["tournament_id"=>$data['tournament_id']]));
+        return $data;
+    }
     public function processPlayerList($data, $functionList)
     {
         if (isset($functionList['playerList']) && isset($functionList['playerList']['functionSingle'])) {
 
         } else {
-            $f = $this->getFunction(['playerList' => []], $functionList['teamList']['source']);
+            $f = $this->getFunction(['playerList' => []], $functionList['playerList']['source']);
             if (isset($f['playerList']['class'])) {
                 $functionList["playerList"] = $f['playerList'];
             }
@@ -826,7 +1155,6 @@ class PrivilegeService
                 if(isset($val['stat'])){
                     $val['stat']=json_decode($val['stat'],true);
                 }
-
             }
         }
         if($data){
@@ -1289,7 +1617,6 @@ class PrivilegeService
             {
                 $data['playerList'] = [];
             }
-
         }
         else
         {
@@ -1321,6 +1648,10 @@ class PrivilegeService
             if($detailData['pid']>0)
             {
                 $data[$key] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$detailData["pid"],1,$params['reset']??0)['data'],$params['fields']??"*");
+                if($data[$key]['player_name']==0)
+                {
+                    $data[$key] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$detailData["pid"],1,1)['data'],$params['fields']??"*");
+                }
             }
             else
             {

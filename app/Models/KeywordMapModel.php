@@ -84,9 +84,14 @@ class KeywordMapModel extends Model
             $keyword_list = $keyword_list->where("content_id",$params['content_id']);
         }
         //来源ID
-        if(isset($params['source_id']) && ($params['source_id'])>0)
+        if(isset($params['source_id']) && !is_array($params['source_id']) && ($params['source_id'])>0)
         {
             $keyword_list = $keyword_list->where("source_id",$params['source_id']);
+        }
+        //来源ID
+        if(isset($params['source_id']) && (is_array($params['source_id']) && count($params['source_id'])>0) )
+        {
+            $keyword_list = $keyword_list->whereIn("source_id",$params['source_id']);
         }
         //目标类型
         if(isset($params['content_type']) && strlen($params['content_type'])>0)

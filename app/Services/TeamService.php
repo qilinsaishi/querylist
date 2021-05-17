@@ -22,10 +22,11 @@ use QL\QueryList;
 
 class TeamService
 {
-    public function insertTeamData($mission_type,$game)
+    const MISSION_REPEAT=100;//调用重复多少条数量就终止
+    public function insertTeamData($mission_type,$game,$force=0)
     {
-        $this->insertCpseoTeam($game);
-        $this->getScoreggTeamDetail($game);
+        //$this->insertCpseoTeam($game);
+        $this->getScoreggTeamDetail($game,$force);
         //采集玩加（www.wanplus.com）战队信息
          //$this->insertWanplus($game, $mission_type);
         //采集cpseo（2cpseo.com）战队信息
@@ -35,7 +36,7 @@ class TeamService
         return 'finish';
     }
 
-    public function getScoreggTeamDetail($game){
+    public function getScoreggTeamDetail($game,$force=0){
         $teamModel = new TeamModel();
         $missionModel = new MissionModel();
         if($game=='kpl'){
@@ -43,6 +44,7 @@ class TeamService
         }elseif($game=='lol'){
             $gameID=1;
         }
+        $mission_repeat=0;
         $tournament_url='https://www.scoregg.com/services/api_url.php';
         $tournament_param = [
             'api_path' => '/services/match/tournament_list.php',
@@ -80,8 +82,27 @@ class TeamService
                     $cdata = curl_post($url, $param);
                     $cdata = $cdata['data']['data']['list'] ?? [];
                     if (count($cdata) > 0) {
-                        //
                         foreach ($cdata as $k=>$v) {
+                            //　强制爬取
+                            if ($force == 1) {
+                                $toGet = 1;
+                            } elseif ($force == 0) {
+                                //获取当前比赛数据
+                                $teamInfo = $teamModel->getTeamBySiteId($v['team_id'], 'scoregg', $game);
+                                //找到
+                                if (isset($teamInfo['site_id'])) {
+                                    $toGet = 0;
+                                    $mission_repeat++;
+                                    echo "exits-team-site_id:" . $v['team_id'] . "\n";
+                                    if ($mission_repeat >= self::MISSION_REPEAT) {
+                                        echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                        return;
+                                    }
+                                } else {
+                                    $mission_repeat = 0;
+                                    $toGet = 1;
+                                }
+                            }
                             $team_url = 'https://www.scoregg.com/big-data/team/' . $v['team_id'] . '?tournamentID=&type=baike';
                             if (strpos($v['team_image'], '_100X100') !== false) {
                                 $v['team_image'] = str_replace('_100X100', '', $v['team_image']);
@@ -94,15 +115,18 @@ class TeamService
                                 'mission_type' => 'team',
                                 'source_link' => $team_url,
                             ];
-                            $teamInfo = $teamModel->getTeamBySiteId($v['team_id'], 'scoregg', $game);
 
-                            $teamInfo = $teamInfo ?? [];
-                            if (count($teamInfo) == 0) {
+                            if ($toGet== 1) {
                                 $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的文章
                                 $missionCount = $missionCount ?? 0;
                                 if($missionCount!==0){
+                                    $mission_repeat ++ ;//重复记录加一
                                     echo "exits-mission-".$game.'-'.$team_url. "\n";//表示Mission表记录已存在，跳出继续
-                                    continue; //表示Mission表记录已存在，跳出继续
+                                    if($mission_repeat>=self::MISSION_REPEAT)
+                                    {
+                                        echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                        return;
+                                    }
                                 }else{
                                     $adata = [
                                         "asign_to" => 1,
@@ -115,11 +139,9 @@ class TeamService
                                         "detail" => json_encode($v),
                                     ];
                                     $insert = (new oMission())->insertMission($adata);
+                                    $mission_repeat = 0;
                                     echo $game."-scoregg-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
                                 }
-                            }else{
-                                echo "exits-teaminfo-scoregg-".$game.'-'.$team_url. "\n";//表示teaminfo表记录已存在，跳出继续
-                                continue;
                             }
                         }
                     }
@@ -1019,4 +1041,97 @@ class TeamService
             return false;
         }
     }
+
+    //通过scoregg站点的team_id获取战队的基础数据
+    public function getScoreggTeamInfo($team_id=0){
+        $scoregg_url='https://www.scoregg.com/big-data/team/'.$team_id;
+        $qt=QueryList::get($scoregg_url);
+        $victory_rate=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(0) .circle-inner-text .num')->text();//胜率
+        $victory_rate_rank=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(0) .circle-text-des .light')->text();//联赛排名
+        $kda=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(1) .kda-chart-container .circle-inner-text .num')->text();//kda
+        $kda_detail=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(1) .industry-text')->text();//kda明细
+        $kda_rank=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(1) .circle-text-des')->text();//kda
+        //获取数据明细
+        $data_list_item=$qt->rules(array(
+            'score-num' => array('.score-num','text'),
+            'score-des' => array('.score-des','text'),
+            'score-rank' => array('.score-rank','text'),
+        ))->range('.right-content .basic-show .basic-show-container .data-list-item .item')->queryData();
+        $data_list_item=$data_list_item ?? [];
+        $total_count=$win=$lose=0;
+        $base_ability_detail=[];
+        if(count($data_list_item)>0){
+            foreach ($data_list_item as $key=>$val){
+                if(strpos($val['score-des'],'比赛场次')!==false ){
+                    $total_count=intval($val['score-num'])??0;
+                    $win=intval($val['score-rank']);
+                    $lose=($total_count-$win);
+                    //用kda替换第一个元素比赛场次
+                    $base_ability_detail['kda']['score-num']=$kda;
+                    $base_ability_detail['kda']['score-des']='KDA';
+                    $base_ability_detail['kda']['score-rank']=trim($kda_rank,' 联赛第 ');
+                }
+                //击杀
+                if(strpos($val['score-des'],'击杀')!==false ){
+                    $base_ability_detail['kills']['score-num']=$val['score-num'];
+                    $base_ability_detail['kills']['score-des']=$val['score-des'];
+                    $base_ability_detail['kills']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //死亡
+                if(strpos($val['score-des'],'死亡')!==false ){
+                    $base_ability_detail['deaths']['score-num']=$val['score-num'];
+                    $base_ability_detail['deaths']['score-des']=$val['score-des'];
+                    $base_ability_detail['deaths']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+                //助攻
+                if(strpos($val['score-des'],'助攻')!==false ){
+                    $base_ability_detail['assists']['score-num']=$val['score-num'];
+                    $base_ability_detail['assists']['score-des']=$val['score-des'];
+                    $base_ability_detail['assists']['score-rank']=trim($val['score-rank'],' 联赛第 ');
+                }
+
+            }
+        }
+        //分解总击杀数，死亡数，助攻数
+        $total_kills=$total_deaths=$total_assists=0;
+        list($total_kills,$total_deaths,$total_assists)=explode(' / ',$kda_detail);
+        //蓝方
+        $blue_count=$blue_win_count=$blue_lose_count=0;
+        $blue_victory_rate=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(2) .circle-inner-text .num')->text();//蓝方胜率
+        $blue_race_stat=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(2) .circle-text')->text();//蓝方战绩
+        $blue_count=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(2) .circle-text-des')->text();//蓝方场数
+        $blue_count=str_replace(array('共 ',' 场'),'',$blue_count);
+        $blue_win_count=intval($blue_race_stat);
+        $blue_lose_count=intval($blue_count)-$blue_win_count;
+        //红方
+        $red_count=$red_win_count=$red_lose_count=0;
+        $red_victory_rate=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(3) .circle-inner-text .num')->text();//蓝方胜率
+        $red_race_stat=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(3) .circle-text')->text();//蓝方战绩
+        $red_count=$qt->find('.right-content .basic-show .basic-show-container .circle:eq(3) .circle-text-des')->text();//蓝方场数
+        $red_count=str_replace(array('共 ',' 场'),'',$red_count);
+        $red_win_count=intval($red_race_stat);
+        $red_lose_count=intval($red_count)-$red_win_count;
+
+        $team_ability_and_base=[
+            'victory_rate'=>trim($victory_rate,'%'),//胜率
+            'victory_rate_rank'=>$victory_rate_rank,//排名
+            'total_count'=>$total_count,//比赛场数
+            'win'=>$win,//胜利场数
+            'lose'=>$lose,//失败场数
+            'total_kills'=>$total_kills,//总击杀数
+            'total_deaths'=>$total_deaths,//总死亡数
+            'total_assists'=>$total_assists,//总助攻数
+            'base_ability_detail'=>$base_ability_detail,//基础数据明细
+            'blue_victory_rate'=>trim($blue_victory_rate,'%'),//蓝方胜率
+            'blue_count'=>$blue_count,//蓝方总场数
+            'blue_win'=>$blue_win_count,//蓝方胜利场数
+            'blue_lose'=>$blue_lose_count,//蓝方失败场数
+            'red_victory_rate'=>trim($red_victory_rate,'%'),//红方胜率
+            'red_count'=>$red_count,//红方总场数
+            'red_win'=>$red_win_count,//红方胜利场数
+            'red_lose'=>$red_lose_count,//红方失败场数
+        ];
+        return $team_ability_and_base;
+    }
+
 }

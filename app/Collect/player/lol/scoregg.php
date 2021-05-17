@@ -2,8 +2,10 @@
 
 namespace App\Collect\player\lol;
 
+use App\Models\MissionModel;
 use App\Models\TeamModel;
 use App\Services\MissionService as oMission;
+use App\Services\PlayerService;
 use QL\QueryList;
 
 class scoregg
@@ -19,6 +21,7 @@ class scoregg
             "team_history"=>['path'=>'','default'=>[]],
             "event_history"=>['path'=>'','default'=>[]],
             "stat"=>['path'=>'stat','default'=>[]],
+            "player_stat"=>['path'=>'player_stat','default'=>[]],
             "team_id"=>['path'=>'team_id','default'=>0],
             "logo"=>['path'=>'player_image','default'=>0],
             "original_source"=>['path'=>"",'default'=>"scoregg"],
@@ -32,30 +35,41 @@ class scoregg
         $res = [];
         $url = $arr['detail']['player_url'] ?? '';
         $team_id=$arr['detail']['team_id'] ?? 0;
-        $teamInfo = $this->getScoreggInfo($url,$team_id);
-        $res = $url = $arr['detail'] ?? [];
-        $res = array_merge($res, $teamInfo);
-        if (count($res) > 0) {
-            //处理战队采集数据
-            $res['player_name'] =$res['player_name'] ?? '';
-            $cdata = [
-                'mission_id' => $arr['mission_id'],
-                'content' => json_encode($res),
-                'game' => $arr['game'],
-                'source_link' => $arr['source_link'],
-                'title' => $arr['title'] ?? '',
-                'mission_type' => $arr['mission_type'],
-                'source' => $arr['source'],
-                'status' => 1,
-            ];
-            //处理战队采集数据
+        $player_id=$arr['detail']['player_id'] ?? 0;
+        if($player_id >0){
+            $teamInfo = $this->getScoreggInfo($url,$team_id);
+            $res = $url = $arr['detail'] ?? [];
+            $res = array_merge($res, $teamInfo);
+            $player_stat=(new PlayerService())->getScoreggPlayerInfo($player_id);
+            $res['player_stat']=$player_stat;
+            if (count($res) > 0) {
+                //处理战队采集数据
+                $res['player_name'] =$res['player_name'] ?? '';
+                $cdata = [
+                    'mission_id' => $arr['mission_id'],
+                    'content' => json_encode($res),
+                    'game' => $arr['game'],
+                    'source_link' => $arr['source_link'],
+                    'title' => $arr['title'] ?? '',
+                    'mission_type' => $arr['mission_type'],
+                    'source' => $arr['source'],
+                    'status' => 1,
+                ];
+                //处理战队采集数据
+            }
+        }else{
+            //失败
+            (new MissionModel())->updateMission($arr['mission_id'], ['mission_status' => 3]);
+            echo "mission_id:".$arr['mission_id'] .',player_id:'.$player_id."\n";
         }
+
 
         return $cdata;
     }
 
     public function process($arr)
     {
+        $redis = app("redis.connection");
         /**
          * [tournament_id] => 197 //赛事id
          * [player_id] => 3771  //队员id
@@ -77,8 +91,8 @@ class scoregg
          * [DAMAGEDEALT_RATE] => 7.7  //输出占比
          * [MINUTE_DAMAGETAKEN] => 4525.9 //每分钟承受伤害
          * [DAMAGETAKEN_RATE] => 21.5  //承受伤害占比
-         * [MINUTE_WARDSPLACED] => 0.0 //每分钟插眼数
-         * [MINUTE_WARDKILLED] => 0.0 //每分钟拆眼熟
+         * [MINUTE_WARDSPLACED] => 0.0 //每分钟插眼数 wardsplaced
+         * [MINUTE_WARDKILLED] => 0.0 //每分钟拆眼熟 wardkilled
          * [update_time] => 1615932892
          * [MVP] => 0 //mvp次数
          * [player_chinese_name] => 张佳豪
@@ -118,6 +132,7 @@ class scoregg
         $arr['content']['player_name']=$player_name ?? $arr['content']['player_name'];
         $arr['content']['stat'] =
             getFieldsFromArray($arr['content'],"KDA,PLAYS_TIMES,OFFERED_RATE,AVERAGE_KILLS,AVERAGE_ASSISTS,AVERAGE_DEATHS,MINUTE_ECONOMIC,MINUTE_HITS,MINUTE_DAMAGEDEALT,DAMAGEDEALT_RATE,MINUTE_DAMAGETAKEN,DAMAGETAKEN_RATE,MINUTE_WARDSPLACED,MINUTE_WARDKILLED,MVP,win,los,VICTORY_RATE,total_kills,total_deaths,total_assists");
+
         $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","lol");
         if(isset($teamInfo['team_id']))
         {
@@ -127,7 +142,7 @@ class scoregg
             {
                 $arr['content']['stat'][$key_name] = $arr['content'][$key_name];
             }*/
-            $arr['content']['player_image'] = getImage($arr['content']['player_image']);
+            $arr['content']['player_image'] = getImage($arr['content']['player_image'],$redis);
 
             $arr['content']['team_id'] = $teamInfo['team_id'];
             $patten = '/([\x{4e00}-\x{9fa5}]+)/u';

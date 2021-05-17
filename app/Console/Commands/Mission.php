@@ -27,7 +27,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=}';
+    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=} {--force=}';
 
     /**
      * The console command description.
@@ -56,6 +56,7 @@ class Mission extends Command
         $operation = ($this->argument("operation")??"collect");
         $game = ($this->argument("game")??"");
         $mission_type = ($this->argument("mission_type")??"");
+        $force = $this->option("force")??0;
         switch ($operation) {
             case "insert_mission":
                 //资讯采集入任务表
@@ -65,7 +66,7 @@ class Mission extends Command
 
                 //采集战队入库
                 if($mission_type=='team'){
-                    (new TeamService())->insertTeamData($mission_type,$game);
+                    (new TeamService())->insertTeamData($mission_type,$game,$force);
                 }
                 //采集队员入库
                 if($mission_type=='player'){
@@ -94,15 +95,15 @@ class Mission extends Command
                 }
                 //采集赛事入库
                 if($mission_type=='schedule'){
-                    (new ScheduleService())->insertScheduleData($game);
+                    (new ScheduleService())->insertScheduleData($game,$force);
                 }
                 //采集赛事详情入库
                 if($mission_type=='match'){
-                    (new MatchService())->insertMatchData($game);
+                    (new MatchService())->insertMatchData($game,$force);
                 }
                 break;
             case "collect":
-                $count = $this->option("count")??50;
+                $count = $this->option("count")??1000;
                 (new oMission())->collect($game,"",$mission_type,$count);
                 break;
             case "process":
@@ -116,7 +117,7 @@ class Mission extends Command
                 }
                 foreach($gameList as $g)
                 {
-                    $count = $this->option("count")??5;
+                    $count = $this->option("count")??100;
                     $sleepmin = $this->option("sleepmin")??1;
                     $sleepmax = $this->option("sleepmax")??2;
                     (new oMission())->process($g,"",$mission_type,$count,$sleepmin,$sleepmax);
@@ -139,6 +140,15 @@ class Mission extends Command
             case "views":
                 //php artisan mission:collect views  update all (保存缓存中的浏览数据)
                 (new RedisService())->saveViews();
+                break;
+            case "updateScoreggMatchList":
+                //php artisan mission:collect updateScoreggMatchList  match all (更新scoregg_match_list表里面的result_list数据)
+                (new MatchService())->updateScoreggMatchList($game);
+                break;
+            case "updateScoreggMatchListStatus":
+                //当状态不等于未结束时（status!=2）,必须要重新生成任务爬取数据
+                //php artisan mission:collect updateScoreggMatchListStatus  match lol
+                (new MatchService())->updateScoreggMatchListStatus($game);
                 break;
             default:
 

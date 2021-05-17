@@ -43,29 +43,89 @@ class matchListModel extends Model
     ];
     public function getMatchList($params)
     {
-        $match_list =$this->select("*");
+        $start = microtime(true);
+        $fields = $params['fields'] ?? "match_id,game,match_status,round_id,tournament_id,home_id,away_id,home_score,away_score,start_time,match_data";
+        $match_list =$this->select(explode(",",$fields));
         $pageSizge = $params['page_size']??4;
         $page = $params['page']??1;
-        if (isset($params['tournament_id']) && $params['tournament_id']!="") {
+
+        if (isset($params['tournament_id']) && $params['tournament_id']>0) {
             $match_list = $match_list ->where("tournament_id", $params['tournament_id']);
         }
-        $match_list = $match_list
-            ->limit($pageSizge)
-            ->whereHas('getHomeInfo', function($query){
+
+        if (isset($params['round_detailed'])) {//主要修复match_data里面的数据
+            $match_list = $match_list ->where("round_detailed", $params['round_detailed']);
+        }
+        //游戏类型
+        if(isset($params['game']))
+        {
+            if(is_array($params['game']) && count($params['game'])>1)
+            {//数组里面多个元素
+                $match_list = $match_list->whereIn("game",$params['game']);
+            }
+            elseif(is_array($params['game']) && count($params['game'])==1)
+            {
+                $match_list = $match_list->where("game",$params['game']['0']);
+            }
+            else
+            {
+                $match_list = $match_list->where("game",$params['game']);
+            }
+        }
+        //状态
+        if (isset($params['match_status']))
+        {
+            if(!is_array($params['match_status']))
+            {
+                $status = explode(",", $params['match_status']);
+                $match_list=$match_list->whereIn("match_status", $status);
+            }
+            else
+            {
+                $match_list=$match_list->whereIn("match_status", $params['match_status']);
+            }
+        }
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['start']) && $params['start'] > 0) {
+            $time = date("Y-m-d H:i:s", time() - 8 * 3600);
+            $match_list = $match_list->where("start_time", '<=', $time);
+        }
+        //比赛日期
+        if (isset($params['start_date']) && strtotime($params['start_date']) > 0)
+        {
+            $match_list = $match_list->where("start_time",">=" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600));
+            //$match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600+86400));
+        }
+        //比赛日期
+        if (isset($params['end_date']) && strtotime($params['end_date']) > 0)
+        {
+            $match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['end_date'])+8*3600+86400-1));
+            //$match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600+86400));
+        }
+        if(!isset($params['all']) || $params['all'] <=0){
+            $match_list=$match_list->where("home_id",">",0)->where("away_id",">",0);
+        }
+
+
+        $match_list = $match_list->limit($pageSizge)
+        /*    ->whereHas('getHomeInfo', function($query){
                 return $query->select('team_name');
             })->whereHas('getawayInfo', function($query){
                 return $query->select('team_name');
-            })->offset(($page-1)*$pageSizge)
+            })
+        */
+        ->offset(($page-1)*$pageSizge)
             ->orderBy("start_time","desc")
             ->get()->toArray();
-        //print_r($match_list);exit;
+        //print_r(\DB::getQueryLog());exit;
+        $end = microtime(true);
         return $match_list;
     }
     public function getHomeInfo(){
-        return $this->belongsTo(TeamModel::class,'home_id','team_id');
+        return $this->belongsTo(TeamModel::class,'home_id','site_id');
     }
     public function getawayInfo(){
-        return $this->belongsTo(TeamModel::class,'away_id','team_id');
+        return $this->belongsTo(TeamModel::class,'away_id','site_id');
     }
     public function getTournamentInfo(){
         return $this->belongsTo(tournamentModel::class,'tournament_id','tournament_id');
@@ -88,6 +148,10 @@ class matchListModel extends Model
     }
     public function getMatchById($match_id)
     {
+        if(is_array($match_id))
+        {
+            $match_id = $match_id['0']??($match_id['match_id']??0);
+        }
         $match_info =$this->select("*")
             ->where("match_id",$match_id)
             ->get()->first();
@@ -119,6 +183,11 @@ class matchListModel extends Model
             }
         }
         $currentTime = date("Y-m-d H:i:s");
+
+        if(!isset($data['round_detailed']))
+        {
+            $data['round_detailed']=1;
+        }
         if(!isset($data['create_time']))
         {
             $data['create_time'] = $currentTime;

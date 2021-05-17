@@ -2,6 +2,8 @@
 
 namespace App\Collect\team\lol;
 
+use App\Models\MissionModel;
+use App\Services\TeamService;
 use QL\QueryList;
 
 class scoregg
@@ -21,36 +23,50 @@ class scoregg
             "original_source"=>['path'=>"",'default'=>"scoregg"],
             "site_id"=>['path'=>"team_id",'default'=>0],
             "honor_list"=>['path'=>"history_honor",'default'=>[]],
-            "team_history"=>['path'=>"team_history",'default'=>[]],
+            "team_history"=>['path'=>"",'default'=>[]],
+            "team_stat"=>['path'=>"team_stat",'default'=>[]],
+
         ];
     public function collect($arr)
     {
         $cdata = [];
         $res=[];
-        $url = $arr['detail']['team_url'] ?? '';
-        $teamInfo=$this->getScoreggInfo($url);
-        $res = $url = $arr['detail'] ?? [];
-        $res=array_merge($res,$teamInfo);
-        if (count($res) >0) {
-            //处理战队采集数据
-            $res['en_name']=$res['en_name'] ?? '';
-            $cdata = [
-                'mission_id' => $arr['mission_id'],
-                'content' => json_encode($res),
-                'game' => $arr['game'],
-                'source_link' => $arr['source_link'],
-                'title' => $arr['title'] ?? '',
-                'mission_type' => $arr['mission_type'],
-                'source' => $arr['source'],
-                'status' => 1,
-            ];
-            //处理战队采集数据
+        $team_id=$arr['detail']['team_id'] ?? 0;
+        if($team_id >0){
+            $url = $arr['detail']['team_url'] ?? '';
+            $teamInfo=$this->getScoreggInfo($url);
+            $res = $url = $arr['detail'] ?? [];
+            $res=array_merge($res,$teamInfo);
+
+            $team_stat=(new TeamService())->getScoreggTeamInfo($res['team_id']);
+            $res['team_stat']=$team_stat;
+            if (count($res) >0) {
+                //处理战队采集数据
+                $res['en_name']=$res['en_name'] ?? '';
+                $cdata = [
+                    'mission_id' => $arr['mission_id'],
+                    'content' => json_encode($res),
+                    'game' => $arr['game'],
+                    'source_link' => $arr['source_link'],
+                    'title' => $arr['title'] ?? '',
+                    'mission_type' => $arr['mission_type'],
+                    'source' => $arr['source'],
+                    'status' => 1,
+                ];
+                //处理战队采集数据
+            }
+
+        }else{
+            //失败
+            (new MissionModel())->updateMission($arr['mission_id'], ['mission_status' => 3]);
+            echo "mission_id:".$arr['mission_id'] .',team_id:'.$team_id."\n";
         }
 
         return $cdata;
     }
     public function process($arr)
     {
+        $redis = app("redis.connection");
         /*[team_id] => 5
         [team_name] => RNG
         [team_image] => https://img1.famulei.com/z/2373870/p/201/0815415242776_100X100.png //战队图片
@@ -116,12 +132,13 @@ class scoregg
             $arr['content']['en_name'] = $arr['content']['team_name'];
         }*/
 
-        $arr['content']['team_image'] = getImage($arr['content']['team_image']);
+        $arr['content']['team_image'] = getImage($arr['content']['team_image'],$redis);
         $arr['content']['raceStat'] = ["win"=>intval($arr['content']['win']??0),"draw"=>0,"lose"=>intval($arr['content']['los']??0)];
-        $arr['content']['description'] = $arr['content']['team_history'];
-        $arr['content']['team_history'] = json_encode($arr['content']['team_history']);
+        //$arr['content']['description'] = $arr['content']['team_history'];
+        //$arr['content']['team_history'] = json_encode($arr['content']['team_history']);
 
         $data = getDataFromMapping($this->data_map,$arr['content']);
+
         return $data;
     }
     //获取战队scoregg战队详情
@@ -167,7 +184,7 @@ class scoregg
 
         $baseinfo=[
             'cn_name'=>$cn_name ?? '',//中文名
-            'team_history'=>$content ?? '',//战队历程
+            'description'=>$content ?? '',//战队历程
             //'play_list'=>$play_list ?? [],//现役队员
             'history_honor'=>$history_honor ?? [],//荣誉信息
         ];

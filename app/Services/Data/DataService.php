@@ -26,11 +26,11 @@ class DataService
                 {
                     if(isset($params['cache_time']))
                     {
-                        $p = array_merge($data[$params['cacheWith']]??[],['cache_time'=>$params['cache_time'],"source"=>$params['source']??""]);
+                        $p = array_merge($data[$params['cacheWith']]??[],['cache_time'=>$params['cache_time'],"source"=>$params['source']??"",'game'=>$params['game']??""]);
                     }
                     else
                     {
-                        $p = array_merge($data[$params['cacheWith']]??[],["source"=>$params['source']??""]);
+                        $p = array_merge($data[$params['cacheWith']]??[],["source"=>$params['source']??"",'game'=>$params['game']??""]);
                     }
                 }
                 else
@@ -76,18 +76,17 @@ class DataService
                     {
                         if(isset($params['cache_time']))
                         {
-                            $p = array_merge($data[$params['cacheWith']]??[],['cache_time'=>$params['cache_time'],"source"=>$params['source']??""]);
+                            $p = array_merge($data[$params['cacheWith']]??[],['cache_time'=>$params['cache_time'],"source"=>$params['source']??"",'game'=>$params['game']??""]);
                         }
                         else
                         {
-                            $p = array_merge($data[$params['cacheWith']]??[],["source"=>$params['source']??""]);
+                            $p = array_merge($data[$params['cacheWith']]??[],["source"=>$params['source']??"",'game'=>$params['game']??""]);
                         }
                     }
                     else
                     {
                         $p = $params;
                     }
-
                     $redisService->saveCache($dataType,$p,$dataArr);
                 }
                 if(isset($dataType) && $dataType=='informationList') {

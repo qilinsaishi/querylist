@@ -81,7 +81,7 @@ class tournamentModel extends Model
     }
     public function getTournamentById($tournament_id)
     {
-        $tournament_id = is_array($tournament_id)?$tournament_id['tournament_id']:$tournament_id;
+        $tournament_id = is_array($tournament_id)?($tournament_id['0']??$tournament_id['tournament_id']):$tournament_id;
         $tournament_info =$this->select("*")
             ->where("tournament_id",$tournament_id)
             ->get()->first();

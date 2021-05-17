@@ -18,10 +18,10 @@ function curl_get($url, $referer = '')
     //设置头文件的信息作为数据流输出
     curl_setopt($curl, CURLOPT_HEADER, 0);
     // 超时设置,以秒为单位
-    curl_setopt($curl, CURLOPT_TIMEOUT, 1);
-
+    //curl_setopt($curl, CURLOPT_TIMEOUT, 1);
+    curl_setopt($curl, CURLOPT_NOSIGNAL, true);
     // 超时设置，以毫秒为单位
-   curl_setopt($curl, CURLOPT_TIMEOUT_MS, 5000);
+   curl_setopt($curl, CURLOPT_TIMEOUT_MS, 30000);
 
     // 设置请求头
      curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
@@ -128,9 +128,9 @@ function curl_post($url = '', $postdata = '',$header = [])
 //毫秒级时间戳
 function msectime()
 {
-    list($msec, $sec) = explode(' ', microtime());
-    $msectime = (float)sprintf('%.0f', (floatval($msec) + floatval($sec)) * 1000);
-    return intval($msectime);
+    $microtime =  substr(microtime(false),3,3);
+    $msectime =time().$microtime;
+    return $msectime;
 
 }
 
@@ -309,8 +309,12 @@ if (!function_exists('randStr')) {
     }
 }
 //获取远程图片，并以文件的hash作为文件名保存
-function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type = 1)
+function getImage($url ,$redis = null,$save_dir = 'storage/downloads', $filename = '', $type = 1)
 {
+    $bucket = config('aliyun.oss.bucket');
+    if(strpos($url,$bucket)!==false){
+        return $url;
+    }
     $f_name = $filename;
     if(substr($url,0,2)=='//')
     {
@@ -342,10 +346,13 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         $url = substr($url,0,strlen($url)-1);
     }
     $start_time = microtime(true);
-    $redis = app("redis.connection");
-    $fileKey = "file_get_" . $url;
+    if(is_null($redis))
+    {
+        $redis = app("redis.connection");
+    }
+    $fileKey = "file_url2_" . $url;
+    print_r(strlen($url));
     $currentFile = $redis->get($fileKey);
-    echo "url:".$url."\n";
     echo "cache:".$currentFile."\n";
     if ($currentFile && strlen($currentFile) > 5) {
         return $currentFile;
@@ -419,7 +426,7 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
             $url = str_replace('https://','http://',$url);
             echo "get img FileSize error:".$url."\n";
             echo "process time:".(microtime(true)-$start_time)."\n";
-            return getImage($url, $save_dir, $f_name, 1);
+            return getImage($url, $redis,$save_dir, $f_name, 1);
         }
         $upload = (new AliyunService())->upload2Oss([$root]);
         //存储到redis,一天内不再重新获取
@@ -556,6 +563,23 @@ function getImage($url, $save_dir = 'storage/downloads', $filename = '', $type =
         $clean_text = preg_replace($regexDingbats, '', $clean_text);
         return $clean_text;
     }
+//检测图片,如果是其他网站图片则上传到我们自己的OSS
+function checkImg($data,$redis)
+{
+    $suffixList = [".png",".jpg",".gif"];
+    foreach($suffixList as $suffix)
+    {
+        if(strpos($data,$suffix)>0)
+        {
+            $data=str_replace('https','http',$data);
+            $image_url=getImage($data,$redis);
+            echo $image_url."\n";
+            return $image_url;
+        }
+    }
+    return $data;
+
+}
 
 
 

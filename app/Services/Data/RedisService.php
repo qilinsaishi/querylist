@@ -83,6 +83,17 @@ class RedisService
                 'prefix' => "intergratedPlayerList",
                 'expire' => 86400,
             ],
+            "matchList" => [//比赛列表
+                'prefix' => "matchList",
+                'expire' => 86400,
+            ],
+
+            "matchDetail" => [//比赛详情
+                'prefix' => "matchDetail",
+                'expire' => 86400,
+            ],
+
+
             "lolHero" => [//lolHero
                 'prefix' => "lolHero",
                 'expire' => 86400,
@@ -147,6 +158,14 @@ class RedisService
                 unset($params['reset']);
             }
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
+            if(isset($params['game']) && !is_array($params['game']) && trim($params['game'])!="")
+            {
+                $keyConfig = $keyConfig."_".trim($params['game']);
+            }
+            if(isset($params['game']) && is_array($params['game']))
+            {
+                $keyConfig = $keyConfig."_".implode("_",$params['game']);
+            }
             $exists = $redis->exists($keyConfig);
             if ($exists) {
                 $data = json_decode($redis->get($keyConfig), true);
@@ -177,7 +196,14 @@ class RedisService
             }
             ksort($params);
             $keyConfig = $cacheConfig[$dataType]['prefix'] . "_" . md5(json_encode($params));
-
+            if(isset($params['game']) && !is_array($params['game']) && trim($params['game'])!="")
+            {
+                $keyConfig = $keyConfig."_".trim($params['game']);
+            }
+            if(isset($params['game']) && is_array($params['game']))
+            {
+                $keyConfig = $keyConfig."_".implode("_",$params['game']);
+            }
             //如果接口指定了缓存时间
             if(isset($params['cache_time']))
             {

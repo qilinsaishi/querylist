@@ -63,8 +63,6 @@ class lol_qq
 
                             ];
                         }
-                    }else{
-                        continue;
                     }
                 }
 
