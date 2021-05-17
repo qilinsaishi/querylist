@@ -322,12 +322,15 @@ class IntergrationService
             //获取集合数据
             $totalPlayer = $oTotalPlayer->getPlayerById($pid);
             //如果有重定向
-            $totalPlayer['redirect'] = json_decode($totalPlayer['redirect'],true);
-            if(isset($totalPlayer['redirect']['pid']) && $totalPlayer['redirect']['pid']>0)
-            {
-                //返回新数据
-                return $this->getPlayerInfo(0,$totalPlayer['redirect']['pid'],$get_data,$force);
+            if(isset($totalPlayer['redirect'])){
+                $totalPlayer['redirect'] = json_decode($totalPlayer['redirect'],true);
+                if(isset($totalPlayer['redirect']['pid']) && $totalPlayer['redirect']['pid']>0)
+                {
+                    //返回新数据
+                    return $this->getPlayerInfo(0,$totalPlayer['redirect']['pid'],$get_data,$force);
+                }
             }
+
             $playerIdList = array_column($playerList,"player_id");
             //复制映射结构
             $totalPlayerStructure = $totalPlayer;
