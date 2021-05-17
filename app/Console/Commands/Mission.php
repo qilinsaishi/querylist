@@ -56,6 +56,7 @@ class Mission extends Command
         $operation = ($this->argument("operation")??"collect");
         $game = ($this->argument("game")??"");
         $mission_type = ($this->argument("mission_type")??"");
+        $force = $this->option("force")??0;
         switch ($operation) {
             case "insert_mission":
                 //资讯采集入任务表
@@ -65,7 +66,7 @@ class Mission extends Command
 
                 //采集战队入库
                 if($mission_type=='team'){
-                    (new TeamService())->insertTeamData($mission_type,$game);
+                    (new TeamService())->insertTeamData($mission_type,$game,$force);
                 }
                 //采集队员入库
                 if($mission_type=='player'){
@@ -94,12 +95,10 @@ class Mission extends Command
                 }
                 //采集赛事入库
                 if($mission_type=='schedule'){
-                    $force = $this->option("force")??0;
                     (new ScheduleService())->insertScheduleData($game,$force);
                 }
                 //采集赛事详情入库
                 if($mission_type=='match'){
-                    $force = $this->option("force")??0;
                     (new MatchService())->insertMatchData($game,$force);
                 }
                 break;

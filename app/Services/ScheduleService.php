@@ -176,7 +176,7 @@ class ScheduleService
                                 $mission_repeat++;
                                 echo "exits-tournament-tournament_id:" . $val['tournamentID'] . "\n";
                                 if ($mission_repeat >= self::MISSION_REPEAT) {
-                                    echo "重复任务过多，任务终止\n";
+                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
                                     return;
                                 }
                             } else {
@@ -214,7 +214,7 @@ class ScheduleService
                                 echo "exits--scoregg-match-tournament-mission" . $key . '-' . $val['ajax_url'] . "\n";//表示Mission表记录已存在，跳出继续
                                 if($mission_repeat>=self::MISSION_REPEAT)
                                 {
-                                    echo "重复任务过多，任务终止\n";
+                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
                                     return;
                                 }
                             }

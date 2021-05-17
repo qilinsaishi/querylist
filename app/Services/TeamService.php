@@ -22,10 +22,11 @@ use QL\QueryList;
 
 class TeamService
 {
-    public function insertTeamData($mission_type,$game)
+    const MISSION_REPEAT=100;//调用重复多少条数量就终止
+    public function insertTeamData($mission_type,$game,$force=0)
     {
         //$this->insertCpseoTeam($game);
-        $this->getScoreggTeamDetail($game);
+        $this->getScoreggTeamDetail($game,$force);
         //采集玩加（www.wanplus.com）战队信息
          //$this->insertWanplus($game, $mission_type);
         //采集cpseo（2cpseo.com）战队信息
@@ -35,7 +36,7 @@ class TeamService
         return 'finish';
     }
 
-    public function getScoreggTeamDetail($game){
+    public function getScoreggTeamDetail($game,$force=0){
         $teamModel = new TeamModel();
         $missionModel = new MissionModel();
         if($game=='kpl'){
@@ -43,6 +44,7 @@ class TeamService
         }elseif($game=='lol'){
             $gameID=1;
         }
+        $mission_repeat=0;
         $tournament_url='https://www.scoregg.com/services/api_url.php';
         $tournament_param = [
             'api_path' => '/services/match/tournament_list.php',
@@ -80,8 +82,27 @@ class TeamService
                     $cdata = curl_post($url, $param);
                     $cdata = $cdata['data']['data']['list'] ?? [];
                     if (count($cdata) > 0) {
-                        //
                         foreach ($cdata as $k=>$v) {
+                            //　强制爬取
+                            if ($force == 1) {
+                                $toGet = 1;
+                            } elseif ($force == 0) {
+                                //获取当前比赛数据
+                                $teamInfo = $teamModel->getTeamBySiteId($v['team_id'], 'scoregg', $game);
+                                //找到
+                                if (isset($teamInfo['site_id'])) {
+                                    $toGet = 0;
+                                    $mission_repeat++;
+                                    echo "exits-team-site_id:" . $v['team_id'] . "\n";
+                                    if ($mission_repeat >= self::MISSION_REPEAT) {
+                                        echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                        return;
+                                    }
+                                } else {
+                                    $mission_repeat = 0;
+                                    $toGet = 1;
+                                }
+                            }
                             $team_url = 'https://www.scoregg.com/big-data/team/' . $v['team_id'] . '?tournamentID=&type=baike';
                             if (strpos($v['team_image'], '_100X100') !== false) {
                                 $v['team_image'] = str_replace('_100X100', '', $v['team_image']);
@@ -94,15 +115,18 @@ class TeamService
                                 'mission_type' => 'team',
                                 'source_link' => $team_url,
                             ];
-                            $teamInfo = $teamModel->getTeamBySiteId($v['team_id'], 'scoregg', $game);
 
-                            $teamInfo = $teamInfo ?? [];
-                            //if (count($teamInfo) == 0) {
+                            if ($toGet== 1) {
                                 $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的文章
                                 $missionCount = $missionCount ?? 0;
                                 if($missionCount!==0){
+                                    $mission_repeat ++ ;//重复记录加一
                                     echo "exits-mission-".$game.'-'.$team_url. "\n";//表示Mission表记录已存在，跳出继续
-                                    continue; //表示Mission表记录已存在，跳出继续
+                                    if($mission_repeat>=self::MISSION_REPEAT)
+                                    {
+                                        echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                        return;
+                                    }
                                 }else{
                                     $adata = [
                                         "asign_to" => 1,
@@ -115,12 +139,10 @@ class TeamService
                                         "detail" => json_encode($v),
                                     ];
                                     $insert = (new oMission())->insertMission($adata);
+                                    $mission_repeat = 0;
                                     echo $game."-scoregg-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
                                 }
-                            /*}else{
-                                echo "exits-teaminfo-scoregg-".$game.'-'.$team_url. "\n";//表示teaminfo表记录已存在，跳出继续
-                                continue;
-                            }*/
+                            }
                         }
                     }
 

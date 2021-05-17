@@ -240,7 +240,7 @@ class MatchService
                                                 echo "exits-round_son_scoregg_match-matchID:" . $v2['matchID'] . "\n";
                                                 if($mission_repeat>=self::MISSION_REPEAT)
                                                 {
-                                                    echo "重复任务过多，任务终止\n";
+                                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
                                                     return;
                                                 }
                                             } else {
@@ -271,7 +271,7 @@ class MatchService
                                                 echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
                                                 if($mission_repeat>=self::MISSION_REPEAT)
                                                 {
-                                                    echo "重复任务过多，任务终止\n";
+                                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
                                                     return;
                                                 }
                                             }

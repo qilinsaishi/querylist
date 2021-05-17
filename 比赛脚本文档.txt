@@ -16,6 +16,14 @@ php artisan mission:collect insert_mission match lol --force=1  //（--force=1  
 php artisan mission:collect updateScoreggMatchListStatus  match lol  //查询scoregg_match_list表里面所有未结束的比赛脚本执行更新match_status=1或者match_status=0
 
 
+四、战队更新数据
+1.php artisan mission:collect insert_mission team  kpl --force=0 //（--force=0  表示scoregg_match_list 里面的数据进行匹配，不存在怎加入任务表;--force=1  强制采集战队到任务表）
+2.php artisan mission:collect collect team  kpl  对任务表里面的数据进行进一步的处理
+3.php artisan mission:collect process team  kpl   同步到team_info
+
+
+
+
 
 
 
