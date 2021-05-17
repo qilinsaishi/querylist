@@ -22,7 +22,6 @@ class  PlayerService
     const MISSION_REPEAT=100;//调用重复多少条数量就终止
     public function insertPlayerData( $game,$force=0)
     {
-        //$this->getPlayerListByCollectResult($game, $mission_type);
         $this->getScoreggPlayerDetail($game, $force);
        // $this->insertCpseoPlayer($game, $mission_type);
         //$this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
