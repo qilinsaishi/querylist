@@ -19,17 +19,19 @@ use QL\QueryList;
 
 class  PlayerService
 {
-    public function insertPlayerData($mission_type, $game)
+    const MISSION_REPEAT=100;//调用重复多少条数量就终止
+    public function insertPlayerData( $game,$force=0)
     {
         //$this->getPlayerListByCollectResult($game, $mission_type);
-        $this->getScoreggPlayerDetail($game, $mission_type);
+        $this->getScoreggPlayerDetail($game, $force);
        // $this->insertCpseoPlayer($game, $mission_type);
         //$this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
         return 'finish';
     }
 
-    public function insertCpseoPlayer($game, $mission_type)
+    public function insertCpseoPlayer($game)
     {
+        $mission_type='cpseo';
         $AjaxModel = new AjaxRequest();
         $missionModel = new MissionModel();
 
@@ -105,10 +107,11 @@ class  PlayerService
         return true;
     }
 
-    public function getScoreggPlayerDetail($game)
+    public function getScoreggPlayerDetail($game,$force)
     {
         $playerModel = new PlayerModel();
         $missionModel = new MissionModel();
+        $mission_repeat=0;
         if ($game == 'kpl') {
             $gameID = 2;
         } elseif ($game == 'lol') {
@@ -137,6 +140,26 @@ class  PlayerService
                         $vo = $vo ?? [];
                         if (count($vo) > 0) {
                             foreach ($vo as $k => $v) {
+                                //　强制爬取
+                                if ($force == 1) {
+                                    $toGet = 1;
+                                } elseif ($force == 0) {
+                                    //获取当前比赛数据
+                                    $playerInfo = $playerModel->getPlayerBySiteId($v['player_id'], $game, 'scoregg');
+                                    //找到
+                                    if (isset($playerInfo['site_id'])) {
+                                        $toGet = 0;
+                                        $mission_repeat++;
+                                        echo "exits-player-site_id:" . $v['player_id'] . "\n";
+                                        if ($mission_repeat >= self::MISSION_REPEAT) {
+                                            echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                            return;
+                                        }
+                                    } else {
+                                        $mission_repeat = 0;
+                                        $toGet = 1;
+                                    }
+                                }
                                 $v['game'] = $game;
                                 $v['source'] = 'scoregg';
                                 $params = [
@@ -146,14 +169,17 @@ class  PlayerService
                                 ];
                                 $v['player_id'] = $v['player_id'] ?? 0;
                                 if ($v['player_id'] > 0) {
-                                    $playerInfo = $playerModel->getPlayerBySiteId($v['player_id'], $game, 'scoregg');
-                                    $playerInfo = $playerInfo ?? [];
-                                    //if (count($playerInfo) == 0) {
+                                    if ($toGet == 1) {
                                         $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的文章
                                         $missionCount = $missionCount ?? 0;
                                         if ($missionCount !== 0) {
+                                            $mission_repeat ++ ;//重复记录加一
                                             echo "exist-mission-scoregg-" . $game . '-' . $v['player_url'] . "\n";//表示Mission表记录已存在，跳出继续
-                                            continue; //表示Mission表记录已存在，跳出继续
+                                            if($mission_repeat>=self::MISSION_REPEAT)
+                                            {
+                                                echo "player重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                                return;
+                                            }
                                         } else {
                                             $adata = [
                                                 "asign_to" => 1,
@@ -166,12 +192,10 @@ class  PlayerService
                                                 "detail" => json_encode($v),
                                             ];
                                             $insert = (new oMission())->insertMission($adata);
+                                            $mission_repeat = 0;
                                             echo $game . $key . $k . "-scoregg-player-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
                                         }
-                                    /*} else {
-                                        echo "exist-playerinfo-scoregg-" . $game . '-' . $v['player_url'] . "\n";//表示playerinfo表记录已存在，跳出继续
-                                        continue;
-                                    }*/
+                                    }
                                 } else {
                                     echo "player_id:" . $v['player_id'];
 

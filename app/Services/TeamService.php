@@ -23,7 +23,7 @@ use QL\QueryList;
 class TeamService
 {
     const MISSION_REPEAT=100;//调用重复多少条数量就终止
-    public function insertTeamData($mission_type,$game,$force=0)
+    public function insertTeamData($game,$force=0)
     {
         //$this->insertCpseoTeam($game);
         $this->getScoreggTeamDetail($game,$force);

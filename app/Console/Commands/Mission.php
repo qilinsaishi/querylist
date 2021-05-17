@@ -66,11 +66,11 @@ class Mission extends Command
 
                 //采集战队入库
                 if($mission_type=='team'){
-                    (new TeamService())->insertTeamData($mission_type,$game,$force);
+                    (new TeamService())->insertTeamData($game,$force);
                 }
                 //采集队员入库
                 if($mission_type=='player'){
-                    (new PlayerService())->insertPlayerData($mission_type,$game);
+                    (new PlayerService())->insertPlayerData($game,$force);
                 }
 
                 //采集英雄入库
