@@ -94,7 +94,8 @@ class Mission extends Command
                 }
                 //采集赛事入库
                 if($mission_type=='schedule'){
-                    (new ScheduleService())->insertScheduleData($game);
+                    $force = $this->option("force")??0;
+                    (new ScheduleService())->insertScheduleData($game,$force);
                 }
                 //采集赛事详情入库
                 if($mission_type=='match'){

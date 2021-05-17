@@ -102,9 +102,12 @@ class matchListModel extends Model
             $match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['end_date'])+8*3600+86400-1));
             //$match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600+86400));
         }
+        if(!isset($params['all']) || $params['all'] <=0){
+            $match_list=$match_list->where("home_id",">",0)->where("away_id",">",0);
+        }
 
-        $match_list = $match_list->where("home_id",">",0)->where("away_id",">",0)
-            ->limit($pageSizge)
+
+        $match_list = $match_list->limit($pageSizge)
         /*    ->whereHas('getHomeInfo', function($query){
                 return $query->select('team_name');
             })->whereHas('getawayInfo', function($query){
@@ -180,6 +183,11 @@ class matchListModel extends Model
             }
         }
         $currentTime = date("Y-m-d H:i:s");
+
+        if(!isset($data['round_detailed']))
+        {
+            $data['round_detailed']=1;
+        }
         if(!isset($data['create_time']))
         {
             $data['create_time'] = $currentTime;

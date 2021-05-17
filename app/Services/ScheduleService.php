@@ -13,7 +13,8 @@ use QL\QueryList;
 
 class ScheduleService
 {
-    public function insertScheduleData($game)
+    const MISSION_REPEAT=10;//调用重复多少条数量就终止
+    public function insertScheduleData($game, $force)
     {
 
         if ($game == 'kpl' || $game == 'lol') {
@@ -148,13 +149,14 @@ class ScheduleService
 
 
     //scoregg
-    public function tournamentList($game)
+    public function tournamentList($game, $force = 0)
     {
         if ($game == 'lol') {
             $gameId = 1;
         } elseif ($game == 'kpl') {
             $gameId = 2;
         }
+        $mission_repeat=0;
         $list = $this->getEventList($gameId);
         $missionModel = new MissionModel();
         $tournamentModel = new tournamentModel();
@@ -162,17 +164,35 @@ class ScheduleService
             foreach ($list as $v) {
                 if (count($v) > 0) {
                     foreach ($v as $key => $val) {
-                        $params1 = [
-                            'game' => $game,
-                            'mission_type' => 'match',
-                            'source_link' => $val['ajax_url'],
-                        ];
-                        $tournamentInfo = $tournamentModel->getTournamentById($val['tournamentID']);
-                        $tournamentInfo = $tournamentInfo ?? [];
-                        $val['game'] = $game;
-                        $val['source'] = 'scoregg';
-                        $val['type'] = 'tournament';
-                        if (count($tournamentInfo) == 0) {
+                        //　强制爬取
+                        if ($force == 1) {
+                            $toGet = 1;
+                        } elseif ($force == 0) {
+                            //获取当前比赛数据
+                            $tournamentInfo = $tournamentModel->getTournamentById($val['tournamentID']);
+                            //找到
+                            if (isset($tournamentInfo['tournament_id'])) {
+                                $toGet = 0;
+                                $mission_repeat++;
+                                echo "exits-tournament-tournament_id:" . $val['tournamentID'] . "\n";
+                                if ($mission_repeat >= self::MISSION_REPEAT) {
+                                    echo "重复任务过多，任务终止\n";
+                                    return;
+                                }
+                            } else {
+                                $mission_repeat = 0;
+                                $toGet = 1;
+                            }
+                        }
+                        if ($toGet == 1) {
+                            $params1 = [
+                                'game' => $game,
+                                'mission_type' => 'match',
+                                'source_link' => $val['ajax_url'],
+                            ];
+                            $val['game'] = $game;
+                            $val['source'] = 'scoregg';
+                            $val['type'] = 'tournament';
                             $result = $missionModel->getMissionCount($params1);//过滤已经采集过的文章
                             $result = $result ?? 0;
                             if ($result == 0) {
@@ -187,13 +207,17 @@ class ScheduleService
                                     "detail" => json_encode($val),
                                 ];
                                 $insert = (new oMission())->insertMission($data);
+                                $mission_repeat = 0;
                                 echo $game . $key . "-scoregg-match-tournament-mission-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                             } else {
+                                $mission_repeat ++ ;//重复记录加一
                                 echo "exits--scoregg-match-tournament-mission" . $key . '-' . $val['ajax_url'] . "\n";//表示Mission表记录已存在，跳出继续
+                                if($mission_repeat>=self::MISSION_REPEAT)
+                                {
+                                    echo "重复任务过多，任务终止\n";
+                                    return;
+                                }
                             }
-                        } else {
-                            //表示scoregg_tournament_info表记录已存在，跳出继续
-                            echo "exits-scoregg_tournament_info" . $key . '-' . $val['ajax_url'] . "\n";
                         }
 
                     }

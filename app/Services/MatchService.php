@@ -15,6 +15,7 @@ use QL\QueryList;
 
 class MatchService
 {
+    const MISSION_REPEAT=100;//调用重复多少条数量就终止
     public function insertMatchData($game,$force)
     {
 
@@ -237,7 +238,7 @@ class MatchService
                                                 $toGet = 0;
                                                 $mission_repeat ++;
                                                 echo "exits-round_son_scoregg_match-matchID:" . $v2['matchID'] . "\n";
-                                                if($mission_repeat>=100)
+                                                if($mission_repeat>=self::MISSION_REPEAT)
                                                 {
                                                     echo "重复任务过多，任务终止\n";
                                                     return;
@@ -268,7 +269,7 @@ class MatchService
                                                 //表示Mission表记录已存在，跳出继续
                                                 $mission_repeat ++ ;//重复记录加一
                                                 echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
-                                                if($mission_repeat>=100)
+                                                if($mission_repeat>=self::MISSION_REPEAT)
                                                 {
                                                     echo "重复任务过多，任务终止\n";
                                                     return;
@@ -400,6 +401,7 @@ class MatchService
         $params = [
             'page_size' => 500,
             'page' => 1,
+            'all'=>1,//表示不管home_id和away_id是否有值
             'game' => $game,
             'round_detailed' => '0',
             'fields' => "match_id,game",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
@@ -431,6 +433,7 @@ class MatchService
             'page' => 1,
             'game' => $game,
             'start'=>1,//表示启动开始时间条件
+            'all'=>1,//表示不管home_id和away_id是否有值
             'match_status' => ["0","1"],
             'fields' => "match_id,game",
         ];
