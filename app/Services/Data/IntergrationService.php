@@ -106,6 +106,7 @@ class IntergrationService
             //----------检查是否需要跳转
             $teamIdList = array_column($teamList,"team_id");
             //复制映射结构
+            $siteIdList = array_column($teamList,"site_id");
             $totalTeamStructure = $totalTeam;
             $append = [];
             $table_source = [];
@@ -230,6 +231,7 @@ class IntergrationService
                 }
             }
             $totalTeam['intergrated_id_list'] = ($teamIdList);
+
             $return['data'] = $totalTeam;
             $return['structure'] = $totalTeamStructure;
         }

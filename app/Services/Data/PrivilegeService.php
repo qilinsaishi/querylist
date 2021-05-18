@@ -4,6 +4,7 @@ namespace App\Services\Data;
 
 use App\Collect\hero\dota2\gamedota2;
 use App\Models\PlayerModel;
+use function AlibabaCloud\Client\json;
 
 class PrivilegeService
 {
@@ -911,6 +912,7 @@ class PrivilegeService
                         }
                     }
                 }
+                $data[$key]['game_count'] = $matchData['game_count'];
 
             }
             $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
@@ -1620,7 +1622,7 @@ class PrivilegeService
                 $modelMatchList = $functionList["matchList"]["class"];
                 $functionMatchList = $functionList["matchList"]["function"];
                 $functionProcessMatchList = $functionList["matchList"]["functionProcess"];
-                $matchList = $modelMatchList->$functionMatchList(["team_id"=>$data['intergrated_id_list'],"page_size"=>4]);
+                $matchList = $modelMatchList->$functionMatchList(["team_id"=>$data['intergrated_site_id_list'],"page_size"=>4]);
                 $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList);
             }
             else
@@ -1697,6 +1699,14 @@ class PrivilegeService
                     $data['playerList'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0,$pid,1,$params['reset']??0)['data']??[],"pid,player_name,logo,position");
                 }
             }
+            $radarData = [];
+            $radarArray = ['kill'=>"击杀",'assists'=>"助攻",'join_rate'=>"参团率",'visual_field'=>"视野",'survival'=>'生存','economy'=>'经济'];
+            foreach($radarArray as $key => $name)
+            {
+                $radarData[$key]=["name"=>$name,"empno"=>intval(rand(40,100))];
+            }
+            $data['radarData']=$radarData;
+
         }
         else
         {
