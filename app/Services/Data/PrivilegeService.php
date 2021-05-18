@@ -752,7 +752,7 @@ class PrivilegeService
         return $classList;
     }
 
-    public function processMatchList($data, $functionList)
+    public function processMatchList($data, $functionList,$params = [])
     {
         $intergrationService = new IntergrationService();
         //判断赛事
@@ -913,10 +913,51 @@ class PrivilegeService
                     }
                 }
                 $data[$key]['game_count'] = $matchData['game_count'];
-
             }
             $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
             unset($data[$key]['match_data']);
+            if(isset($params['pid']))
+            {
+                $home = in_array($params['pid'],array_column($data[$key]['home_player_list'],"pid"))?1:0;
+                $away = in_array($params['pid'],array_column($data[$key]['away_player_list'],"pid"))?1:0;
+                if(($home+$away)==0)
+                {
+                    unset($data[$key]);
+                }
+                else
+                {
+                    $playerDetail = [];
+                    if(isset($matchData['result_list']) && count($matchData['result_list'])>0)
+                    {
+                        foreach($matchData['result_list'] as $r_key => $result)
+                        {
+                            $currentKey = "";
+                            if(isset($result['detail']))
+                            {
+                                foreach($result['detail']['result_list'] as $result_key => $value)
+                                {
+                                    if(in_array($value,$params['player_id']) && substr($result_key,-9)=="_playerID")
+                                    {
+                                        $currentKey = $result_key;
+                                    }
+                                }
+                                if($currentKey !="")
+                                {
+                                    $t = explode("_",$currentKey);
+                                    foreach($result['detail']['result_list'] as $result_key => $value)
+                                    {
+                                        if(substr($result_key,0,strlen($t['0']))==$t['0'] && (strpos($result_key,"_".$t[2]."_")>0))
+                                        {
+                                            $playerDetail[$r_key][$result_key] = $value;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    $data[$key]['player_detail'] = ($playerDetail);
+                }
+            }
         }
         return $data;
     }
@@ -1686,6 +1727,11 @@ class PrivilegeService
                 $functionList["totalPlayerList"] = $f['totalPlayerList'];
             }
             $sourceList = config('app.intergration.player');
+            $f = $this->getFunction(['matchList' => []],$params['source']??"scoregg");
+            if (isset($f['matchList']['class'])) {
+                $functionList["matchList"] = $f['matchList'];
+            }
+            $data['recentMatchList'] = [];
             $data['playerList'] = [];
             $data['teamInfo'] = $ingergratedTeam;
             $modelClass = $functionList["totalPlayerList"]["class"];
@@ -1705,8 +1751,12 @@ class PrivilegeService
             {
                 $radarData[$key]=["name"=>$name,"empno"=>intval(rand(40,100))];
             }
+            $modelMatchList = $functionList["matchList"]["class"];
+            $functionMatchList = $functionList["matchList"]["function"];
+            $functionProcessMatchList = $functionList["matchList"]["functionProcess"];
+            $matchList = $modelMatchList->$functionMatchList(["team_id"=>$ingergratedTeam['intergrated_site_id_list'],"page_size"=>6]);
+            $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList,["pid"=>$data["pid"],"player_id"=>$data['intergrated_site_id_list']]);
             $data['radarData']=$radarData;
-
         }
         else
         {
