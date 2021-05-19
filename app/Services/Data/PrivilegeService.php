@@ -1158,7 +1158,7 @@ class PrivilegeService
                 $teamInfo = $intergrationService->getTeamInfo(0,$teamInfo['tid'],1,0);
                 if(isset($teamInfo['data']['tid']))
                 {
-                    $teamList[$teamInfo['data']['tid']] = getFieldsFromArray($teamInfo['data'],"tid,logo,team_name");
+                    $teamList[$teamInfo['data']['tid']] = getFieldsFromArray($teamInfo['data'],"tid,logo,team_name,intergrated_id_list");
                 }
             }
         }
@@ -1628,7 +1628,7 @@ class PrivilegeService
     }
     public function processIntergratedTeam($data, $functionList,$params)
     {
-        if($data['tid']>0)
+        if(isset($data['tid']) && $data['tid']>0)
         {
             $intergrationService = (new IntergrationService());
             $data = $intergrationService->getTeamInfo(0,$data["tid"],1,$params['reset']??0)['data'];
