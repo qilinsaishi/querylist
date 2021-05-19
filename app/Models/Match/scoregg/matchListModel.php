@@ -102,8 +102,18 @@ class matchListModel extends Model
             $match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['end_date'])+8*3600+86400-1));
             //$match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600+86400));
         }
+        //all表示查询所有比赛
+        //否则要求确定的主客队双方
         if(!isset($params['all']) || $params['all'] <=0){
             $match_list=$match_list->where("home_id",">",0)->where("away_id",">",0);
+        }
+        //主客队双方
+        if(isset($params['team_id']) && !is_array($params['team_id']) && $params['team_id'] >0){
+            $match_list=$match_list->whereRaw('((home_id ='.$params['team_id'] .') or (away_id = '.$params['team_id'].'))');
+        }
+        //主客队双方
+        if(isset($params['team_id']) && is_array($params['team_id']) && count($params['team_id']) >0){
+            $match_list=$match_list->whereRaw('((home_id in ('.implode(",",$params['team_id']) .')) or (away_id in ('.implode(",",$params['team_id']).')))');
         }
 
 
@@ -117,7 +127,6 @@ class matchListModel extends Model
         ->offset(($page-1)*$pageSizge)
             ->orderBy("start_time","desc")
             ->get()->toArray();
-        //print_r(\DB::getQueryLog());exit;
         $end = microtime(true);
         return $match_list;
     }
