@@ -106,6 +106,7 @@ class IntergrationService
             //----------检查是否需要跳转
             $teamIdList = array_column($teamList,"team_id");
             //复制映射结构
+            $siteIdList = array_column($teamList,"site_id");
             $totalTeamStructure = $totalTeam;
             $append = [];
             $table_source = [];
@@ -230,6 +231,8 @@ class IntergrationService
                 }
             }
             $totalTeam['intergrated_id_list'] = ($teamIdList);
+            $totalTeam['intergrated_site_id_list'] = ($siteIdList);
+
             $return['data'] = $totalTeam;
             $return['structure'] = $totalTeamStructure;
         }
@@ -332,6 +335,7 @@ class IntergrationService
             }
 
             $playerIdList = array_column($playerList,"player_id");
+            $playerSiteIdList = array_column($playerList,"site_id");
             //复制映射结构
             $totalPlayerStructure = $totalPlayer;
             $append = [];
@@ -457,6 +461,7 @@ class IntergrationService
                 }
             }
             $totalPlayer['intergrated_id_list'] = ($playerIdList);
+            $totalPlayer['intergrated_site_id_list'] = ($playerSiteIdList);
             $return['data'] = $totalPlayer;
             $return['structure'] = $totalPlayerStructure;
         }
