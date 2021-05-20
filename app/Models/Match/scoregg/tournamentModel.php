@@ -54,7 +54,7 @@ class tournamentModel extends Model
         $tournament_list = $tournament_list
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
-            ->orderBy("create_time","desc")
+            ->orderBy("tournament_id","desc")
             ->get()->toArray();
         return $tournament_list;
     }

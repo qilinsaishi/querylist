@@ -201,7 +201,7 @@ class MatchService
         //查询赛事列表
         $tournamentModel = new tournamentModel();
         $tournamentParams = [
-            'page_size' => 150,
+            'page_size' => 2,
             'game' => $game
         ];
         $tournamentList = $tournamentModel->getTournamentList($tournamentParams);
