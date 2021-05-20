@@ -927,8 +927,8 @@ class PrivilegeService
             unset($data[$key]['match_data']);
             if(isset($params['pid']))
             {
-                $home = in_array($params['pid'],array_column($data[$key]['home_player_list'],"pid"))?1:0;
-                $away = in_array($params['pid'],array_column($data[$key]['away_player_list'],"pid"))?1:0;
+                $home = in_array($params['pid'],array_column($data[$key]['home_player_list']??[],"pid"))?1:0;
+                $away = in_array($params['pid'],array_column($data[$key]['away_player_list']??[],"pid"))?1:0;
                 if(($home+$away)==0)
                 {
                     unset($data[$key]);
