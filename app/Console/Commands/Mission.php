@@ -128,6 +128,7 @@ class Mission extends Command
                     foreach($gameList as $g)
                     {
                         $oKeyword->information($g);
+                        $oKeyword->coreword($g);
                         $oKeyword->tfIdf($g);
                         $oKeyword->rewrite($g);
                     }
