@@ -1094,29 +1094,33 @@ class PrivilegeService
                                 unset($data['match_data']['result_list'][$key]['detail']);
                             }
                         }
-                        foreach($result['record_list_'.$side] as $key_a => $player)
+                        if(isset($result['record_list_'.$side]))
                         {
-                            if(!isset($playerList[$player['playerID']]))
+                            foreach($result['record_list_'.$side] as $key_a => $player)
                             {
+                                if(!isset($playerList[$player['playerID']]))
+                                {
 
-                                $playerInfo = $oPlayerModel->$oPlayerFunction($player['playerID'],$data['game'],$functionList['matchDetail']['source']);
-                               // print_R($playerInfo);
-                                //die();
-                                if(isset($playerInfo['tid']) && $playerInfo['tid']>0)
-                                {
-                                //    print_R($intergrationService->getPlayerInfo(0,$playerInfo['tid'],1,0));
-                                    $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0,$playerInfo['tid'],1,0)['data'],"pid,player_name,logo");
-                                    $playerList[$player['playerID']] = $playerInfo;
+                                    $playerInfo = $oPlayerModel->$oPlayerFunction($player['playerID'],$data['game'],$functionList['matchDetail']['source']);
+                                    // print_R($playerInfo);
+                                    //die();
+                                    if(isset($playerInfo['tid']) && $playerInfo['tid']>0)
+                                    {
+                                        //    print_R($intergrationService->getPlayerInfo(0,$playerInfo['tid'],1,0));
+                                        $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0,$playerInfo['tid'],1,0)['data'],"pid,player_name,logo");
+                                        $playerList[$player['playerID']] = $playerInfo;
+                                    }
+                                    else
+                                    {
+                                        $playerList[$player['playerID']] = $playerInfo;
+                                    }
                                 }
-                                else
-                                {
-                                    $playerList[$player['playerID']] = $playerInfo;
-                                }
+                                unset($data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_image_thumb']);
+                                $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['logo'] = $playerList[$player['playerID']]['logo']??"";
+                                $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name']??"";
                             }
-                            unset($data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_image_thumb']);
-                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['logo'] = $playerList[$player['playerID']]['logo']??"";
-                            $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name']??"";
                         }
+
                     }
                 }
             }
