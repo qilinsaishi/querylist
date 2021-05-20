@@ -1116,6 +1116,7 @@ class PrivilegeService
                                     }
                                 }
                                 unset($data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_image_thumb']);
+                                $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['pid'] = $playerList[$player['playerID']]['pid']??0;
                                 $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['logo'] = $playerList[$player['playerID']]['logo']??"";
                                 $data['match_data']['result_list'][$key]['record_list_'.$side][$key_a]['player_name'] = $playerList[$player['playerID']]['player_name']??"";
                             }
