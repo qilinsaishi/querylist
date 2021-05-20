@@ -90,6 +90,10 @@ class InformationModel extends Model
         if (isset($params['game']) && is_array($params['game'])) {
             $information_list = $information_list->whereIn("game", $params['game']);
         }
+        //对应站点
+        if (isset($params['site']) && intval($params['site'])>0) {
+            $information_list = $information_list->where("site", $params['site']);
+        }
         $hot = $params['hot'] ?? 0;
         if ($hot == 1) {
             $information_list->where("hot", $hot);
@@ -280,6 +284,10 @@ class InformationModel extends Model
         //游戏类型
         if (isset($params['game']) && is_array($params['game'])) {
             $information_count = $information_count->whereIn("game", $params['game']);
+        }
+        //对应站点
+        if (isset($params['site']) && intval($params['site'])>0) {
+            $information_count = $information_count->where("site", $params['site']);
         }
         $hot = $params['hot'] ?? 0;
         if ($hot == 1) {
