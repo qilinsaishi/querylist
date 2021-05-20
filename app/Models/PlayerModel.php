@@ -78,10 +78,15 @@ class PlayerModel extends Model
             $player_list = $player_list->where("team_id",$params['team_id']);
         }
         //所属战队
-        if(isset($params['team_ids']) && count($params['team_ids'])>0)
+        if(isset($params['team_ids']) && !is_array($params['team_ids']) &&  intval($params['team_ids'])>0)
         {
-            $player_list = $player_list->whereIn("team_id",$params['team_ids']);
+            $player_list = $player_list->where("team_id",$params['team_ids']);
         }
+        //所属战队(数组)
+        if (isset($params['team_ids']) && is_array($params['team_ids']) && count($params['team_ids'])>0) {
+            $player_list = $player_list->whereIn("team_id", $params['team_ids']);
+        }
+
         //不所属战队
         if(isset($params['except_team']) && $params['except_team']>0)
         {
