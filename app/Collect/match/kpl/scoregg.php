@@ -102,7 +102,26 @@ class scoregg
                     }
                 }
             }else{
+                $resultlist_url='https://img.scoregg.com/match/resultlist/'.$matchID.'.json?_='.msectime();
                 $res['result_list']=[];
+                $resultlist=curl_get($resultlist_url);//获取结果集
+                if($resultlist['code']==200){
+                    if(isset($resultlist['data']) && is_array($resultlist['data']) && count($resultlist['data'])>0){
+                        foreach($resultlist['data'] as $k=>$v){
+                            $res['result_list'][$k]['resultID']=$v['resultID'];
+                            $res['result_list'][$k]['win_teamID']=$v['win_teamID'];
+                            $res['result_list'][$k]['bo']=$v['bo'];
+                            $result_data_url='https://img1.famulei.com/match/result/'.$v['resultID'].'.json'.'?_='.msectime();
+                            $result_data=curl_get($result_data_url);//获取复盘数据接口
+
+                            if($result_data['code']==200) {
+                                $res['result_list'][$k]['detail'] = $result_data['data'] ?? [];
+                            }
+
+                        }
+                    }
+
+                }
             }
         }
 
