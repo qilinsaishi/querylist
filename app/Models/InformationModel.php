@@ -94,6 +94,10 @@ class InformationModel extends Model
         if (isset($params['site']) && intval($params['site'])>0) {
             $information_list = $information_list->where("site", $params['site']);
         }
+        else
+        {
+            $information_list = $information_list->where("site", 0);
+        }
         $hot = $params['hot'] ?? 0;
         if ($hot == 1) {
             $information_list->where("hot", $hot);
@@ -288,6 +292,10 @@ class InformationModel extends Model
         //对应站点
         if (isset($params['site']) && intval($params['site'])>0) {
             $information_count = $information_count->where("site", $params['site']);
+        }
+        else
+        {
+            $information_count = $information_count->where("site", 0);
         }
         $hot = $params['hot'] ?? 0;
         if ($hot == 1) {
