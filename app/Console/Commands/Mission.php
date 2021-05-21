@@ -144,13 +144,16 @@ class Mission extends Command
                 break;
             case "updateScoreggMatchList":
                 //php artisan mission:collect updateScoreggMatchList  match all (更新scoregg_match_list表里面的result_list数据)
-                (new MatchService())->updateScoreggMatchList($game);
+                $count = $this->option("count")??50;
+                (new MatchService())->updateScoreggMatchList($game,$count);
                 break;
             case "updateScoreggMatchListStatus":
                 //当状态不等于未结束时（status!=2）,必须要重新生成任务爬取数据
-                //php artisan mission:collect updateScoreggMatchListStatus  match lol
-                (new MatchService())->updateScoreggMatchListStatus($game);
+                //php artisan mission:collect updateScoreggMatchListStatus  match lol  (--count=50)
+                $count = $this->option("count")??50;
+                (new MatchService())->updateScoreggMatchListStatus($game,$count);
                 break;
+
             default:
 
                 break;

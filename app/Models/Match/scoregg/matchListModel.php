@@ -77,8 +77,13 @@ class matchListModel extends Model
         {
             if(!is_array($params['match_status']))
             {
-                $status = explode(",", $params['match_status']);
-                $match_list=$match_list->whereIn("match_status", $status);
+                if(strpos($params['match_status'],',') !==false){
+                    $status = explode(",", $params['match_status']);
+                    $match_list=$match_list->whereIn("match_status", $status);
+                }else{
+                    $match_list=$match_list->where("match_status", $params['match_status']);
+                }
+
             }
             else
             {
@@ -89,7 +94,7 @@ class matchListModel extends Model
         if (isset($params['start']) && $params['start'] > 0) {
             $start_time = date("Y-m-d H:i:s", time() - 8 * 3600);
             $end_time = date("Y-m-d H:i:s", time() - (8-4) * 3600);
-            $match_list = $match_list->where("start_time", '<=', $start_time)->where("start_time", '>', $end_time);
+            $match_list = $match_list->where("start_time", '>=', $start_time)->where("start_time", '<', $end_time);
         }
         //比赛日期
         if (isset($params['start_date']) && strtotime($params['start_date']) > 0)

@@ -395,11 +395,11 @@ class MatchService
     }
 
     //
-    public function updateScoreggMatchList($game)
+    public function updateScoreggMatchList($game,$count=50)
     {
         $scoreggMatchModel = new matchListModel();
         $params = [
-            'page_size' => 500,
+            'page_size' => $count,
             'page' => 1,
             'all'=>1,//表示不管home_id和away_id是否有值
             'game' => $game,
@@ -408,15 +408,17 @@ class MatchService
         ];
         $collectClassList = [];
         $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
+        $matchList=array_column($matchList, 'match_id');
         $matchList = $matchList ?? [];
         $classList = [];
         if (count($matchList) > 0) {
             foreach ($matchList as &$val) {
-                $rt=$this->getOneScoreggMatchList($val);
+                echo 'start_time:'.date('Y-m-d H:i:s'). "-match_id:".$val."\n";
+                $rt=$this->getOneScoreggMatchList($val,$game);
                 if ($rt>0) {
-                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
+                    echo "match_id：" . $val . "更新成功" . "\n";
                 } else {
-                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
+                    echo "match_id：" . $val. "更新失败" . "\n";
                 }
                 sleep(1);
             }
@@ -425,29 +427,39 @@ class MatchService
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
 
     }
+    //查询查询scoreggMatchList里面的
+
     //查询scoreggMatchList里面所有不等于2的数据重新采集更新
-    public function updateScoreggMatchListStatus($game){
+    public function updateScoreggMatchListStatus($game,$count=50){
+
         $scoreggMatchModel = new matchListModel();
         $params = [
-            'page_size' => 1,
+            'page_size' => $count,
             'page' => 1,
             'game' => $game,
-            'start'=>1,//表示启动开始时间条件
             'all'=>1,//表示不管home_id和away_id是否有值
-            'match_status' => ["0","1"],
+            'match_status' =>["0","1"],
             'fields' => "match_id,game",
         ];
         $collectClassList = [];
-        $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
+        $matchList = $scoreggMatchModel->getMatchList($params);//未完成的比赛
+        $matchList=array_column($matchList, 'match_id');
+        //查询scoreggMatchList里面开始时间+4 时更新状态
+        $matchingList=$this->updateScoreggMatchListStatusByStartTime($game,$count=50);
+        $matchingList=array_column($matchingList, 'match_id');
+
+        $matchList=array_merge($matchList,$matchingList);
+        $matchList=array_unique($matchList);
         $matchList = $matchList ?? [];
         $classList = [];
         if (count($matchList) > 0) {
             foreach ($matchList as &$val) {
-                $rt=$this->getOneScoreggMatchList($val);
+                echo 'start_time:'.date('Y-m-d H:i:s'). "-match_id:".$val."\n";
+                $rt=$this->getOneScoreggMatchList($val,$game);
                 if ($rt>0) {
-                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
+                    echo "match_id：" . $val . "更新成功" . "\n";
                 } else {
-                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
+                    echo "match_id：" . $val . "更新失败" . "\n";
                 }
 
             }
@@ -455,24 +467,42 @@ class MatchService
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
     }
 
+    //查询scoreggMatchList里面开始时间+4 时更新状态
+    public function updateScoreggMatchListStatusByStartTime($game,$count=50){
+
+        $scoreggMatchModel = new matchListModel();
+        $params = [
+            'page_size' => $count,
+            'page' => 1,
+            'game' => $game,
+            'start'=>1,//表示启动开始时间条件
+            'all'=>1,//表示不管home_id和away_id是否有值
+            'fields' => "match_id,game",
+        ];
+        $collectClassList = [];
+        $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
+        $matchList = $matchList ?? [];
+        return $matchList ;
+    }
+
     //封装更新一条ScoreggMatchList数据
-    public function getOneScoreggMatchList($val){
+    public function getOneScoreggMatchList($match_id,$game){
         $scoreggMatchModel = new matchListModel();
         $rt=0;
-        $insert_mission = $this->saveMissionByScoreggMatchId($val['match_id'],$val['game']);
+        $insert_mission = $this->saveMissionByScoreggMatchId($match_id,$game);
         if($insert_mission>0){
             $mission = (new MissionModel())->getMissionbyId($insert_mission);
             //判断类库存在
-            if(!isset($collectClassList[$val['game']]))
+            if(!isset($collectClassList[$game]))
             {
-                $className = "App\Collect\match\\".$val['game'].'\scoregg';
+                $className = "App\Collect\match\\".$game.'\scoregg';
                 if(class_exists($className))
                 {
-                    $collectClassList[$val['game']] = new $className;
+                    $collectClassList[$game] = new $className;
                 }
             }
 
-            $collectClass = $collectClassList[$val['game']];
+            $collectClass = $collectClassList[$game];
             $mission['detail'] = json_decode($mission['detail'], true);
             $mission['detail']['type']='match';
 
@@ -484,9 +514,19 @@ class MatchService
             $processData = $collectClass->process($collectData);
             $processData['match_list'][0]['round_detailed']=1;
             $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
+            if($rt){
+                //任务状态更新为2
+                (new MissionModel())->updateMission($insert_mission, ['mission_status'=>2]);
+            }else{
+                //任务状态更新为3
+                (new MissionModel())->updateMission($insert_mission, ['mission_status'=>3]);
+            }
+
         }else{
+            //任务状态更新为3
             $updateData['round_detailed']=1;//原站点数据删除，把round_detailed转成1；
-            $scoreggMatchModel->updateMatch($val['match_id'],$updateData);
+            $scoreggMatchModel->updateMatch($match_id,$updateData);
+            (new MissionModel())->updateMission($insert_mission, ['mission_status'=>3]);
         }
 
         return $rt;
