@@ -254,7 +254,13 @@ class InformationModel extends Model
 
     public function getInformationCount($params = [])
     {
-        $information_count = $this;
+
+        if(isset($params['status'])){
+            $status=$params['status'];
+        }else{
+            $status=1;
+        }
+        $information_count = $this->where("status", $status);;
         //排除的来源
         if (isset($params['except_source']) && strlen($params['except_source']) > 0) {
             $information_count = $information_count->where("source", '!=', $params['except_source']);
