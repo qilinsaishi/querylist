@@ -94,10 +94,7 @@ class InformationModel extends Model
         if (isset($params['site']) && intval($params['site'])>0) {
             $information_list = $information_list->where("site", $params['site']);
         }
-        else
-        {
-            $information_list = $information_list->where("site", 0);
-        }
+
         $hot = $params['hot'] ?? 0;
         if ($hot == 1) {
             $information_list->where("hot", $hot);
