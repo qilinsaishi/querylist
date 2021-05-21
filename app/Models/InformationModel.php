@@ -45,7 +45,6 @@ class InformationModel extends Model
 
     public function getInformationList($params)
     {
-
         $fields = $params['fields'] ?? "id,title,author,author_id,logo,create_time,status,type,site_time";
         if(isset($params['status'])){
             $status=$params['status'];

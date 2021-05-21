@@ -116,8 +116,8 @@ class ScwsMapModel extends Model
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $keyword_list = $keyword_list
-            ->limit($pageSizge)
-            ->offset(($page-1)*$pageSizge)
+            //->limit($pageSizge)
+            //->offset(($page-1)*$pageSizge)
             ->groupBy('content_id')
             ->orderBy("weight","desc")
             ->get()->toArray();

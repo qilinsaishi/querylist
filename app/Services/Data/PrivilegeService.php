@@ -1773,26 +1773,22 @@ class PrivilegeService
             }
         return $data;
     }
-    public function processScwsInformationList($data, $functionList)
+    public function processScwsInformationList($data, $functionList,$params)
     {
-        if (isset($functionList['information']) && isset($functionList['information']['function'])) {
+        if (isset($functionList['informationList']) && isset($functionList['informationList']['function'])) {
 
         } else {
-            $f = $this->getFunction(['information' => []]);
-            if (isset($f['information']['class'])) {
-                $functionList["information"] = $f['information'];
+            $f = $this->getFunction(['informationList' => []]);
+            if (isset($f['informationList']['class'])) {
+                $functionList["informationList"] = $f['informationList'];
             }
         }
-        $modelClass = $functionList["information"]["class"];
-        $function = $functionList["information"]['function'];
-        foreach($data as $key => $value)
+        $modelClass = $functionList["informationList"]["class"];
+        $function = $functionList["informationList"]['function'];
+        $data = $modelClass->$function(['ids'=>array_column($data,"content_id"),"site"=>$params['site']??0,"page"=>$params['page']??1,"page_size"=>$params['page_size']??10,"fields"=>$params['fields']??"id,title,logo,create_time,site_time,content,type"]);
+        foreach($data as $key => $info)
         {
-            $information = $modelClass->$function($value['content_id'],["id","title","logo","create_time","site_time","content","type"]);
-            if(isset($information['id']))
-            {
-                $information['content'] = string_split(strip_tags($information['content']),100);
-                $data[$key]['content'] = $information;
-            }
+            $data[$key]['content'] = string_split(strip_tags($info['content']),100);
         }
         return $data;
     }
@@ -1829,7 +1825,7 @@ class PrivilegeService
                 //获取文章
                 if($params['content_type'] == "information")
                 {
-                    $p = array_merge($params['list'],['ids'=>$ids]);
+                    $p = array_merge($params['list'],['ids'=>$ids,"site"=>$params['site']??0]);
                     $functionList = $this->checkFunction($functionList,"informationList");
                     $modelClass = $functionList["informationList"]["class"];
                     $function = $functionList["informationList"]['function'];
