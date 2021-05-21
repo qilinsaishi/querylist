@@ -1086,8 +1086,6 @@ class PrivilegeService
                     {
                         if(isset($round_info['record_list_' . $side]))
                         {
-                            print_R($round_info['record_list_' . $side]);
-                            die();
                             $data[$key][$color.'_player_id_list'] = array_unique(array_merge($data[$key][$color.'_team_info']??[],array_column($round_info['record_list_' . $side],"playerID")));
                         }
                     }
@@ -1317,14 +1315,10 @@ class PrivilegeService
                             {
                                 if(!isset($playerList[$player['playerID']]))
                                 {
-
                                     $playerInfo = $oPlayerModel->$oPlayerFunction($player['playerID'],$data['game'],$functionList['matchDetail']['source']);
-                                    // print_R($playerInfo);
-                                    //die();
-                                    if(isset($playerInfo['tid']) && $playerInfo['tid']>0)
+                                    if(isset($playerInfo['pid']) && $playerInfo['pid']>0)
                                     {
-                                        //    print_R($intergrationService->getPlayerInfo(0,$playerInfo['tid'],1,0));
-                                        $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0,$playerInfo['tid'],1,0)['data'],"pid,player_name,logo");
+                                        $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0,$playerInfo['pid'],1,0)['data'],"pid,player_name,logo");
                                         $playerList[$player['playerID']] = $playerInfo;
                                     }
                                     else
@@ -1751,7 +1745,6 @@ class PrivilegeService
     }
     public function processTotalPlayerList($data, $functionList)
     {
-            //print_R($data);die();
             if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['function'])) {}else{
                 $f = $this->getFunction(["totalTeamInfo"=>[]]);
                 if (isset($f['totalTeamInfo']['class'])) {
