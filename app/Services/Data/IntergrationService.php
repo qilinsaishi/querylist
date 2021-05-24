@@ -230,9 +230,11 @@ class IntergrationService
                     }
                 }
             }
+            foreach($teamList as $team)
+            {
+                $totalTeam['intergrated_site_id_list'][$team['original_source']][] = $team['site_id'];
+            }
             $totalTeam['intergrated_id_list'] = ($teamIdList);
-            $totalTeam['intergrated_site_id_list'] = ($siteIdList);
-
             $return['data'] = $totalTeam;
             $return['structure'] = $totalTeamStructure;
         }
@@ -335,7 +337,7 @@ class IntergrationService
             }
 
             $playerIdList = array_column($playerList,"player_id");
-            $playerSiteIdList = array_column($playerList,"site_id");
+            //$playerSiteIdList = array_column($playerList,"site_id");
             //复制映射结构
             $totalPlayerStructure = $totalPlayer;
             $append = [];
@@ -460,8 +462,12 @@ class IntergrationService
                     }
                 }
             }
+            foreach($playerList as $player)
+            {
+                $totalPlayer['intergrated_site_id_list'][$player['original_source']][] = $player['site_id'];
+            }
             $totalPlayer['intergrated_id_list'] = ($playerIdList);
-            $totalPlayer['intergrated_site_id_list'] = ($playerSiteIdList);
+            //$totalPlayer['intergrated_site_id_list'] = ($playerSiteIdList);
             $return['data'] = $totalPlayer;
             $return['structure'] = $totalPlayerStructure;
         }

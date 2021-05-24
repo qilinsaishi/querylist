@@ -1879,7 +1879,7 @@ class PrivilegeService
             if (isset($f['totalPlayerList']['class'])) {
                 $functionList["totalPlayerList"] = $f['totalPlayerList'];
             }
-            $f = $this->getFunction(['matchList' => []],$params['source']??"scoregg");
+            $f = $this->getFunction(['matchList' => []],"scoregg");
             if (isset($f['matchList']['class'])) {
                 $functionList["matchList"] = $f['matchList'];
             }
@@ -1906,7 +1906,7 @@ class PrivilegeService
                 $modelMatchList = $functionList["matchList"]["class"];
                 $functionMatchList = $functionList["matchList"]["function"];
                 $functionProcessMatchList = $functionList["matchList"]["functionProcess"];
-                $matchList = $modelMatchList->$functionMatchList(["team_id"=>$data['intergrated_site_id_list'],"page_size"=>4]);
+                $matchList = $modelMatchList->$functionMatchList(["team_id"=>$data['intergrated_site_id_list']['scoregg']??[0],"page_size"=>4]);
                 $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList);
             }
             else
