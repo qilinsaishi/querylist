@@ -437,6 +437,7 @@ class MatchService
             'page_size' => $count,
             'page' => 1,
             'game' => $game,
+            'start'=>1,//表示启动开始时间条件
             'all'=>1,//表示不管home_id和away_id是否有值
             'match_status' =>["0","1"],
             'fields' => "match_id,game",
@@ -445,11 +446,11 @@ class MatchService
         $matchList = $scoreggMatchModel->getMatchList($params);//未完成的比赛
         $matchList=array_column($matchList, 'match_id');
         //查询scoreggMatchList里面开始时间+4 时更新状态
-        $matchingList=$this->updateScoreggMatchListStatusByStartTime($game,$count=50);
+       /* $matchingList=$this->updateScoreggMatchListStatusByStartTime($game,$count=50);
         $matchingList=array_column($matchingList, 'match_id');
 
         $matchList=array_merge($matchList,$matchingList);
-        $matchList=array_unique($matchList);
+        $matchList=array_unique($matchList);*/
         $matchList = $matchList ?? [];
         $classList = [];
         if (count($matchList) > 0) {
