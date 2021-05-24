@@ -10,6 +10,7 @@ use App\Models\InformationModel;
 use App\Models\Match\scoregg\matchListModel;
 use App\Models\Match\scoregg\tournamentModel;
 use App\Models\MissionModel;
+use App\Services\Data\RedisService;
 use App\Services\MissionService as oMission;
 use QL\QueryList;
 
@@ -453,6 +454,7 @@ class MatchService
         $matchList=array_unique($matchList);*/
         $matchList = $matchList ?? [];
         $classList = [];
+        $match_delete=0;
         if (count($matchList) > 0) {
             foreach ($matchList as &$val) {
                 echo 'start_time:'.date('Y-m-d H:i:s'). "-match_id:".$val."\n";
@@ -460,10 +462,16 @@ class MatchService
                 if ($rt>0) {
                     echo "match_id：" . $val . "更新成功" . "\n";
                 } else {
+                    $match_delete ++ ;
                     echo "match_id：" . $val . "更新失败：scoregg站点的match_id被删除" . "\n";
                 }
 
             }
+            if($match_delete >0){//原站点删除才会刷新缓存
+                $redisService = new RedisService();
+                $redisService->truncate('matchList');
+            }
+
         }
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
     }
@@ -489,10 +497,11 @@ class MatchService
     //封装更新一条ScoreggMatchList数据
     public function getOneScoreggMatchList($match_id,$game){
         $scoreggMatchModel = new matchListModel();
+        $missionModel=new MissionModel();
         $rt=0;
         $insert_mission = $this->saveMissionByScoreggMatchId($match_id,$game);
         if($insert_mission>0){
-            $mission = (new MissionModel())->getMissionbyId($insert_mission);
+            $mission = $missionModel->getMissionbyId($insert_mission);
             //判断类库存在
             if(!isset($collectClassList[$game]))
             {
@@ -517,17 +526,18 @@ class MatchService
             $rt=$scoreggMatchModel->saveMatch($processData['match_list'][0]);
             if($rt){
                 //任务状态更新为2
-                (new MissionModel())->updateMission($insert_mission, ['mission_status'=>2]);
+                $missionModel->updateMission($insert_mission, ['mission_status'=>2]);
             }else{
                 //任务状态更新为3
-                (new MissionModel())->updateMission($insert_mission, ['mission_status'=>3]);
+                $missionModel->updateMission($insert_mission, ['mission_status'=>3]);
             }
 
         }else{
             //任务状态更新为3
             $updateData['round_detailed']=1;//原站点数据删除，把round_detailed转成1；
+            $updateData['match_status']=4;
             $scoreggMatchModel->updateMatch($match_id,$updateData);
-            (new MissionModel())->updateMission($insert_mission, ['mission_status'=>3]);
+            $missionModel->updateMission($insert_mission, ['mission_status'=>3]);
         }
 
         return $rt;
