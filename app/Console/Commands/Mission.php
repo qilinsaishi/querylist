@@ -143,7 +143,7 @@ class Mission extends Command
                 (new RedisService())->saveViews();
                 break;
             case "updateScoreggMatchList":
-                //php artisan mission:collect updateScoreggMatchList  match all (更新scoregg_match_list表里面的result_list数据)
+                //php artisan mission:collect updateScoreggMatchList  match lol  (--count=50)(更新scoregg_match_list表里面的result_list数据)
                 $count = $this->option("count")??50;
                 (new MatchService())->updateScoreggMatchList($game,$count);
                 break;

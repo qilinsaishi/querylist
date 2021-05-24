@@ -11,9 +11,9 @@ php artisan mission:collect insert_mission match lol --force=1  //（--force=1  
 3.php artisan mission:collect process  match lol   同步到scoregg_match_list
 
 三.对比赛数据进行更新
-1.php artisan mission:collect updateScoreggMatchList  match lol  对scoregg_match_list表里面的数据进行更新（主要针对之前缺少了比赛结果的接口和图片oss进行修复round_detailed=0)，
+1.php artisan mission:collect updateScoreggMatchList  match lol (--count=50)对scoregg_match_list表里面的数据进行更新（主要针对之前缺少了比赛结果的接口和图片oss进行修复round_detailed=0)，
 
-php artisan mission:collect updateScoreggMatchListStatus  match lol  //查询scoregg_match_list表里面所有未结束的比赛脚本执行更新match_status=1或者match_status=0
+php artisan mission:collect updateScoreggMatchListStatus  match lol (--count=50) //查询scoregg_match_list表里面所有未结束的比赛脚本执行更新match_status=1或者match_status=0
 
 
 四、战队更新数据

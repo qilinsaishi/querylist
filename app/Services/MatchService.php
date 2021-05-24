@@ -15,7 +15,7 @@ use QL\QueryList;
 
 class MatchService
 {
-    const MISSION_REPEAT=100;//调用重复多少条数量就终止
+    const MISSION_REPEAT=500;//调用重复多少条数量就终止
     public function insertMatchData($game,$force)
     {
 
@@ -459,7 +459,7 @@ class MatchService
                 if ($rt>0) {
                     echo "match_id：" . $val . "更新成功" . "\n";
                 } else {
-                    echo "match_id：" . $val . "更新失败" . "\n";
+                    echo "match_id：" . $val . "更新失败：scoregg站点的match_id被删除" . "\n";
                 }
 
             }
