@@ -229,7 +229,7 @@ class RedisService
         }
     }
 
-    public function refreshCache($dataType, $params, $keyName = '')
+    public function refreshCache($dataType, $params = [], $keyName = '')
     {
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
@@ -287,17 +287,46 @@ class RedisService
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
+                    if ($dataType == 'tournament')
+                    {
+                        $redis->del($key);
+                        $params_list[] = $data['params'];
+                    }
+                    if ($dataType == "matchList") {
+                        $toDelete = 0;
+
+                        $dataParams = $data['params'];
+                        if (is_array($dataParams['game'])) {
+                            if (count(array_intersect($dataParams['game'], $params['game']))) {
+                                $toDelete = 1;
+                            }
+                        } else {
+                            if (in_array($dataParams['game'], $params['game'])) {
+                                $toDelete = 1;
+                            }
+                        }
+
+                        if ($toDelete == 1)
+                        {
+                            $redis->del($key);
+                            $params_list[] = $data['params'];
+                        }
+                    }
+
                 } else//没有，删除等待重建
                 {
                     $redis->del($key);
                 }
 
             }
+
             //资讯类型数据需要刷新相关站点列表页第一页
             if($dataType == "information")
             {
                 //查找数据，获取类型和对应游戏
-                $info = (new InformationModel())->getInformationById($params['0'],["id","type","game"]);
+                $this->truncate("informationList");
+
+               /* $info = (new InformationModel())->getInformationById($params['0'],["id","type","game"]);
                 if(isset($info['id']))
                 {
                     $type = "";
@@ -327,10 +356,10 @@ class RedisService
                     $siteInfo=(new Site())->getSiteById($id);
                     $domain=$siteInfo['domain'] ?? '';
                     $url=$domain.$type;
-                    $rt=file_get_contents($url);
+                    $rt=file_get_contents($url);print_r($rt);exit;
                     }
 
-                }
+                }*/
             }
             return $params_list;
 

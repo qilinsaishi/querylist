@@ -454,7 +454,9 @@ class MatchService
         $matchList=array_unique($matchList);*/
         $matchList = $matchList ?? [];
         $classList = [];
+        $matchCache=[];
         $match_delete=0;
+        //$match_delete = [];
         if (count($matchList) > 0) {
             foreach ($matchList as &$val) {
                 echo 'start_time:'.date('Y-m-d H:i:s'). "-match_id:".$val."\n";
@@ -462,14 +464,17 @@ class MatchService
                 if ($rt>0) {
                     echo "match_id：" . $val . "更新成功" . "\n";
                 } else {
-                    $match_delete ++ ;
+                    $match_delete ++;
+                    $matchCache[$game]=$match_delete;
                     echo "match_id：" . $val . "更新失败：scoregg站点的match_id被删除" . "\n";
                 }
 
             }
-            if($match_delete >0){//原站点删除才会刷新缓存
+
+            if(count($matchCache) >0){//原站点删除才会刷新缓存
+
                 $redisService = new RedisService();
-                $redisService->truncate('matchList');
+                $redesReturn=$redisService->refreshCache('matchList',['game'=>array_keys($matchCache)]);
             }
 
         }
@@ -535,7 +540,7 @@ class MatchService
         }else{
             //任务状态更新为3
             $updateData['round_detailed']=1;//原站点数据删除，把round_detailed转成1；
-            $updateData['match_status']=4;
+            $updateData['match_status']=3;
             $scoreggMatchModel->updateMatch($match_id,$updateData);
             $missionModel->updateMission($insert_mission, ['mission_status'=>3]);
         }
