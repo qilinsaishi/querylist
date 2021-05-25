@@ -166,8 +166,7 @@ class InformationModel extends Model
 
     public function insertInformation($data)
     {
-        $siteList = ["kpl"=>3,"lol"=>1,"dota2"=>4];
-        $data['site'] = $siteList[$data["game"]];
+
         //需要进行伪原创
         $data['status'] = 4;
         foreach ($this->attributes as $key => $value) {
@@ -188,6 +187,8 @@ class InformationModel extends Model
         if (!isset($data['update_time'])) {
             $data['update_time'] = $currentTime;
         }
+        $siteList = ["kpl"=>3,"lol"=>1,"dota2"=>4];
+        $data['site'] = $siteList[$data["game"]];
         return $this->insertGetId($data);
     }
 
