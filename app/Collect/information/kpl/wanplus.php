@@ -18,6 +18,7 @@ class wanplus
             "title"=>['path'=>"title",'default'=>''],//标题
             "content"=>['path'=>"content",'default'=>''],//内容
             "type"=>['path'=>"type",'default'=>1],//类型
+            "site"=>['path'=>"",'default'=>3],//指定站点
             "site_time"=>['path'=>"create_time",'default'=>""]//来源站点的时间
         ];
     protected $type = [

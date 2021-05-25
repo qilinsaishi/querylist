@@ -19,6 +19,7 @@ class kuai8
             "title"=>['path'=>"title",'default'=>''],//标题
             "content"=>['path'=>"content",'default'=>''],//内容
             "type"=>['path'=>"",'default'=>4],//类型
+            "site"=>['path'=>"",'default'=>1],//指定站点
             "site_time"=>['path'=>"dtime",'default'=>""]//来源站点的时间
             ];
     public function collect($arr)
