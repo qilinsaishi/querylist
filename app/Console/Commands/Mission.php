@@ -128,10 +128,10 @@ class Mission extends Command
                     foreach($gameList as $g)
                     {
                         $oKeyword->information($g);
+                        $oKeyword->rewrite($g);
                         $oKeyword->coreword($g);
                         $oKeyword->baidu_keyword($g);
                         $oKeyword->tfIdf($g);
-                        $oKeyword->rewrite($g);
                     }
                 }
                 break;
