@@ -17,6 +17,7 @@ class pvp_qq
             "title"=>['path'=>"sTitle",'default'=>''],//标题
             "content"=>['path'=>"sContent",'default'=>''],//内容
             "type"=>['path'=>"target",'default'=>1],//类型
+            "site"=>['path'=>"",'default'=>3],//指定站点
             "site_time"=>['path'=>"sCreated",'default'=>""]//来源站点的时间
             ];
     protected $type = [
