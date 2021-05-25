@@ -98,7 +98,7 @@ class matchListModel extends Model
         }
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['start']) && $params['start'] > 0) {
-            $start_time = date("Y-m-d H:i:s", time() - 8 * 3600);
+            $start_time = date("Y-m-d H:i:s", time());
             //$end_time = date("Y-m-d H:i:s", time() - (8-4) * 3600);
             $match_list = $match_list->where("start_time", '<=', $start_time);//->where("start_time", '<', $end_time);
         }
