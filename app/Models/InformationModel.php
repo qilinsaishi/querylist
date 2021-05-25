@@ -58,7 +58,7 @@ class InformationModel extends Model
         }
         //最后更新时间
         if (isset($params['recent']) && $params['recent'] > 0) {
-            $time = date("Y-m-d H:i:s", time() - 8 * 3600 - $params['recent']);
+            $time = date("Y-m-d H:i:s", time() - $params['recent']);
             $information_list = $information_list->where("update_time", '>=', $time);
         }
         //是否需要处理关键字
