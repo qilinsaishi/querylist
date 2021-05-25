@@ -105,13 +105,13 @@ class matchListModel extends Model
         //比赛日期
         if (isset($params['start_date']) && strtotime($params['start_date']) > 0)
         {
-            $match_list = $match_list->where("start_time",">=" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600));
+            $match_list = $match_list->where("start_time",">=" , date("Y-m-d H:i:s",strtotime($params['start_date'])));
             //$match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600+86400));
         }
         //比赛日期
         if (isset($params['end_date']) && strtotime($params['end_date']) > 0)
         {
-            $match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['end_date'])+8*3600+86400-1));
+            $match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['end_date'])+86400-1));
             //$match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600+86400));
         }
         //all表示查询所有比赛
