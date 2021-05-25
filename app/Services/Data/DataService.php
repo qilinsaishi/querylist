@@ -129,19 +129,19 @@ class DataService
             "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'team_id'],
             "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'player_id'],
             "herodetail"=>['dataType'=>'lolHeroList','page_size'=>100,"fields"=>"hero_id"],
-            "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'lol',"fields"=>'id'],
+            "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>1,"fields"=>'id'],
             ],
             3=>[
             "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'kpl',"source"=>"scoregg","fields"=>'team_id'],
             "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'kpl',"source"=>"scoregg","fields"=>'player_id'],
             "herodetail"=>['dataType'=>'kplHeroList','page_size'=>100,"fields"=>"hero_id"],
-            "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'kpl',"fields"=>'id'],
+            "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id'],
             ],
             2=>[
-                "detail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'id'],
+                "detail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id'],
             ],
             4=>[
-                "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'dota2',"type"=>"1,2,3,4,5","source"=>"gamedota2","fields"=>'id'],
+                "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id'],
                 "videodetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'dota2',"type"=>"7","source"=>"gamedota2","fields"=>'id'],
                 "tournament"=>["dataType"=>"tournamentList","game"=>'dota2',"page"=>1,"page_size"=>1000,"source"=>"gamedota2","fields"=>'tournament_id'],
             ],

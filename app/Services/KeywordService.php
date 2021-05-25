@@ -159,7 +159,7 @@ class KeywordService
  //       $scwsMapModel = (new ScwsMapModel());
  //       $scwsKeywordMapModel = (new ScwsKeywordMapModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["game"=>$game,"scws"=>1,"status"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = $informationModel->getInformationList(["game"=>$game,"scws"=>1,"fields"=>"id","page_size"=>1000]);
         $informationList = array_column($informationList,"id");
 
         foreach($informationList as $content_id)
@@ -172,7 +172,7 @@ class KeywordService
     {
         $informationModel = (new InformationModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["game"=>$game,"5118_word"=>1,"status"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = $informationModel->getInformationList(["game"=>$game,"5118_word"=>1,"fields"=>"id","page_size"=>1000]);
         $informationList = array_column($informationList,"id");
         foreach($informationList as $content_id)
         {
@@ -184,7 +184,7 @@ class KeywordService
     {
         $informationModel = (new InformationModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["game"=>$game,"baidu_word"=>1,"status"=>1,"fields"=>"id","page_size"=>1000]);
+        $informationList = $informationModel->getInformationList(["game"=>$game,"baidu_word"=>1,"fields"=>"id","page_size"=>1000]);
         $informationList = array_column($informationList,"id");
         $client = new AipNlp(config("app.baidu.APP_ID"), config("app.baidu.API_KEY"), config("app.baidu.SECRET_KEY"));
         foreach($informationList as $content_id)
