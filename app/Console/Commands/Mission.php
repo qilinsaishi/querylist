@@ -129,6 +129,7 @@ class Mission extends Command
                     {
                         $oKeyword->information($g);
                         $oKeyword->coreword($g);
+                        $oKeyword->baidu_keyword($g);
                         $oKeyword->tfIdf($g);
                         $oKeyword->rewrite($g);
                     }
