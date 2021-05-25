@@ -198,7 +198,7 @@ class KeywordService
         $informationModel = (new InformationModel());
         $informationContentModel = (new contentModel());
         $result = [];
-        $informationList = $informationModel->getInformationList(["status"=>4,"game"=>$game,"except_source"=>"index","5118_rewrite"=>1,"fields"=>"id","page_size"=>50]);
+        $informationList = $informationModel->getInformationList(["status"=>4,"game"=>$game,"except_source"=>"index","5118_rewrite"=>1,"fields"=>"id","page_size"=>500]);
         $informationList = array_column($informationList,"id");
         foreach($informationList as $content_id)
         {
