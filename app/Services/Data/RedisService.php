@@ -166,6 +166,7 @@ class RedisService
             {
                 $keyConfig = $keyConfig."_".implode("_",$params['game']);
             }
+            //echo "toGetKey:".$keyConfig."\n";
             $exists = $redis->exists($keyConfig);
             if ($exists) {
                 $data = json_decode($redis->get($keyConfig), true);
@@ -222,7 +223,7 @@ class RedisService
             $expire = $expire * (count($data['data']) > 0 ? 1 : 0.1) + rand(1, 100);
             $redis->set($keyConfig, json_encode(['params' => $params, 'data' => $data]));
             $redis->expire($keyConfig, $expire);
-            //echo "key:".$keyConfig."saved to expire:".$expire."\n";
+            //echo "toSavekey:".$keyConfig."saved to expire:".$expire."\n";
             return true;
         } else {
             return true;
@@ -292,9 +293,8 @@ class RedisService
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
-                    if ($dataType == "matchList") {
+                    if (in_array($dataType,[ "matchList"])) {
                         $toDelete = 0;
-
                         $dataParams = $data['params'];
                         if (is_array($dataParams['game'])) {
                             if (count(array_intersect($dataParams['game'], $params['game']))) {
@@ -305,10 +305,24 @@ class RedisService
                                 $toDelete = 1;
                             }
                         }
-
                         if ($toDelete == 1)
                         {
                             $redis->del($key);
+                            $params_list[] = $data['params'];
+                        }
+                    }
+                    if(in_array($dataType,[ "informationList"]))
+                    {
+                        $toDelete = 0;
+                        $gameList = array_unique(array_column($data['data']['data']??[],"game"));
+                        if(count(array_intersect($gameList, $params['game']))>0)
+                        {
+                            $toDelete = 1;
+                        }
+                        if ($toDelete == 1)
+                        {
+                            $redis->del($key);
+                            echo "toDelete:".$key."\n";
                             $params_list[] = $data['params'];
                         }
                     }
@@ -321,10 +335,10 @@ class RedisService
             }
 
             //资讯类型数据需要刷新相关站点列表页第一页
-            if($dataType == "information")
+            //if($dataType == "informationList")
             {
                 //查找数据，获取类型和对应游戏
-                $this->truncate("informationList");
+            //    $this->truncate("informationList");
 
                /* $info = (new InformationModel())->getInformationById($params['0'],["id","type","game"]);
                 if(isset($info['id']))
@@ -362,7 +376,6 @@ class RedisService
                 }*/
             }
             return $params_list;
-
         }
     }
     public function truncate($prefix="")

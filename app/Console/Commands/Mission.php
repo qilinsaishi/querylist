@@ -124,6 +124,7 @@ class Mission extends Command
                 }
                 if($mission_type == "information")
                 {
+
                     $oKeyword = new oKeyword();
                     foreach($gameList as $g)
                     {
@@ -133,6 +134,7 @@ class Mission extends Command
                         $oKeyword->baidu_keyword($g);
                         $oKeyword->tfIdf($g);
                     }
+                    (new RedisService())->refreshCache("informationList",['game'=>$gameList]);
                 }
                 break;
             case "unpublished":
