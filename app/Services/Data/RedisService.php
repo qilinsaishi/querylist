@@ -322,7 +322,7 @@ class RedisService
                         if ($toDelete == 1)
                         {
                             $redis->del($key);
-                            echo "toDelete:".$key."\n";
+                            //echo "toDelete:".$key."\n";
                             $params_list[] = $data['params'];
                         }
                     }
