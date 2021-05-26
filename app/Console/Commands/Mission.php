@@ -117,6 +117,14 @@ class Mission extends Command
                 }
                 foreach($gameList as $g)
                 {
+                    if($mission_type == "information")
+                    {
+                        $H = date("H");
+                        if(!in_array($H,[8,9,10,11,12,13,14,15,16,17,18,19,20]))
+                        {
+                            return;
+                        }
+                    }
                     $count = $this->option("count")??100;
                     $sleepmin = $this->option("sleepmin")??1;
                     $sleepmax = $this->option("sleepmax")??2;
@@ -124,6 +132,7 @@ class Mission extends Command
                 }
                 if($mission_type == "information")
                 {
+
                     $oKeyword = new oKeyword();
                     foreach($gameList as $g)
                     {
@@ -133,6 +142,7 @@ class Mission extends Command
                         $oKeyword->baidu_keyword($g);
                         $oKeyword->tfIdf($g);
                     }
+                    (new RedisService())->refreshCache("informationList",['game'=>$gameList]);
                 }
                 break;
             case "unpublished":

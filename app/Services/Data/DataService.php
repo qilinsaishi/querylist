@@ -47,7 +47,6 @@ class DataService
                     $functionInfo = $functionList[$dataType];
                     $class = $functionInfo['class'];
                     $function = $functionInfo['function'];
-                    //$params = $data[$dataType];
                     $d = $class->$function($params);
                     $functionCount = $functionInfo['functionCount'];
                     $functionProcess = $functionInfo['functionProcess']??"";

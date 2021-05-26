@@ -51,7 +51,9 @@ class InformationModel extends Model
         }else{
             $status=1;
         }
-        $information_list = $this->select(explode(",", $fields))->where("status", $status);
+        $fields = explode(",", $fields);
+        if(!in_array("game",$fields) && $fields != ["*"]){$fields[] = "game";}
+        $information_list = $this->select($fields)->where("status", $status);
         //排除的来源
         if (isset($params['except_source']) && strlen($params['except_source']) > 0) {
             $information_list = $information_list->where("source", '!=', $params['except_source']);

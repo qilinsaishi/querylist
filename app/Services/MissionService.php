@@ -410,8 +410,8 @@ class MissionService
             }
             //随机等待
             $sleep = rand($sleepmin, $sleepmax);
-            //sleep($sleep);
-            //echo $sleep . "\n";
+            sleep($sleep);
+            echo $sleep . "\n";
         }
     }
 
