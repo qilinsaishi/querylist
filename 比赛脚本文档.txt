@@ -21,6 +21,15 @@ php artisan mission:collect updateScoreggMatchListStatus  match lol (--count=50)
 2.php artisan mission:collect collect team  kpl  对任务表里面的数据进行进一步的处理
 3.php artisan mission:collect process team  kpl   同步到team_info
 
+五、资讯脚本更新
+1.php artisan mission:collect insert_mission  information lol --force=0
+php artisan mission:collect insert_mission  information kpl --force=0
+
+2.php artisan mission:collect collect  information lol(kpl/dota2)   对任务表里面的数据进行进一步的处理
+
+3.php artisan mission:collect process  information lol   information
+
+
 
 
 

@@ -61,7 +61,7 @@ class Mission extends Command
             case "insert_mission":
                 //资讯采集入任务表
                 if($mission_type=='information'){
-                    (new InformationService())->insertData($game);
+                    (new InformationService())->insertData($game,$force);
                 }
 
                 //采集战队入库

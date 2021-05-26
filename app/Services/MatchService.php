@@ -300,7 +300,7 @@ class MatchService
                                             $toGet = 0;
                                             $mission_repeat ++;
                                             echo "exits-scoregg_match-matchID:" . $v2['matchID'] . "\n";
-                                            if($mission_repeat>=100)
+                                            if($mission_repeat>=self::MISSION_REPEAT)
                                             {
                                                 echo "重复任务过多，任务终止\n";
                                                 return;
@@ -331,7 +331,7 @@ class MatchService
                                             //表示Mission表记录已存在，跳出继续
                                             $mission_repeat ++ ;//重复记录加一
                                             echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
-                                            if($mission_repeat>=100)
+                                            if($mission_repeat>=self::MISSION_REPEAT)
                                             {
                                                 echo "重复任务过多，任务终止\n";
                                                 return;
