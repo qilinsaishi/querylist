@@ -31,10 +31,10 @@ class InformationService
                 $typeList = ['news', 'gamenews', 'competition', 'news_update'];
                 $raidersList = ['raiders', 'newer', 'step', 'skill'];
                 foreach ($typeList as $v1) {
-                    $this->insertDota2Information($v1,$force);//dota2资讯采集
+                    $this->insertDota2Information($v1, $force);//dota2资讯采集
                 }
                 foreach ($raidersList as $v2) {
-                    $this->insertDota2Raiders($v2,$force);//攻略采集
+                    $this->insertDota2Raiders($v2, $force);//攻略采集
                 }
 
 
@@ -74,73 +74,78 @@ class InformationService
                 $information_list = $information_list['data']['result'] ?? [];//每一页列表数据
                 if (count($information_list) > 0) {
                     foreach ($information_list as $informationInfo) {
-                        $detail_url = 'https://apps.game.qq.com/cmc/zmMcnContentInfo?r0=jsonp&source=web_pc&type=0&docid=' . $informationInfo['iDocID'];
-                        $detail_data = curl_get($detail_url);//获取详情接口信息
-                        $detail_data = $detail_data['data']['result'] ?? [];
+                        $site_id = intval($informationInfo['iDocID']) ?? 0;//原地址新闻id
 
-                        if ((count($detail_data) > 1 && strlen($detail_data['sContent']) > 150)) {//判断内容长度
-                            //　强制爬取
-                            if ($force == 1) {
-                                $toGet = 1;
-                            } elseif ($force == 0) {
-                                //获取资讯信息
-                                $site_id = $informationInfo['iDocID'] ?? 0;
-                                $informationInfo = $informationModel->getInformationBySiteId($site_id, 'lol', 'lol_qq');
+                        if ($site_id > 0) {
+                            $detail_url = 'https://apps.game.qq.com/cmc/zmMcnContentInfo?r0=jsonp&source=web_pc&type=0&docid=' . $informationInfo['iDocID'];
+                            $detail_data = curl_get($detail_url);//获取详情接口信息
+                            $detail_data = $detail_data['data']['result'] ?? [];
 
-                                //找到
-                                if (isset($informationInfo['site_id'])) {
-                                    $toGet = 0;
-                                    $mission_repeat++;
-                                    echo "lol-information_exits-site_id::" . $site_id . "\n";
-                                    if ($mission_repeat >= self::MISSION_REPEAT) {
-                                        echo "重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
-                                        return;
-                                    }
-                                } else {
-                                    $mission_repeat = 0;
+                            if ((count($detail_data) > 1 && strlen($detail_data['sContent']) > 150)) {//判断内容长度
+                                //　强制爬取
+                                if ($force == 1) {
                                     $toGet = 1;
-                                }
-                            }
-                            if ($toGet == 1) {
-                                $detail_data['sCreated'] = date("Y-m-d H:i:s");
-                                $detail_data['target'] = $target;
-                                $detail_data['source'] = 'lol_qq';//资讯
-                                $detail_data['game'] = 'lol';
-                                $detail_data['url']=$detail_url ?? '';
-                                $params = [
-                                    'game' => 'lol',
-                                    'mission_type' => 'information',
-                                    'source_link' => $detail_url,
-                                ];
-                                $result = $missionModel->getMissionCount($params);//过滤已经采集过的文章
-                                $result = $result ?? 0;
-                                if ($result == 0) {//表示任务表不存在记录，则插入数据
-                                    $data = [
-                                        "asign_to" => 1,
-                                        "mission_type" => 'information',//资讯
-                                        "mission_status" => 1,
-                                        "game" => 'lol',
-                                        "source" => 'lol_qq',//
-                                        'title' => $detail_data['sTitle'] ?? '',
-                                        'source_link' => $detail_url,
-                                        "detail" => json_encode($detail_data),
-                                    ];
-                                    $insert = $missionModel->insertMission($data);
-                                    $mission_repeat = 0;
-                                    echo "lol-information-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
-                                } else {
-                                    $mission_repeat++;//重复记录加一
-                                    echo "mission-exits-lol-lol_qq-information" . "\n";//表示任务表存在记录，跳出继续
-                                    if ($mission_repeat >= self::MISSION_REPEAT) {
-                                        echo "重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
-                                        return;
+                                } elseif ($force == 0) {
+                                    //获取资讯信息
+                                    $site_id = $informationInfo['iDocID'] ?? 0;
+                                    $informationInfo = $informationModel->getInformationBySiteId($site_id, 'lol', 'lol_qq');
+
+                                    //找到
+                                    if (isset($informationInfo['site_id'])) {
+                                        $toGet = 0;
+                                        $mission_repeat++;
+                                        echo "lol-information_exits-site_id::" . $site_id . "\n";
+                                        if ($mission_repeat >= self::MISSION_REPEAT) {
+                                            echo "information-lol-lol_qq重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                            return;
+                                        }
+                                    } else {
+                                        $mission_repeat = 0;
+                                        $toGet = 1;
                                     }
                                 }
+                                if ($toGet == 1) {
+                                    $detail_data['sCreated'] = date("Y-m-d H:i:s");
+                                    $detail_data['target'] = $target;
+                                    $detail_data['source'] = 'lol_qq';//资讯
+                                    $detail_data['game'] = 'lol';
+                                    $detail_data['url'] = $detail_url ?? '';
+                                    $params = [
+                                        'game' => 'lol',
+                                        'mission_type' => 'information',
+                                        'source_link' => $detail_url,
+                                    ];
+                                    $result = $missionModel->getMissionCount($params);//过滤已经采集过的文章
+                                    $result = $result ?? 0;
+                                    if ($result == 0) {//表示任务表不存在记录，则插入数据
+                                        $data = [
+                                            "asign_to" => 1,
+                                            "mission_type" => 'information',//资讯
+                                            "mission_status" => 1,
+                                            "game" => 'lol',
+                                            "source" => 'lol_qq',//
+                                            'title' => $detail_data['sTitle'] ?? '',
+                                            'source_link' => $detail_url,
+                                            "detail" => json_encode($detail_data),
+                                        ];
+                                        $insert = $missionModel->insertMission($data);
+                                        $mission_repeat = 0;
+                                        echo "lol-information-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                                    } else {
+                                        $mission_repeat++;//重复记录加一
+                                        echo "mission-exits-lol-lol_qq-information" . "\n";//表示任务表存在记录，跳出继续
+                                        if ($mission_repeat >= self::MISSION_REPEAT) {
+                                            echo "information-lol-lol_qq重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                            return;
+                                        }
+                                    }
+
+                                }
 
                             }
-
                         }
                     }
+
                 }
 
             }
@@ -187,70 +192,74 @@ class InformationService
                 $cdata = $pageData['msg']['result'] ?? [];
                 if (count($cdata) > 0) {//数据不能为空
                     foreach ($cdata as $key => $val) {
-                        $site_id = $val['iNewsId'] ?? 0;//原地址新闻id
-                        //　强制爬取
-                        if ($force == 1) {
-                            $toGet = 1;
-                        } elseif ($force == 0) {
-                            //获取当前比赛数据
-                            $informationInfo = $informationModel->getInformationBySiteId($site_id, 'kpl', 'pvp_qq');
-                            //找到
-                            if (isset($informationInfo['site_id'])) {
-                                $toGet = 0;
-                                $mission_repeat++;
-                                echo "exits-information_site_id:" . $site_id . "\n";
-                                if ($mission_repeat >= self::MISSION_REPEAT) {
-                                    echo "重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
-                                    return;
-                                }
-                            } else {
-                                $mission_repeat = 0;
+                        $site_id = intval($val['iNewsId']) ?? 0;//原地址新闻id
+
+                        if ($site_id > 0) {
+                            //　强制爬取
+                            if ($force == 1) {
                                 $toGet = 1;
+                            } elseif ($force == 0) {
+                                //获取当前比赛数据
+                                $informationInfo = $informationModel->getInformationBySiteId($site_id, 'kpl', 'pvp_qq');
+                                //找到
+                                if (isset($informationInfo['site_id'])) {
+                                    $toGet = 0;
+                                    $mission_repeat++;
+                                    echo "exits-information_site_id:" . $site_id . "\n";
+                                    if ($mission_repeat >= self::MISSION_REPEAT) {
+                                        echo "information-kpl-pvp_qq重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                        return;
+                                    }
+                                } else {
+                                    $mission_repeat = 0;
+                                    $toGet = 1;
+                                }
                             }
-                        }
 
 
-                        $informationInfo = $informationInfo ?? [];
-                        if ($toGet == 1) {//资讯在数据库不存在
-                            $detail_url = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=' . $val['iNewsId'];//攻略
-                            $params = [
-                                'game' => 'kpl',
-                                'mission_type' => 'information',
-                                'source_link' => $detail_url,
-                            ];
-                            $result = $missionModel->getMissionCount($params);
-                            //过滤已经采集过的文章
-                            $result = $result ?? 0;
-                            if ($result <= 0) {
-                                $data = [
-                                    "asign_to" => 1,
-                                    "mission_type" => 'information',//资讯
-                                    "mission_status" => 1,
-                                    "game" => 'kpl',
-                                    "source" => 'pvp_qq',//
-                                    'title' => $val['sTitle'] ?? '',
+                            $informationInfo = $informationInfo ?? [];
+                            if ($toGet == 1) {//资讯在数据库不存在
+                                $detail_url = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=' . $val['iNewsId'];//攻略
+                                $params = [
+                                    'game' => 'kpl',
+                                    'mission_type' => 'information',
                                     'source_link' => $detail_url,
-                                    "detail" => json_encode(
-                                        [
-                                            "url" => $detail_url,
-                                            "game" => 'kpl',//王者荣耀
-                                            "source" => 'pvp_qq',//资讯
-                                            'type' => $type,//1761=>新闻,1762=>公告,1763=>活动,1764=>赛事,1765=>攻略
-                                        ]
-                                    ),
                                 ];
-                                $insert = $missionModel->insertMission($data);
-                                $mission_repeat = 0;
-                                echo "information-kpl-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
-                            } else {
-                                $mission_repeat++;//重复记录加一
-                                echo "exits-mission-information-kpl-source_link" . $detail_url . "\n";//表示Mission表 记录存在,跳出继续
-                                if ($mission_repeat >= self::MISSION_REPEAT) {
-                                    echo "重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
-                                    return;
+                                $result = $missionModel->getMissionCount($params);
+                                //过滤已经采集过的文章
+                                $result = $result ?? 0;
+                                if ($result <= 0) {
+                                    $data = [
+                                        "asign_to" => 1,
+                                        "mission_type" => 'information',//资讯
+                                        "mission_status" => 1,
+                                        "game" => 'kpl',
+                                        "source" => 'pvp_qq',//
+                                        'title' => $val['sTitle'] ?? '',
+                                        'source_link' => $detail_url,
+                                        "detail" => json_encode(
+                                            [
+                                                "url" => $detail_url,
+                                                "game" => 'kpl',//王者荣耀
+                                                "source" => 'pvp_qq',//资讯
+                                                'type' => $type,//1761=>新闻,1762=>公告,1763=>活动,1764=>赛事,1765=>攻略
+                                            ]
+                                        ),
+                                    ];
+                                    $insert = $missionModel->insertMission($data);
+                                    $mission_repeat = 0;
+                                    echo "information-kpl-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
+                                } else {
+                                    $mission_repeat++;//重复记录加一
+                                    echo "exits-mission-information-kpl-source_link" . $detail_url . "\n";//表示Mission表 记录存在,跳出继续
+                                    if ($mission_repeat >= self::MISSION_REPEAT) {
+                                        echo "information-kpl-pvp_qq重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                        return;
+                                    }
                                 }
                             }
                         }
+
                     }
                 }
                 $t2 = microtime(true);
@@ -261,13 +270,13 @@ class InformationService
     }
 
     //dota2官网资讯
-    public function insertDota2Information($gametype,$force=0)
+    public function insertDota2Information($gametype, $force = 0)
     {
         $missionModel = new MissionModel();
         $informationModel = new InformationModel();
         $count = 29;
         $cdata = [];
-        $mission_repeat=0;
+        $mission_repeat = 0;
         for ($i = 0; $i <= $count; $i++) {
             $m = $i + 1;
             // $typeList=['news','gamenews','competition','news_update'];
@@ -324,11 +333,10 @@ class InformationService
                             //找到
                             if (isset($informationInfo['site_id'])) {
                                 $toGet = 0;
-                                $mission_repeat ++;
-                                echo "information-dota2-exits-site:" .$site_id . "\n";
-                                if($mission_repeat>=self::MISSION_REPEAT)
-                                {
-                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                $mission_repeat++;
+                                echo "information-dota2-exits-site:" . $site_id . "\n";
+                                if ($mission_repeat >= self::MISSION_REPEAT) {
+                                    echo "information-dota2-gamedota2重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
                                     return;
                                 }
                             } else {
@@ -367,11 +375,10 @@ class InformationService
                                 $mission_repeat = 0;
                                 echo "insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                             } else {
-                                $mission_repeat ++ ;//重复记录加一
+                                $mission_repeat++;//重复记录加一
                                 echo "mission-exits-dota2-source_link:" . $val . "-type" . $gametype . "\n";//表示Mission表 记录存在
-                                if($mission_repeat>=self::MISSION_REPEAT)
-                                {
-                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                if ($mission_repeat >= self::MISSION_REPEAT) {
+                                    echo "information-dota2-gamedota2重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
                                     return;
                                 }
                             }
@@ -387,13 +394,13 @@ class InformationService
     }
 
     //官网攻略
-    public function insertDota2Raiders($gametype,$force=0)
+    public function insertDota2Raiders($gametype, $force = 0)
     {
         $missionModel = new MissionModel();
         $informationModel = new InformationModel();
         $countPage = 29;
         $cdata = [];
-        $mission_repeat=0;
+        $mission_repeat = 0;
         for ($i = 0; $i <= $countPage; $i++) {
             $m = $i + 1;
             //官网攻略链接
@@ -440,11 +447,10 @@ class InformationService
                             //找到
                             if (isset($informationInfo['site_id'])) {
                                 $toGet = 0;
-                                $mission_repeat ++;
-                                echo "information-dota2-exits-site:" .$site_id . "\n";
-                                if($mission_repeat>=self::MISSION_REPEAT)
-                                {
-                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                $mission_repeat++;
+                                echo "information-dota2-exits-site:" . $site_id . "\n";
+                                if ($mission_repeat >= self::MISSION_REPEAT) {
+                                    echo "information-dota2-gamedota2-raiders重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
                                     return;
                                 }
                             } else {
@@ -487,11 +493,10 @@ class InformationService
                                 $mission_repeat = 0;
                                 echo "dota2-gamedota2-raiders-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                             } else {
-                                $mission_repeat ++;
+                                $mission_repeat++;
                                 echo "dota2-gamedota2-raiders-information-mission-exits" . "\n";//表示Mission 记录存在
-                                if($mission_repeat>=self::MISSION_REPEAT)
-                                {
-                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                if ($mission_repeat >= self::MISSION_REPEAT) {
+                                    echo "information-dota2-gamedota2-raiders重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
                                     return;
                                 }
                             }
