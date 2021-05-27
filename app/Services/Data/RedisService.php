@@ -316,7 +316,7 @@ class RedisService
                     {
                         $toDelete = 0;
                         $gameList = array_unique(array_column($data['data']['data']??[],"game"));
-                        $count = count(array_intersect($gameList, $params['game']??[],true));
+                        $count = count(array_intersect($gameList, $params['game']??[]));
                         if($count>0)
                         {
                             $toDelete = 1;
