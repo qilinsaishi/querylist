@@ -722,7 +722,7 @@ class InformationService
                             }else{
                                 echo "-fail"."\n";
                             }
-                            sleep(1);
+                           // sleep(1);
                         }
                     }
                 }

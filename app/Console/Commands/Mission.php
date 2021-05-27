@@ -165,8 +165,8 @@ class Mission extends Command
                 (new MatchService())->updateScoreggMatchListStatus($game,$count);
                 break;
             case "updateInformationRedirect":
-                //php artisan mission:collect updateInformationRedirect  information all (手动发布脚本命令)
-                (new InformationService())->updateInformationRedirect();//更新预发布脚本
+                //php artisan mission:collect updateInformationRedirect  information all (修复资讯数据)
+                (new InformationService())->updateInformationRedirect();//修复资讯数据
                 break;
 
             default:
