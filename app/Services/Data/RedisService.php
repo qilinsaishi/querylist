@@ -233,33 +233,19 @@ class RedisService
     public function refreshCache($dataType, $params = [], $keyName = '')
     {
         $main = config("app.main");
-        //获取本机IP
-        $currentIP = getLocalIP();
         //如果当前不在redis配置的缓存中
         if(intval($main)<=0)
         {
             $params = "dataType=".$dataType."&params=".json_encode($params);
             $apiUrl = config("app.api_url")."/refresh?".$params;
-            print_R($apiUrl);
-            die();
-            //$request = curl_get($apiUrl);
+            echo $apiUrl;
+            echo "\n";
+            $request = curl_get($apiUrl);
             var_dump($request);
             die();
         }
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
-            /*
-            $privilegeService = new PrivilegeService();
-            $functionList = $privilegeService->getFunction([$dataType => $params]);
-            {
-                $functionInfo = $functionList[$dataType];
-                $class = $functionInfo['class'];
-                $function = $functionInfo['function'];
-                //$params = $data[$dataType];
-                $functionCount = $functionInfo['functionCount'];
-                $functionProcess = $functionInfo['functionProcess'] ?? "";
-            }*/
-            //$functionList = $privilegeService->getFunction($data);
             $redis = app("redis.connection");
             if($dataType=="information")
             {
@@ -330,7 +316,8 @@ class RedisService
                     {
                         $toDelete = 0;
                         $gameList = array_unique(array_column($data['data']['data']??[],"game"));
-                        if(count(array_intersect($gameList, $params['game']))>0)
+                        $count = count(array_intersect($gameList, $params['game']??[],true));
+                        if($count>0)
                         {
                             $toDelete = 1;
                         }
