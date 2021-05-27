@@ -13,8 +13,8 @@ class wanplus
             "author"=>['path'=>"author",'default'=>''],//原站点作者
             "logo"=>['path'=>"logo",'default'=>''],//logo
             "site_id"=>['path'=>"site_id",'default'=>""],//原站点ID
-            "game"=>['path'=>"",'default'=>"dota2"],//对应游戏
-            "source"=>['path'=>"",'default'=>"gamedota2"],//来源
+            "game"=>['path'=>"",'default'=>"kpl"],//对应游戏
+            "source"=>['path'=>"",'default'=>"wanplus"],//来源
             "title"=>['path'=>"title",'default'=>''],//标题
             "content"=>['path'=>"content",'default'=>''],//内容
             "type"=>['path'=>"type",'default'=>1],//类型

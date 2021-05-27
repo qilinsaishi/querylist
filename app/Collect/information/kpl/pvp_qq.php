@@ -13,7 +13,7 @@ class pvp_qq
             "logo"=>['path'=>"sIMG",'default'=>''],//logo
             "site_id"=>['path'=>"iNewsId",'default'=>""],//原站点ID
             "game"=>['path'=>"",'default'=>"kpl"],//对应游戏
-            "source"=>['path'=>"",'default'=>"lol_qq"],//来源
+            "source"=>['path'=>"",'default'=>"pvp_qq"],//来源
             "title"=>['path'=>"sTitle",'default'=>''],//标题
             "content"=>['path'=>"sContent",'default'=>''],//内容
             "type"=>['path'=>"target",'default'=>1],//类型
