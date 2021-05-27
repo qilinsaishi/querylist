@@ -239,7 +239,7 @@ class RedisService
         if(intval($main)<=0)
         {
             $params = "dataType=".$dataType."&params=".json_encode($params);
-            $apiUrl = config("app.api_url")."/refresh?".$apiUrl;
+            $apiUrl = config("app.api_url")."/refresh?".$params;
             print_R($apiUrl);
             die();
             //$request = curl_get($apiUrl);
