@@ -232,6 +232,20 @@ class RedisService
 
     public function refreshCache($dataType, $params = [], $keyName = '')
     {
+        $main = config("app.main");
+        //获取本机IP
+        $currentIP = getLocalIP();
+        //如果当前不在redis配置的缓存中
+        if(intval($main)<=0)
+        {
+            $params = "dataType=".$dataType."&params=".json_encode($params);
+            $apiUrl = config("app.api_url")."/refresh?".$apiUrl;
+            print_R($apiUrl);
+            die();
+            //$request = curl_get($apiUrl);
+            var_dump($request);
+            die();
+        }
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
             $privilegeService = new PrivilegeService();
@@ -331,49 +345,6 @@ class RedisService
                 {
                     $redis->del($key);
                 }
-
-            }
-
-            //资讯类型数据需要刷新相关站点列表页第一页
-            //if($dataType == "informationList")
-            {
-                //查找数据，获取类型和对应游戏
-            //    $this->truncate("informationList");
-
-               /* $info = (new InformationModel())->getInformationById($params['0'],["id","type","game"]);
-                if(isset($info['id']))
-                {
-                    $type = "";
-                    if($info['type']==4)
-                    {
-                        $type="/strategylist/1/reset";
-                    }
-                    elseif(in_array($info['type'],[1,2,3,5]))
-                    {
-                        $type = "/newslist/1/reset";
-                    }
-                    if($type!="")
-                    {
-                    switch($info['game'])
-                    {
-                        case "lol":
-                            $id=1;
-                            break;
-                        case "kpl":
-                            $id=3;
-                            break;
-                        case "dota2":
-                            $id=4;
-                            break;
-                    }
-                    //请求浏览器刷新缓存
-                    $siteInfo=(new Site())->getSiteById($id);
-                    $domain=$siteInfo['domain'] ?? '';
-                    $url=$domain.$type;
-                    $rt=file_get_contents($url);print_r($rt);exit;
-                    }
-
-                }*/
             }
             return $params_list;
         }
