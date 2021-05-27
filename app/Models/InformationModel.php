@@ -53,7 +53,8 @@ class InformationModel extends Model
         }
         $fields = explode(",", $fields);
         if(!in_array("game",$fields) && $fields != ["*"]){$fields[] = "game";}
-        $information_list = $this->select($fields)->where("status", $status);
+        if(!in_array("redirect",$fields) && $fields != ["*"]){$fields[] = "redirect";}
+        $information_list = $this->select($fields)->where("status", $status)->where("redirect","=",0);
         //排除的来源
         if (isset($params['except_source']) && strlen($params['except_source']) > 0) {
             $information_list = $information_list->where("source", '!=', $params['except_source']);
@@ -263,7 +264,7 @@ class InformationModel extends Model
         }else{
             $status=1;
         }
-        $information_count = $this->where("status", $status);;
+        $information_count = $this->where("status", $status)->where("redirect","=",0);
         //排除的来源
         if (isset($params['except_source']) && strlen($params['except_source']) > 0) {
             $information_count = $information_count->where("source", '!=', $params['except_source']);

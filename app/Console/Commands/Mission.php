@@ -164,6 +164,10 @@ class Mission extends Command
                 $count = $this->option("count")??50;
                 (new MatchService())->updateScoreggMatchListStatus($game,$count);
                 break;
+            case "updateInformationRedirect":
+                //php artisan mission:collect updateInformationRedirect  information all (修复资讯数据)
+                (new InformationService())->updateInformationRedirect();//修复资讯数据
+                break;
 
             default:
 
