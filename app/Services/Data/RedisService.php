@@ -248,6 +248,7 @@ class RedisService
         }
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
+            /*
             $privilegeService = new PrivilegeService();
             $functionList = $privilegeService->getFunction([$dataType => $params]);
             {
@@ -257,7 +258,7 @@ class RedisService
                 //$params = $data[$dataType];
                 $functionCount = $functionInfo['functionCount'];
                 $functionProcess = $functionInfo['functionProcess'] ?? "";
-            }
+            }*/
             //$functionList = $privilegeService->getFunction($data);
             $redis = app("redis.connection");
             if($dataType=="information")

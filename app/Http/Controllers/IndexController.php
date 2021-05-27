@@ -155,7 +155,6 @@ class IndexController extends Controller
         if($data) {
             $return = (new DataService())->getData($data);
         }
-
         return $return;
     }
     public function truncate()
