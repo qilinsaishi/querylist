@@ -241,7 +241,7 @@ class MatchService
                                                 echo "exits-round_son_scoregg_match-matchID:" . $v2['matchID'] . "\n";
                                                 if($mission_repeat>=self::MISSION_REPEAT)
                                                 {
-                                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                                    echo $game."match-scoregg-round_son重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
                                                     return;
                                                 }
                                             } else {
@@ -272,7 +272,7 @@ class MatchService
                                                 echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
                                                 if($mission_repeat>=self::MISSION_REPEAT)
                                                 {
-                                                    echo "重复任务超过".self::MISSION_REPEAT. "次，任务终止\n";
+                                                    echo $game."match-scoregg-round_son重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
                                                     return;
                                                 }
                                             }
@@ -302,7 +302,7 @@ class MatchService
                                             echo "exits-scoregg_match-matchID:" . $v2['matchID'] . "\n";
                                             if($mission_repeat>=self::MISSION_REPEAT)
                                             {
-                                                echo "重复任务过多，任务终止\n";
+                                                echo $game."match-scoregg-round重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
                                                 return;
                                             }
                                         } else {
@@ -321,8 +321,9 @@ class MatchService
                                         $result = $result ?? 0;
                                         if ($result == 0) {
                                             $insertMissionResult = $this->saveMissionByScoreggMatchId($v2['matchID'], $game);
-                                            $mission_repeat = 0;
+
                                             if ($insertMissionResult>0) {
+                                                $mission_repeat = 0;
                                                 echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务成功' . "\n";
                                             } else {
                                                 echo "insert:" . $insertMissionResult . ' matchId:' . $v2['matchID'] . '加入任务失败' . "\n";
@@ -333,7 +334,7 @@ class MatchService
                                             echo "exist-mission" . '-source_link:' . 'https://www.scoregg.com/match/' . $v2['matchID'] . "\n";
                                             if($mission_repeat>=self::MISSION_REPEAT)
                                             {
-                                                echo "重复任务过多，任务终止\n";
+                                                echo $game."match-scoregg-round重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
                                                 return;
                                             }
                                         }
