@@ -1941,6 +1941,22 @@ class PrivilegeService
                 $data[$key] = [];
             }
         }
+        if(isset($params['tid']) && is_array($params['tid']) && count($params['tid'])>0)
+        {
+            $tidList = array_flip(array_column($data,"tid"));
+            $teamList = [];
+            foreach($params['tid'] as $tid)
+            {
+                if($tid>0 && isset($tidList[$tid]))
+                {
+                    $teamList[] = $data[$tidList[$tid]];
+                }
+            }
+            if(count($teamList)>0)
+            {
+                $data = $teamList;
+            }
+        }
         return $data;
     }
     public function processIntergratedPlayerList($data, $functionList,$params)

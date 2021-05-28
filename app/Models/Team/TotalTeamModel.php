@@ -54,9 +54,14 @@ class TotalTeamModel extends Model
     {
         $team_list =$this->select("*");
         //总表队伍ID
-        if(isset($params['tid']) && intval($params['tid'])>=0)
+        if(isset($params['tid']) && !is_array($params['tid']) && intval($params['tid'])>=0)
         {
             $team_list = $team_list->where("tid",$params['tid']);
+        }
+        //总表队伍ID
+        if(isset($params['tid']) && is_array($params['tid']) && count($params['tid'])>0)
+        {
+            $team_list = $team_list->whereIn("tid",$params['tid']);
         }
         //游戏类型
         if (isset($params['game']) && !is_array($params['game']) && strlen($params['game']) >= 3) {
@@ -173,9 +178,14 @@ class TotalTeamModel extends Model
     {
         $team_count =$this;
         //总表队伍ID
-        if(isset($params['tid']) && intval($params['tid'])>=0)
+        if(isset($params['tid']) && !is_array($params['tid']) && intval($params['tid'])>=0)
         {
             $team_count = $team_count->where("tid",$params['tid']);
+        }
+        //总表队伍ID
+        if(isset($params['tid']) && is_array($params['tid']) && count($params['tid'])>0)
+        {
+            $team_count = $team_count->whereIn("tid",$params['tid']);
         }
         //游戏类型
         if (isset($params['game']) && !is_array($params['game']) && strlen($params['game']) >= 3) {
