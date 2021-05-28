@@ -671,5 +671,64 @@ class InformationService
         }
         return true;
     }
+    //修复脚本数据
+
+
+    public function updateInformationRedirect(){
+        $informationModel = new InformationModel();
+        $data=$informationModel
+            ->selectRaw("count('id') as num,site_id")
+            ->where('source',"<>","index")
+            ->whereRaw('left(site_id,2) =? and length(site_id) =?',[15,7])
+            ->where('site_id',"<>","")
+            ->where('site_id',"<>",0)
+            ->where('redirect','=',0)
+            ->groupBy('site_id')
+            ->having("num",">",1)
+            ->get()->toArray();
+
+        $data=$data?? [];
+        if(count($data)>0){
+            foreach ($data as $val){
+                echo "------------------------------\n";
+                echo "site_id:".$val['site_id']."\n";
+                $informationResult=$informationModel->selectRaw('id,game')
+                    ->where('site_id',"=",$val['site_id'])
+                    ->where('redirect','=',0)
+                    ->orderBy('id','asc')
+                    ->get()->toArray();
+                $gameList = [];
+                //$gameList=array_column($informationResult,'game');
+                foreach ($informationResult as $info)
+                {
+                    if(!isset($gameList[$info['game']]))
+                    {
+                        $gameList[$info['game']] = $info['id'];
+                    }
+                }
+                if(isset($gameList["lol"]))
+                {
+                    $redirect = $gameList["lol"];
+                    echo "target:".$redirect."\n";
+                    foreach($informationResult as $info)
+                    {
+                        if($info['id']!= $redirect)
+                        {
+                            echo "toUpdate:".$info['id'].",redirect:".$redirect;
+                            //$rt=0;
+                            $rt=$informationModel->updateInformation($info['id'],['redirect'=>$redirect]);
+                            if($rt){
+                                echo "-success"."\n";
+                            }else{
+                                echo "-fail"."\n";
+                            }
+                           // sleep(1);
+                        }
+                    }
+                }
+                 // print_r($informationResult);exit;
+            }
+        }
+    }
 
 }
