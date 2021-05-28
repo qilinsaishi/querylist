@@ -150,12 +150,11 @@ class IndexController extends Controller
         $dataType = $this->request->get("dataType","defaultConfig");
         $keyName= $this->request->get("key_name","");
         $params= $this->request->get("params",'[]');
-        $data = $redisService->refreshCache($dataType,json_decode($params),$keyName);
+        $data = $redisService->refreshCache($dataType,json_decode($params,true),$keyName);
         $return=[];
         if($data) {
             $return = (new DataService())->getData($data);
         }
-
         return $return;
     }
     public function truncate()

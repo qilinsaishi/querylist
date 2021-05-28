@@ -69,7 +69,7 @@ class KeywordMapModel extends Model
         }
         return;
     }
-    public function getList($params)
+    public function getList($params=[])
     {
         $fields = $params['fields']??"source_id,game,source_type,content_id,content_type,count";
         $keyword_list =$this->select(explode(",",$fields));
@@ -93,6 +93,16 @@ class KeywordMapModel extends Model
         {
             $keyword_list = $keyword_list->whereIn("source_id",$params['source_id']);
         }
+        //来源关键字
+        if(isset($params['word']) && !is_array($params['word']) && strlen($params['word'])>0)
+        {
+            $keyword_list = $keyword_list->where("keyword",$params['word']);
+        }
+        //来源关键字
+        if(isset($params['word']) && (is_array($params['word']) && count($params['word'])>0))
+        {
+            $keyword_list = $keyword_list->whereIn("keyword",$params['word']);
+        }
         //目标类型
         if(isset($params['content_type']) && strlen($params['content_type'])>0)
         {
@@ -111,5 +121,50 @@ class KeywordMapModel extends Model
             ->orderBy("content_time","desc")
             ->get()->toArray();
         return $keyword_list;
+    }
+    public function getMapCount($params=[])
+    {
+        $keyword_count =$this;
+        //对应游戏
+        if(isset($params['game']) && ($params['game'])!="")
+        {
+            $keyword_count = $keyword_count->where("game",$params['game']);
+        }
+        //目标ID
+        if(isset($params['content_id']) && ($params['content_id'])>0)
+        {
+            $keyword_count = $keyword_count->where("content_id",$params['content_id']);
+        }
+        //来源ID
+        if(isset($params['source_id']) && !is_array($params['source_id']) && ($params['source_id'])>0)
+        {
+            $keyword_count = $keyword_count->where("source_id",$params['source_id']);
+        }
+        //来源ID
+        if(isset($params['source_id']) && (is_array($params['source_id']) && count($params['source_id'])>0) )
+        {
+            $keyword_count = $keyword_count->whereIn("source_id",$params['source_id']);
+        }
+        //来源关键字
+        if(isset($params['word']) && !is_array($params['word']) && strlen($params['word'])>0)
+        {
+            $keyword_count = $keyword_count->where("keyword",$params['word']);
+        }
+        //来源关键字
+        if(isset($params['word']) && (is_array($params['word']) && count($params['word'])>0))
+        {
+            $keyword_count = $keyword_count->whereIn("keyword",$params['word']);
+        }
+        //目标类型
+        if(isset($params['content_type']) && strlen($params['content_type'])>0)
+        {
+            $keyword_count = $keyword_count->where("content_type",$params['content_type']);
+        }
+        //来源类型
+        if(isset($params['source_type']) && strlen($params['source_type'])>0)
+        {
+            $keyword_count = $keyword_count->where("source_type",$params['source_type']);
+        }
+        return $keyword_count->count();
     }
 }
