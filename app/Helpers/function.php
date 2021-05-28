@@ -76,7 +76,7 @@ function curl_get($url, $referer = '')
 
 // $url 是请求的链接
 // $postdata 是传输的数据，数组格式
-function curl_post($url = '', $postdata = '',$header = [])
+function curl_post($url = '', $postdata = [],$header = [])
 {
 
     //初始化

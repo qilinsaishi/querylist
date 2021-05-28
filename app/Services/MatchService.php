@@ -24,6 +24,9 @@ class MatchService
             //$this->saveMissionByScoreggMatchId(12280,$game);//这个是测试单个比赛的方法案例
             $this->scoreggMatch($game,$force);//scoregg 比赛数据
         }
+        if($game == 'dota2'){
+            $this->wcaMatchList();
+        }
         /* if ($game == 'dota2') {//这个dota2的数据不用改，是拼接起来的专题。暂时不用改
              $this->getDota2International($game);
              $this->getBilibiliDota2($game);
@@ -32,6 +35,25 @@ class MatchService
 
         return 'finish';
     }
+
+    public function wcaMatchList(){
+        //赛事赛程列表
+        $url='https://www.wca.com.cn/e/action/score.php';
+        $curtime=date('Y-m-d',strtotime('sunday'));
+        $param = [
+            'time' => '2021-05-30',
+            'id' => '2',
+            'page' => '0',
+            'action'=>'score'
+        ];
+        $headers=['origin'=>'https://www.wca.com.cn'];
+        $client=new ClientServices();
+        $data=$client->curlPost($url,$param,$headers);
+        print_r($data);exit;
+echo 11;exit;
+        return "22";
+    }
+
 
 
     public function pwesports($game)
