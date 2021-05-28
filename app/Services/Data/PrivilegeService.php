@@ -329,7 +329,7 @@ class PrivilegeService
                 'functionCount' => "getImageCount",
                 'functionSingle' => "getImageById",
             ],
-            "gameConfig" => [//lol游戏配置
+            "gameConfig" => [//游戏配置
                 'list' => [
                     ['model' => 'App\Models\Admin\GameConfig', 'source' => ''],
                 ],
@@ -344,6 +344,7 @@ class PrivilegeService
                 ],
                 'withSource' => 0,
                 'function' => "getList",
+                'functionCount' => "getMapCount",
                 'functionProcess' => "processkeywordMapList",
                 'functionProcessCount' => "processkeywordMapCount",
             ],
