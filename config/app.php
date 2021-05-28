@@ -50,6 +50,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
     'asign' => env('ASIGN', 1),
+    'api_url' => env('API_URL'),
+    'main' => env('MAIN'),
     'logs_root' => env('LOGS_ROOT'),
     '5118'=>[
         'abstract'=>env('5118_abstract_key'),
