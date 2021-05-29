@@ -27,7 +27,18 @@ php artisan mission:collect insert_mission  information kpl --force=0
 
 2.php artisan mission:collect collect  information lol(kpl/dota2)   对任务表里面的数据进行进一步的处理
 
-3.php artisan mission:collect process  information lol   information
+3.php artisan mission:collect process  information lol   
+
+六、爬取DOTA2 wca比赛脚本
+1.php artisan mission:collect insert_mission match dota2   --force=0 --week=0 （-week 每四个增加）
+
+2.php artisan mission:collect collect match dota2
+
+3.php artisan mission:collect process match dota2
+
+七、开赛后4小时内更新DOTA2 wca比赛脚本
+1.php artisan mission:collect insert_mission match dota2   --force=0 --week=0 （-week 每四个增加）
+
 
 
 
