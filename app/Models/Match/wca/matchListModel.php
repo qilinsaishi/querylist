@@ -42,8 +42,9 @@ class matchListModel extends Model
     ];
     public function getMatchList($params)
     {
+        //\DB::connection()->enableQueryLog();
         $start = microtime(true);
-        $fields = $params['fields'] ?? "match_id,game,match_status,round_id,tournament_id,home_id,away_id,home_score,away_score,start_time,match_data";
+        $fields = $params['fields'] ?? "match_id,game,match_status,tournament_id,home_id,away_id,home_name,away_name,home_logo,away_logo,home_score,away_score,start_time,match_data";
         $match_list =$this->select(explode(",",$fields));
         $pageSizge = $params['page_size']??4;
         $page = $params['page']??1;
@@ -98,7 +99,7 @@ class matchListModel extends Model
             $match_list = $match_list->where("start_time", '<=', $start_time);//->where("start_time", '<', $end_time);
         }
         //比赛日期
-        if (isset($params['start_date']) && strtotime($params['start_date']) > 0)
+       if (isset($params['start_date']) && strtotime($params['start_date']) > 0)
         {
             $match_list = $match_list->where("start_time",">=" , date("Y-m-d H:i:s",strtotime($params['start_date'])));
 
@@ -110,10 +111,7 @@ class matchListModel extends Model
 
         }
         //all表示查询所有比赛
-        //否则要求确定的主客队双方
-        if(!isset($params['all']) || $params['all'] <=0){
-            $match_list=$match_list->where("home_id",">",0)->where("away_id",">",0);
-        }
+
         //主客队双方
         if(isset($params['team_id']) && !is_array($params['team_id']) && $params['team_id'] >0){
             $match_list=$match_list->whereRaw('((home_id ='.$params['team_id'] .') or (away_id = '.$params['team_id'].'))');
@@ -129,6 +127,7 @@ class matchListModel extends Model
             ->orderBy("start_time","desc")
             ->get()->toArray();
         $end = microtime(true);
+        //print_r(\DB::getQueryLog());exit;
         return $match_list;
     }
 
