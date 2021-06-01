@@ -261,7 +261,7 @@ class MissionService
                                 $ModelClass = $classList[$ModelClassName];
                                 foreach($processResult['match_list'] as $key => $value)
                                 {
-                                    if ( $value['tournament_name']!='' && $result['source']=='wca'){
+                                    if ( isset($value['tournament_name']) && $value['tournament_name']!='' && $result['source']=='wca'){
                                         $wcaTournamentModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
                                         $classList = $this->getClass($classList, $wcaTournamentModelClassName);
                                         $wcaTournamentModelClass = $classList[$wcaTournamentModelClassName];

@@ -197,6 +197,8 @@ class matchListModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
+        $data['game_bo']=intval($data['game_bo']) ?? 0;
+
         return $this->insertGetId($data);
     }
 
