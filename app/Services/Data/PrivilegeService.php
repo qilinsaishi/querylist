@@ -82,6 +82,7 @@ class PrivilegeService
             "matchDetail" => [
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'scoregg'],
+                    ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'wca'],
                 ],
                 'withSource' => 1,
                 'function' => "getMatchById",//获取数据方法
@@ -122,16 +123,6 @@ class PrivilegeService
                 'function' => "getRoundList",
                 'functionSingle' => "getRoundById",
             ],
-            "teamList" => [//团队列表
-                'list' => [
-                    ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'cpseo'],
-                    ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'chaofan'],
-                ],
-                'withSource' => 1,
-                'function' => "getTeamList",
-                'functionCount' => "getTeamCount",
-                'functionSingle' => "getTeamById",
-            ],
             "totalTeamList" => [//团队总列表
                 'list' => [
                     ['model' => 'App\Models\TeamModel'],
@@ -164,17 +155,6 @@ class PrivilegeService
                 'functionCount' => "getPlayerCount",
                 'functionSingle' => "getPlayerById",
                 'functionProcess' => "processTotalPlayerList",
-            ],
-            "team" => [//团队列表
-                'list' => [
-                    ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'cpseo'],
-                    ['model' => 'App\Models\Match\#source#\teamModel', 'source' => 'chaofan'],
-                ],
-                'withSource' => 1,
-                'function' => "getTeamById",
-                //'functionCount' => "getTeamCount",
-                'functionSingle' => "getTeamById",
-                'functionProcess' => "processTeam",
             ],
             "defaultConfig" => [//通用配置
                 'list' => [
@@ -484,6 +464,7 @@ class PrivilegeService
         $classList = [];
         $functionList = [];
         foreach ($data as $name => $params) {
+            //print_R(array_column($functionList,"source"));
             $dataType = $params['dataType'] ?? $name;
             //echo "try to find type:".$dataType."\n";
             //echo "currentSource:".$currentSource."\n";
@@ -512,44 +493,48 @@ class PrivilegeService
                         if ($sourceFound == 1 && ($params['source'] != $detail['source'])) {
                             continue;
                         }
+                        //数据类型和来源的双重结构
+                        $fullDataType = $dataType.'/'.$params['source'];
+                        //echo "full:".$fullDataType."\n";
+
                         //如果之前没初始化过
-                        if (!isset($functionList[$dataType])) {
+                        if (!isset($functionList[$fullDataType])) {
                             //如果类库初始化成功
                             if (isset($classList[$modelName])) {
                                 //检查基础function方法存在
                                 if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
                                     //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";
 
-                                    $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
+                                    $functionList[$fullDataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
                                     if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
-                                        $functionList[$dataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
+                                        $functionList[$fullDataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
                                     } else {
-                                        $functionList[$dataType]['functionCount'] = "";
+                                        $functionList[$fullDataType]['functionCount'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle'])) {
-                                        $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
+                                        $functionList[$fullDataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
                                     } else {
-                                        $functionList[$dataType]['functionSingle'] = "";
+                                        $functionList[$fullDataType]['functionSingle'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionUpdate']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionUpdate'])) {
-                                        $functionList[$dataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
+                                        $functionList[$fullDataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
                                     } else {
-                                        $functionList[$dataType]['functionUpdate'] = "";
+                                        $functionList[$fullDataType]['functionUpdate'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionProcess'])) {
-                                        $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
+                                        $functionList[$fullDataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
                                     } else {
-                                        $functionList[$dataType]['functionProcess'] = "";
+                                        $functionList[$fullDataType]['functionProcess'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionProcessCount'])) {
-                                        $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
+                                        $functionList[$fullDataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
                                     } else {
-                                        $functionList[$dataType]['functionProcessCount'] = "";
+                                        $functionList[$fullDataType]['functionProcessCount'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
-                                        $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                        $functionList[$fullDataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
                                     } else {
-                                        $functionList[$dataType]['functionSingleBySite'] = "";
+                                        $functionList[$fullDataType]['functionSingleBySite'] = "";
                                     }
                                     $found = 1;
                                 } else {
@@ -558,7 +543,7 @@ class PrivilegeService
                             } else {
                                 //echo "class:".$modelName.",not found\n";
                             }
-                            $functionList[$dataType]['source'] = $sourceFound == 1 ? $params['source'] : $currentSource;//$priviliegeList[$dataType]['source'];
+                            $functionList[$fullDataType]['source'] = ($sourceFound == 1 ? $params['source'] : $currentSource);//$priviliegeList[$dataType]['source'];
                         }
                     }
                 } //已经初始化数据来源 且 当前数据类型需要包含数据来源
@@ -566,8 +551,7 @@ class PrivilegeService
                     if ($sourceFound == 1) {
                         $currentSource = $params['source'];
                     }
-                    //调用已有的数据类型
-                    $functionList[$dataType]['source'] = $currentSource;
+
                     //获取当前数据了行的类库列表
                     $list = array_combine(array_column($priviliegeList[$dataType]['list'], "source"), array_column($priviliegeList[$dataType]['list'], "model"));
                     //如果包含已经被初始化的数据来源
@@ -579,40 +563,45 @@ class PrivilegeService
                         if ($sourceFound == 1 && ($params['source'] != $currentSource)) {
                             continue;
                         }
+                        //数据类型和来源的双重结构
+                        $fullDataType = $dataType.'/'.$params['source'];
+                        //调用已有的数据类型
+                        $functionList[$fullDataType]['source'] = ($params['source']);
+                        //echo "full:".$fullDataType."\n";
                         //检查方法存在
                         if (method_exists($classList[$modelName] ?? [], $priviliegeList[$dataType]['function'])) {
-                            $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
+                            $functionList[$fullDataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
                             //标记为找到
                             $found = 1;
                             if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
-                                $functionList[$dataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
+                                $functionList[$fullDataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
                             } else {
-                                $functionList[$dataType]['functionCount'] = "";
+                                $functionList[$fullDataType]['functionCount'] = "";
                             }
                             if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle'])) {
-                                $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
+                                $functionList[$fullDataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
                             } else {
-                                $functionList[$dataType]['functionSingle'] = "";
+                                $functionList[$fullDataType]['functionSingle'] = "";
                             }
                             if (isset($priviliegeList[$dataType]['functionUpdate']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionUpdate'])) {
-                                $functionList[$dataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
+                                $functionList[$fullDataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
                             } else {
-                                $functionList[$dataType]['functionUpdate'] = "";
+                                $functionList[$fullDataType]['functionUpdate'] = "";
                             }
                             if (isset($priviliegeList[$dataType]['functionProcess'])) {
-                                $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
+                                $functionList[$fullDataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
                             } else {
-                                $functionList[$dataType]['functionProcess'] = "";
+                                $functionList[$fullDataType]['functionProcess'] = "";
                             }
                             if (isset($priviliegeList[$dataType]['functionProcessCount'])) {
-                                $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
+                                $functionList[$fullDataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
                             } else {
-                                $functionList[$dataType]['functionProcessCount'] = "";
+                                $functionList[$fullDataType]['functionProcessCount'] = "";
                             }
                             if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
-                                $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                $functionList[$fullDataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
                             } else {
-                                $functionList[$dataType]['functionSingleBySite'] = "";
+                                $functionList[$fullDataType]['functionSingleBySite'] = "";
                             }
                         }
                     }
@@ -622,44 +611,44 @@ class PrivilegeService
                         foreach ($priviliegeList[$dataType]['list'] as $detail) {
                             $modelName = $detail['model'];
                             $modelName = str_replace("#source#", $detail['source'], $modelName);
-                            $classList = $this->getClass($classList, $modelName);
+                            $classList = $this->getFunction($classList, $modelName);
                             if ($sourceFound == 1 && ($params['source'] != $detail['source'])) {
                                 continue;
                             }
-                            if (!isset($functionList[$dataType])) {
+                            if (!isset($functionList[$fullDataType])) {
                                 if (isset($classList[$modelName])) {
                                     if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
                                         //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";
-                                        $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
+                                        $functionList[$fullDataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
                                         if (method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
-                                            $functionList[$dataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
+                                            $functionList[$fullDataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
                                         } else {
-                                            $functionList[$dataType]['functionCount'] = "";
+                                            $functionList[$fullDataType]['functionCount'] = "";
                                         }
                                         if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle'])) {
-                                            $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
+                                            $functionList[$fullDataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
                                         } else {
-                                            $functionList[$dataType]['functionSingle'] = "";
+                                            $functionList[$fullDataType]['functionSingle'] = "";
                                         }
                                         if (isset($priviliegeList[$dataType]['functionUpdate']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionUpdate'])) {
-                                            $functionList[$dataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
+                                            $functionList[$fullDataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
                                         } else {
-                                            $functionList[$dataType]['functionUpdate'] = "";
+                                            $functionList[$fullDataType]['functionUpdate'] = "";
                                         }
                                         if (isset($priviliegeList[$dataType]['functionProcess'])) {
-                                            $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
+                                            $functionList[$fullDataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
                                         } else {
-                                            $functionList[$dataType]['functionProcess'] = "";
+                                            $functionList[$fullDataType]['functionProcess'] = "";
                                         }
                                         if (isset($priviliegeList[$dataType]['functionProcessCount'])) {
-                                            $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
+                                            $functionList[$fullDataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
                                         } else {
-                                            $functionList[$dataType]['functionProcessCount'] = "";
+                                            $functionList[$fullDataType]['functionProcessCount'] = "";
                                         }
                                         if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
-                                            $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                            $functionList[$fullDataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
                                         } else {
-                                            $functionList[$dataType]['functionSingleBySite'] = "";
+                                            $functionList[$fullDataType]['functionSingleBySite'] = "";
                                         }
                                         //标记为找到
                                         $found = 1;
@@ -673,8 +662,12 @@ class PrivilegeService
                         }
                     }
                     //调用当前的数据来源
-                    $functionList[$dataType]['source'] = $currentSource;
+                    $functionList[$fullDataType]['source'] = ($params['source']??$currentSource);
                 } elseif ($priviliegeList[$dataType]['withSource'] == 0) {
+                    //数据类型和来源的双重结构
+                    $fullDataType = $dataType;
+                    //echo "full:".$fullDataType."\n";
+
                     foreach ($priviliegeList[$dataType]['list'] as $detail) {
                         $modelName = $detail['model'];
                         //$currentSource = $currentSource == "" ? $detail['source'] : $currentSource;
@@ -682,49 +675,49 @@ class PrivilegeService
                         if ($sourceFound == 1 && ($params['source'] != $detail['source'])) {
                             continue;
                         }
-                        if (!isset($functionList[$dataType])) {
+                        if (!isset($functionList[$fullDataType])) {
                             if (isset($classList[$modelName])) {
                                 if (method_exists($classList[$modelName], $priviliegeList[$dataType]['function'])) {
                                     //echo "class:".$modelName.",function:".$priviliegeList[$dataType]['function']." found\n";exit;
-                                    $functionList[$dataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
+                                    $functionList[$fullDataType] = ["className" => $modelName, "class" => $classList[$modelName], "function" => $priviliegeList[$dataType]['function']];
                                     if (isset($priviliegeList[$dataType]['functionCount']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionCount'])) {
-                                        $functionList[$dataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
+                                        $functionList[$fullDataType]['functionCount'] = $priviliegeList[$dataType]['functionCount'];
                                     } else {
-                                        $functionList[$dataType]['functionCount'] = "";
+                                        $functionList[$fullDataType]['functionCount'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionSingle']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionSingle'])) {
-                                        $functionList[$dataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
+                                        $functionList[$fullDataType]['functionSingle'] = $priviliegeList[$dataType]['functionSingle'];
                                     } else {
-                                        $functionList[$dataType]['functionSingle'] = "";
+                                        $functionList[$fullDataType]['functionSingle'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionUpdate']) && method_exists($classList[$modelName], $priviliegeList[$dataType]['functionUpdate'])) {
-                                        $functionList[$dataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
+                                        $functionList[$fullDataType]['functionUpdate'] = $priviliegeList[$dataType]['functionUpdate'];
                                     } else {
-                                        $functionList[$dataType]['functionUpdate'] = "";
+                                        $functionList[$fullDataType]['functionUpdate'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionProcess'])) {
-                                        $functionList[$dataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
+                                        $functionList[$fullDataType]['functionProcess'] = $priviliegeList[$dataType]['functionProcess'];
                                     } else {
-                                        $functionList[$dataType]['functionProcess'] = "";
+                                        $functionList[$fullDataType]['functionProcess'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionProcessCount'])) {
-                                        $functionList[$dataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
+                                        $functionList[$fullDataType]['functionProcessCount'] = $priviliegeList[$dataType]['functionProcessCount'];
                                     } else {
-                                        $functionList[$dataType]['functionProcessCount'] = "";
+                                        $functionList[$fullDataType]['functionProcessCount'] = "";
                                     }
                                     if (isset($priviliegeList[$dataType]['functionSingleBySite'])) {
-                                        $functionList[$dataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
+                                        $functionList[$fullDataType]['functionSingleBySite'] = $priviliegeList[$dataType]['functionSingleBySite'];
                                     } else {
-                                        $functionList[$dataType]['functionSingleBySite'] = "";
+                                        $functionList[$fullDataType]['functionSingleBySite'] = "";
                                     }
                                     $found = 1;
                                 } else {
-                                    echo "class:" . $modelName . ",function:" . $priviliegeList[$dataType]['function'] . " not found\n";
+                                    //echo "class:" . $modelName . ",function:" . $priviliegeList[$dataType]['function'] . " not found\n";
                                 }
                             } else {
                                 //echo "class:".$modelName.",not found\n";
                             }
-                            $functionList[$dataType]['source'] = $currentSource;//$priviliegeList[$dataType]['source'];
+                            $functionList[$fullDataType]['source'] = "";//$priviliegeList[$dataType]['source'];
                         }
                     }
 
@@ -760,26 +753,10 @@ class PrivilegeService
     public function processMatchList($data, $functionList, $params = [])
     {
         $intergrationService = new IntergrationService();
-
-        if (isset($params['game']) && $params['game'] == 'dota2' && $params['source'] = 'wca') {
-
-            //判断赛事
-            if (isset($functionList['tournament']) && isset($functionList['tournament']['functionSingle'])) {
-
-            } else {
-                $f = $this->getFunction(['tournament' => []], $functionList['matchList']['source']);
-
-                if (isset($f['tournament']['class'])) {
-                    $functionList["tournament"] = $f['tournament'];
-                }
-            }
-
-            if (!isset($functionList["tournament"]["class"]) || !isset($functionList['tournament']['functionSingle'])) {
-                // return $data;(没有跳过)
-            }
-
-            $modelTournamentClass = $functionList["tournament"]["class"];
-            $functionTournamentSingle = $functionList["tournament"]['functionSingle'];
+        if (isset($params['game']) && $params['game'] == 'dota2' && $params['source'] == 'wca') {
+            $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
+            $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
+            $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
             $tournament = [];
             if (count($data)) {
                 foreach ($data as $matchKey => $matchInfo) {
@@ -797,59 +774,14 @@ class PrivilegeService
 
             return $data;
         } else {
-            //判断赛事
-            if (isset($functionList['tournament']) && isset($functionList['tournament']['functionSingle'])) {
-
-            } else {
-                $f = $this->getFunction(['tournament' => []], $functionList['matchList']['source']);
-                if (isset($f['tournament']['class'])) {
-                    $functionList["tournament"] = $f['tournament'];
-                }
-            }
-            if (!isset($functionList["tournament"]["class"]) || !isset($functionList['tournament']['functionSingle'])) {
-                // return $data;(没有跳过)
-            }
-            $modelTournamentClass = $functionList["tournament"]["class"];
-            $functionTournamentSingle = $functionList["tournament"]['functionSingle'];
-            //判断战队
-            if (isset($functionList['teamList']) && isset($functionList['teamList']['functionSingle'])) {
-
-            } else {
-                $f = $this->getFunction(['totalTeamList' => []], $functionList['matchList']['source']);
-                if (isset($f['totalTeamList']['class'])) {
-                    $functionList["totalTeamList"] = $f['totalTeamList'];
-                }
-            }
-            if (!isset($functionList["totalTeamList"]["class"]) || !isset($functionList['totalTeamList']['functionSingleBySite'])) {
-                //return $data;
-            }
+            $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
+            $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
+            $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
+            $functionList = $this->checkFunction($functionList,"totalTeamList");
             $modelClass = $functionList["totalTeamList"]["class"];
             $functionSingle = $functionList["totalTeamList"]['functionSingleBySite'];
-
-            //判断队员
-            if (isset($functionList['totalPlayerInfo']) && isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
-
-            } else {
-                $f = $this->getFunction(['totalPlayerInfo' => []], $functionList['matchList']['source']);
-                if (isset($f['totalPlayerInfo']['class'])) {
-                    $functionList["totalPlayerInfo"] = $f['totalPlayerInfo'];
-                }
-            }
-            if (!isset($functionList["totalPlayerInfo"]["class"]) || !isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
-                //return $data;
-            }
-            //判断队员
-            if (isset($functionList['totalPlayerList']) && isset($functionList['totalPlayerList']['function'])) {
-
-            } else {
-                $f = $this->getFunction(['totalPlayerList' => []], $functionList['matchList']['source']);
-                if (isset($f['totalPlayerList']['class'])) {
-                    $functionList["totalPlayerList"] = $f['totalPlayerList'];
-                }
-            }
-            if (!isset($functionList["totalPlayerList"]["class"]) || !isset($functionList['totalPlayerList']['function'])) {
-                //return $data;
-            }
+            $functionList = $this->checkFunction($functionList,"totalPlayerInfo",$params['source']);
+            $functionList = $this->checkFunction($functionList,"totalPlayerList",$params['source']);
             $playerModelClass = $functionList["totalPlayerInfo"]["class"];
             $functionPlayerSingle = $functionList["totalPlayerInfo"]['functionSingleBySite'];
 
@@ -870,7 +802,7 @@ class PrivilegeService
                 }
                 //战队信息
                 if (!isset($teamList[$matchInfo['home_id']])) {
-                    $teamInfo = $modelClass->$functionSingle($matchInfo['home_id'], $functionList['matchList']['source'], $matchInfo['game']);
+                    $teamInfo = $modelClass->$functionSingle($matchInfo['home_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
                     if (isset($teamInfo['team_id'])) {
                         if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
                             $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
@@ -879,7 +811,7 @@ class PrivilegeService
                     }
                 }
                 if (!isset($teamList[$matchInfo['away_id']])) {
-                    $teamInfo = $modelClass->$functionSingle($matchInfo['away_id'], $functionList['matchList']['source'], $matchInfo['game']);
+                    $teamInfo = $modelClass->$functionSingle($matchInfo['away_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
                     if (isset($teamInfo['team_id'])) {
                         if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
                             $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
@@ -906,7 +838,7 @@ class PrivilegeService
                         $data[$key][$color . '_player_id_list'] = array_keys($data[$key][$color . '_player_list']);
                         foreach ($data[$key][$color . '_player_list'] as $player_id => $playerInfo) {
                             if (!isset($playerList[$player_id])) {
-                                $playerInfo = $playerModelClass->$functionPlayerSingle($player_id, $matchInfo['game'], $functionList['matchList']['source']);
+                                $playerInfo = $playerModelClass->$functionPlayerSingle($player_id, $matchInfo['game'], $functionList["matchList"."/".$params['source']]['source']);
                                 if (isset($playerInfo['player_id'])) {
                                     if (isset($playerInfo['pid']) && $playerInfo['pid'] > 0) {
                                         $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0, $playerInfo['pid'], 1, 0)['data'], "pid,player_name,logo");
@@ -978,59 +910,14 @@ class PrivilegeService
     public function processMatchList_bak($data, $functionList, $params = [])
     {
         $intergrationService = new IntergrationService();
-        //判断赛事
-        if (isset($functionList['tournament']) && isset($functionList['tournament']['functionSingle'])) {
-
-        } else {
-            $f = $this->getFunction(['tournament' => []], $functionList['matchList']['source']);
-            if (isset($f['tournament']['class'])) {
-                $functionList["tournament"] = $f['tournament'];
-            }
-        }
-        if (!isset($functionList["tournament"]["class"]) || !isset($functionList['tournament']['functionSingle'])) {
-            // return $data;(没有跳过)
-        }
-        $modelTournamentClass = $functionList["tournament"]["class"];
-        $functionTournamentSingle = $functionList["tournament"]['functionSingle'];
-        //判断战队
-        if (isset($functionList['teamList']) && isset($functionList['teamList']['functionSingle'])) {
-
-        } else {
-            $f = $this->getFunction(['totalTeamList' => []], $functionList['matchList']['source']);
-            if (isset($f['totalTeamList']['class'])) {
-                $functionList["totalTeamList"] = $f['totalTeamList'];
-            }
-        }
-        if (!isset($functionList["totalTeamList"]["class"]) || !isset($functionList['totalTeamList']['functionSingleBySite'])) {
-            //return $data;
-        }
+        $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
+        $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
+        $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
+        $functionList = $this->checkFunction($functionList,"totalTeamList");
         $modelClass = $functionList["totalTeamList"]["class"];
         $functionSingle = $functionList["totalTeamList"]['functionSingleBySite'];
-
-        //判断队员
-        if (isset($functionList['totalPlayerInfo']) && isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
-
-        } else {
-            $f = $this->getFunction(['totalPlayerInfo' => []], $functionList['matchList']['source']);
-            if (isset($f['totalPlayerInfo']['class'])) {
-                $functionList["totalPlayerInfo"] = $f['totalPlayerInfo'];
-            }
-        }
-        if (!isset($functionList["totalPlayerInfo"]["class"]) || !isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
-            //return $data;
-        }
-        //判断队员
-        if (isset($functionList['totalPlayerList']) && isset($functionList['totalPlayerList']['function'])) {
-
-        } else {
-            $f = $this->getFunction(['totalPlayerList' => []], $functionList['matchList']['source']);
-            if (isset($f['totalPlayerList']['class'])) {
-                $functionList["totalPlayerList"] = $f['totalPlayerList'];
-            }
-        }
-        if (!isset($functionList["totalPlayerList"]["class"]) || !isset($functionList['totalPlayerList']['function'])) {
-            //return $data;
-        }
+        $functionList = $this->checkFunction($functionList,"totalPlayerInfo");
+        $functionList = $this->checkFunction($functionList,"totalPlayerList");
         $playerModelClass = $functionList["totalPlayerInfo"]["class"];
         $functionPlayerSingle = $functionList["totalPlayerInfo"]['functionSingleBySite'];
 
@@ -1051,7 +938,7 @@ class PrivilegeService
             }
             //战队信息
             if (!isset($teamList[$matchInfo['home_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['home_id'], $functionList['matchList']['source'], $matchInfo['game']);
+                $teamInfo = $modelClass->$functionSingle($matchInfo['home_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
                 if (isset($teamInfo['team_id'])) {
                     if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
                         $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
@@ -1060,7 +947,7 @@ class PrivilegeService
                 }
             }
             if (!isset($teamList[$matchInfo['away_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['away_id'], $functionList['matchList']['source'], $matchInfo['game']);
+                $teamInfo = $modelClass->$functionSingle($matchInfo['away_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
                 if (isset($teamInfo['team_id'])) {
                     if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
                         $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
@@ -1084,7 +971,7 @@ class PrivilegeService
                 foreach ($teamMap as $side => $color) {
                     foreach ($data[$key][$color . '_player_id_list'] as $k => $player_id) {
                         if (!isset($playerList[$player_id])) {
-                            $playerInfo = $playerModelClass->$functionPlayerSingle($player_id, $matchInfo['game'], $functionList['matchList']['source']);
+                            $playerInfo = $playerModelClass->$functionPlayerSingle($player_id, $matchInfo['game'], $functionList["matchList"."/".$params['source']]['source']);
                             if (isset($playerInfo['player_id'])) {
                                 if (isset($playerInfo['pid']) && $playerInfo['pid'] > 0) {
                                     $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0, $playerInfo['pid'], 1, 0)['data'], "pid,player_name,logo");
@@ -1151,47 +1038,14 @@ class PrivilegeService
         return $data;
     }
 
-    public function processMatch($data, $functionList)
+    public function processMatch($data, $functionList , $params)
     {
         $intergrationService = new IntergrationService();
-        //判断赛事
-        if (isset($functionList['tournament']) && isset($functionList['tournament']['functionSingle'])) {
-
-        } else {
-            $f = $this->getFunction(['tournament' => []], $functionList['matchDetail']['source']);
-            if (isset($f['tournament']['class'])) {
-                $functionList["tournament"] = $f['tournament'];
-            }
-        }
-        if (!isset($functionList["tournament"]["class"]) || !isset($functionList['tournament']['functionSingle'])) {
-            // return $data;(没有跳过)
-        }
-        $modelTournamentClass = $functionList["tournament"]["class"];
-        $functionTournamentSingle = $functionList["tournament"]['functionSingle'];
-        //判断战队
-        if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['functionSingle'])) {
-
-        } else {
-            $f = $this->getFunction(['totalTeamInfo' => []], $functionList['matchDetail']['source']);
-            if (isset($f['totalTeamInfo']['class'])) {
-                $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
-            }
-        }
-        if (!isset($functionList["totalTeamInfo"]["class"]) || !isset($functionList['totalTeamInfo']['functionSingleBySite'])) {
-            return $data;
-        }
-        //判断队员
-        if (isset($functionList['totalPlayerInfo']) && isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
-
-        } else {
-            $f = $this->getFunction(['totalPlayerInfo' => []], $functionList['matchDetail']['source']);
-            if (isset($f['totalPlayerInfo']['class'])) {
-                $functionList["totalPlayerInfo"] = $f['totalPlayerInfo'];
-            }
-        }
-        if (!isset($functionList["totalPlayerInfo"]["class"]) || !isset($functionList['totalPlayerInfo']['functionSingleBySite'])) {
-            return $data;
-        }
+        $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
+        $functionList = $this->checkFunction($functionList,"totalTeamInfo");
+        $functionList = $this->checkFunction($functionList,"totalPlayerInfo");
+        $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
+        $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
         $modelClass = $functionList["totalTeamInfo"]["class"];
         $functionSingle = $functionList["totalTeamInfo"]['functionSingleBySite'];
         $teamList = [];
@@ -1205,13 +1059,13 @@ class PrivilegeService
         }
         //战队信息
         if (!isset($teamList[$data['home_id']])) {
-            $teamInfo = $modelClass->$functionSingle($data['home_id'], $functionList['matchDetail']['source'], "", "team_id,tid,team_name,logo,description");
+            $teamInfo = $modelClass->$functionSingle($data['home_id'],$params['source'], "", "team_id,tid,team_name,logo,description");
             if (isset($teamInfo['team_id'])) {
                 $teamList[$data['home_id']] = $teamInfo;
             }
         }
         if (!isset($teamList[$data['away_id']])) {
-            $teamInfo = $modelClass->$functionSingle($data['away_id'], $functionList['matchDetail']['source'], "", "team_id,tid,team_name,logo,description");
+            $teamInfo = $modelClass->$functionSingle($data['away_id'],$params['source'], "", "team_id,tid,team_name,logo,description");
             if (isset($teamInfo['team_id'])) {
                 $teamList[$data['away_id']] = $teamInfo;
             }
@@ -1287,17 +1141,14 @@ class PrivilegeService
     public function processTournament($data, $functionList, $params = [])
     {
         if ($data['game'] == 'dota2') {
-            if (isset($functionList['matchList']) && isset($functionList['matchList']['functionSingle'])) {
+            if (isset($functionList["matchList"."/".$params['source']]) && isset($functionList["matchList"."/".$params['source']]['functionSingle'])) {
 
             } else {
-                $f = $this->getFunction(['matchList' => []], $functionList['tournament']['source']);
-                if (isset($f['matchList']['class'])) {
-                    $functionList["matchList"] = $f['matchList'];
-                }
+                $functionList = $this->checkFunction($functionList,"matchList",$params['source']);
             }
             $data['teamList'] = [];
-            $matchModelClass = $functionList["matchList"]["class"];
-            $matchFunction = $functionList["matchList"]['function'];
+            $matchModelClass = $functionList["matchList"."/".$params['source']]["class"];
+            $matchFunction = $functionList["matchList"."/".$params['source']]['function'];
             $matchList = $matchModelClass->$matchFunction([
                 'tournament_id' => $data['tournament_id'],
                 "page_size" => 1000,
@@ -1315,35 +1166,13 @@ class PrivilegeService
             $data['teamList'] = $teamList;
             return $data;
         } else {
-            if (isset($functionList['roundList']) && isset($functionList['roundList']['functionSingle'])) {
-
-            } else {
-                $f = $this->getFunction(['roundList' => []], $functionList['tournament']['source']);
-                if (isset($f['roundList']['class'])) {
-                    $functionList["roundList"] = $f['roundList'];
-                }
-            }
-            if (isset($functionList['matchList']) && isset($functionList['matchList']['functionSingle'])) {
-
-            } else {
-                $f = $this->getFunction(['matchList' => []], $functionList['tournament']['source']);
-                if (isset($f['matchList']['class'])) {
-                    $functionList["matchList"] = $f['matchList'];
-                }
-            }
-            if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['functionSingle'])) {
-
-            } else {
-                $f = $this->getFunction(['totalTeamInfo' => []], $functionList['tournament']['source']);
-                if (isset($f['totalTeamInfo']['class'])) {
-                    $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
-                }
-            }
-
-            $modelClass = $functionList["roundList"]["class"];
-            $function = $functionList["roundList"]['function'];
-            $matchModelClass = $functionList["matchList"]["class"];
-            $matchFunction = $functionList["matchList"]['function'];
+            $functionList = $this->checkFunction($functionList,"roundList",$params['source']);
+            $functionList = $this->checkFunction($functionList,"matchList",$params['source']);
+            $functionList = $this->checkFunction($functionList,"totalTeamInfo");
+            $modelClass = $functionList["roundList"."/".$params['source']]["class"];
+            $function = $functionList["roundList"."/".$params['source']]['function'];
+            $matchModelClass = $functionList["matchList"."/".$params['source']]["class"];
+            $matchFunction = $functionList["matchList"."/".$params['source']]['function'];
             $teamModelClass = $functionList["totalTeamInfo"]["class"];
             $teamFunction = $functionList["totalTeamInfo"]['functionSingleBySite'];
             $matchList = $matchModelClass->$matchFunction(['tournament_id' => $data['tournament_id'], "page_size" => 1000, "fields" => "match_id,home_id,away_id"]);
@@ -1367,14 +1196,7 @@ class PrivilegeService
 
     public function processPlayerList($data, $functionList)
     {
-        if (isset($functionList['playerList']) && isset($functionList['playerList']['functionSingle'])) {
-
-        } else {
-            $f = $this->getFunction(['playerList' => []], $functionList['playerList']['source']);
-            if (isset($f['playerList']['class'])) {
-                $functionList["playerList"] = $f['playerList'];
-            }
-        }
+        $functionList = $this->checkFunction($functionList,"playerList");
         $modelClass = $functionList["playerList"]["class"];
         $functionSingle = $functionList["playerList"]['functionSingle'];
         $teamInfo = [];
@@ -1409,28 +1231,15 @@ class PrivilegeService
     {
         $data['skinList'] = [];
         $data['spellList'] = [];
-        if (isset($functionList['lolHeroSkin']) && isset($functionList['lolHeroSkin']['function'])) {
+        $functionList = $this->checkFunction($functionList,"lolHeroSkin");
 
-        } else {
-            $f = $this->getFunction(['lolHeroSkin' => []]);
-            if (isset($f['lolHeroSkin']['class'])) {
-                $functionList["lolHeroSkin"] = $f['lolHeroSkin'];
-            }
-        }
         $modelClass = $functionList["lolHeroSkin"]["class"];
         $function = $functionList["lolHeroSkin"]['function'];
         $teamInfo = [];
         if (!empty($data)) {
             $data['skinList'] = $modelClass->$function(["hero_id" => $data['id']]);
         }
-        if (isset($functionList['lolHeroSpell']) && isset($functionList['lolHeroSpell']['function'])) {
-
-        } else {
-            $f = $this->getFunction(['lolHeroSpell' => []]);
-            if (isset($f['lolHeroSpell']['class'])) {
-                $functionList["lolHeroSpell"] = $f['lolHeroSpell'];
-            }
-        }
+        $functionList = $this->checkFunction($functionList,"lolHeroSpell");
         $modelClass = $functionList["lolHeroSpell"]["class"];
         $function = $functionList["lolHeroSpell"]['function'];
         $teamInfo = [];
@@ -1457,23 +1266,19 @@ class PrivilegeService
         if (isset($data['inscription_tips'])) {
             $data['inscription_tips'] = json_decode($data['inscription_tips'], true);
             if (!empty($data['inscription_tips'])) {
-                if (isset($functionList['kplInscription']) && isset($functionList['kplInscription']['function'])) {
-
-                } else {
-                    $f = $this->getFunction(['kplInscription' => []]);
-                    if (isset($f['kplInscription']['class'])) {
-                        $modelClass = $f['kplInscription']['class'] ?? '';
-                        if (isset($data['inscription_tips']['sugglistIds']) && $data['inscription_tips']['sugglistIds']) {
-                            if (strpos($data['inscription_tips']['sugglistIds'], '|') !== false) {
-                                $inscriptionId = explode('|', $data['inscription_tips']['sugglistIds']);
-                            } else {
-                                $inscriptionId[] = $data['inscription_tips']['sugglistIds'];
-                            }
-                            $inscriptionInfo = $modelClass->getInscriptionByIds($inscriptionId);
-                            $data['inscription_tips']['sugglistIds'] = $inscriptionInfo;
+                $functionList = $this->checkFunction($functionList,"kplInscription");
+                    $modelClass = $functionList['kplInscription']['class'] ?? '';
+                    if (isset($data['inscription_tips']['sugglistIds']) && $data['inscription_tips']['sugglistIds']) {
+                        if (strpos($data['inscription_tips']['sugglistIds'], '|') !== false) {
+                            $inscriptionId = explode('|', $data['inscription_tips']['sugglistIds']);
+                        } else {
+                            $inscriptionId[] = $data['inscription_tips']['sugglistIds'];
                         }
+                        $inscriptionInfo = $modelClass->getInscriptionByIds($inscriptionId);
+                        $data['inscription_tips']['sugglistIds'] = $inscriptionInfo;
                     }
-                }
+
+
             }
         }
         if (isset($data['skill_tips'])) {
@@ -1516,27 +1321,23 @@ class PrivilegeService
         if (isset($data['equipment_tips'])) {
             $data['equipment_tips'] = json_decode($data['equipment_tips'], true);
             if (!empty($data['equipment_tips'])) {
-                if (isset($functionList['kplEquipment']) && isset($functionList['kplEquipment']['function'])) {
-
-                } else {
-                    $f = $this->getFunction(['kplEquipment' => []]);
-                    if (isset($f['kplEquipment']['class'])) {
-                        $modelClass = $f['kplEquipment']['class'] ?? '';
-                        foreach ($data['equipment_tips'] as &$val) {
-                            if ($val['equipItemIds']) {
-                                if (strpos($val['equipItemIds'], '|') !== false) {
-                                    $equipItemIds = explode('|', $val['equipItemIds']);
-                                } else {
-                                    $equipItemIds[] = $val['equipItemIds'];
-                                }
-                                $equipmentInfo = $modelClass->getEquipmentByIds($equipItemIds);
-                                $val['equipment_tips'] = $equipmentInfo;
+                $functionList = $this->checkFunction($functionList,"kplEquipment");
+                    $modelClass = $functionList['kplEquipment']['class'] ?? '';
+                    foreach ($data['equipment_tips'] as &$val) {
+                        if ($val['equipItemIds']) {
+                            if (strpos($val['equipItemIds'], '|') !== false) {
+                                $equipItemIds = explode('|', $val['equipItemIds']);
+                            } else {
+                                $equipItemIds[] = $val['equipItemIds'];
                             }
-
+                            $equipmentInfo = $modelClass->getEquipmentByIds($equipItemIds);
+                            $val['equipment_tips'] = $equipmentInfo;
                         }
 
                     }
-                }
+
+
+
             }
 
         }
@@ -1544,22 +1345,16 @@ class PrivilegeService
         if (isset($data['summoner_skill'])) {
             $data['summoner_skill'] = json_decode($data['summoner_skill'], true);
             if (!empty($data['summoner_skill'])) {
-                if (isset($functionList['kplSummoner']) && isset($functionList['kplSummoner']['function'])) {
-
-                } else {
-                    $f = $this->getFunction(['kplSummoner' => []]);
-                    if (isset($f['kplSummoner']['class'])) {
-                        $modelClass = $f['kplSummoner']['class'] ?? '';
-                        if (isset($data['summoner_skill']['summonerSkillId']) && $data['summoner_skill']['summonerSkillId']) {
-                            if (strpos($data['summoner_skill']['summonerSkillId'], '|') !== false) {
-                                $summonerSkillId = explode('|', $data['summoner_skill']['summonerSkillId']);
-                            } else {
-                                $summonerSkillId[] = $data['summoner_skill']['summonerSkillId'];
-                            }
-                            $summonerInfo = $modelClass->getSkillByIds($summonerSkillId);
-                            $data['summoner_skill'] = $summonerInfo;
-                        }
+                $functionList = $this->checkFunction($functionList,"kplSummoner");
+                $modelClass = $functionList['kplSummoner']['class'] ?? '';
+                if (isset($data['summoner_skill']['summonerSkillId']) && $data['summoner_skill']['summonerSkillId']) {
+                    if (strpos($data['summoner_skill']['summonerSkillId'], '|') !== false) {
+                        $summonerSkillId = explode('|', $data['summoner_skill']['summonerSkillId']);
+                    } else {
+                        $summonerSkillId[] = $data['summoner_skill']['summonerSkillId'];
                     }
+                    $summonerInfo = $modelClass->getSkillByIds($summonerSkillId);
+                    $data['summoner_skill'] = $summonerInfo;
                 }
             }
         }
@@ -1584,62 +1379,10 @@ class PrivilegeService
         $data['roles'] = json_encode($data['roles']);
         return $data;
     }
-
-    public function processTeam($data, $functionList)
-    {
-        if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['function'])) {
-
-        } else {
-            $f = $this->getFunction(['totalTeamInfo' => []]);
-            if (isset($f['totalTeamInfo']['class'])) {
-                $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
-            }
-        }
-        $modelClass = $functionList["totalTeamInfo"]["class"];
-        $function = $functionList["totalTeamInfo"]['function'];
-        $teamInfo = [];
-        if (!empty($data)) {
-            $data['totalTeamInfo'] = $modelClass->getTeamByName($data['team_name'], $data['game']);
-        }
-        if (isset($data['totalTeamInfo']['team_id'])) {
-            if (isset($functionList['playerList']) && isset($functionList['playerList']['function'])) {
-
-            } else {
-                $f = $this->getFunction(['playerList' => []]);
-                if (isset($f['playerList']['class'])) {
-                    $functionList["playerList"] = $f['playerList'];
-                }
-            }
-            $modelClass = $functionList["playerList"]["class"];
-            $function = $functionList["playerList"]['function'];
-            if (!empty($data)) {
-                $data['playerList'] = $modelClass->$function(['team_id' => $data['totalTeamInfo']['site_id']]);
-            }
-
-            if (isset($functionList['matchList']) && isset($functionList['matchList']['function'])) {
-
-            } else {
-                $f = $this->getFunction(['matchList' => []]);
-                if (isset($f['matchList']['class'])) {
-                    $functionList["matchList"] = $f['matchList'];
-                }
-            }
-            $modelClass = $functionList["matchList"]["class"];
-            $function = $functionList["matchList"]['function'];
-            if (!empty($data)) {
-                $data['matchList'] = $modelClass->$function(['team_id' => $data['team_id'], 'page_size' => 10]);
-            }
-        }
-        return $data;
-    }
-
     public function processTotalTeam($data, $functionList)
     {
         if (isset($data['team_id'])) {
-            $f = $this->getFunction(['totalPlayerList' => []]);
-            if (isset($f['totalPlayerList']['class'])) {
-                $functionList["totalPlayerList"] = $f['totalPlayerList'];
-            }
+            $functionList = $this->checkFunction($functionList,"totalPlayerList");
             $modelClass = $functionList["totalPlayerList"]["class"];
             $function = $functionList["totalPlayerList"]['function'];
             $data['playerList'] = $modelClass->$function(['team_id' => $data['team_id'], "page_size" => 100]);
@@ -1661,16 +1404,8 @@ class PrivilegeService
     {
         if (isset($data['scws_list'])) {
             $data['scws_list'] = json_decode($data['scws_list'], true);
-
-            if (isset($functionList['scwsKeyword']) && isset($functionList['scwsKeyword']['function'])) {
-            } else {
-                $f = $this->getFunction(['scwsKeyword' => []]);
-                if (isset($f['scwsKeyword']['class'])) {
-                    $functionList["scwsKeyword"] = $f['scwsKeyword'];
-                }
-            }
+            $functionList = $this->checkFunction($functionList,"scwsKeyword");
             $modelClass = $functionList["scwsKeyword"]["class"];
-            //$function = $functionList["scwsKeyword"]['functionProcess'];
             $disableKeywordList = $modelClass->getDisableList();
             foreach ($data['scws_list'] as $key => $word) {
                 if (in_array($word['keyword_id'], $disableKeywordList)) {
@@ -1685,20 +1420,8 @@ class PrivilegeService
     public function processTotalPlayer($data, $functionList)
     {
         if (isset($data['player_id'])) {
-            if (isset($functionList['totalPlayerList']) && isset($functionList['totalPlayerList']['function'])) {
-            } else {
-                $f = $this->getFunction(['totalPlayerList' => []]);
-                if (isset($f['totalPlayerList']['class'])) {
-                    $functionList["totalPlayerList"] = $f['totalPlayerList'];
-                }
-            }
-            if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['function'])) {
-            } else {
-                $f = $this->getFunction(["totalTeamInfo" => []]);
-                if (isset($f['totalTeamInfo']['class'])) {
-                    $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
-                }
-            }
+            $functionList = $this->checkFunction($functionList,"totalTeamInfo");
+            $functionList = $this->checkFunction($functionList,"totalPlayerList");
             $modelClass = $functionList["totalPlayerList"]["class"];
             $function = $functionList["totalPlayerList"]['function'];
             $teamModelClass = $functionList["totalTeamInfo"]["class"];
@@ -1717,13 +1440,7 @@ class PrivilegeService
 
     public function processTotalPlayerList($data, $functionList)
     {
-        if (isset($functionList['totalTeamInfo']) && isset($functionList['totalTeamInfo']['function'])) {
-        } else {
-            $f = $this->getFunction(["totalTeamInfo" => []]);
-            if (isset($f['totalTeamInfo']['class'])) {
-                $functionList["totalTeamInfo"] = $f['totalTeamInfo'];
-            }
-        }
+        $functionList = $this->checkFunction($functionList,"totalTeamInfo");
         $teamModelClass = $functionList["totalTeamInfo"]["class"];
         $teamFunction = $functionList["totalTeamInfo"]['function'];
         foreach ($data as $key => $player) {
@@ -1739,14 +1456,7 @@ class PrivilegeService
 
     public function processScwsInformationList($data, $functionList, $params)
     {
-        if (isset($functionList['informationList']) && isset($functionList['informationList']['function'])) {
-
-        } else {
-            $f = $this->getFunction(['informationList' => []]);
-            if (isset($f['informationList']['class'])) {
-                $functionList["informationList"] = $f['informationList'];
-            }
-        }
+        $functionList = $this->checkFunction($functionList,"informationList");
         $modelClass = $functionList["informationList"]["class"];
         $function = $functionList["informationList"]['function'];
         $data = $modelClass->$function(['ids' => array_column($data, "content_id"), "site" => $params['site'] ?? 0, "page" => $params['page'] ?? 1, "page_size" => $params['page_size'] ?? 10, "fields" => $params['fields'] ?? "id,title,logo,create_time,site_time,content,type"]);
@@ -1758,14 +1468,7 @@ class PrivilegeService
 
     public function process5118InformationList($data, $functionList)
     {
-        if (isset($functionList['information']) && isset($functionList['information']['function'])) {
-
-        } else {
-            $f = $this->getFunction(['information' => []]);
-            if (isset($f['information']['class'])) {
-                $functionList["information"] = $f['information'];
-            }
-        }
+        $functionList = $this->checkFunction($functionList,"informationList");
         $modelClass = $functionList["information"]["class"];
         $function = $functionList["information"]['function'];
         foreach ($data as $key => $value) {
@@ -1819,14 +1522,22 @@ class PrivilegeService
     }
 
     //检查方法列表
-    public function checkFunction($functionList, $type)
+    public function checkFunction($functionList, $dataType,$source="")
     {
-        if (isset($functionList[$type]) && isset($functionList[$type]['function'])) {
-
+        $priviliageList = $this->getPriviliege();
+        if(isset($priviliageList[$dataType]) && $priviliageList[$dataType]['withSource']==1)
+        {
+            $fullDataType = $dataType.'/'.$source;
+        }
+        elseif(isset($priviliageList[$dataType]) && $priviliageList[$dataType]['withSource']==0)
+        {
+            $fullDataType = $dataType;
+        }
+        if (isset($functionList[$fullDataType]) && isset($functionList[$fullDataType]['function'])) {
         } else {
-            $f = $this->getFunction([$type => []]);
-            if (isset($f[$type]['class'])) {
-                $functionList[$type] = $f[$type];
+            $f = $this->getFunction([$dataType => ["source"=>$source]],$source);
+            if (isset($f[$fullDataType]['class'])) {
+                $functionList[$fullDataType] = $f[$fullDataType];
             }
         }
         return $functionList;
@@ -1837,14 +1548,8 @@ class PrivilegeService
         if (isset($data['tid']) && $data['tid'] > 0) {
             $intergrationService = (new IntergrationService());
             $data = $intergrationService->getTeamInfo(0, $data["tid"], 1, $params['reset'] ?? 0)['data'];
-            $f = $this->getFunction(['totalPlayerList' => []]);
-            if (isset($f['totalPlayerList']['class'])) {
-                $functionList["totalPlayerList"] = $f['totalPlayerList'];
-            }
-            $f = $this->getFunction(['matchList' => []], "scoregg");
-            if (isset($f['matchList']['class'])) {
-                $functionList["matchList"] = $f['matchList'];
-            }
+            $functionList = $this->checkFunction($functionList,"totalPlayerList");
+            $functionList = $this->checkFunction($functionList,"matchList","scoregg");
             $data['recentMatchList'] = [];
             $data['playerList'] = [];
             $modelClass = $functionList["totalPlayerList"]["class"];
@@ -1861,9 +1566,9 @@ class PrivilegeService
                         }
                     }
                 }
-                $modelMatchList = $functionList["matchList"]["class"];
-                $functionMatchList = $functionList["matchList"]["function"];
-                $functionProcessMatchList = $functionList["matchList"]["functionProcess"];
+                $modelMatchList = $functionList["matchList"."/scoregg"]["class"];
+                $functionMatchList = $functionList["matchList"."/scoregg"]["function"];
+                $functionProcessMatchList = $functionList["matchList"."/scoregg"]["functionProcess"];
                 $matchList = $modelMatchList->$functionMatchList(["team_id" => $data['intergrated_site_id_list']['scoregg'] ?? [0], "page_size" => 4]);
                 $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList);
             } else {
@@ -1927,15 +1632,9 @@ class PrivilegeService
             $intergrationService = (new IntergrationService());
             $data = $intergrationService->getPlayerInfo(0, $data["pid"], 1, $params['reset'] ?? 0)['data'];
             $ingergratedTeam = $intergrationService->getTeamInfo($data['team_id'], 0, 1, $params['reset'] ?? 0)['data'];
-            $f = $this->getFunction(['totalPlayerList' => []]);
-            if (isset($f['totalPlayerList']['class'])) {
-                $functionList["totalPlayerList"] = $f['totalPlayerList'];
-            }
+            $functionList = $this->checkFunction($functionList,"totalPlayerList");
             $sourceList = config('app.intergration.player');
-            $f = $this->getFunction(['matchList' => []], $params['source'] ?? "scoregg");
-            if (isset($f['matchList']['class'])) {
-                $functionList["matchList"] = $f['matchList'];
-            }
+            $functionList = $this->checkFunction($functionList,"matchList","scoregg");
             $data['recentMatchList'] = [];
             $data['playerList'] = [];
             $data['teamInfo'] = $ingergratedTeam;
@@ -1953,9 +1652,9 @@ class PrivilegeService
             foreach ($radarArray as $key => $name) {
                 $radarData[$key] = ["name" => $name, "empno" => intval(rand(40, 100))];
             }
-            $modelMatchList = $functionList["matchList"]["class"];
-            $functionMatchList = $functionList["matchList"]["function"];
-            $functionProcessMatchList = $functionList["matchList"]["functionProcess"];
+            $modelMatchList = $functionList["matchList"."/scoregg"]["class"];
+            $functionMatchList = $functionList["matchList"."/scoregg"]["function"];
+            $functionProcessMatchList = $functionList["matchList"."/scoregg"]["functionProcess"];
             $matchList = $modelMatchList->$functionMatchList(["team_id" => $ingergratedTeam['intergrated_site_id_list']['scoregg'] ?? [0], "page_size" => 6]);
             $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList, ["pid" => $data["pid"], "player_id" => $data['intergrated_site_id_list']['scoregg'] ?? [0]]);
             $data['radarData'] = $radarData;
@@ -1964,5 +1663,4 @@ class PrivilegeService
         }
         return $data;
     }
-
 }
