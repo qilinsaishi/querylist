@@ -1474,7 +1474,7 @@ class PrivilegeService
         foreach ($data as $key => $value) {
             $information = $modelClass->$function($value['content_id'], ["id", "title", "logo", "create_time", "site_time", "content", "type"]);
             if (isset($information['id'])) {
-                $information['content'] = string_split(strip_tags($information['content']), 100);
+                $information['content'] = string_split(strip_tags(html_entity_decode($information['content'])), 100);
                 $data[$key]['content'] = $information;
             }
         }
