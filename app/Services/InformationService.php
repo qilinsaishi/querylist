@@ -16,7 +16,7 @@ use QL\QueryList;
 
 class InformationService
 {
-    const MISSION_REPEAT = 100;//调用重复多少条数量就终止
+    const MISSION_REPEAT = 200;//调用重复多少条数量就终止
 
     public function insertData($game, $force = 0)
     {
@@ -65,7 +65,7 @@ class InformationService
         foreach ($targetItem as $val) {
             $target = $val;
 
-            $lastPage = 9;//采集最新的50页数据
+            $lastPage = 1;//采集最新的50页数据
             for ($i = 0; $i <= $lastPage; $i++) {
                 $t1 = microtime(true);
                 $m = $i + 1;
@@ -167,7 +167,7 @@ class InformationService
         foreach ($targetItem as $val) {
             $type = $val;
 
-            $lastPage = 9;
+            $lastPage = 1;
             for ($i = 0; $i <= $lastPage; $i++) {
                 $t1 = microtime(true);
                 $m = $i + 1;
