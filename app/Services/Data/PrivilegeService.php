@@ -761,7 +761,7 @@ class PrivilegeService
     {
         $intergrationService = new IntergrationService();
 
-        if (isset($params['game']) && $params['game'] == 'dota2' && $params['source'] = 'wca') {
+        if (isset($params['game']) && $params['game'] == 'dota2' && $params['source'] == 'wca') {
 
             //判断赛事
             if (isset($functionList['tournament']) && isset($functionList['tournament']['functionSingle'])) {
