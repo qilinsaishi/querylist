@@ -1048,7 +1048,7 @@ class PrivilegeService
             $intergrationService = new IntergrationService();
             $teamList = [];
             foreach ($teamIdList as $team_id) {
-                $teamInfo = $teamModelClass->$teamFunction($team_id, $functionList['tournament']['source'], $data['game'], "team_id,tid");
+                $teamInfo = $teamModelClass->$teamFunction($team_id, $functionList['tournament'."/".$params['source']]['source'], $data['game'], "team_id,tid");
                 if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
                     $teamInfo = $intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0);
                     if (isset($teamInfo['data']['tid'])) {
