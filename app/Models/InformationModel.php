@@ -128,7 +128,7 @@ class InformationModel extends Model
         $information_list = $information_list
             ->limit($pageSizge)
             ->offset(($page - 1) * $pageSizge)
-            ->orderBy("site_time",
+            ->orderBy("create_time",
                 "desc")
             ->get()->toArray();
         return $information_list;
