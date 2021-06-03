@@ -906,138 +906,6 @@ class PrivilegeService
             return $data;
         }
     }
-
-    public function processMatchList_bak($data, $functionList, $params = [])
-    {
-        $intergrationService = new IntergrationService();
-        $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
-        $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
-        $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
-        $functionList = $this->checkFunction($functionList,"totalTeamList");
-        $modelClass = $functionList["totalTeamList"]["class"];
-        $functionSingle = $functionList["totalTeamList"]['functionSingleBySite'];
-        $functionList = $this->checkFunction($functionList,"totalPlayerInfo");
-        $functionList = $this->checkFunction($functionList,"totalPlayerList");
-        $playerModelClass = $functionList["totalPlayerInfo"]["class"];
-        $functionPlayerSingle = $functionList["totalPlayerInfo"]['functionSingleBySite'];
-
-        $teamList = [];
-        $playerList = [];
-        $tournament = [];
-        $teamMap = ["a" => "home", "b" => "away"];
-        foreach ($data as $key => $matchInfo) {
-            //赛事信息
-            if (!isset($tournament[$matchInfo['tournament_id']])) {
-                $tournamentInfo = $modelTournamentClass->$functionTournamentSingle($matchInfo['tournament_id']);
-                if (isset($tournamentInfo['tournament_id'])) {
-                    $tournament[$matchInfo['tournament_id']] = $tournamentInfo;
-                }
-            }
-            foreach ($teamMap as $side => $color) {
-                $data[$key][$color . '_player_id_list'] = [];
-            }
-            //战队信息
-            if (!isset($teamList[$matchInfo['home_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['home_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
-                if (isset($teamInfo['team_id'])) {
-                    if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
-                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
-                    }
-                    $teamList[$matchInfo['home_id']] = $teamInfo;
-                }
-            }
-            if (!isset($teamList[$matchInfo['away_id']])) {
-                $teamInfo = $modelClass->$functionSingle($matchInfo['away_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
-                if (isset($teamInfo['team_id'])) {
-                    if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
-                        $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
-                    }
-                    $teamList[$matchInfo['away_id']] = $teamInfo;
-                }
-            }
-            $matchData = json_decode($matchInfo['match_data'], true);
-            $playerIdList = [];
-            if (is_array($matchData['result_list'])) {
-                foreach ($teamMap as $side => $color) {
-                    foreach ($matchData['result_list'] as $round => $round_info) {
-                        if (isset($round_info['record_list_' . $side])) {
-                            $data[$key][$color . '_player_id_list'] = array_unique(array_merge($data[$key][$color . '_team_info'] ?? [], array_column($round_info['record_list_' . $side], "playerID")));
-                        }
-                    }
-                }
-                $data[$key]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
-                $data[$key]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
-
-                foreach ($teamMap as $side => $color) {
-                    foreach ($data[$key][$color . '_player_id_list'] as $k => $player_id) {
-                        if (!isset($playerList[$player_id])) {
-                            $playerInfo = $playerModelClass->$functionPlayerSingle($player_id, $matchInfo['game'], $functionList["matchList"."/".$params['source']]['source']);
-                            if (isset($playerInfo['player_id'])) {
-                                if (isset($playerInfo['pid']) && $playerInfo['pid'] > 0) {
-                                    $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0, $playerInfo['pid'], 1, 0)['data'], "pid,player_name,logo");
-                                }
-                                $playerList[$player_id] = $playerInfo;
-                            }
-                        }
-                        if (isset($playerList[$player_id])) {
-                            $data[$key][$color . '_player_list'][] = $playerList[$player_id];
-                        }
-                    }
-                    //如果没有对阵的队员
-                    if (count($data[$key][$color . '_player_list'] ?? []) == 0) {
-                        $teamId = $data[$key][$color . '_team_info']['intergrated_id_list'] ?? $data[$key][$color . '_id'];
-                        $functionPlayerList = $functionList["totalPlayerList"]["function"];
-                        $playerList = $functionList["totalPlayerList"]["class"]->$functionPlayerList(['team_ids' => $teamId, "pageSize" => 999]);
-                        foreach ($playerList as $player) {
-                            if ($player['pid'] > 0) {
-                                $data[$key][$color . '_player_id_list'][] = $player['player_id'];
-                                $data[$key][$color . '_player_list'][] = getFieldsFromArray($intergrationService->getPlayerInfo(0, $player['pid'], 1, 0)['data'], "pid,player_name,logo");
-                                $countPlayer = count($data[$key][$color . '_player_list']);
-                                if ($countPlayer > 5) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                $data[$key]['game_count'] = $matchData['game_count'];
-            }
-            $data[$key]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
-            unset($data[$key]['match_data']);
-            if (isset($params['pid'])) {
-                $home = in_array($params['pid'], array_column($data[$key]['home_player_list'] ?? [], "pid")) ? 1 : 0;
-                $away = in_array($params['pid'], array_column($data[$key]['away_player_list'] ?? [], "pid")) ? 1 : 0;
-                if (($home + $away) == 0) {
-                    unset($data[$key]);
-                } else {
-                    $playerDetail = [];
-                    if (isset($matchData['result_list']) && count($matchData['result_list']) > 0) {
-                        foreach ($matchData['result_list'] as $r_key => $result) {
-                            $currentKey = "";
-                            if (isset($result['detail'])) {
-                                foreach ($result['detail']['result_list'] as $result_key => $value) {
-                                    if (in_array($value, $params['player_id']) && substr($result_key, -9) == "_playerID") {
-                                        $currentKey = $result_key;
-                                    }
-                                }
-                                if ($currentKey != "") {
-                                    $t = explode("_", $currentKey);
-                                    foreach ($result['detail']['result_list'] as $result_key => $value) {
-                                        if (substr($result_key, 0, strlen($t['0'])) == $t['0'] && (strpos($result_key, "_" . $t[2] . "_") > 0)) {
-                                            $playerDetail[$r_key][$result_key] = $value;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    $data[$key]['player_detail'] = ($playerDetail);
-                }
-            }
-        }
-        return $data;
-    }
-
     public function processMatch($data, $functionList , $params)
     {
         $intergrationService = new IntergrationService();
@@ -1570,7 +1438,7 @@ class PrivilegeService
                 $functionMatchList = $functionList["matchList"."/scoregg"]["function"];
                 $functionProcessMatchList = $functionList["matchList"."/scoregg"]["functionProcess"];
                 $matchList = $modelMatchList->$functionMatchList(["team_id" => $data['intergrated_site_id_list']['scoregg'] ?? [0], "page_size" => 4]);
-                $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList);
+                $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList,['source'=>'scoregg']);
             } else {
                 $data['playerList'] = [];
                 $data['recentMatchList'] = [];
