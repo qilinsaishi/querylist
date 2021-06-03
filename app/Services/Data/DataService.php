@@ -137,7 +137,7 @@ class DataService
             "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id'],
             ],
             2=>[
-                "detail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id'],
+                "detail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>1,"fields"=>'id'],
             ],
             4=>[
                 "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id'],
