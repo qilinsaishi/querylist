@@ -16,7 +16,7 @@ use QL\QueryList;
 
 class MatchService
 {
-    const MISSION_REPEAT = 100;//调用重复多少条数量就终止
+    const MISSION_REPEAT = 300;//调用重复多少条数量就终止
 
     public function insertMatchData($game, $force = 0, $week = 0)
     {
