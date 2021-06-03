@@ -261,6 +261,19 @@ class MissionService
                                 $ModelClass = $classList[$ModelClassName];
                                 foreach($processResult['match_list'] as $key => $value)
                                 {
+                                    if ( isset($value['tournament_name']) && $value['tournament_name']!='' && $result['source']=='wca'){
+                                        $wcaTournamentModelClassName = 'App\Models\Match\\'.$result['source'].'\\tournamentModel';
+                                        $classList = $this->getClass($classList, $wcaTournamentModelClassName);
+                                        $wcaTournamentModelClass = $classList[$wcaTournamentModelClassName];
+                                        $tournamentValue['tournament_name']=$value['tournament_name'] ?? '';
+                                        $tournamentValue['game']=$value['game'] ?? 0;
+                                        $saveTournament = $wcaTournamentModelClass->saveTournament($tournamentValue);
+                                        $value['tournament_id']=$saveTournament;
+                                        unset($value['tournament_name']);
+
+                                    }
+
+
                                     $save = $ModelClass->saveMatch($value);
                                     echo "saveMatch:".$save."\n";
                                     if (isset($value['round']) && count($value['round'])>0)

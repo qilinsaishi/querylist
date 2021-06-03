@@ -113,11 +113,335 @@ class HomeController extends Controller
         }
         return $data;
     }
+    //dota2赛事赛程列表
+    public function dotaMatchList(){
+        //赛事赛程列表
+        $url='https://www.wca.com.cn/e/action/score.php';
+        $curtime=date('Y-m-d',strtotime('sunday'));echo $curtime;
+        $timestamp = time();
+        $param = [
+            'time' => '2021-05-30',
+            'id' => '2',
+            'page' => '0',
+            'action'=>'score'
+        ];
+        $headers=['origin'=>'https://www.wca.com.cn'];
 
+        $client=new ClientServices();
+        $data=$client->curlPost($url,$param,$headers);print_r($data);exit;
+        $data=curl_post($url,$param);
+        return $data;
+    }
 
 
     public function index()
     {
+        $url='https://www.wca.com.cn/score/dota2/6536/';
+        $qt=QueryList::get($url);
+        $team_base_data=[];
+        //=========================战队基础数据=============================
+        $blue_victory_rate=$qt->find('.team-data .team-data-content .basic-data .left .number p')->text();//蓝队胜率
+        $blue_victory_rate=trim($blue_victory_rate,'%');//胜率
+        $blue_victory_tip_text=$qt->find('.team-data .team-data-content .basic-data .left .tip-text')->text();//比赛场次
+        $red_victory_rate=$qt->find('.team-data .team-data-content .basic-data .right .number p')->text();//红队胜率
+        $red_victory_rate=trim($red_victory_rate,'%');//胜率
+        $red_victory_tip_text=$qt->find('.team-data .team-data-content .basic-data .right .tip-text')->text();//比赛场次
+        $blue_kda=$qt->find('.team-data .team-data-content .basic-data .middle .center-box .block')->text();
+        $blue_kda_detail=$qt->find('.team-data .team-data-content .basic-data .middle .center-box .block2')->text();
+        $red_kda=$qt->find('.team-data .team-data-content .basic-data .middle .center-box .block5')->text();
+        //分解总击杀数，死亡数，助攻数
+        $blue_kills=$blue_deaths=$blue_assists=$red_kills=$red_deaths=$red_assists=0;
+        list($blue_kills,$blue_deaths,$blue_assists)=explode('/',$blue_kda_detail);
+
+        $red_kda_detail=$qt->find('.team-data .team-data-content .basic-data .middle .center-box .block4')->text();
+        list($red_kills,$red_deaths,$red_assists)=explode('/',$red_kda_detail);
+        $red_kda_detail=$qt->find('.team-data .team-data-content .basic-data .middle .center-box .block4')->text();
+        $data_list_item_list=[];
+        $data_list_item=$qt->rules(array(
+            'title' => array('.title','text'),
+            'blue' => array('.row span:eq(0)','text'),
+            'red' => array('.row span:eq(2)','text'),
+        ))->range('.team-data .team-data-content .basic-data .middle  .basic-row')->queryData();
+        if(count($data_list_item)>0){
+            foreach ($data_list_item as $key=>$item){
+                if($item['title']=='分均补刀'){
+                    $data_list_item_list['minute_hits'] =$item;
+                }
+                if($item['title']=='分均经济'){
+                    $data_list_item_list['average_money']=$item;
+                }
+                if($item['title']=='分均输出'){
+                    $data_list_item_list['minute_output']=$item;
+                }
+                if($item['title']=='场均时长'){
+                    $data_list_item_list['average_time']=$item;
+
+                }
+            }
+        }
+
+        //=========================战队统计=====================================
+        $statistics=$qt->find('.team-data .team-data-content .statistics')->html();
+        $bodyHtml=$qt->find('body')->html();
+        $start = strpos($bodyHtml, " name: '2011年',");
+        $end = strpos($bodyHtml, "var myChart = echarts.init(document.getElementById('echarts'));");
+        $html3 = substr($bodyHtml, $start, $end - $start);
+
+
+        $blue_start=strpos($html3,"data: [");
+        $blue_end=strpos($html3,"label:");
+        $blue_statistics_str=substr($html3, $blue_start, $blue_end - $blue_start);
+        $blue_statistics_str=str_replace(array('data: [','],'),"",$blue_statistics_str);
+        $blue_statistics_list=explode(',',$blue_statistics_str);
+
+        $red_start=strripos($html3,"data: [");
+        $red_end=strripos($html3,"label:");
+        $red_statistics_str=substr($html3, $red_start, $red_end-$red_start);
+        $red_statistics_str=str_replace(array('data: [','],'),"",$red_statistics_str);
+        $red_statistics_list=explode(',',$red_statistics_str);
+        $statistics_name_list=['一血率', '一塔率', '先十杀', '首肉山'];
+
+        $statistics_list=['firstbloodkillrate'=>['name'=>'一血率'],'firsttowerrate'=>['name'=>'一塔率'], 'firsttenkill'=>['name'=>'先十杀'], 'shouroumountain'=>['name'=>'首肉山']];
+
+        foreach ($statistics_name_list as $k=>$statisticsInfo){
+            if($statisticsInfo=='一血率'){
+                $statistics_list['firstbloodkillrate']['name']=$statisticsInfo;
+
+                $statistics_list['firstbloodkillrate']['blue']=$blue_statistics_list[$k] ?? 0;
+
+                $statistics_list['firstbloodkillrate']['red']=$red_statistics_list[$k] ?? 0;
+
+            }
+            if($statisticsInfo=='一塔率'){
+                $statistics_list['firsttowerrate']['name']=$statisticsInfo;
+                $statistics_list['firsttowerrate']['blue']=$blue_statistics_list[$k] ?? 0;
+                $statistics_list['firsttowerrate']['red']=$red_statistics_list[$k] ?? 0;
+            }
+            if($statisticsInfo=='先十杀'){
+                $statistics_list['firsttenkill']['name']=$statisticsInfo;
+                $statistics_list['firsttenkill']['blue']=$blue_statistics_list[$k] ?? 0;
+                $statistics_list['firsttenkill']['red']=$red_statistics_list[$k] ?? 0;
+            }
+            if($statisticsInfo=='首肉山'){
+                $statistics_list['shouroumountain']['name']=$statisticsInfo;
+                $statistics_list['shouroumountain']['blue']=$blue_statistics_list[$k] ?? 0;
+                $statistics_list['shouroumountain']['red']=$red_statistics_list[$k] ?? 0;
+            }
+
+        }
+
+
+
+        $team_base_data=[
+            'blue_victory_rate'=>$blue_victory_rate,//蓝队胜率
+            'blue_victory_tip_text'=>$blue_victory_tip_text,//蓝队比赛场次
+            'blue_kda'=> $blue_kda,//蓝队kda
+            'blue_kills'=>$blue_kills ??0,//蓝队击杀
+            'blue_deaths'=>$blue_deaths ?? 0,//蓝队死亡
+            'blue_assists'=>$blue_assists ?? 0,//蓝队助攻
+            'red_victory_rate'=>$red_victory_rate,//红队胜率
+            'red_victory_tip_text'=>$red_victory_tip_text,//红队比赛场次
+            'red_kda'=> $red_kda,
+            'red_kills'=>$red_kills ?? 0,
+            'red_deaths'=>$red_deaths ?? 0,
+            'red_assists'=>$red_assists ?? 0,
+            'data_list_item'=>$data_list_item_list,
+            'statistics_list'=>$statistics_list,
+
+        ];
+        //=========================战队基础数据=============================
+        //========================队员基础数据==============================
+        $player_item_data=[];
+        $player_item_data=$qt->rules(array(
+            'blue_playe_name' => array('.left .name','text'),
+            'blue_playe_logo' => array('.left img','src'),
+            'red_player_name' => array('.right .name','text'),
+            'red_playe_logo' => array('.right img','src'),
+            'player_item_infos' => array('.middle','html'),
+            'player_item_foot' => array('.player-foot','html'),
+        ))->range('.player-wrap .player-container .player-item')->queryData(function ($item){
+
+            $item['player_item_infos'] = QueryList::html($item['player_item_infos'])->rules(array(
+                'blue' => array('span:eq(0)','text'),
+                'red' => array('span:eq(1)','text'),
+                'title' => array('p','text'),
+            ))->range('.row')->queryData();
+            $player_item_list=[];
+            if( count($item['player_item_infos'])>0){
+                foreach ($item['player_item_infos'] as $player_info){
+                    if($player_info['title']=='出场次数') {
+                        $player_item_list['player_count']=$player_info;
+                    }
+                    if($player_info['title']=='K / D / A') {
+                        $player_item_list['kda']=$player_info;
+                    }
+                    if($player_info['title']=='胜率') {
+                        $player_info['blue']=trim($player_info['blue'],"%");
+                        $player_info['red']=trim($player_info['red'],"%");
+                        $player_item_list['win_rate']=$player_info;
+                    }
+                    if($player_info['title']=='参团率') {
+                        $player_info['blue']=trim($player_info['blue'],"%");
+                        $player_info['red']=trim($player_info['red'],"%");
+                        $player_item_list['join_rate']=$player_info;
+                    }
+                }
+            }
+            $item['player_item_infos'] =$player_item_list;
+
+            $item['blue_hero']=QueryList::html($item['player_item_foot'])->rules(array(
+                'img' => array('img','src'),
+                'count' => array('p','text'),
+                'win_rate' => array('.chart-box .text','text'),
+            ))->range('.hero:eq(0) .item')->queryData(function ($heroBlueItem){
+                $heroBlueItem['count']=trim($heroBlueItem['count'],'局') ??0;
+                $heroBlueItem['win_rate']=trim($heroBlueItem['win_rate'],'%') ??0;
+                $heroBlueItem['lose_rate']=(1-$heroBlueItem['win_rate']/100)*100;
+                return $heroBlueItem;
+            });
+            $item['red_hero']=QueryList::html($item['player_item_foot'])->rules(array(
+                'img' => array('img','src'),
+                'count' => array('p','text'),
+                'win_rate' => array('.chart-box .text','text'),
+            ))->range('.hero:eq(1) .item')->queryData(function ($heroRedItem){
+                $heroRedItem['count']=trim($heroRedItem['count'],'局') ??0;
+                $heroRedItem['win_rate']=trim($heroRedItem['win_rate'],'%') ??0;
+                $heroRedItem['lose_rate']=(1-$heroRedItem['win_rate']/100)*100;
+                return $heroRedItem;
+            });
+            $blue_start=strpos($item['player_item_foot'],'data-basic=');
+            $blue_end=strpos($item['player_item_foot'],"data-basic2");
+            $blue_indicator=substr($item['player_item_foot'],$blue_start,$blue_end-$blue_start);
+            $blue_indicator=str_replace(array('data-basic="','" '),'',$blue_indicator);
+            $blue_indicator_list=explode(',',$blue_indicator);
+
+            $red_start=strpos($item['player_item_foot'],'data-basic2=');
+            $red_indicator=substr($item['player_item_foot'],$red_start);
+            $red_indicator=substr($red_indicator,strlen('data-basic2="'),strpos($red_indicator,'"></div>')-strlen('data-basic2="'));
+            $red_indicator_list=explode(',',$red_indicator);
+            $indicator_list=['economic'=>['name'=>'经济'],'injury'=>['name'=>'伤害'], 'hits'=>['name'=>'补刀'], 'assists'=>['name'=>'助攻'], 'output'=>['name'=>'输出'], 'kill'=>['name'=>'击杀']];
+            foreach ($indicator_list as $indicatorKey=>$indicatorInfo){
+                if($indicatorInfo['name']=='经济') {
+                    $indicator_list[$indicatorKey]['blue']=$blue_indicator_list[0] ?? 0;
+                    $indicator_list[$indicatorKey]['red']=$red_indicator_list[0] ?? 0;
+                }
+                if($indicatorInfo['name']=='伤害') {
+                    $indicator_list[$indicatorKey]['blue']=$blue_indicator_list[1] ?? 0;
+                    $indicator_list[$indicatorKey]['red']=$red_indicator_list[1] ?? 0;
+                }
+                if($indicatorInfo['name']=='补刀') {
+                    $indicator_list[$indicatorKey]['blue']=$blue_indicator_list[2] ?? 0;
+                    $indicator_list[$indicatorKey]['red']=$red_indicator_list[2] ?? 0;
+                }
+                if($indicatorInfo['name']=='助攻') {
+                    $indicator_list[$indicatorKey]['blue']=$blue_indicator_list[3] ?? 0;
+                    $indicator_list[$indicatorKey]['red']=$red_indicator_list[3] ?? 0;
+                }
+                if($indicatorInfo['name']=='输出') {
+                    $indicator_list[$indicatorKey]['blue']=$blue_indicator_list[4] ?? 0;
+                    $indicator_list[$indicatorKey]['red']=$red_indicator_list[4] ?? 0;
+                }
+                if($indicatorInfo['name']=='击杀') {
+                    $indicator_list[$indicatorKey]['blue']=$blue_indicator_list[5] ?? 0;
+                    $indicator_list[$indicatorKey]['red']=$red_indicator_list[5] ?? 0;
+                }
+
+            }
+            $item['indicator_list']=$indicator_list ?? [];
+            unset($item['player_item_foot']);
+            return $item;
+        });
+
+        //========================队员基础数据==============================
+        //========================ban数据==============================
+        $ban_item_data=[];
+        //主队ban
+        $ban_home_data=$qt->rules(array(
+            'hero_name' => array('.details .name','text'),
+            'hero_img' => array('img','src'),
+            'hero_win' => array('.details .txt','text'),
+
+        ))->range('.ban-pick-wrap .ban  .list .home-box li')->queryData(function ($item){
+            $item['hero_win']=trim($item['hero_win'],"%");
+            return $item;
+        });
+        //客队ban
+        $ban_away_data=$qt->rules(array(
+            'hero_name' => array('.details .name','text'),
+            'hero_img' => array('img','src'),
+            'hero_win' => array('.details .txt','text'),
+
+        ))->range('.ban-pick-wrap .ban  .list .away-box li')->queryData(function ($item){
+            $item['hero_win']=trim($item['hero_win'],"%");
+            return $item;
+        });
+        $ban_item_data=[
+            'ban_home_data'=>$ban_home_data,
+            'ban_away_data'=>$ban_away_data,
+        ];
+
+        //========================ban数据==============================
+        //========================pick数据==============================
+        $pick_item_data=[];
+        //主队ban
+        $pick_home_data=$qt->rules(array(
+            'hero_name' => array('.details .name','text'),
+            'hero_img' => array('img','src'),
+            'hero_win' => array('.details .txt','text'),
+
+        ))->range('.ban-pick-wrap .pick  .list .home-box li')->queryData(function ($item){
+            $item['hero_win']=trim($item['hero_win'],"%");
+            return $item;
+        });
+        //客队ban
+        $pick_away_data=$qt->rules(array(
+            'hero_name' => array('.details .name','text'),
+            'hero_img' => array('img','src'),
+            'hero_win' => array('.details .txt','text'),
+
+        ))->range('.ban-pick-wrap .pick  .list .away-box li')->queryData(function ($item){
+            $item['hero_win']=trim($item['hero_win'],"%");
+            return $item;
+        });
+        $pick_item_data=[
+            'pickn_home_data'=>$pick_home_data,
+            'pick_away_data'=>$pick_away_data,
+        ];
+
+        //========================pick数据==============================
+        //========================历史交锋数据===========================
+        $history_confrontation_data=[];
+        $blue_name=$qt->find('.history-wrap .top-box ')->attr('alt');print_r($blue_name);exit;
+        $confrontation_data=$qt->rules(array(
+            'hero_name' => array('.details .name','text'),
+            'hero_img' => array('img','src'),
+            'hero_win' => array('.details .txt','text'),
+
+        ))->range('.history-wrap .top-box .row')->queryData(function ($item){
+            $item['hero_win']=trim($item['hero_win'],"%");
+            return $item;
+        });
+
+        //========================历史交锋数据===========================
+
+
+
+        $data=[
+            'team_base_data'=>$team_base_data,
+            'player_base_data'=>$player_item_data,
+            'ban_item_data'=>$ban_item_data,
+            'pick_item_data'=>$pick_item_data,
+        ];
+        print_r($data);exit;
+
+
+
+//$statistics_list['name']
+        print_r($team_base_data);exit;
+
+
+
+
 
 
         $bilibiList=curl_get('https://www.dota2.com.cn/international/2019/rank?task=main_map');//接口链接
@@ -324,7 +648,7 @@ class HomeController extends Controller
 
 
 
-       // $qt=QueryList::get('https://www.dota2.com.cn/items/index.htm');
+        // $qt=QueryList::get('https://www.dota2.com.cn/items/index.htm');
         $item=QueryList::get('https://www.dota2.com.cn/items/index.htm')->rules(array(
             'typename' => array('h4','text'),//类型名称
             'type' => array('img','src'),//类型名称
@@ -568,13 +892,13 @@ class HomeController extends Controller
             }
         }
         print_r($item);print_r($typeItem);exit;
-      /*  $data = QueryList::get('https://www.dota2.com.cn/heroes/index.htm')->rules([
-            'title' => ['.news_msg .title', 'text'],
-            'remark' => ['.news_msg .content', 'text'],
-            'create_time' => ['.news_msg .date', 'text'],
-            'logo' => ['.news_logo img', 'src']
-        ])->range('#news_lists .panes .active a')
-            ->queryData();*/
+        /*  $data = QueryList::get('https://www.dota2.com.cn/heroes/index.htm')->rules([
+              'title' => ['.news_msg .title', 'text'],
+              'remark' => ['.news_msg .content', 'text'],
+              'create_time' => ['.news_msg .date', 'text'],
+              'logo' => ['.news_logo img', 'src']
+          ])->range('#news_lists .panes .active a')
+              ->queryData();*/
 
 
 
@@ -666,14 +990,14 @@ print_r( $data_eid);exit;*/
         //战队关联英雄
         if(isset($playData['bpList']['bans']) && $playData['bpList']['bans']){
             foreach ($playData['bpList']['bans'] as $key=>&$val){
-              if($val){
-                  foreach ($val as $k=>&$v){
-                      $v['img_url']='https://static.wanplus.com/data/lol/hero/square/'.$v['cpherokey'].'.'.$playData['info']['heroImgSuffix'];
-                      $matchInfo['teamHero'][$key][$k]['hero_img']=$v['img_url'];
-                      $matchInfo['teamHero'][$key][$k]['teamid']=$v['teamid'];
-                      $matchInfo['teamHero'][$key][$k]['en_name']=$v['cpherokey'];
-                  }
-              }
+                if($val){
+                    foreach ($val as $k=>&$v){
+                        $v['img_url']='https://static.wanplus.com/data/lol/hero/square/'.$v['cpherokey'].'.'.$playData['info']['heroImgSuffix'];
+                        $matchInfo['teamHero'][$key][$k]['hero_img']=$v['img_url'];
+                        $matchInfo['teamHero'][$key][$k]['teamid']=$v['teamid'];
+                        $matchInfo['teamHero'][$key][$k]['en_name']=$v['cpherokey'];
+                    }
+                }
             }
         }
         //队员
@@ -714,9 +1038,9 @@ print_r( $data_eid);exit;*/
             }
         }
         $data['matchInfo']=$matchInfo;
-print_r($matchInfo);exit;
-$url= 'https://static.wanplus.com/data/lol/hero/square/'.$playData['bpList']['bans'][0][0]['cpherokey'].'.'.$playData['info']['heroImgSuffix'];
-echo $url;exit;
+        print_r($matchInfo);exit;
+        $url= 'https://static.wanplus.com/data/lol/hero/square/'.$playData['bpList']['bans'][0][0]['cpherokey'].'.'.$playData['info']['heroImgSuffix'];
+        echo $url;exit;
         print_r($playData['bpList']['bans']);exit;
         //print_r($playData);exit;
         $return = [];
@@ -746,7 +1070,7 @@ echo $url;exit;
         }
 
         print_r(count($data));
-exit;
+        exit;
         $url='https://www.wanplus.com/ajax/player/recent?isAjax=1&playerId=25474&gametype=1&page=6&heroId=0';
         $playData = $AjaxModel->getHistoryMatch($url);//ajax 获取所有历史记录
         print_r($playData);exit;
@@ -773,51 +1097,51 @@ exit;
             }
         }
         //详情：$detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0=18&id=497272&&_='.msectime();
-       // $url='http://lol.kuai8.com/gonglue/index_1.html';
+        // $url='http://lol.kuai8.com/gonglue/index_1.html';
 
         $pageData = curl_get($url,$refeerer);print_r($pageData);exit;
 
         foreach($pageData['msg']['result'] as $val) {
             $detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id='.$val['iNewsId'];
         }
-       /* $client=new ClientServices();
-        $data=curl_get($url);dd($data);
-        $data=$client->curlGet($url);*/
+        /* $client=new ClientServices();
+         $data=curl_get($url);dd($data);
+         $data=$client->curlGet($url);*/
 
         //for($i=0;$i<=32;$i++){
-           // $m=$i+1;
-            //$url='http://lol.kuai8.com/gonglue/index_'.$m.'.html';
-            $ql = QueryList::get($url);
-            $imgs=$ql->find('.Cont .news-list li img')->attrs('data-original');//print_r($imgs);exit;
-            $data=$ql->rules([
-                'title' => ['.con .tit', 'text'],
-                'desc' => ['.con  .txt', 'text'],
-                'link' => ['.img  a', 'href'],
-                'img_url' => ['.img img', 'src'],
-                'dtime' => ['.con  .time', 'text']
-            ])->range('.Cont .news-list li')->queryData();
-           foreach ($data as $key=>$val){
-                $data = [
-                    "asign_to"=>1,
-                    "mission_type"=>'information',//攻略
-                    "mission_status"=>1,
-                    "game"=>'lol',
-                    "source"=>'kuai8',//
-                    'title'=>'',
-                    "detail"=>json_encode(
-                        [
-                            "url"=>$url,
-                            "game"=>'lol',//英雄联盟
-                            "source"=>'kuai8',//资讯
-                            "title"=>$val['title'] ?? '',
-                            "desc"=>$val['desc'] ?? '',
-                            "img_url"=>$imgs[$key] ?? '',
-                            "dtime"=>$val['dtime'] ?? '',
+        // $m=$i+1;
+        //$url='http://lol.kuai8.com/gonglue/index_'.$m.'.html';
+        $ql = QueryList::get($url);
+        $imgs=$ql->find('.Cont .news-list li img')->attrs('data-original');//print_r($imgs);exit;
+        $data=$ql->rules([
+            'title' => ['.con .tit', 'text'],
+            'desc' => ['.con  .txt', 'text'],
+            'link' => ['.img  a', 'href'],
+            'img_url' => ['.img img', 'src'],
+            'dtime' => ['.con  .time', 'text']
+        ])->range('.Cont .news-list li')->queryData();
+        foreach ($data as $key=>$val){
+            $data = [
+                "asign_to"=>1,
+                "mission_type"=>'information',//攻略
+                "mission_status"=>1,
+                "game"=>'lol',
+                "source"=>'kuai8',//
+                'title'=>'',
+                "detail"=>json_encode(
+                    [
+                        "url"=>$url,
+                        "game"=>'lol',//英雄联盟
+                        "source"=>'kuai8',//资讯
+                        "title"=>$val['title'] ?? '',
+                        "desc"=>$val['desc'] ?? '',
+                        "img_url"=>$imgs[$key] ?? '',
+                        "dtime"=>$val['dtime'] ?? '',
 
-                        ]
-                    ),
-                ];
-            }
+                    ]
+                ),
+            ];
+        }
         //}//exit;
         print_r($data);exit;
         foreach ($data as &$val){
@@ -832,8 +1156,8 @@ exit;
         dd($data);
         $data=curl_get($url);
 
-$model=new DefaultConfig();
-$a=$model->getDefaultById(3);dd($a);
+        $model=new DefaultConfig();
+        $a=$model->getDefaultById(3);dd($a);
         $data=$this->kplInfo();dd($data);
 
         //$html=iconv('gb2312','utf-8',file_get_contents('https://pvp.qq.com/web201605/herodetail/191.shtml'));
@@ -842,12 +1166,12 @@ $a=$model->getDefaultById(3);dd($a);
         $data=$client->curlGet($url);
         dd($data);*/
         //$url='http://www.2cpseo.com/teams/lol/p-1';//分页
-       /* $url='http://www.2cpseo.com/teams/lol/p-1';//分页
-        $ql = QueryList::get($url);
-        $links=$ql->find('.hot-teams-container a')->attrs('href')->all();//分页
-        dd($links);*/
-      /*  $res=$this->cpseoTeam();
-        dd($res);*/
+        /* $url='http://www.2cpseo.com/teams/lol/p-1';//分页
+         $ql = QueryList::get($url);
+         $links=$ql->find('.hot-teams-container a')->attrs('href')->all();//分页
+         dd($links);*/
+        /*  $res=$this->cpseoTeam();
+          dd($res);*/
         /*$url='http://www.2cpseo.com/events/lol/p-1';//分页
         $ql = QueryList::get($url);
         $links=$ql->find('.versus a')->attrs('href')->all();//分页
@@ -915,7 +1239,7 @@ dd($infos);*/
             }
         }
 
-dd($matchInfo);
+        dd($matchInfo);
 
         $logo=$ql->find('.lemma_pic img')->attr('src');
         $desc = $ql->find('.abstract ')->text();
@@ -928,21 +1252,21 @@ dd($matchInfo);
                 $baseInfos[$key]['value']=delZzts($baseInfosValues[$key],$replace='展开');//去除特殊符号
             }
         }
-dd($baseInfos);
+        dd($baseInfos);
         //皮肤
         $skinImg = $ql->find('.catalog_wrap')->htmls();
         $skiArr=explode('|',$skinImg);
         $tempSkiArr=[];
         $skinData=[];
         if($skiArr) {
-           foreach ($skiArr as $key=>&$val){
-               $tempSkiArr=explode('&',$val);
-               $smallImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/'.$item_id.'/'.$item_id.'-smallskin-'.($key+1).'.jpg';
-               $bigImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/'.$item_id.'/'.$item_id.'-bigskin-'.($key+1).'.jpg';
-               $skinData[$key]['smallImg']=$smallImg;//小图
-               $skinData[$key]['bigImg']=$bigImg;//大图
-               $skinData[$key]['name']=$tempSkiArr[0] ?? '';//皮肤名称
-           }
+            foreach ($skiArr as $key=>&$val){
+                $tempSkiArr=explode('&',$val);
+                $smallImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/'.$item_id.'/'.$item_id.'-smallskin-'.($key+1).'.jpg';
+                $bigImg='https://game.gtimg.cn/images/yxzj/img201606/heroimg/'.$item_id.'/'.$item_id.'-bigskin-'.($key+1).'.jpg';
+                $skinData[$key]['smallImg']=$smallImg;//小图
+                $skinData[$key]['bigImg']=$bigImg;//大图
+                $skinData[$key]['name']=$tempSkiArr[0] ?? '';//皮肤名称
+            }
         }
         //评分能力
         $baseText= $ql->find('.cover-list-text')->texts()->all();
@@ -965,7 +1289,7 @@ dd($baseInfos);
         $skillInfo=[];
         $skillImg=$ql->find('.skill-info  .skill-u1 li img')->attrs('src')->all();
 
-           // $(".skill-show .show-list").eq(4).find(".skill-name b").html();
+        // $(".skill-show .show-list").eq(4).find(".skill-name b").html();
         //http://game.gtimg.cn/images/yxzj/img201606/heroimg/105/10500.png
         //game.gtimg.cn/images/yxzj/img201606/heroimg/105/10500.png
         $skillName=$ql->find('.skill-show .show-list .skill-name')->texts()->all();
@@ -1088,13 +1412,13 @@ dd($baseInfos);
         foreach ($cdata as $key=>$val){
             $refeerer_detail ='Referer: https://pvp.qq.com/web201605/newsDetail.shtml?G_Biz='.$val['iBiz'].'&tid='.$val['iNewsId'];
             $detail_url='https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?source=pvpweb_detail&p0='.$val['iBiz'].'&id='.$val['iNewsId'];
-           /* $detail_data = curl_get($detail_url, $refeerer_detail);
-            if($detail_data['status']==0) {
-                $data[$key]=$detail_data['msg'] ?? [];
-            }*/
+            /* $detail_data = curl_get($detail_url, $refeerer_detail);
+             if($detail_data['status']==0) {
+                 $data[$key]=$detail_data['msg'] ?? [];
+             }*/
         }
 
-       return $data;
+        return $data;
     }
 
     public function cpseoTeam($url='http://www.2cpseo.com/teams/lol/p-1'){

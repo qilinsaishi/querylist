@@ -14,13 +14,28 @@ class DataService
         $privilegeService = new PrivilegeService();
         $return = [];
         $functionList = $privilegeService->getFunction($data);
+        $priviliageList = $privilegeService->getPriviliege();
         foreach($data as $name => $params)
         {
             $start = microtime(true);
             $dataType = $params['dataType']??$name;
             $view = $redisService->addViews($dataType,$params);
-            if(isset($functionList[$dataType]))
+            if(isset($priviliageList[$dataType]) && $priviliageList[$dataType]['withSource']==1)
             {
+                $fullType = $dataType.($priviliageList[$dataType]['withSource']==1?("/".$params['source']):"");
+            }
+            elseif(isset($priviliageList[$dataType]) && $priviliageList[$dataType]['withSource']==0)
+            {
+                $fullType = $dataType;
+            }
+            else
+            {
+                continue;
+            }
+            //echo "fullType:".$fullType."-".$name."\n";
+            if(isset($functionList[$fullType]))
+            {
+                //echo "fullType:".$fullType."-".$name."\n";
                 $toSave = 1;
                 if(isset($params['cacheWith']))
                 {
@@ -38,13 +53,14 @@ class DataService
                     $p = $params;
                 }
                 $dataArr = $redisService->processCache($dataType,$p);
+                //$dataArr = false;
                 if(is_array($dataArr))
                 {
                     $toSave = 0;
                 }
                 else
                 {
-                    $functionInfo = $functionList[$dataType];
+                    $functionInfo = $functionList[$fullType];
                     $class = $functionInfo['class'];
                     $function = $functionInfo['function'];
                     $d = $class->$function($params);

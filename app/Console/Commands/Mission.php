@@ -27,7 +27,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=} {--force=}';
+    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=} {--force=} {--week=0}';
 
     /**
      * The console command description.
@@ -66,7 +66,7 @@ class Mission extends Command
 
                 //采集战队入库
                 if($mission_type=='team'){
-                    (new TeamService())->insertTeamData($mission_type,$game,$force);
+                    (new TeamService())->insertTeamData($game,$force);
                 }
                 //采集队员入库
                 if($mission_type=='player'){
@@ -99,7 +99,8 @@ class Mission extends Command
                 }
                 //采集赛事详情入库
                 if($mission_type=='match'){
-                    (new MatchService())->insertMatchData($game,$force);
+                    $week = $this->option("week")??0;
+                    (new MatchService())->insertMatchData($game,$force,$week);
                 }
                 break;
             case "collect":
@@ -167,6 +168,12 @@ class Mission extends Command
             case "updateInformationRedirect":
                 //php artisan mission:collect updateInformationRedirect  information all (修复资讯数据)
                 (new InformationService())->updateInformationRedirect();//修复资讯数据
+                break;
+            case "updateWcaMatchListStatus":
+                //当状态1时更新DOTA2 wcaMatchList数据
+                //php artisan mission:collect updateWcaMatchListStatus  match dota2  (--count=50)
+                $count = $this->option("count")??50;
+                (new MatchService())->updateWcaMatchListStatus($game,$count);
                 break;
 
             default:
