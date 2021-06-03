@@ -984,7 +984,7 @@ class PrivilegeService
                         if (isset($result['record_list_' . $side])) {
                             foreach ($result['record_list_' . $side] as $key_a => $player) {
                                 if (!isset($playerList[$player['playerID']])) {
-                                    $playerInfo = $oPlayerModel->$oPlayerFunction($player['playerID'], $data['game'], $functionList['matchDetail']['source']);
+                                    $playerInfo = $oPlayerModel->$oPlayerFunction($player['playerID'], $data['game']);
                                     if (isset($playerInfo['pid']) && $playerInfo['pid'] > 0) {
                                         $playerInfo = getFieldsFromArray($intergrationService->getPlayerInfo(0, $playerInfo['pid'], 1, 0)['data'], "pid,player_name,logo");
                                         $playerList[$player['playerID']] = $playerInfo;
