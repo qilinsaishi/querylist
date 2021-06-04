@@ -291,7 +291,7 @@ class RedisService
                     }
                     if ($dataType == 'tournament')
                     {
-                        if($data['data']['tournament_id']==$params['tournament_id'] && $data['data']['source']==$params['source'])
+                        if($data['data']['data']['tournament_id']==$params['tournament_id'] && $data['params']['source']==$params['source'])
                         {
                             $redis->del($key);
                             $params_list[] = $data['params'];
