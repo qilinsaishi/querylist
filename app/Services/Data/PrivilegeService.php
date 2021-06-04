@@ -753,7 +753,7 @@ class PrivilegeService
     public function processMatchList($data, $functionList, $params = [])
     {
         $intergrationService = new IntergrationService();
-        if (isset($params['game']) && $params['game'] == 'dota2' && $params['source'] == 'wca') {
+        if (isset($params['source']) &&  $params['source'] == 'wca') {
             $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
             $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
             $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
