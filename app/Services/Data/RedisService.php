@@ -291,8 +291,11 @@ class RedisService
                     }
                     if ($dataType == 'tournament')
                     {
-                        $redis->del($key);
-                        $params_list[] = $data['params'];
+                        if($data['data']['tournament_id']==$params['tournament_id'])
+                        {
+                            $redis->del($key);
+                            $params_list[] = $data['params'];
+                        }
                     }
                     if (in_array($dataType,[ "matchList"])) {
                         $toDelete = 0;
