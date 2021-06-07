@@ -282,7 +282,7 @@ class KeywordService
         $scwsKeywordMapModel = new ScwsKeywordMapModel();
         $sh = scws_open();
         scws_set_charset($sh, 'utf8');
-        $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time"]);
+        $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time","site"]);
         echo "start_to_process:".$information['id']."\n";
         $replace_arr = [
             '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&lsquo'=>"'",'&rsquo'=>"'",'&rdquo'=>'”','&mdash'=>'-'
@@ -317,7 +317,7 @@ class KeywordService
         $informationModel->updateInformation($information['id'],['scws'=>0,'scws_list'=> $top]);
         print_R($top);
         echo "count:".count($top)."\n";
-        $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time']);
+        $scwsMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$top,$keywordMap,$information['create_time'],$information['site']);
         $data = $redisService->refreshCache("information",[strval($information['id'])]);
     }
     public function process5118Coreword($content_id,$informationModel)
@@ -325,7 +325,7 @@ class KeywordService
         $redisService = new RedisService();
         $corewordModel = new CorewordModel();
         $corewordMapModel = new CorewordMapModel();
-        $information = $informationModel->getInformationById($content_id,["content","type","game","id","create_time"]);
+        $information = $informationModel->getInformationById($content_id,["content","site","type","game","id","create_time"]);
         echo "start_to_process:".$information['id']."\n";
         $replace_arr = [
             '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&lsquo'=>"'",'&rsquo'=>"'",'&rdquo'=>'”','&mdash'=>'-'
@@ -349,7 +349,7 @@ class KeywordService
         $informationModel->updateInformation($information['id'],['5118_word'=>0,'5118_word_list'=> array_flip($keywordMap)]);
         print_R(array_flip($keywordMap));
         echo "count:".count($keywordMap)."\n";
-        $corewordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],array_flip($keywordMap),$information['create_time']);
+        $corewordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],array_flip($keywordMap),$information['create_time'],$information['site']);
         $data = $redisService->refreshCache("information",[strval($information['id'])]);
     }
     public function processBaiduKeyword($content_id,$informationModel,$oClient)
@@ -357,7 +357,7 @@ class KeywordService
         $redisService = new RedisService();
         $baiduKeywordModel = new BaiduKeywordModel();
         $baiduKeywordMapModel = new BaiduKeywordMapModel();
-        $information = $informationModel->getInformationById($content_id,["title","content","type","game","id","create_time"]);
+        $information = $informationModel->getInformationById($content_id,["title","content","type","game","id","create_time","site"]);
         echo "start_to_process:".$information['id']."\n";
         $replace_arr = [
             '&gt;'=>'>','&rt;'=>'<','&amp;'=>'&','&quot;'=>'','&nbsp;'=>'','&ldquo'=>'“','&lsquo'=>"'",'&rsquo'=>"'",'&rdquo'=>'”','&mdash'=>'-'
@@ -381,7 +381,7 @@ class KeywordService
         $informationModel->updateInformation($information['id'],['baidu_word'=>0,'baidu_word_list'=> $keywordMap]);
         print_R($return['items']);
         echo "count:".count($return['items'])."\n";
-        $baiduKeywordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$keywordMap,$information['create_time']);
+        $baiduKeywordMapModel->saveMap($information['id'],$information['game'],"information",$information['type'],$keywordMap,$information['create_time'],$information['site']);
         $data = $redisService->refreshCache("information",[strval($information['id'])]);
     }
 
