@@ -166,19 +166,19 @@ class wca
         ))->range('.team-data .team-data-content .basic-data .middle  .basic-row')->queryData();
         if(count($data_list_item)>0){
             foreach ($data_list_item as $key=>$item){
+                if($item['title']=='分均经济'){
+                    $data_list_item_list['average_money']=$item;
+                }
                 if($item['title']=='分均补刀'){
                     $data_list_item_list['minute_hits'] =$item;
                 }
-                if($item['title']=='分均经济'){
-                    $data_list_item_list['average_money']=$item;
+                if($item['title']=='场均时长'){
+                    $data_list_item_list['average_time']=$item;
                 }
                 if($item['title']=='分均输出'){
                     $data_list_item_list['minute_output']=$item;
                 }
-                if($item['title']=='场均时长'){
-                    $data_list_item_list['average_time']=$item;
 
-                }
             }
         }
 
