@@ -14,8 +14,11 @@ use QL\QueryList;
 class ScheduleService
 {
     const MISSION_REPEAT=10;//调用重复多少条数量就终止
-    public function insertScheduleData($game, $force)
+    public function insertScheduleData($game, $force=0)
     {
+        if ($game == 'dota2') {//dota 赛事是不用改，这个没有新的数据
+            $this->shangniuTournament($game,$force);
+        }
 
         if ($game == 'kpl' || $game == 'lol') {
             $this->tournamentList($game);
@@ -91,6 +94,102 @@ class ScheduleService
             }
         }
         return true;
+    }
+    //尚牛赛事数据
+    public function shangniuTournament($game,$force=0){
+        $client = new ClientServices();
+        $tournamentModel=new \App\Models\Match\shangniu\tournamentModel();
+        $missionModel=new MissionModel();
+        //===========================获取总页数==============================
+        $shangniu_url='https://www.shangniu.cn/api/game/user/tournament/getTournamentVoPage?pageIndex=1&pageSize=20&gameType=dota';
+        $shangniu_headers = ['referer' => 'https://www.shangniu.cn/match/dota'];
+        $shangniuTournament= $client->curlGet($shangniu_url, [],$shangniu_headers);
+        if($force==1){
+            $pageTotal=$shangniuTournament['body']['pageTotal'] ?? 0;
+        }else{
+            $pageTotal=1;
+        }
+
+        //===========================获取总页数==============================
+        for($pageIndex=1;$pageIndex<=$pageTotal;$pageIndex++){
+            $mission_repeat = 0;
+            $url='https://www.shangniu.cn/api/game/user/tournament/getTournamentVoPage?pageIndex='.$pageIndex.'&pageSize=20&gameType=dota';
+            if($pageIndex==1){
+                $referer_url='https://www.shangniu.cn/match/dota';
+            }else{
+                $referer_url='https://www.shangniu.cn/match/dota/'.($pageIndex-1);
+            }
+            $headers = ['referer' => $referer_url];
+            $tournamentList= $client->curlGet($url, [],$headers);
+            $tournamentList=$tournamentList['body']['rows'] ?? [];//获取每一页的赛事数据
+            if(count($tournamentList) >0){
+                foreach ($tournamentList  as $tournamentInfo){
+                    echo 'currentPage:'.$pageIndex.'tournamentId'.$tournamentInfo['tournamentId']."\n";
+                //　强制爬取
+                    if ($force == 1) {
+                        $toGet = 1;
+                    } elseif ($force == 0) {
+                        $tournament=$tournamentModel->getTournamentById($tournamentInfo['tournamentId']);
+                        //找到
+                        if (isset($tournament['tournamentId'])) {
+                            $toGet = 0;
+                            $mission_repeat++;
+                            echo "exits-shangniu-tournament-tournamentId:" . $tournamentInfo['tournamentId'] . "\n";
+                            if ($mission_repeat >= self::MISSION_REPEAT) {
+                                echo $game . "shangniu-tournament-重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                return;
+                            }
+                        } else {
+                            $mission_repeat = 0;
+                            $toGet = 1;
+                        }
+                    }
+                    if($toGet==1){
+                        $source_link='https://www.shangniu.cn/gd/dota?pid=1&tid='.$tournamentInfo['tournamentId'];
+                        $params = [
+                            'game' => $game,
+                            'mission_type' => 'match',
+                            'source_link' => $source_link?? '',
+                        ];
+                        $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的赛事任务
+                        $tournamentInfo['game'] = $game;
+                        $tournamentInfo['source'] = 'shangniu';
+                        $tournamentInfo['type'] = 'tournament';
+                        $tournamentInfo['url'] = $source_link;
+                        if($missionCount==0){
+                            $data = [
+                                "asign_to" => 1,
+                                "mission_type" => 'match',//赛事
+                                "mission_status" => 1,
+                                "game" => $game,
+                                "source" => 'shangniu',//
+                                'title' => 'shangniu-tournament'.$tournamentInfo['tournamentName'],
+                                'source_link' => $source_link,
+                                "detail" => json_encode($tournamentInfo),
+                            ];
+                            $insert = $missionModel->insertMission($data);
+                            if($insert){
+                                $mission_repeat = 0;
+                                echo "insert:" . $insert . ' tournament:' . $tournamentInfo['tournamentId'] . '加入任务成功' . "\n";
+                            } else {
+                                echo "insert:" . $insert . ' tournament:' . $tournamentInfo['tournamentId'] . '加入任务失败' . "\n";
+                            }
+                            $mission_repeat = 0;
+                        }else{
+                            $mission_repeat++;//重复记录加一
+                            echo "exist-mission" . '-source_link:' . $source_link. "\n";
+                            if ($mission_repeat >= self::MISSION_REPEAT) {
+                                echo $game . "tournament-shangniu重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                return;
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        return true;
+
     }
 
     public function tournament($game)

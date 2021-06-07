@@ -26,6 +26,7 @@ class MatchService
             $this->scoreggMatch($game, $force);//scoregg 比赛数据
         }
         if ($game == 'dota2') {
+            $this->shangniuMatch($game, $week, $force);
             $this->wcaMatchList($game, $week, $force);
         }
         /* if ($game == 'dota2') {//这个dota2的数据不用改，是拼接起来的专题。暂时不用改
@@ -35,6 +36,104 @@ class MatchService
          }*/
 
         return 'finish';
+    }
+
+    //尚牛赛程
+    public function shangniuMatch($game = 'dota2', $week = 0, $force = 0){
+        //赛事赛程列表
+        $client = new ClientServices();
+        $missionModel = new MissionModel();
+        $shangniuMatchModel=new \App\Models\Match\shangniu\matchListModel();
+        $curtime = date('Y-m-d', strtotime('Monday') - $week * 7 * 86400);
+        for($i = 0; $i < 4; $i++){
+            $mission_repeat = 0;
+            $time = date('Y-m-d', strtotime($curtime) - $i * 7 * 86400);
+            echo "date-".$time . "\n";
+            $url='https://www.shangniu.cn/api/game/user/index/getWeekMatchList?gameType=dota&date='.$time;
+            $referer_url='https://www.shangniu.cn/live/dota';
+            $headers = ['referer' => $referer_url];
+            $matchBodyList= $client->curlGet($url, [],$headers);
+            $matchBodyList=$matchBodyList['body']??[];
+            $matchList=[];
+            if(count($matchBodyList)>0){
+                //一周的比赛数据
+                foreach ($matchBodyList as $matchBodyInfo){
+                    $matchList=$matchBodyInfo['matchList'] ?? [];
+                    if(count($matchList)>0){
+                        //比赛列表
+                        foreach ($matchList as $matchInfo){
+                            //　强制爬取
+                            if ($force == 1) {
+                                $toGet = 1;
+                            } elseif ($force == 0) {
+                                //获取当前比赛数据
+                                $shangniuMatchInfo = $shangniuMatchModel->getMatchById($matchInfo['id']);
+                                //找到
+                                if (isset($shangniuMatchInfo['match_id'])) {
+                                    $toGet = 0;
+                                    $mission_repeat++;
+                                    echo "exits-shangniu-match-matchID:" . $matchInfo['id'] . "\n";
+                                    if ($mission_repeat >= self::MISSION_REPEAT) {
+                                        echo $game . "shangniu-match-重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                        return;
+                                    }
+                                } else {
+                                    $mission_repeat = 0;
+                                    $toGet = 1;
+                                }
+                            }
+                            if($toGet==1){
+                                $source_link='https://www.shangniu.cn/esports/dota-live-'.$matchInfo['id'].'.html';
+                                $params = [
+                                    'game' => $game,
+                                    'mission_type' => 'match',
+                                    'source_link' => $source_link ?? '',
+                                ];
+                                $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的赛事任务
+                                echo "missionCount:" . $missionCount . "\n";
+                                if($missionCount==0){
+                                    $matchInfo['game'] = $game;
+                                    $matchInfo['source'] = 'shangniu';
+                                    $matchInfo['type'] = 'match';
+                                    unset($matchInfo['csgoTeamStats']);
+                                    unset($matchInfo['lolTeamStatsList']);
+                                    unset($matchInfo['kogTeamStatsList']);
+                                    $data = [
+                                        "asign_to" => 1,
+                                        "mission_type" => 'match',//赛事
+                                        "mission_status" => 1,
+                                        "game" => $game,
+                                        "source" => 'shangniu',//
+                                        'title' =>date("Y-m-d H:i:s",$matchInfo['matchTime']).'-match_id'.$matchInfo['id'].'-'.$matchInfo['tournamentName'],
+                                        'source_link' => $source_link ?? '',
+                                        "detail" => json_encode($matchInfo),
+                                    ];
+
+                                    $insert = $missionModel->insertMission($data);
+                                    if ($insert) {
+                                        $mission_repeat = 0;
+                                        echo $game . "MatchShangniuInsertMission:" . $insert . "success" . "\n";
+                                    } else {
+                                        echo $game . "MatchShangniuInsertMission:" . $insert . "fail" . "\n";
+                                    }
+                                }else{
+                                    $mission_repeat++;
+                                    echo $game . "shangniuMatchMissionExits" . "\n";
+                                    if ($mission_repeat >= self::MISSION_REPEAT) {
+                                        echo $game . "shangniu-match-重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                        return;
+                                    }
+                                }
+
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     public function wcaMatchList($game = 'dota2', $week = 0, $force = 0)
@@ -120,7 +219,12 @@ class MatchService
                                     }
 
                                 } else {
+                                    $mission_repeat++;
                                     echo $game . "MatchWcaMissionExits" . "\n";
+                                    if ($mission_repeat >= self::MISSION_REPEAT) {
+                                        echo $game . "wca-match-重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                        return;
+                                    }
                                 }
                             }
 

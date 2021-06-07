@@ -136,6 +136,7 @@ class HomeController extends Controller
 
     public function index()
     {
+        echo getImage('http://www.2cpseo.com/img-asset/small/storage/images/29936c1a12e25c643da1c8100d201ec0.png');exit;
         $url='https://www.wca.com.cn/score/dota2/6536/';
         $qt=QueryList::get($url);
         $team_base_data=[];

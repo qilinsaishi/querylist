@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Match\wca;
+namespace App\Models\Match\shangniu;
 
 use App\Models\TeamModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class matchListModel extends Model
 {
-    protected $table = "wca_match_list";
+    protected $table = "shangniu_match_list";
     public $timestamps = false;
     protected $connection = "query_list";
 
@@ -198,10 +198,6 @@ class matchListModel extends Model
             $data['update_time'] = $currentTime;
         }
         $data['game_bo']=intval($data['game_bo']) ?? 0;
-        if(isset($data['tournament_name']))
-        {
-           unset($data['tournament_name']);
-        }
 
         return $this->insertGetId($data);
     }
@@ -213,12 +209,6 @@ class matchListModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
-        if(isset($data['tournament_name']))
-        {
-            unset($data['tournament_name']);
-        }
-        $data['game_bo']=isset($data['game_bo']) ?intval($data['game_bo']): 0;
-
         return $this->where('match_id',$match_id)->update($data);
     }
 

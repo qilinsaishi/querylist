@@ -93,9 +93,9 @@ class wca
         $currentKeyList = array_column($this->data_map['list'],'path');
 
         $keyList = array_keys($arr['content']);
-        $arr['content']['start_time'] = date("Y-m-d H:i:s",$arr['content']['start_time']);
-        $arr['content']['home_logo']=getImage($arr['content']['home_logo'],$redis) ;
-        $arr['content']['away_logo']=getImage($arr['content']['away_logo'],$redis) ;
+        $arr['content']['start_time'] =isset($arr['content']['start_time']) ? date("Y-m-d H:i:s",$arr['content']['start_time']):date("Y-m-d H:i:s",0);
+        $arr['content']['home_logo']=isset($arr['content']['home_logo'])?getImage($arr['content']['home_logo'],$redis):'' ;
+        $arr['content']['away_logo']=isset($arr['content']['away_logo']) ? getImage($arr['content']['away_logo'],$redis):'' ;
         foreach($keyList as $key)
         {
             if(!in_array($key,$currentKeyList))
