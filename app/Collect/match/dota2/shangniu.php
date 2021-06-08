@@ -46,10 +46,16 @@ class shangniu
         $cdata = [];
         $res =$arr['detail'] ?? [];
         $type = $arr['detail']['type'] ?? '';
+        $act=$arr['detail']['act'] ?? 'insert';
+
+        //print_r($act);exit;
 
         if($type=='match'){//赛程
             //=============================赛前数据=====================================
-            $res['matchTime']=date("Y-m-d H:i:s",substr($res['matchTime'],0,-3));
+            if($act !='update'){
+                $res['matchTime']=date("Y-m-d H:i:s",substr($res['matchTime'],0,-3));
+            }
+
             $refererUrl='https://www.shangniu.cn/esports/dota-live-'.$res['id'].'.html?tab=1';
             //战队信息分析
             $teamBaseUrl='https://www.shangniu.cn/api/game/user/match/getMatchProspect?matchId='.$res['id'].'&gameType=dota';
@@ -75,6 +81,22 @@ class shangniu
             $matchLiveUrl='https://www.shangniu.cn/api/game/user/match/getMatchLive?gameType=dota&matchId='.$res['id'].'&tournamentId='.$res['tournamentId'];
             $matchDiveData=$client->curlGet($matchLiveUrl, [],$headers);
             $matchDiveData=$matchDiveData['body'] ?? [];
+            if($act=='update' && count($matchDiveData)>0 ){
+                if($matchDiveData['status'] !=null && $matchDiveData['status']>$res['status']){
+                    $res['status']=$matchDiveData['status'];
+                }
+
+
+                if(isset($matchDiveData['homeTeam']['score'])   && $matchDiveData['homeTeam']['score']!=$res['homeScore']){
+
+                    $res['homeScore']=$matchDiveData['homeTeam']['score'] ?? $res['homeScore'];
+                }
+                if(isset($matchDiveData['awayTeam']['score'])  && $matchDiveData['awayTeam']['score']!=$res['awayScore']){
+
+                    $res['awayScore']=$matchDiveData['awayTeam']['score'] ?? $res['awayScore'];
+                }
+
+            }
 
             if(isset($matchDiveData['boxNum']) && $matchDiveData['boxNum']>0 ){
                 $matchData[$matchDiveData['boxNum']]=$matchDiveData;

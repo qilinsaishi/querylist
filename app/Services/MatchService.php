@@ -762,6 +762,120 @@ class MatchService
         }
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
     }
+    //查询查询wcaMatchList里面的数据
+    public function updateShangniuMatchListStatus($game, $count = 50){
+        $shangniuMatchModel=new \App\Models\Match\shangniu\matchListModel();
+        $missionModel=new MissionModel();
+        $params = [
+            'page_size' => $count,
+            'page' => 1,
+            'game' => $game,
+            'start' => 1,//表示启动开始时间条件
+            'all' => 1,//表示不管home_id和away_id是否有值
+            'match_status' =>[1,2],//未开赛
+            'fields' => "match_id,game,match_status,game_bo,tournament_id,home_id,away_id,home_name,away_name,home_score,away_score,start_time,away_logo,home_logo",
+        ];
+        $collectClassList = [];
+        $matchCache = [];
+        $match_delete = 0;
+        $shangniuMatchList = $shangniuMatchModel->getMatchList($params);//未完成的比赛
+
+        $shangniuMatchList = $shangniuMatchList ?? [];
+        $rt=0;
+        if (count($shangniuMatchList) > 0) {
+            foreach ($shangniuMatchList as &$val) {
+                echo 'start_time:' . date('Y-m-d H:i:s') . "shangniu-match_id:" . $val['match_id'] . "\n";
+                //================创建任务=======================
+                $cdetail['source'] = 'shangniu';
+                $cdetail['id'] = $val['match_id'];
+                $cdetail['status'] = $val['match_status'];
+                $cdetail['matchTime'] = $val['start_time'];
+                $cdetail['homeId'] = $val['home_id'];
+                $cdetail['awayId'] = $val['away_id'];
+                $cdetail['homeLogo'] = $val['home_logo'];
+                $cdetail['awayLogo'] = $val['away_logo'];
+                $cdetail['homeName'] = $val['home_name'];
+                $cdetail['awayName'] = $val['away_name'];
+                $cdetail['tournamentId'] = $val['tournament_id'];
+                $cdetail['box'] = $val['game_bo'];
+                $cdetail['homeScore'] = $val['home_score'];
+                $cdetail['awayScore'] = $val['away_score'];
+                $cdetail['url'] = 'https://www.shangniu.cn/esports/dota-live-'.$val['match_id'].'.html';
+                $cdetail['game'] = $game;
+                $cdetail['act'] = 'update';
+                $cdetail['type'] = 'match';
+                $cdetail['title'] = 'shangniuMatchId:'.$val['match_id'] ?? '';
+                $cdata = [
+                    "asign_to" => 1,
+                    "mission_type" => 'match',//赛事
+                    "mission_status" => 1,
+                    "game" => $game,
+                    "source" => 'shangniu',//
+                    'title' =>'shangniuMatchId:'.$val['match_id'] ?? '',
+                    'source_link' => 'https://www.shangniu.cn/esports/dota-live-'.$val['match_id'].'.html',
+                    "detail" => json_encode($cdetail),
+                ];
+                $insert_mission=0;
+                $insert_mission = $missionModel->insertMission($cdata);
+                //============================创建任务=====================================
+                if ($insert_mission > 0) {
+
+                    //========================对任务进行进一步处理collect_result================================
+                    $mission = $missionModel->getMissionbyId($insert_mission);
+
+                    //判断类库存在
+                    if (!isset($collectClassList[$game])) {
+                        $className = "App\Collect\match\\" . $game . '\shangniu';
+                        if (class_exists($className)) {
+                            $collectClassList[$game] = new $className;
+                        }
+                    }
+
+                    $collectClass = $collectClassList[$game];
+                    $mission['detail'] = json_decode($mission['detail'], true);
+                    $collectData = $collectClass->collect($mission);
+                    //=========================对任务进行进一步处理collect_result===============================
+
+                    //=========================同步到数据库wca_match_list===============================
+                    $collectData['content'] = json_decode($collectData['content'], true);
+                    ksort($collectData['content']);
+
+                    $processData = $collectClass->process($collectData);
+
+                    unset($processData['match_list'][0]['tournament_name']);
+                    $rt = $shangniuMatchModel->saveMatch($processData['match_list'][0]);
+
+                    if ($rt>0) {
+                        echo "match_id：" . $val['match_id'] . "shangniuMatchList更新成功" . "\n";
+                        //任务状态更新为2
+                        $missionModel->updateMission($insert_mission, ['mission_status' =>2]);
+                    } else {
+                        //任务状态更新为3
+                        $missionModel->updateMission($insert_mission, ['mission_status' => 3]);
+                        $match_delete++;
+                        $matchCache[$game] = $match_delete;
+                        echo "match_id：" . $val['match_id'] . "更新失败：shangniu站点的match_id被删除" . "\n";
+                    }
+
+                } else {
+                    //任务状态更新为3
+                    $updateData['match_status'] = 0;
+                    $shangniuMatchModel->updateMatch($val['match_id'], $updateData);
+                    $missionModel->updateMission($insert_mission, ['mission_status' => 3]);
+                }
+
+
+            }
+            //=========================同步到数据库wca_match_list===============================
+
+            if (count($matchCache) > 0) {//原站点删除才会刷新缓存
+                $redisService = new RedisService();
+                $redesReturn = $redisService->refreshCache('matchList', ['game' => array_keys($matchCache)]);
+            }
+
+        }
+        return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
+    }
 
     //查询scoreggMatchList里面所有不等于2的数据重新采集更新
     public function updateScoreggMatchListStatus($game, $count = 50)

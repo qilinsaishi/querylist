@@ -27,7 +27,7 @@ class Mission extends Command
      *
      * @var string
      */
-    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=} {--force=} {--week=0}';
+    protected $signature = 'mission:collect {operation} {mission_type} {game} {--count=} {--sleepmin=} {--sleepmax=} {--force=} {--week=0}  {--source=0}';
 
     /**
      * The console command description.
@@ -105,7 +105,7 @@ class Mission extends Command
                 break;
             case "collect":
                 $count = $this->option("count")??1000;
-                (new oMission())->collect($game,"shangniu",$mission_type,$count);
+                (new oMission())->collect($game,"",$mission_type,$count);
                 break;
             case "process":
                 if($game != "all")
@@ -129,7 +129,7 @@ class Mission extends Command
                     $count = $this->option("count")??100;
                     $sleepmin = $this->option("sleepmin")??1;
                     $sleepmax = $this->option("sleepmax")??2;
-                    (new oMission())->process($g,"shangniu",$mission_type,$count,$sleepmin,$sleepmax);
+                    (new oMission())->process($g,"",$mission_type,$count,$sleepmin,$sleepmax);
                 }
                 if($mission_type == "information")
                 {
@@ -174,6 +174,17 @@ class Mission extends Command
                 //php artisan mission:collect updateWcaMatchListStatus  match dota2  (--count=50)
                 $count = $this->option("count")??50;
                 (new MatchService())->updateWcaMatchListStatus($game,$count);
+                break;
+            case "updateStatus":
+                //当状态1时更新DOTA2 shangniuMatchList数据
+                //php artisan mission:collect updateStatus  match dota2  (--count=50)
+                $matchService=new MatchService();
+                $count = $this->option("count")??50;
+                $source = $this->option("source")??'scoregg';
+                if($source=='shangniu'){
+                    $matchService->updateShangniuMatchListStatus($game,$count);
+                }
+
                 break;
 
             default:

@@ -23,7 +23,7 @@ class  PlayerService
     {
         //$this->getPlayerListByCollectResult($game, $mission_type);
         $this->getScoreggPlayerDetail($game, $mission_type);
-       // $this->insertCpseoPlayer($game, $mission_type);
+        $this->insertCpseoPlayer($game, $mission_type);
         //$this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
         return 'finish';
     }
@@ -92,11 +92,10 @@ class  PlayerService
                         echo $game . "-player-cpseo-insert:" . $insert . ' lenth:' . strlen($data['detail']) . "\n";
                     } else {
                         echo $game . "-Mission-cpseo-exits" . "\n";//表示任务表存在记录，跳出继续
-                        continue;
+
                     }
                 } else {
                     echo $player_url . "\n";
-                    continue;
 
                 }
 

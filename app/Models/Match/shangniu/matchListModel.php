@@ -81,7 +81,7 @@ class matchListModel extends Model
                     if($params['match_status']>0){
                         $match_list=$match_list->where("match_status", $params['match_status']);
                     }else{
-                        $match_list=$match_list->where("match_status",'<>', 3);
+                        $match_list=$match_list->where("match_status",'<>', 0);//数据异常
                     }
                 }
 
@@ -91,7 +91,7 @@ class matchListModel extends Model
                 $match_list=$match_list->whereIn("match_status", $params['match_status']);
             }
         }else{
-            $match_list=$match_list->where("match_status",'<>', 3);
+            $match_list=$match_list->where("match_status",'<>', 0);////数据异常
         }
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['start']) && $params['start'] > 0) {
