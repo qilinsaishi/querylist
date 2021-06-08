@@ -52,12 +52,10 @@ class RedisService
                 'expire' => 86400,
                 'views'=> 1
             ],
-
             "totalTeamList" => [//战队总表
                 'prefix' => "totalTeamList",
                 'expire' => 3600,
             ],
-
             "tournamentList" => [//赛事总表
                 'prefix' => "tournamentList",
                 'expire' => 3600,
@@ -75,6 +73,10 @@ class RedisService
                 'prefix' => "intergratedTeamList",
                 'expire' => 86400,
             ],
+            "intergratedTeamListByTeam" => [//整合队伍列表(来自队员）
+                'prefix' => "intergratedTeamListByTeam",
+                'expire' => 86400,
+            ],
             "intergratedPlayer" => [//整合队员
                 'prefix' => "intergratedPlayer",
                 'expire' => 86400,
@@ -83,17 +85,18 @@ class RedisService
                 'prefix' => "intergratedPlayerList",
                 'expire' => 86400,
             ],
+            "intergratedPlayerListByPlayer" => [//整合队员列表(来自队员）
+                'prefix' => "intergratedPlayerListByPlayer",
+                'expire' => 86400,
+            ],
             "matchList" => [//比赛列表
                 'prefix' => "matchList",
                 'expire' => 86400,
             ],
-
             "matchDetail" => [//比赛详情
                 'prefix' => "matchDetail",
                 'expire' => 86400,
             ],
-
-
             "lolHero" => [//lolHero
                 'prefix' => "lolHero",
                 'expire' => 86400,
