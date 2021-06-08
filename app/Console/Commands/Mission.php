@@ -129,7 +129,7 @@ class Mission extends Command
                     $count = $this->option("count")??100;
                     $sleepmin = $this->option("sleepmin")??1;
                     $sleepmax = $this->option("sleepmax")??2;
-                    (new oMission())->process($g,"",$mission_type,$count,$sleepmin,$sleepmax);
+                    (new oMission())->process($g,"shangniu",$mission_type,$count,$sleepmin,$sleepmax);
                 }
                 if($mission_type == "information")
                 {

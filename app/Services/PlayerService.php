@@ -113,8 +113,6 @@ class  PlayerService
             $gameID = 2;
         } elseif ($game == 'lol') {
             $gameID = 1;
-        } elseif ($game == 'dota2') {
-            $gameID = 1;
         }
         $tournament_url = 'https://www.scoregg.com/services/api_url.php';
         $tournament_param = [

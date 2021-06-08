@@ -36,7 +36,7 @@ class matchListModel extends Model
     protected $attributes = [
     ];
     protected $toJson = [
-      "match_data"
+      "match_data","match_pre"
     ];
     protected $toAppend = [
     ];

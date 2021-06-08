@@ -3,6 +3,7 @@
 namespace App\Collect\match\dota2;
 
 use App\Libs\ClientServices;
+use http\Message\Body;
 
 class shangniu
 {
@@ -33,11 +34,10 @@ class shangniu
                 'home_name'=>['path'=>"homeName",'default'=>''],//主队名称
                 'away_name'=>['path'=>"awayName",'default'=>''],//主队名称
                 "tournament_id"=>['path'=>"tournamentId",'default'=>""],//赛事唯一ID
-                "start_time"=>['path'=>"matchTime",'default'=>[]],
+                "start_time"=>['path'=>"matchTime",'default'=>''],
                 "match_pre"=>['path'=>"match_pre",'default'=>[]],//赛前数据
-                "match_live"=>['path'=>"livedata",'default'=>[]],//赛事进程
                 "match_data"=>['path'=>"match_data",'default'=>[]],//赛事数据
-                // "round"=>['path'=>"round_list",'default'=>[]]//轮次数据
+                "game_bo"=>['path'=>"box",'default'=>'']
             ]
         ];
     public function collect($arr)
@@ -48,14 +48,50 @@ class shangniu
         $type = $arr['detail']['type'] ?? '';
 
         if($type=='match'){//赛程
+            //=============================赛前数据=====================================
             $res['matchTime']=date("Y-m-d H:i:s",substr($res['matchTime'],0,-3));
-            $referer_url='https://www.shangniu.cn/esports/dota-live-'.$res['id'].'.html?tab=1';
+            $refererUrl='https://www.shangniu.cn/esports/dota-live-'.$res['id'].'.html?tab=1';
             //战队信息分析
-            $team_base_url='https://www.shangniu.cn/api/game/user/match/getMatchProspect?matchId='.$res['id'].'&gameType=dota';
-            $headers = ['referer' => $referer_url];
-            $teamBaseData= $client->curlGet($team_base_url, [],$headers);
+            $teamBaseUrl='https://www.shangniu.cn/api/game/user/match/getMatchProspect?matchId='.$res['id'].'&gameType=dota';
+            $headers = ['referer' => $refererUrl];
+            $teamBaseData= $client->curlGet($teamBaseUrl, [],$headers);
+            $teamBaseData=$teamBaseData['body'] ?? [];
+            //队员信息
+            $playerBaseUrl='https://www.shangniu.cn/api/game/user/player/getPlayerStatByMatchId?matchId='.$res['id'].'&gameType=dota';
+            $playerStatData= $client->curlGet($playerBaseUrl, [],$headers);
+            $playerStatData=$playerStatData['body']??[];
+            //英雄信息
+            $heroBaseUrl='https://www.shangniu.cn/api/game/user/hero/getHeroStat?matchId='.$res['id'].'&gameType=dota';
+            $heroStatData= $client->curlGet($heroBaseUrl, [],$headers);
+            $heroStatData=$heroStatData['body']??[];
+            $res['match_pre']=[
+                'teamBaseData'=>$teamBaseData,
+                'playerStatData'=>$playerStatData,
+                'heroStatData'=>$heroStatData
+            ];
+            //=============================赛前数据=====================================
+            //=============================比赛数据=====================================
+            $matchData=[];
+            $matchLiveUrl='https://www.shangniu.cn/api/game/user/match/getMatchLive?gameType=dota&matchId='.$res['id'].'&tournamentId='.$res['tournamentId'];
+            $matchDiveData=$client->curlGet($matchLiveUrl, [],$headers);
+            $matchDiveData=$matchDiveData['body'] ?? [];
 
-            print_r($teamBaseData);exit;
+            if(isset($matchDiveData['boxNum']) && $matchDiveData['boxNum']>0 ){
+                $matchData[$matchDiveData['boxNum']]=$matchDiveData;
+                //局数
+                for($boxNum=$matchDiveData['boxNum']-1;$boxNum>0;$boxNum--){
+                    $matchLiveBoxNumUrl='https://www.shangniu.cn/api/game/user/match/getMatchLive?gameType=dota&matchId='.$res['id'].'&tournamentId='.$res['tournamentId'].'&boxNum='.$boxNum;
+                    $matchDiveBoxNumData=$client->curlGet($matchLiveBoxNumUrl, [],$headers);
+                    $matchDiveBoxNumData=$matchDiveBoxNumData['body'] ?? [];
+                    $matchData[$boxNum]=$matchDiveBoxNumData;
+                    echo $matchLiveBoxNumUrl."\n";
+                }
+
+            }
+            $res['matchData']=$matchData;
+
+            //=============================比赛数据=====================================
+
         }else{//赛事
             if($res['status']==0){
                 $res['status']=4;
@@ -98,7 +134,9 @@ class shangniu
             $currentKeyList = array_column($this->data_map['list'],'path');
             $keyList = array_keys($arr['content']);
             $arr['content']['match_data'] = [];
-            $arr['content']['start_time'] = date("Y-m-d H:i:s",$arr['content']['start_time']);
+            $arr['content']['matchTime'] = isset($arr['content']['matchTime']) ? $arr['content']['matchTime']:date("Y-m-d H:i:s",$arr['content']['matchTime']);
+            $arr['content']['homeLogo']=isset($arr['content']['homeLogo'])?getImage($arr['content']['homeLogo'],$redis):'' ;
+            $arr['content']['awayLogo']=isset($arr['content']['awayLogo']) ? getImage($arr['content']['awayLogo'],$redis):'' ;
             foreach($keyList as $key)
             {
                 if(!in_array($key,$currentKeyList))
@@ -108,9 +146,32 @@ class shangniu
                 }
             }
 
-          //  $arr['content']['match_data'] = $this->processImg($arr['content']['match_data'],$redis);
+            $arr['content']['match_pre'] = $this->processImg($arr['content']['match_pre'],$redis);
+            if(isset($arr['content']['match_data']) && count($arr['content']['match_data'])>0){
+                $arr['content']['match_data'] = $this->processImg($arr['content']['match_data'],$redis);
+            }
+
             $data['match_list'][] = getDataFromMapping($this->data_map['list'],$arr['content']);
         }
         return $data;
+    }
+    public function processImg($arr,$redis = null)
+    {
+        if(is_null($redis))
+        {
+            $redis = app("redis.connection");
+        }
+        foreach($arr as $key => $value)
+        {
+            if(is_array($value))
+            {
+                $arr[$key] = $this->processImg($value,$redis);
+            }
+            else
+            {
+                $arr[$key] = checkImg($value,$redis);
+            }
+        }
+        return $arr;
     }
 }
