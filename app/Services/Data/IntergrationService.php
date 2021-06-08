@@ -217,7 +217,7 @@ class IntergrationService
                                 {
                                     $temp = [];
                                 }
-                                if(count($temp)<count($t))
+                                if(count($temp)<is_array($t)?count($t):0)
                                 {
                                     $temp = $t;
                                     $current_team = $teamInfo['team_id']."|".$source['source'];
@@ -449,7 +449,8 @@ class IntergrationService
                                 {
                                     $temp = [];
                                 }
-                                if(count($temp)<count($t))
+
+                                if(count($temp)<is_array($t)?count($t):0)
                                 {
                                     $temp = $t;
                                     $current_player = $playerInfo['player_id']."|".$source['source'];

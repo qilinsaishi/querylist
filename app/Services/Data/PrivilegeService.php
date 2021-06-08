@@ -66,6 +66,28 @@ class PrivilegeService
                     'functionSingle' => "getPlayerById",
                     'functionProcess' => "processIntergratedPlayerList",
                 ],
+            "intergratedPlayerListByPlayer" =>
+                [
+                    'list' => [
+                        ['model' => 'App\Models\PlayerModel', 'source' => ''],
+                    ],
+                    'withSource' => 0,
+                    'function' => "getPlayerList",
+                    'functionCount' => "getPlayerCount",
+                    'functionSingle' => "getPlayerById",
+                    'functionProcess' => "processIntergratedPlayerListByPlayer",
+                ],
+            "intergratedTeamListByTeam" =>
+                [
+                    'list' => [
+                        ['model' => 'App\Models\TeamModel', 'source' => ''],
+                    ],
+                    'withSource' => 0,
+                    'function' => "getTeamList",
+                    'functionCount' => "getTeamCount",
+                    'functionSingle' => "getTeamById",
+                    'functionProcess' => "processIntergratedTeamListByTeam",
+                ],
             "matchList" => [
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'cpseo'],
@@ -1336,14 +1358,14 @@ class PrivilegeService
 
     public function process5118InformationList($data, $functionList)
     {
-        $functionList = $this->checkFunction($functionList,"informationList");
+        $functionList = $this->checkFunction($functionList,"information");
         $modelClass = $functionList["information"]["class"];
         $function = $functionList["information"]['function'];
         foreach ($data as $key => $value) {
             $information = $modelClass->$function($value['content_id'], ["id", "title", "logo", "create_time", "site_time", "content", "type"]);
             if (isset($information['id'])) {
                 $information['content'] = string_split(strip_tags(html_entity_decode($information['content'])), 100);
-                $data[$key]['content'] = $information;
+                $data[$key] = $information;
             }
         }
         return $data;
@@ -1489,6 +1511,38 @@ class PrivilegeService
                 }
             } else {
                 $data[$key] = [];
+            }
+        }
+        return $data;
+    }
+    public function processIntergratedPlayerListByPlayer($data, $functionList, $params)
+    {
+        $intergrationService = (new IntergrationService());
+        $data = array_combine(array_column($data,"player_id"),array_values($data));
+        foreach ($data as $key => $detailData) {
+            if ($detailData['pid'] > 0) {
+                $data[$key] = getFieldsFromArray($intergrationService->getPlayerInfo(0, $detailData["pid"], 1, $params['reset'] ?? 0)['data'], $params['fields'] ?? "*");
+                if ($data[$key]['player_name'] == 0) {
+                    $data[$key] = getFieldsFromArray($intergrationService->getPlayerInfo(0, $detailData["pid"], 1, 1)['data'], $params['fields'] ?? "*");
+                }
+            } else {
+                unset($data[$key]);
+            }
+        }
+        return $data;
+    }
+    public function processIntergratedTeamListByTeam($data, $functionList, $params)
+    {
+        $intergrationService = (new IntergrationService());
+        $data = array_combine(array_column($data,"team_id"),array_values($data));
+        foreach ($data as $key => $detailData) {
+            if ($detailData['tid'] > 0) {
+                $data[$key] = getFieldsFromArray($intergrationService->getTeamInfo(0, $detailData["tid"], 1, $params['reset'] ?? 0)['data'], $params['fields'] ?? "*");
+                if ($data[$key]['team_name'] == 0) {
+                    $data[$key] = getFieldsFromArray($intergrationService->getTeamInfo(0, $detailData["tid"], 1, 1)['data'], $params['fields'] ?? "*");
+                }
+            } else {
+                unset($data[$key]);
             }
         }
         return $data;
