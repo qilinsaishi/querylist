@@ -46,7 +46,17 @@ class PlayerModel extends Model
     public function getPlayerList($params)
     {
         $fields = $params['fields']??"player_id,player_name,logo,position,pid";
-        $player_list =$this->select(explode(",",$fields));
+        $fields = explode(",",$fields);
+        if($fields!=["*"] && !in_array("player_id",$fields))
+        {
+            $fields[] = "player_id";
+        }
+        $player_list =$this->select($fields);
+        //队员ID
+        if(isset($params['ids']) && is_array($params['ids']) && count($params['ids'])>=0)
+        {
+            $player_list = $player_list->whereIn("player_id",$params['ids']);
+        }
         //总表队员ID
         if(isset($params['pid']) && intval($params['pid'])>=0)
         {
@@ -139,7 +149,6 @@ class PlayerModel extends Model
     }
     public function getPlayerByName($player_name,$game)
     {
-        //echo $player_name."-".$game."\n";
         $player_info =$this->select("*")
                     ->where("player_name",$player_name)
                     ->where("game",$game)
@@ -316,6 +325,11 @@ class PlayerModel extends Model
 
     public function getPlayerCount($params=[]){
         $player_count = $this;
+        //队员ID
+        if(isset($params['ids']) && is_array($params['ids']) && count($params['ids'])>=0)
+        {
+            $player_count = $player_count->whereIn("player_id",$params['ids']);
+        }
         //总表队员ID
         if(isset($params['pid']) && intval($params['pid'])>=0)
         {

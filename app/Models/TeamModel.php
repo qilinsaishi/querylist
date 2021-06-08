@@ -54,7 +54,12 @@ class TeamModel extends Model
     public function getTeamList($params)
     {
         $fields = $params['fields']??"team_id,team_name,logo";
-        $team_list =$this->select(explode(",",$fields));
+        $fields = explode(",",$fields);
+        if($fields!=["*"] && !in_array("team_id",$fields))
+        {
+            $fields[] = "team_id";
+        }
+        $team_list =$this->select($fields);
         //队伍ID
         if(isset($params['ids']) && count($params['ids'])>0)
         {
