@@ -49,7 +49,7 @@ class ScwsMapModel extends Model
     {
         return $this->where('content_id',$id)->delete();
     }
-    public function saveMap($id,$game,$type,$content_type,$mapList,$keywordMapList,$time)
+    public function saveMap($id,$game,$type,$content_type,$mapList,$keywordMapList,$time,$site)
     {
         echo "content_id:".$id."\n";
         echo "deleted:".$this->deleteByContent($id,$type)."\n";
@@ -65,6 +65,7 @@ class ScwsMapModel extends Model
                     "content_time"=>$time,
                     "content_type"=>$content_type,
                     "game"=>$game,
+                    "site"=>$site
                 ];
                 $this->insert($map);
             }
@@ -95,6 +96,11 @@ class ScwsMapModel extends Model
         if(isset($params['content_id']) && ($params['content_id'])>0)
         {
             $keyword_list = $keyword_list->where("content_id",$params['content_id']);
+        }
+        //站点
+        if(isset($params['site']) && ($params['site'])>0)
+        {
+            $keyword_list = $keyword_list->where("site",$params['site']);
         }
         //来源ID
         if(isset($params['ids']))
@@ -150,6 +156,11 @@ class ScwsMapModel extends Model
         if(isset($params['expect_id']))
         {
             $keyword_count = $keyword_count->where("content_id","!=",$params['expect_id']);
+        }
+        //站点
+        if(isset($params['site']) && ($params['site'])>0)
+        {
+            $keyword_count = $keyword_count->where("site",$params['site']);
         }
         //来源ID
         if(isset($params['ids']))
