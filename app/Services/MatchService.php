@@ -526,24 +526,27 @@ class MatchService
         $params = [
             'page_size' => $count,
             'page' => 1,
+            'next_try' => 1,
             'all' => 1,//表示不管home_id和away_id是否有值
             'game' => $game,
             'round_detailed' => '0',
-            'fields' => "match_id,game",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
+            'fields' => "match_id,game,next_try,try",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
         ];
         $collectClassList = [];
         $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
-        $matchList = array_column($matchList, 'match_id');
+
+        //$matchList = array_column($matchList, 'match_id');
         $matchList = $matchList ?? [];
         $classList = [];
         if (count($matchList) > 0) {
             foreach ($matchList as &$val) {
-                echo 'start_time:' . date('Y-m-d H:i:s') . "-match_id:" . $val . "\n";
-                $rt = $this->getOneScoreggMatchList($val, $game);
+
+                echo 'start_time:' . date('Y-m-d H:i:s') . "-match_id:" . $val['match_id'] . "\n";
+                $rt = $this->getOneScoreggMatchList( $val['match_id'], $game, $val['next_try'],$val['try']);
                 if ($rt > 0) {
-                    echo "match_id：" . $val . "更新成功" . "\n";
+                    echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
                 } else {
-                    echo "match_id：" . $val . "更新失败" . "\n";
+                    echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
                 }
                 sleep(1);
             }
@@ -675,8 +678,8 @@ class MatchService
         ];
         $collectClassList = [];
         $matchList = $scoreggMatchModel->getMatchList($params);//未完成的比赛
-        $matchList = array_column($matchList, 'match_id');
-
+        //$matchList = array_column($matchList, 'match_id');
+print_r($matchList);exit;
         $matchList = $matchList ?? [];
         $classList = [];
         $matchCache = [];
@@ -726,7 +729,7 @@ class MatchService
     }
 
     //封装更新一条ScoreggMatchList数据
-    public function getOneScoreggMatchList($match_id, $game)
+    public function getOneScoreggMatchList($match_id, $game,$next_try=0,$try=0)
     {
         $scoreggMatchModel = new matchListModel();
         $missionModel = new MissionModel();
@@ -745,10 +748,13 @@ class MatchService
             $collectClass = $collectClassList[$game];
             $mission['detail'] = json_decode($mission['detail'], true);
             $mission['detail']['type'] = 'match';
-
+            $mission['detail']['next_try'] = $next_try;
+            $mission['detail']['try'] = $try;
+            $mission['detail']['act'] = 'update';
             $collectData = $collectClass->collect($mission);
 
             $collectData['content'] = json_decode($collectData['content'], true);
+
             ksort($collectData['content']);
 
             $processData = $collectClass->process($collectData);
