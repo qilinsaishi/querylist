@@ -353,7 +353,7 @@ class TeamService
         $playerModel = new PlayerModel();
 
         $playerServices = new PlayerService();
-        $team_intergration = config("app.intergration.team") ?? [];
+        $team_intergration = config("app.intergration.team.".$game) ?? [];
         $return = [];
         $teamList = $teamModel->getTeamList(["fields" => "team_id,tid,team_name,en_name,cn_name,aka,original_source,game", "tid" => 0, "game" => $game, "sources" => array_column($team_intergration, "source"), "page_size" => 99999999]);
         echo count($teamList);
