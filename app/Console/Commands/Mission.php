@@ -154,17 +154,7 @@ class Mission extends Command
                 //php artisan mission:collect views  update all (保存缓存中的浏览数据)
                 (new RedisService())->saveViews();
                 break;
-            case "updateScoreggMatchList":
-                //php artisan mission:collect updateScoreggMatchList  match lol  (--count=50)(更新scoregg_match_list表里面的result_list数据)
-                $count = $this->option("count")??50;
-                (new MatchService())->updateScoreggMatchList($game,$count);
-                break;
-            case "updateScoreggMatchListStatus":
-                //当状态不等于未结束时（status!=2）,必须要重新生成任务爬取数据
-                //php artisan mission:collect updateScoreggMatchListStatus  match lol  (--count=50)
-                $count = $this->option("count")??50;
-                (new MatchService())->updateScoreggMatchListStatus($game,$count);
-                break;
+
             case "updateInformationRedirect":
                 //php artisan mission:collect updateInformationRedirect  information all (修复资讯数据)
                 (new InformationService())->updateInformationRedirect();//修复资讯数据
@@ -175,6 +165,26 @@ class Mission extends Command
                 $count = $this->option("count")??50;
                 (new MatchService())->updateWcaMatchListStatus($game,$count);
                 break;
+            case "updateRecentMatch":
+                //更新赛事
+                $matchService=new MatchService();
+                //当状态1时更新DOTA2 wcaMatchList数据
+                //php artisan mission:collect updateRecentMatch  match lol  (--count=50)
+                $count = $this->option("count")??50;
+                if($game=='lol' || $game=='kpl'){
+                    /* php artisan mission:collect updateRecentMatch  match lol  --count=50
+                        (更新scoregg_match_list表里面的round_detailed=0的数据)*/
+                    $matchService->updateScoreggMatchList($game,$count);
+
+                }elseif($game=='dota2'){
+                    /* php artisan mission:collect updateRecentMatch  match dota2 --count=50
+                    (更新scoregg_match_list表里面的round_detailed=0的数据)*/
+                    $matchService->updateWcaMatchListStatus($game,$count);
+
+                }
+
+                break;
+
 
             default:
 
