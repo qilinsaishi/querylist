@@ -53,11 +53,13 @@ class TotalPlayerModel extends Model
     {
         $fields = $params['fields']??"pid,player_name,logo,position";
         $player_list =$this->select(explode(",",$fields));
-        if(isset($params['game']))
+        /*
+        if(isset($params['game']) && !is_array($params['game']))
         {
             $sourceList = config('app.intergration.player.'.$params['game']);
             $player_list = $player_list->whereIn("original_source",array_column($sourceList,"source"));
         }
+        */
         //总表队员ID
         if(isset($params['pids']) && count($params['pid'])>=1)
         {
@@ -177,11 +179,13 @@ class TotalPlayerModel extends Model
     }
     public function getPlayerCount($params=[]){
         $player_count = $this;
-        if(isset($params['game']))
+
+        /*if(isset($params['game']))
         {
             $sourceList = config('app.intergration.player.'.$params['game']);
             $player_count = $player_count->whereIn("original_source",array_column($sourceList,"source"));
         }
+        */
         //总表队员ID
         if(isset($params['pids']) && count($params['pid'])>=1)
         {
