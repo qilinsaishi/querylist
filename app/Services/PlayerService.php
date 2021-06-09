@@ -241,8 +241,8 @@ class  PlayerService
         $playerNameMapModel = new PlayerNameMapModel();
         $playerModel = new PlayerModel();
         $teamModel = new TeamModel();
-        $player_intergration = config("app.intergration.player") ?? [];
-        $team_intergration = config("app.intergration.team") ?? [];
+        $player_intergration = config("app.intergration.player.".$game) ?? [];
+        $team_intergration = config("app.intergration.team".$game) ?? [];
         $teamList = [];
         $return = false;
         $playerList = $playerModel->getPlayerList(["fields" => "player_id,player_name,en_name,cn_name,aka,original_source,game,team_id", "pid" => 0, "game" => $game, "sources" => array_column($player_intergration, "source"), "page_size" => 3000]);
@@ -352,7 +352,7 @@ class  PlayerService
     function mergeToPlayerMap($playerInfo = [], $pid, $playerModel, $playerNameMapModel)
     {
             $aka = json_decode($playerInfo['aka'], true);
-            $nameList = (array_merge([$playerInfo['player_name'], $playerInfo['en_name'], $playerInfo['cn_name']], $aka ?? []));
+            $nameList = (array_merge([$playerInfo['player_name'], $playerInfo['en_name'], $playerInfo['cn_name']], is_array($aka)?$aka : []));
             foreach ($nameList as $key => $name) {
                 if ($name == "") {
                     unset($nameList[$key]);

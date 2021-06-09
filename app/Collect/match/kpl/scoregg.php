@@ -39,7 +39,7 @@ class scoregg
                     "match_pre"=>['path'=>"match_pre",'default'=>[]],//赛前数据
                     "match_live"=>['path'=>"livedata",'default'=>[]],//赛事进程
                     "match_data"=>['path'=>"match_data",'default'=>[]],//赛事数据
-                    //"round"=>['path'=>"round_list",'default'=>[]]//轮次数据
+                    'round_detailed'=>['path'=>"round_detailed",'default'=>0],//客队id
             ]
         ];
 
@@ -50,9 +50,11 @@ class scoregg
         $matchID=$arr['detail']['matchID'] ?? 0;
         $status=$arr['detail']['status'] ?? 0;
         $type = $arr['detail']['type'] ?? '';
+        $act=isset($res['act']) ? $res['act'] :'insert';
         if($type=='match'){//赛程
             //status=0 未开始;status=1表示正在开始，status=2表示已经结束
             //表示赛前分析接口
+            $try=0;
             $match_pre_url='https://img1.famulei.com/match_pre/'.$matchID.'.json';
             $match_pre=curl_get($match_pre_url);
             if($match_pre['code']==200) {
@@ -60,6 +62,7 @@ class scoregg
             }else{
                 $res['match_pre']=[];
             }
+            $res['round_detailed']=0;
             //复盘（正在进行或者已结束）
             if($status !=0){
                 $livedata_url='https://img1.famulei.com/lol/livedata/'.$matchID.'.json'.'?_='.msectime();
@@ -98,6 +101,7 @@ class scoregg
                     $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.time().$microtime;
                     $result_data=curl_get($result_data_url);//获取复盘数据接口
                     if($result_data['code']==200) {
+                        $res['round_detailed']=1;
                         $res['result_list'][$key]['detail'] = $result_data['data'];
                     }
                 }
@@ -115,6 +119,7 @@ class scoregg
                             $result_data=curl_get($result_data_url);//获取复盘数据接口
 
                             if($result_data['code']==200) {
+                                $res['round_detailed']=1;
                                 $res['result_list'][$k]['detail'] = $result_data['data'] ?? [];
                             }
 
@@ -123,6 +128,12 @@ class scoregg
 
                 }
             }
+            if($act=='update' && $res['round_detailed']==0){
+                $res['next_try']=pow(2,$try)*3600 +$res['next_try'];
+                $try ++;
+                $res['try']=$try;
+            }
+
         }
 
 
@@ -220,6 +231,7 @@ class scoregg
             $arr['content']['match_data'] = $this->processImg($arr['content']['match_data'],$redis);
             $data['match_list'][] = getDataFromMapping($this->data_map['list'],$arr['content']);
         }
+
         return $data;
     }
 

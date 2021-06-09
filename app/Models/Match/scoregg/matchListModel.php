@@ -58,7 +58,7 @@ class matchListModel extends Model
         }
         //游戏类型
         if(isset($params['game']))
-        {
+        {\DB::connection()->enableQueryLog();
             if(is_array($params['game']) && count($params['game'])>1)
             {//数组里面多个元素
                 $match_list = $match_list->whereIn("game",$params['game']);
@@ -102,6 +102,16 @@ class matchListModel extends Model
             //$end_time = date("Y-m-d H:i:s", time() - (8-4) * 3600);
             $match_list = $match_list->where("start_time", '<=', $start_time);//->where("start_time", '<', $end_time);
         }
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['next_try']) && $params['next_try'] > 0) {
+            $currentTime = time();
+            $start_time = date("Y-m-d H:i:s", $currentTime);
+            //$end_time = $params['start_time']+30*86400;
+            $match_list = $match_list->where("next_try", '<=', $currentTime);
+            $match_list = $match_list->where("try", '<', 10);
+            //$match_list = $match_list->whereRaw("unix_timestamp(start_time)+30*3600 <=".$currentTime);
+
+        }
         //比赛日期
         if (isset($params['start_date']) && strtotime($params['start_date']) > 0)
         {
@@ -139,6 +149,7 @@ class matchListModel extends Model
         ->offset(($page-1)*$pageSizge)
             ->orderBy("start_time","desc")
             ->get()->toArray();
+        //print_r(\DB::getQueryLog());exit;
         $end = microtime(true);
         return $match_list;
     }
@@ -207,7 +218,7 @@ class matchListModel extends Model
 
         if(!isset($data['round_detailed']))
         {
-            $data['round_detailed']=1;
+            $data['round_detailed']=0;
         }
         if(!isset($data['create_time']))
         {
@@ -217,6 +228,7 @@ class matchListModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
+        $data['next_try']=strtotime($data['start_time'])-3600;
         return $this->insertGetId($data);
     }
 
@@ -227,6 +239,7 @@ class matchListModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
+
         return $this->where('match_id',$match_id)->update($data);
     }
 

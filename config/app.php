@@ -1,39 +1,43 @@
 <?php
-$t = explode('|',env('DEFAULT_SOURCE_TEAM'));
-$team_intergration = [];
-foreach($t as $detail)
+$gameList = ['lol','kpl','dota2'];
+foreach($gameList as $game)
 {
-    $stop = stripos($detail,":");
-    if($stop>0)
+    $t = explode('|',env('DEFAULT_SOURCE_TEAM_'.$game));
+    $team_intergration[$game] = [];
+    foreach($t as $detail)
     {
-        $detail_list = substr($detail,$stop+1,(strlen($detail)-$stop-1));
-        $detail_list = explode("/",$detail_list);
-        $source = substr($detail,0,$stop);
+        $stop = stripos($detail,":");
+        if($stop>0)
+        {
+            $detail_list = substr($detail,$stop+1,(strlen($detail)-$stop-1));
+            $detail_list = explode("/",$detail_list);
+            $source = substr($detail,0,$stop);
+        }
+        else
+        {
+            $detail_list = [];
+            $source = $detail;
+        }
+        $team_intergration[$game][] = ["source"=>$source,"detail_list" => $detail_list];
     }
-    else
+    $p = explode('|',env('DEFAULT_SOURCE_PLAYER_'.$game));
+    $player_intergration[$game] = [];
+    foreach($p as $detail)
     {
-        $detail_list = [];
-        $source = $detail;
+        $stop = stripos($detail,":");
+        if($stop>0)
+        {
+            $detail_list = substr($detail,$stop+1,(strlen($detail)-$stop-1));
+            $detail_list = explode("/",$detail_list);
+            $source = substr($detail,0,$stop);
+        }
+        else
+        {
+            $detail_list = [];
+            $source = $detail;
+        }
+        $player_intergration[$game][] = ["source"=>$source,"detail_list" => $detail_list];
     }
-    $team_intergration[] = ["source"=>$source,"detail_list" => $detail_list];
-}
-$p = explode('|',env('DEFAULT_SOURCE_PLAYER'));
-$player_intergration = [];
-foreach($p as $detail)
-{
-    $stop = stripos($detail,":");
-    if($stop>0)
-    {
-        $detail_list = substr($detail,$stop+1,(strlen($detail)-$stop-1));
-        $detail_list = explode("/",$detail_list);
-        $source = substr($detail,0,$stop);
-    }
-    else
-    {
-        $detail_list = [];
-        $source = $detail;
-    }
-    $player_intergration[] = ["source"=>$source,"detail_list" => $detail_list];
 }
 return [
 

@@ -507,7 +507,7 @@ use App\Services\AliyunService;
         foreach($toJson  as $key)
         {
             $value=is_array($data[$key])?$data[$key]:json_decode($data[$key],true);
-            foreach($value??[] as $value_detail)
+            foreach(is_array($value)?$value:[] as $value_detail)
             {
                 $value_detail = generateNameHash($value_detail);
                 if($value_detail!="")

@@ -39,7 +39,7 @@ class scoregg
                 "match_pre"=>['path'=>"match_pre",'default'=>[]],//赛前数据
                 "match_live"=>['path'=>"livedata",'default'=>[]],//赛事进程
                 "match_data"=>['path'=>"match_data",'default'=>[]],//赛事数据
-               // "round"=>['path'=>"round_list",'default'=>[]]//轮次数据
+                'round_detailed'=>['path'=>"round_detailed",'default'=>0],//客队id
             ]
         ];
 
@@ -50,9 +50,11 @@ class scoregg
         $matchID=$arr['detail']['matchID'] ?? 0;
         $status=$arr['detail']['status'] ?? 0;
         $type = $arr['detail']['type'] ?? '';
+        $act=isset($res['act']) ? $res['act'] :'insert';
         if($type=='match'){//赛程
             //status=0 未开始;status=1表示正在开始，status=2表示已经结束
             //表示赛前分析接口
+            $try=0;
             $match_pre_url='https://img1.famulei.com/match_pre/'.$matchID.'.json';
             $match_pre=curl_get($match_pre_url);
             if($match_pre['code']==200) {
@@ -90,12 +92,14 @@ class scoregg
                 $res['livedata']=[];
             }
 
+            $res['round_detailed']=0;
             if($res['result_list'] && count($res['result_list'] )>0){
                 foreach($res['result_list'] as $key => $result)
                 {
                     $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.msectime();
                     $result_data=curl_get($result_data_url);//获取复盘数据接口
                     if($result_data['code']==200) {
+                        $res['round_detailed']=1;
                         $res['result_list'][$key]['detail'] = $result_data['data'];
                     }
                 }
@@ -111,8 +115,8 @@ class scoregg
                             $res['result_list'][$k]['bo']=$v['bo'];
                             $result_data_url='https://img1.famulei.com/match/result/'.$v['resultID'].'.json'.'?_='.msectime();
                             $result_data=curl_get($result_data_url);//获取复盘数据接口
-
                             if($result_data['code']==200) {
+                                $res['round_detailed']=1;
                                 $res['result_list'][$k]['detail'] = $result_data['data'] ?? [];
                             }
 
@@ -121,6 +125,12 @@ class scoregg
 
                 }
 
+            }
+
+            if($act=='update' && $res['round_detailed']==0){
+                $res['next_try']=pow(2,$try)*3600 +$res['next_try'];
+                $try ++;
+                $res['try']=$try;
             }
 
         }
