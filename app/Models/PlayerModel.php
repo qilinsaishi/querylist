@@ -41,7 +41,7 @@ class PlayerModel extends Model
         "team_history","event_history","aka","stat","aka","player_stat"
     ];
     public $toAppend = [
-        "aka"=>["player_name","en_name","cn_name","aka"]
+        "aka"=>["player_name","en_name","cn_name"]
     ];
     public function getPlayerList($params)
     {
@@ -268,16 +268,19 @@ class PlayerModel extends Model
             {
                 if(isset($this->toAppend[$key]))
                 {
-                    $t = json_decode($currentPlayer[$key],true);
-
-                    foreach($value as $k => $v)
-                    {
-                        if(!in_array($v,$t))
+                    if($key!='aka'){
+                        $t = json_decode($currentPlayer[$key],true);
+                        foreach($value as $k => $v)
                         {
-                            $t[] = $v;
+                            if(!in_array($v,$t))
+                            {
+                                $t[] = $v;
+                            }
                         }
+
+                        $data[$key] = $t;
                     }
-                    $data[$key] = $t;
+
                 }
                 if(in_array($key,$this->toJson))
                 {

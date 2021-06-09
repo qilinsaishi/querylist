@@ -136,9 +136,57 @@ class HomeController extends Controller
 
     public function index()
     {
-        echo getImage('http://www.2cpseo.com/img-asset/small/storage/images/29936c1a12e25c643da1c8100d201ec0.png');exit;
-        $url='https://www.wca.com.cn/score/dota2/6536/';
+
+        $url='https://www.scoregg.com/big-data/player/2854';
         $qt=QueryList::get($url);
+        $bodyHtml=$qt->find('body')->html();
+        /////////////////////////////////////////////////////////
+        $start = strpos($bodyHtml, '(function(');
+        $end = strpos($bodyHtml, '){');
+        $functionIndexs = substr($bodyHtml, $start, $end - $start);
+        $functionIndexs = str_replace(array('(function(', ')'), '', $functionIndexs);
+        $functionIndexs=explode(',',$functionIndexs);
+        //映射反转
+        $functionIndexs = array_flip($functionIndexs);
+
+        //////////////////////////////////////////////////////////
+        $recordStart= strpos($bodyHtml, '{recordID');
+        $recordEnd=strripos($bodyHtml, 'start_time_string:');
+        $recordListString= substr($bodyHtml, $recordStart, $recordEnd - $recordStart);
+        $recordListData=explode('};',$recordListString);
+        $recordList=[];
+        foreach ($recordListData as $recordKey=>$recordInfo){
+            $recordInfoArray=explode(',',$recordInfo);
+            foreach ($recordInfoArray as $recordInfoValue){
+                if(strpos($recordInfoValue,'recordID') !==false) {
+                    $recordID=str_replace(array('{recordID:"','"'),'',$recordInfoValue);
+                    $result_data_url='https://img1.famulei.com/match/result/'.$recordID.'.json'.'?_='.msectime();
+                    $result_data=curl_get($result_data_url);//获取复盘数据接口
+                }
+                if(strpos($recordInfoValue,'assists') !==false) {
+                    $assistsIndex=str_replace(array('assists:'),'',$recordInfoValue);
+                    $assists= $functionIndexs[$assistsIndex];
+                }
+                if(strpos($recordInfoValue,'bo:') !==false) {
+                    $boIndex=str_replace(array('bo:'),'',$recordInfoValue);
+                    $bo= $functionIndexs[$boIndex];
+                }
+                if(strpos($recordInfoValue,'deaths:') !==false) {
+                    $deathsIndex=str_replace(array('deaths:'),'',$recordInfoValue);
+                    $deaths= $functionIndexs[$deathsIndex];
+                }
+                if(strpos($recordInfoValue,'matchID:') !==false) {
+                    $matchIDIndex=str_replace(array('matchID:'),'',$recordInfoValue);
+                    $matchID= $functionIndexs[$matchIDIndex];echo $matchID;exit;
+                }
+                //if()
+            }
+            print_r($recordInfoArray);exit;
+        }
+
+
+        print_r($recordListData);exit;
+
         $team_base_data=[];
         //=========================战队基础数据=============================
         $blue_victory_rate=$qt->find('.team-data .team-data-content .basic-data .left .number p')->text();//蓝队胜率

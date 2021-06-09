@@ -150,7 +150,7 @@ class  PlayerService
                                         $missionCount = $missionCount ?? 0;
                                         if ($missionCount !== 0) {
                                             echo "exist-mission-scoregg-" . $game . '-' . $v['player_url'] . "\n";//表示Mission表记录已存在，跳出继续
-                                            continue; //表示Mission表记录已存在，跳出继续
+                                           // continue; //表示Mission表记录已存在，跳出继续
                                         } else {
                                             $adata = [
                                                 "asign_to" => 1,
