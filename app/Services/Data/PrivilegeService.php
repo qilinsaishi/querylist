@@ -1459,7 +1459,7 @@ class PrivilegeService
                 $modelMatchList = $functionList["matchList"."/scoregg"]["class"];
                 $functionMatchList = $functionList["matchList"."/scoregg"]["function"];
                 $functionProcessMatchList = $functionList["matchList"."/scoregg"]["functionProcess"];
-                $matchList = $modelMatchList->$functionMatchList(["team_id" => $data['intergrated_site_id_list']['scoregg'] ?? [0],"start"=>1, "page_size" => 6]);
+                $matchList = $modelMatchList->$functionMatchList(["team_id" => $data['intergrated_site_id_list']['scoregg'] ?? [0],"start"=>1, "page_size" => 4]);
                 $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList,['source'=>'scoregg']);
             } else {
                 $data['playerList'] = [];
