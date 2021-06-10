@@ -912,6 +912,9 @@ class MatchService
 
             $processData = $collectClass->process($collectData);
             $processData['match_list'][0]['round_detailed'] = 1;
+            if(isset($processData['match_list'][0]['round']) && count($processData['match_list'][0]['round'])>0 ){
+                unset($processData['match_list'][0]['round']);
+            }
             $rt = $scoreggMatchModel->saveMatch($processData['match_list'][0]);
             if ($rt) {
                 //任务状态更新为2
