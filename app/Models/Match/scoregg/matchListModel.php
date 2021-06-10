@@ -103,6 +103,14 @@ class matchListModel extends Model
             $match_list = $match_list->where("start_time", '<=', $start_time);//->where("start_time", '<', $end_time);
         }
         //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['recent']) && $params['recent'] > 0) {
+            $currentTime = time();
+            $start_time = date("Y-m-d", $currentTime-3*86400);
+            $end_time = date("Y-m-d", $currentTime+2*86400);
+            $match_list = $match_list->where("start_time", '>=', $start_time);
+            $match_list = $match_list->where("start_time", '<=', $end_time);
+        }
+        //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['next_try']) && $params['next_try'] > 0) {
             $currentTime = time();
             $start_time = date("Y-m-d H:i:s", $currentTime);
