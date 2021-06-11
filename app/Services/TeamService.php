@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Libs\AjaxRequest;
+use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\CollectUrlModel;
 use App\Models\Match\scoregg\tournamentModel;
@@ -26,14 +27,113 @@ class TeamService
 
     public function insertTeamData($game, $force = 0)
     {
-        $this->insertCpseoTeam($game, $force);
-        $this->getScoreggTeamDetail($game, $force);
-        //采集玩加（www.wanplus.com）战队信息
-        //$this->insertWanplus($game, $mission_type);
-        //采集cpseo（2cpseo.com）战队信息
-
+        if($game=='dota2'){
+            $this->insertShangniuTeam($game, $force);//尚牛战队获取
+        }
+        if($game=='lol' || $game=='kpl'){
+            $this->getScoreggTeamDetail($game, $force);//scoregg 比赛
+            $this->insertCpseoTeam($game, $force);//seo
+        }
 
         return 'finish';
+    }
+
+    //尚牛赛程
+    public function insertShangniuTeam($game = 'dota2', $force = 0){
+        $client = new ClientServices();
+        $teamModel=new TeamModel();
+        $missionModel=new MissionModel();
+        //===========================获取总页数==============================
+        $shangniu_url='https://www.shangniu.cn/api/game/user/team/getTeamPageList?gameType=dota&pageIndex=1&pageSize=60';
+        $shangniu_headers = ['referer' => 'https://www.shangniu.cn/esteam/dota'];
+        $shangniuTeam= $client->curlGet($shangniu_url, [],$shangniu_headers);
+        $pageTotal=$shangniuTeam['body']['pageTotal'] ?? 0;
+
+        //===========================获取总页数==============================
+        for($pageIndex=1;$pageIndex<=$pageTotal;$pageIndex++){
+            $mission_repeat = 0;
+            $url='https://www.shangniu.cn/api/game/user/team/getTeamPageList?gameType=dota&pageIndex='.$pageIndex.'&pageSize=60';
+            if($pageIndex==1){
+                $referer_url='https://www.shangniu.cn/esteam/dota';
+            }else{
+                $referer_url='https://www.shangniu.cn/esteam/dota/'.($pageIndex-1);
+            }
+            $headers = ['referer' => $referer_url];
+            $teamList= $client->curlGet($url, [],$headers);
+            $teamList=$teamList['body']['rows'] ?? [];//获取每一页的赛事数据
+
+            if(count($teamList) >0){
+                foreach ($teamList  as $teamInfo){
+                    echo 'currentPage:'.$pageIndex.'teamId'.$teamInfo['teamId']."\n";
+
+                    //　强制爬取
+                    if ($force == 1) {
+                        $toGet = 1;
+                    } elseif ($force == 0) {
+                        $teamObj=$teamModel->getTeamBySiteId($teamModel['teamId'],'shangniu',$game);
+
+                        //找到
+                        if (isset($teamObj['teamId'])) {
+                            $toGet = 0;
+                            $mission_repeat++;
+                            echo "exits-shangniu-team-teamId:" . $teamObj['teamId'] . "\n";
+                            if ($mission_repeat >= self::MISSION_REPEAT) {
+                                echo $game . "shangniu-team-重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                return;
+                            }
+                        } else {
+                            $mission_repeat = 0;
+                            $toGet = 1;
+                        }
+                    }
+                    if($toGet==1){
+                        $source_link='https://www.shangniu.cn/esports/dota-team-'.$teamInfo['teamId'].'.html';
+                        unset($teamInfo['kda']);
+
+                        $params = [
+                            'game' => $game,
+                            'mission_type' => 'team',
+                            'source_link' => $source_link?? '',
+                        ];
+                        $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的赛事任务
+                        $tournamentInfo['game'] = $game;
+                        $tournamentInfo['source'] = 'shangniu';
+                        $tournamentInfo['type'] = 'team';
+                        $tournamentInfo['url'] = $source_link;
+                        if($missionCount==0){
+                            $data = [
+                                "asign_to" => 1,
+                                "mission_type" => 'team',//赛事
+                                "mission_status" => 1,
+                                "game" => $game,
+                                "source" => 'shangniu',//
+                                'title' => 'shangniu-team-'.$teamInfo['teamName'],
+                                'source_link' => $source_link,
+                                "detail" => json_encode($teamInfo),
+                            ];
+                            $insert = $missionModel->insertMission($data);
+                            if($insert){
+                                $mission_repeat = 0;
+                                echo "insert:" . $insert . ' team:' . $teamInfo['teamId']. '加入任务成功' . "\n";
+                            } else {
+                                echo "insert:" . $insert . ' team:' . $teamInfo['teamId'] . '加入任务失败' . "\n";
+                            }
+
+                        }else{
+                            $mission_repeat++;//重复记录加一
+                            echo "exist-mission" . '-source_link:' . $source_link. "\n";
+                            if ($mission_repeat >= self::MISSION_REPEAT) {
+                                echo $game . "team-shangniu重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                return;
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        return true;
+
     }
 
     public function getScoreggTeamDetail($game, $force = 0)

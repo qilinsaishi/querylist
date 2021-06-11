@@ -129,23 +129,28 @@ class MissionService
                         echo "-----save:\n";
                         if (method_exists($class, "processMemberList") && isset($save['team_id']) && intval($save['team_id'])>0) {
                             $missionList = $class->processMemberList($save['team_id'], $result);
-                            foreach ($missionList as $mission) {
-                                $mission = array_merge($mission, ['title' => $mission['title'], 'game' => $result['game'], 'connect_mission_id' => $result['mission_id'], 'source' => $result['source'], 'asign_to' => 1]);
-                                $t = json_decode($mission['detail'],true);
+                            if(is_array($missionList) && count($missionList)>0){
+                                foreach ($missionList as $mission) {
+                                    $mission = array_merge($mission, ['title' => $mission['title'], 'game' => $result['game'], 'connect_mission_id' => $result['mission_id'], 'source' => $result['source'], 'asign_to' => 1]);
+                                    $t = json_decode($mission['detail'],true);
 
-                                $currentPlayer = $playerModel->getPlayerBySiteId($t['site_id'],$result['game'],$result['source']);
-                                try{
-                                    $insert = $missionModel->insertMission($mission);
-                                    echo "insertMisson4Member:" . $insert . "\n";
-                                }catch (\Exception $e){
-                                    return $e->getMessage();
-                                }
-                                if(isset($currentPlayer['player_id']))
-                                {
-                                    echo "existedMember:" . $t['site_id'] . "\n";
-                                }
+                                    $currentPlayer = $playerModel->getPlayerBySiteId($t['site_id'],$result['game'],$result['source']);
+                                    try{
+                                        $insert = $missionModel->insertMission($mission);
+                                        echo "insertMisson4Member:" . $insert . "\n";
+                                    }catch (\Exception $e){
+                                        return $e->getMessage();
+                                    }
+                                    if(isset($currentPlayer['player_id']))
+                                    {
+                                        echo "existedMember:" . $t['site_id'] . "\n";
+                                    }
 
+                                }
+                            }else{
+                                echo "队员已存在任务表\n";
                             }
+
                         } else {
                             echo "no member\n";
                         }
