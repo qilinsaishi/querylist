@@ -474,7 +474,7 @@ class TeamService
             //如果没取到
             if ($currentMap['tid'] == 0) {
                 //获取队员列表
-                $playerList_toProcess = $playerModel->getPlayerList(["team_id" => $teamInfo['team_id'], "fields" => "player_id,pid,player_name,cn_name,en_name,aka,game,original_source", "page_size" => 1000]);
+                $playerList_toProcess = $playerModel->getPlayerList(["sources" => array_column($team_intergration, "source"), "team_id" => $teamInfo['team_id'], "fields" => "player_id,pid,player_name,cn_name,en_name,aka,game,original_source", "page_size" => 1000]);
                 //如果队伍里没人
                 if (count($playerList_toProcess) == 0) {
                     //跳过
@@ -499,7 +499,7 @@ class TeamService
                         $matchedPlayer = 0;
                         $currentMapTeamList = $teamModel->getTeamList(["tid" => $currentMap['tid'], "fields" => "team_id,tid"]);
                         $teamIdList = array_column($currentMapTeamList, "team_id");
-                        $playerList_toMerge = $playerModel->getPlayerList(["team_ids" => $teamIdList, "fields" => "player_id,pid,player_name,cn_name,en_name,aka,game,original_source", "page_size" => 1000]);
+                        $playerList_toMerge = $playerModel->getPlayerList(["sources" => array_column($team_intergration, "source"), "team_ids" => $teamIdList, "fields" => "player_id,pid,player_name,cn_name,en_name,aka,game,original_source", "page_size" => 1000]);
                         //双方队员数量都大于2
                         if (count($playerList_toMerge) >= 3 && count($playerList_toProcess) >= 3) {
                             $toMerge = [];

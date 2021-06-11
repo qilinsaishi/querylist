@@ -20,7 +20,6 @@ class IntergrationService
     public function getTeamInfo($team_id=0,$tid=0,$get_data = 0,$force = 0)
     {
         $return = ["data"=>[],"structure"=>[]];
-        $sourceList = config('app.intergration.team');
         $redis = app("redis.connection");
         $redis_key = "intergrated_team_".$team_id."-".$tid;
         $toGet = 0;
@@ -87,10 +86,12 @@ class IntergrationService
                     $tid = 0;
                 }
             }
-            //获取集合所有详情
-            $teamList = $oTeam->getTeamList(['tid'=>$tid,"fields"=>"*","sources"=>array_column($sourceList,"source")]);
             //获取集合数据
             $totalTeam = $oTotalTeam->getTeamById($tid);
+            $sourceList = config('app.intergration.team.'.$totalTeam['game']);
+            //获取集合所有详情
+            $teamList = $oTeam->getTeamList(['tid'=>$tid,"fields"=>"*","sources"=>array_column($sourceList,"source")]);
+
             //----------检查是否需要跳转
             /*
             $totalTeam['redirect'] = json_decode($totalTeam['redirect'],true);
@@ -136,7 +137,7 @@ class IntergrationService
                     foreach($sourceList as $key => $source)
                     {
                         //如果有注明高优先级
-                        if(in_array($column,$source['detail_list']))
+                        if(in_array($column,$source['detail_list']??[]))
                         {
                             if(in_array($source['source'],array_column($teamList,"original_source")))
                             {
@@ -255,7 +256,6 @@ class IntergrationService
     public function getPlayerInfo($player_id=0,$pid=0,$get_data = 0,$force = 0)
     {
         $return = ["data"=>[],"structure"=>[]];
-        $sourceList = config('app.intergration.player');
         $redis = app("redis.connection");
         $redis_key = "intergrated_player_".$player_id."-".$pid;
         $toGet = 0;
@@ -322,10 +322,11 @@ class IntergrationService
                     $pid = 0;
                 }
             }
-            //获取集合所有详情
-            $playerList = $oPlayer->getPLayerList(['pid'=>$pid,"fields"=>"*","sources"=>array_column($sourceList,"source")]);
             //获取集合数据
             $totalPlayer = $oTotalPlayer->getPlayerById($pid);
+            $sourceList = config('app.intergration.player.'.$totalPlayer['game']);
+            //获取集合所有详情
+            $playerList = $oPlayer->getPLayerList(['pid'=>$pid,"fields"=>"*","sources"=>array_column($sourceList,"source")]);
             //如果有重定向
             if(isset($totalPlayer['redirect'])){
                 $totalPlayer['redirect'] = json_decode($totalPlayer['redirect'],true);

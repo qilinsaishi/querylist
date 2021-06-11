@@ -40,6 +40,7 @@ class scoregg
                     "match_live"=>['path'=>"livedata",'default'=>[]],//赛事进程
                     "match_data"=>['path'=>"match_data",'default'=>[]],//赛事数据
                     'round_detailed'=>['path'=>"round_detailed",'default'=>0],//客队id
+                    'round'=>['path'=>"roundList",'default'=>[]],//轮次
             ]
         ];
 
@@ -223,11 +224,13 @@ class scoregg
                     unset($arr['content'][$key]);
                 }
             }
+            $roundList=[];
             foreach($arr['content']['match_data']['round_list'] as $key => $round)
             {
                 $roundInfo = ['tournament_id'=>$arr['content']['tournamentID'],'round_name'=>$round['name'],'round_id'=>$round['roundID']];
-                $arr['content']['match_data']['round_list'][$key] = $roundInfo;
+                $roundList[$key] = $roundInfo;
             }
+            $arr['content']['roundList']=$roundList;
             $arr['content']['match_data'] = $this->processImg($arr['content']['match_data'],$redis);
             $data['match_list'][] = getDataFromMapping($this->data_map['list'],$arr['content']);
         }

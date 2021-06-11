@@ -275,23 +275,29 @@ class MissionService
                                         $saveTournament = $wcaTournamentModelClass->saveTournament($tournamentValue);
                                         $value['tournament_id']=$saveTournament;
                                         unset($value['tournament_name']);
-
                                     }
-
+                                    $roundList=[];
+                                    if (isset($value['round']) && count($value['round'])>0){
+                                        $roundList=$value['round'] ?? [];
+                                        unset($value['round']);
+                                    }
 
                                     $save = $ModelClass->saveMatch($value);
                                     echo "saveMatch:".$save."\n";
-                                    if (isset($value['round']) && count($value['round'])>0)
+
+                                    if ( count($roundList)>0)
                                     {
                                         $ModelClassName = 'App\Models\Match\\'.$result['source'].'\\roundModel';
                                         $classList = $this->getClass($classList, $ModelClassName);
                                         $ModelClass = $classList[$ModelClassName];
-                                        foreach($value['round'] as  $round)
+                                        foreach($roundList as  $round)
                                         {
                                             $saveRound = $ModelClass->saveRound(array_merge(["game"=>$result['game']],$round));
                                             echo "saveRound:".$saveRound."\n";
                                         }
+
                                     }
+
                                 }
                             }
                             if(!isset($save))
