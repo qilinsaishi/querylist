@@ -58,7 +58,7 @@ class matchListModel extends Model
         }
         //游戏类型
         if(isset($params['game']))
-        {\DB::connection()->enableQueryLog();
+        {
             if(is_array($params['game']) && count($params['game'])>1)
             {//数组里面多个元素
                 $match_list = $match_list->whereIn("game",$params['game']);
@@ -101,6 +101,12 @@ class matchListModel extends Model
             $start_time = date("Y-m-d H:i:s", time());
             //$end_time = date("Y-m-d H:i:s", time() - (8-4) * 3600);
             $match_list = $match_list->where("start_time", '<=', $start_time);//->where("start_time", '<', $end_time);
+        }
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['start']) && $params['start'] < 0) {
+            $start_time = date("Y-m-d H:00:00", time());
+            //$end_time = date("Y-m-d H:i:s", time() - (8-4) * 3600);
+            $match_list = $match_list->where("start_time", '>', $start_time);//->where("start_time", '<', $end_time);
         }
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['recent']) && $params['recent'] > 0) {
@@ -154,12 +160,142 @@ class matchListModel extends Model
                 return $query->select('team_name');
             })
         */
-        ->offset(($page-1)*$pageSizge)
-            ->orderBy("start_time","desc")
+        ->offset(($page-1)*$pageSizge);
+        if(!isset($params['order']) || !is_array($params['order']))
+        {
+            $orderByList = [["start_time","desc"]];
+        }
+        else
+        {
+            $orderByList = $params['order'];
+        }
+        foreach ($orderByList as $order)
+        {
+            $match_list = $match_list->orderBy($order["0"],$order["1"]??"desc");
+        }
+        $match_list  = $match_list
             ->get()->toArray();
         //print_r(\DB::getQueryLog());exit;
         $end = microtime(true);
         return $match_list;
+    }
+    public function getMatchCount($params)
+    {
+        $match_count = $this;
+        $pageSizge = $params['page_size']??4;
+        if (isset($params['tournament_id']) && $params['tournament_id']>0) {
+            $match_count = $match_count ->where("tournament_id", $params['tournament_id']);
+        }
+
+        if (isset($params['round_detailed'])) {//主要修复match_data里面的数据
+            $match_count = $match_count ->where("round_detailed", $params['round_detailed']);
+        }
+        //游戏类型
+        if(isset($params['game']))
+        {
+            if(is_array($params['game']) && count($params['game'])>1)
+            {//数组里面多个元素
+                $match_count = $match_count->whereIn("game",$params['game']);
+            }
+            elseif(is_array($params['game']) && count($params['game'])==1)
+            {
+                $match_count = $match_count->where("game",$params['game']['0']);
+            }
+            else
+            {
+                $match_count = $match_count->where("game",$params['game']);
+            }
+        }
+        //状态
+        if (isset($params['match_status']))
+        {
+            if(!is_array($params['match_status']))
+            {
+                if(strpos($params['match_status'],',') !==false){
+                    $status = explode(",", $params['match_status']);
+                    $match_count=$match_count->whereIn("match_status", $status);
+                }else{
+                    if($params['match_status']>0){
+                        $match_count=$match_count->where("match_status", $params['match_status']);
+                    }else{
+                        $match_count=$match_count->where("match_status",'<>', 3);
+                    }
+                }
+
+            }
+            else
+            {
+                $match_count=$match_count->whereIn("match_status", $params['match_status']);
+            }
+        }else{
+            $match_count=$match_count->where("match_status",'<>', 3);
+        }
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['start']) && $params['start'] > 0) {
+            $start_time = date("Y-m-d H:i:s", time());
+            //$end_time = date("Y-m-d H:i:s", time() - (8-4) * 3600);
+            $match_count = $match_count->where("start_time", '<=', $start_time);//->where("start_time", '<', $end_time);
+        }
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['start']) && $params['start'] < 0) {
+            $start_time = date("Y-m-d H:00:00", time());
+            //$end_time = date("Y-m-d H:i:s", time() - (8-4) * 3600);
+            $match_count = $match_count->where("start_time", '>', $start_time);//->where("start_time", '<', $end_time);
+        }
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['recent']) && $params['recent'] > 0) {
+            $currentTime = time();
+            $start_time = date("Y-m-d", $currentTime-3*86400);
+            $end_time = date("Y-m-d", $currentTime+2*86400);
+            $match_list = $match_count->where("start_time", '>=', $start_time);
+            $match_list = $match_count->where("start_time", '<=', $end_time);
+        }
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['next_try']) && $params['next_try'] > 0) {
+            $currentTime = time();
+            $start_time = date("Y-m-d H:i:s", $currentTime);
+            //$end_time = $params['start_time']+30*86400;
+            $match_count = $match_count->where("next_try", '<=', $currentTime);
+            $match_count = $match_count->where("try", '<', 10);
+            //$match_list = $match_list->whereRaw("unix_timestamp(start_time)+30*3600 <=".$currentTime);
+
+        }
+        //比赛日期
+        if (isset($params['start_date']) && strtotime($params['start_date']) > 0)
+        {
+            $match_count = $match_count->where("start_time",">=" , date("Y-m-d H:i:s",strtotime($params['start_date'])));
+            //$match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600+86400));
+        }
+        //比赛日期
+        if (isset($params['end_date']) && strtotime($params['end_date']) > 0)
+        {
+            $match_count = $match_count->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['end_date'])+86400-1));
+            //$match_list = $match_list->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['start_date'])+8*3600+86400));
+        }
+        //all表示查询所有比赛
+        //否则要求确定的主客队双方
+        if(!isset($params['all']) || $params['all'] <=0){
+            $match_count=$match_count->where("home_id",">",0)->where("away_id",">",0);
+        }
+        //主客队双方
+        if(isset($params['team_id']) && !is_array($params['team_id']) && $params['team_id'] >0){
+            $match_count=$match_count->whereRaw('((home_id ='.$params['team_id'] .') or (away_id = '.$params['team_id'].'))');
+        }
+        //主客队双方
+        if(isset($params['team_id']) && is_array($params['team_id']) && count($params['team_id']) >0){
+            $match_count=$match_count->whereRaw('((home_id in ('.implode(",",$params['team_id']) .')) or (away_id in ('.implode(",",$params['team_id']).')))');
+        }
+
+
+        $match_count = $match_count->limit($pageSizge)
+            /*    ->whereHas('getHomeInfo', function($query){
+                    return $query->select('team_name');
+                })->whereHas('getawayInfo', function($query){
+                    return $query->select('team_name');
+                })
+            */
+            ->count();
+        return $match_count;
     }
     public function getHomeInfo(){
         return $this->belongsTo(TeamModel::class,'home_id','site_id');
