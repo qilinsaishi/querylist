@@ -218,6 +218,7 @@ class TeamModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
+
         return $this->insertGetId($data);
     }
 
@@ -247,6 +248,7 @@ class TeamModel extends Model
 
     public function saveTeam($game,$data)
     {
+
         $return  = ['team_id'=>0,"result"=>0,'site_id'=>0];
         $site_id = $data['site_id']??0;
         $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
@@ -256,7 +258,7 @@ class TeamModel extends Model
         {
             if(is_array($data['aka']))
             {
-                $data['team_name'] = $data['aka'][0] ?? '';
+                $data['aka'] = $data['aka'][0] ?? '';
             }
             else
             {
