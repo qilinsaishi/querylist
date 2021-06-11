@@ -42,6 +42,15 @@ php artisan mission:collect insert_mission  information kpl --force=0
 2.php artisan mission:collect collect team dota2 
 1.php artisan mission:collect process team dota2 
 
+九、dota2战队来源尚牛
+1.php artisan mission:collect insert_mission team dota2 --force=0 （dota2战队来源shangniu ）
+2.php artisan mission:collect collect team dota2 
+3.php artisan mission:collect process team dota2 
+4.php artisan mission:collect collect pleyer dota2 
+5.php artisan mission:collect process pleyer dota2 
+
+
+
 
 
 
