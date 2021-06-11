@@ -180,7 +180,7 @@ class shangniu
 
         $missionList = [];
         $missionModel=new MissionModel();
-        if(isset($arr['content']['playerList']))
+        if(isset($arr['content']['playerList']) && count($arr['content']['playerList'])>0)
         {
             foreach($arr['content']['playerList'] as $member)
             {

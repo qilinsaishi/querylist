@@ -95,6 +95,7 @@ class PrivilegeService
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'gamedota2'],
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'scoregg'],
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'wca'],
+                    ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'shangniu'],
                 ],
                 'withSource' => 1,
                 'function' => "getMatchList",//获取数据方法
@@ -105,6 +106,7 @@ class PrivilegeService
                 'list' => [
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'scoregg'],
                     ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'wca'],
+                    ['model' => 'App\Models\Match\#source#\matchListModel', 'source' => 'shangniu'],
                 ],
                 'withSource' => 1,
                 'function' => "getMatchById",//获取数据方法
@@ -118,6 +120,7 @@ class PrivilegeService
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "gamedota2"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => 'scoregg'],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => 'wca'],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => 'shangniu'],
                 ],
                 'withSource' => 1,
                 'function' => "getTournamentList",
@@ -131,6 +134,7 @@ class PrivilegeService
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => "gamedota2"],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => 'scoregg'],
                     ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => 'wca'],
+                    ['model' => 'App\Models\Match\#source#\tournamentModel', 'source' => 'shangniu'],
                 ],
                 'withSource' => 1,
                 'function' => "getTournamentById",
@@ -775,7 +779,7 @@ class PrivilegeService
     public function processMatchList($data, $functionList, $params = [])
     {
         $intergrationService = new IntergrationService();
-        if (isset($params['source']) &&  $params['source'] == 'wca') {
+        if (isset($params['source']) &&  ($params['source'] == 'wca' || $params['source'] == 'shangniu')) {
             $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
             $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
             $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
