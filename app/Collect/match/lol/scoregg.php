@@ -41,6 +41,8 @@ class scoregg
                 "match_data"=>['path'=>"match_data",'default'=>[]],//赛事数据
                 'round_detailed'=>['path'=>"round_detailed",'default'=>0],//客队id
                 'round'=>['path'=>"roundList",'default'=>[]],//轮次
+                'next_try'=>['path'=>"next_try",'default'=>0],//客队id
+                'try'=>['path'=>"try",'default'=>0],//轮次
             ]
         ];
 
@@ -100,7 +102,9 @@ class scoregg
                     $result_data_url='https://img1.famulei.com/match/result/'.$result['resultID'].'.json'.'?_='.msectime();
                     $result_data=curl_get($result_data_url);//获取复盘数据接口
                     if($result_data['code']==200) {
-                        $res['round_detailed']=1;
+                        if(isset($result_data['data']) && count($result_data['data'])>0){
+                            $res['round_detailed']=1;
+                        }
                         $res['result_list'][$key]['detail'] = $result_data['data'];
                     }
                 }
@@ -117,7 +121,9 @@ class scoregg
                             $result_data_url='https://img1.famulei.com/match/result/'.$v['resultID'].'.json'.'?_='.msectime();
                             $result_data=curl_get($result_data_url);//获取复盘数据接口
                             if($result_data['code']==200) {
-                                $res['round_detailed']=1;
+                                if(isset($result_data['data']) && count($result_data['data'])>0){
+                                    $res['round_detailed']=1;
+                                }
                                 $res['result_list'][$k]['detail'] = $result_data['data'] ?? [];
                             }
 
@@ -132,6 +138,9 @@ class scoregg
                 $res['next_try']=pow(2,$try)*3600 +$res['next_try'];
                 $try ++;
                 $res['try']=$try;
+            } else{
+                $data['next_try']=strtotime($res['start_time'])-3600;
+                $data['try']=0;
             }
 
         }

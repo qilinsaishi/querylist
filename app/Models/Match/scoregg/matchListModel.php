@@ -175,7 +175,7 @@ class matchListModel extends Model
         }
         $match_list  = $match_list
             ->get()->toArray();
-        //print_r(\DB::getQueryLog());exit;
+
         $end = microtime(true);
         return $match_list;
     }
@@ -372,7 +372,7 @@ class matchListModel extends Model
         {
             $data['update_time'] = $currentTime;
         }
-        $data['next_try']=strtotime($data['start_time'])-3600;
+
         return $this->insertGetId($data);
     }
 
