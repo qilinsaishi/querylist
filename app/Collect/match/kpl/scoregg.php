@@ -143,7 +143,7 @@ class scoregg
               //  print_r($res['try']);exit;
             }
             else{
-                $data['next_try']=strtotime($res['start_time'])-3600;
+                $data['next_try']=strtotime($res['start_time'])-86400;
                 $data['try']=0;
             }
 
