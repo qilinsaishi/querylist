@@ -57,7 +57,7 @@ class scoregg
         if($type=='match'){//赛程
             //status=0 未开始;status=1表示正在开始，status=2表示已经结束
             //表示赛前分析接口
-            $try=0;
+            $try=$arr['detail']['try']??0;
             $match_pre_url='https://img1.famulei.com/match_pre/'.$matchID.'.json';
             $match_pre=curl_get($match_pre_url);
             if($match_pre['code']==200) {
@@ -140,7 +140,6 @@ class scoregg
                 $res['try']=$try;
                 echo 'try:'.$try."\n";
                 echo 'next_try:'.$res['next_try']."\n";
-              //  print_r($res['try']);exit;
             }
             else{
                 $data['next_try']=strtotime($res['start_time'])-86400;
