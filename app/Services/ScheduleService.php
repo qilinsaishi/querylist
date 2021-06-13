@@ -104,11 +104,7 @@ class ScheduleService
         $shangniu_url='https://www.shangniu.cn/api/game/user/tournament/getTournamentVoPage?pageIndex=1&pageSize=20&gameType=dota';
         $shangniu_headers = ['referer' => 'https://www.shangniu.cn/match/dota'];
         $shangniuTournament= $client->curlGet($shangniu_url, [],$shangniu_headers);
-        if($force==1){
-            $pageTotal=$shangniuTournament['body']['pageTotal'] ?? 0;
-        }else{
-            $pageTotal=1;
-        }
+        $pageTotal=$shangniuTournament['body']['pageTotal'] ?? 1;
 
         //===========================获取总页数==============================
         for($pageIndex=1;$pageIndex<=$pageTotal;$pageIndex++){

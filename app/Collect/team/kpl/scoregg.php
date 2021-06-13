@@ -174,24 +174,10 @@ class scoregg
 
             return $item;
         });
-        //现役队员
-        $play_list=$qt->rules(array(
-            'nickname' => array('td:eq(0) .name','text'),//队员昵称
-            'player_url' => array('td:eq(0)  a','href'),//队员id
-            'player_image' => array('td:eq(0) img','src'),//队员图片
-            'position_name' => array('td:eq(0) .id','text'),//位置
-            'join_time' => array('td:eq(2) ','text'),//加入时间
-            'contract_end_time' => array('td:eq(3)','text'),//合同到期时间
-        ))->range('.left-content .article-table .tr-item')->queryData(function ($item){
-            $playerID=str_replace('/big-data/player/','',$item['player_url']);
-            $item['player_url']='https://www.scoregg.com'.$item['player_url'];
-            $item['playerID']=$playerID;
-            return $item;
-        });
+
         $baseinfo=[
             'cn_name'=>$cn_name ?? '',//中文名
             'description'=>$content ?? '',//战队历程
-            //'play_list'=>$play_list ?? [],//现役队员
             'history_honor'=>$history_honor ?? [],//荣誉信息
         ];
         return $baseinfo;
