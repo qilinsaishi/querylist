@@ -672,7 +672,7 @@ class MatchService
             'game' => $game,
             'start' => 1,//表示启动开始时间条件
             'all' => 1,//表示不管home_id和away_id是否有值
-            'match_status' =>0,//未开赛
+            //'match_status' =>0,//未开赛
             'fields' => "match_id,game,start_time,away_logo,home_logo,game_bo,tournament_id,home_name,away_name",
         ];
         $collectClassList = [];
