@@ -28,4 +28,4 @@ Route::any('lol/team_info','HomeController@teamInfo');
 Route::any('lol/refresh','lolIndexController@refresh');
 Route::any('refresh','IndexController@refresh');
 Route::any('truncate','IndexController@truncate');
-
+Route::any('submit','IndexController@submit');
