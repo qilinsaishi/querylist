@@ -854,6 +854,11 @@ class MatchService
 
                     if ($rt>0) {
                         echo "match_id：" . $val['match_id'] . "shangniuMatchList更新成功" . "\n";
+                        if(isset($rt['site_id']) && isset($rt['source']) && isset($rt['game']))
+                        {
+                            $data = ["api_id"=>2,"data_type"=>"match","site_id"=>$rt['site_id'],"source"=>$rt['source'],"game"=>$rt['game']];
+                            $return = curl_post(config("app.api_url")."/submit",json_encode($data));
+                        }
                         //任务状态更新为2
                         $missionModel->updateMission($insert_mission, ['mission_status' =>2]);
                     } else {
@@ -921,6 +926,11 @@ class MatchService
 
             $rt = $scoreggMatchModel->saveMatch($processData['match_list'][0]);
             if ($rt) {
+                if(isset($rt['site_id']) && isset($rt['source']) && isset($rt['game']))
+                {
+                    $data = ["api_id"=>2,"data_type"=>"match","site_id"=>$rt['site_id'],"source"=>$rt['source'],"game"=>$rt['game']];
+                    $return = curl_post(config("app.api_url")."/submit",json_encode($data));
+                }
                 //任务状态更新为2
                 $missionModel->updateMission($insert_mission, ['mission_status' => 2]);
             } else {

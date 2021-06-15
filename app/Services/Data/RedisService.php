@@ -303,11 +303,11 @@ class RedisService
                     if (in_array($dataType,[ "matchList"])) {
                         $toDelete = 0;
                         $dataParams = $data['params'];
-                        if (is_array($dataParams['game'])) {
+                        if (isset($dataParams['game']) && is_array($dataParams['game'])) {
                             if (count(array_intersect($dataParams['game'], $params['game']))) {
                                 $toDelete = 1;
                             }
-                        } else {
+                        } elseif(isset($dataParams['game']) && !is_array($dataParams['game'])) {
                             if (in_array($dataParams['game'], $params['game'])) {
                                 $toDelete = 1;
                             }

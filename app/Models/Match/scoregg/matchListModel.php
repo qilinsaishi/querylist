@@ -399,7 +399,7 @@ class matchListModel extends Model
             echo "toInsertMatch:"."\n";
             $insert = $this->insertMatch($data);
             $insert = ($insert==0)?$data['match_id']:0;
-            return $insert;
+            return ['result'=>$insert,"site_id"=>$data['match_id'],"source"=>"scoregg","game"=>$data['game']];
         }
         else
         {
@@ -436,11 +436,11 @@ class matchListModel extends Model
             }
             if(count($data))
             {
-                return $this->updateMatch($currentMatch['match_id'],$data);
+                return ['result'=>$this->updateMatch($currentMatch['match_id'],$data),"site_id"=>$currentMatch['match_id'],"source"=>"scoregg","game"=>$currentMatch['game']];
             }
             else
             {
-                return true;
+                return ['result'=>1,"site_id"=>$currentMatch['match_id'],"source"=>"scoregg","game"=>$currentMatch['game']];
             }
         }
     }
