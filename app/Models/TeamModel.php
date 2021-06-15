@@ -253,7 +253,7 @@ class TeamModel extends Model
         $site_id = $data['site_id']??0;
         $data['team_name'] = preg_replace("/\s+/", "",$data['team_name']);
         $data['team_name'] = trim($data['team_name']);
-        $data['aka'] = ($data['aka']=="")?[]:[$data['aka']];
+        $data['aka'] = ($data['aka']=="")?[]:$data['aka'];
         if(trim($data['team_name'])=="")
         {
             if(is_array($data['aka']))
