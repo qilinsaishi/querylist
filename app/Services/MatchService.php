@@ -16,7 +16,7 @@ use QL\QueryList;
 
 class MatchService
 {
-    const MISSION_REPEAT = 300;//调用重复多少条数量就终止
+    const MISSION_REPEAT = 500;//调用重复多少条数量就终止
 
     public function insertMatchData($game, $force = 0, $week = 0)
     {
@@ -407,13 +407,14 @@ class MatchService
         //查询赛事列表
         $tournamentModel = new tournamentModel();
         $tournamentParams = [
-            'page_size' => 2,
+            'page_size' => 10,
             'game' => $game
         ];
         $tournamentList = $tournamentModel->getTournamentList($tournamentParams);
         $tournamentList = $tournamentList ?? [];//赛事结果
         if (count($tournamentList) > 0) {
             foreach ($tournamentList as $key => $tournament) {
+                echo 'tournament_id:'.$tournament['tournament_id']."\n";
                 $mission_repeat = 0;
                 $ajax_url = 'https://img1.famulei.com/tr/' . $tournament['tournament_id'] . '.json';
                 $cdata = curl_get($ajax_url);//获取赛事下面的一级分类
