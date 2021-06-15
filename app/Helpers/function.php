@@ -339,9 +339,9 @@ use App\Services\AliyunService;
             $redis = app("redis.connection");
         }
         $fileKey = "file_url2_" . $url;
-        print_r(strlen($url));
+        //print_r(strlen($url));
         $currentFile = $redis->get($fileKey);
-        echo "cache:".$currentFile."\n";
+        //echo "cache:".$currentFile."\n";
         if ($currentFile && strlen($currentFile) > 5) {
             return $currentFile;
         }
@@ -413,7 +413,7 @@ use App\Services\AliyunService;
               //  echo "process time:".(microtime(true)-$start_time)."\n";
                 $url = str_replace('https://','http://',$url);
                 echo "get img FileSize error:".$url."\n";
-                echo "process time:".(microtime(true)-$start_time)."\n";
+                //echo "process time:".(microtime(true)-$start_time)."\n";
                 return getImage($url, $redis,$save_dir, $f_name, 1);
             }
             $upload = (new AliyunService())->upload2Oss([$root]);
@@ -423,14 +423,14 @@ use App\Services\AliyunService;
                 $redis->set($fileKey, $upload[0]);
                 $redis->expire($fileKey, 86400);
             }
-            echo "process time:".(microtime(true)-$start_time)."\n";
-            echo "result:".$upload[0]."\n";
+            //echo "process time:".(microtime(true)-$start_time)."\n";
+            //echo "result:".$upload[0]."\n";
             return $upload[0];
         }
         catch (\Exception $e)
         {
-            echo "get img error:".$url."\n";
-            echo "process time:".(microtime(true)-$start_time)."\n";
+            //echo "get img error:".$url."\n";
+            //echo "process time:".(microtime(true)-$start_time)."\n";
             return $url;
         }
 
