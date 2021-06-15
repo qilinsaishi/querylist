@@ -521,6 +521,10 @@ use App\Services\AliyunService;
     }
     function generateNameHash($name = "")
     {
+        if(!is_string($name))
+        {
+            $name = "";
+        }
         $name = strtolower($name);
         $name = trim($name);
         $replaceList = [" ","."];
