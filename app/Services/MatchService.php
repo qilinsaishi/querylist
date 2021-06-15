@@ -627,6 +627,7 @@ class MatchService
     public function updateScoreggMatchList($game, $count = 50)
     {
         $scoreggMatchModel = new matchListModel();
+        $redisService = new RedisService();
         $params = [
             'page_size' => $count,
             'page' => 1,
@@ -646,7 +647,7 @@ class MatchService
             foreach ($matchList as &$val) {
 
                 echo 'start_time:' . date('Y-m-d H:i:s') . "-match_id:" . $val['match_id'] . "\n";
-                $rt = $this->getOneScoreggMatchList( $val['match_id'], $game, $val['next_try'],$val['try']);
+                $rt = $this->updateOneScoreggMatchList( $val['match_id'], $game, $val['next_try'],$val['try']);
                 if ($rt > 0) {
                     echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
                 } else {
@@ -654,6 +655,8 @@ class MatchService
                 }
                 sleep(1);
             }
+
+            $redisService->refreshCache("matchList",['game' =>[$game]]);
 
         }
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
@@ -669,7 +672,7 @@ class MatchService
             'game' => $game,
             'start' => 1,//表示启动开始时间条件
             'all' => 1,//表示不管home_id和away_id是否有值
-            'match_status' =>0,//未开赛
+            //'match_status' =>0,//未开赛
             'fields' => "match_id,game,start_time,away_logo,home_logo,game_bo,tournament_id,home_name,away_name",
         ];
         $collectClassList = [];
@@ -882,7 +885,7 @@ class MatchService
 
 
     //封装更新一条ScoreggMatchList数据
-    public function getOneScoreggMatchList($match_id, $game,$next_try=0,$try=0)
+    public function updateOneScoreggMatchList($match_id, $game,$next_try=0,$try=0)
     {
         $scoreggMatchModel = new matchListModel();
         $missionModel = new MissionModel();
@@ -911,10 +914,10 @@ class MatchService
             ksort($collectData['content']);
 
             $processData = $collectClass->process($collectData);
-            $processData['match_list'][0]['round_detailed'] = 1;
             if(isset($processData['match_list'][0]['round']) && count($processData['match_list'][0]['round'])>0 ){
                 unset($processData['match_list'][0]['round']);
             }
+
             $rt = $scoreggMatchModel->saveMatch($processData['match_list'][0]);
             if ($rt) {
                 //任务状态更新为2
