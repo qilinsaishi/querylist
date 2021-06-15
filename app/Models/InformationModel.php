@@ -222,7 +222,7 @@ class InformationModel extends Model
         $currentInformation = $this->getInformationBySiteId($data['site_id'], $game, $data['source']);
         if (!isset($currentInformation['id'])) {
             echo "toInsertInformation:\n";
-            return $this->insertInformation(array_merge($data, ["game" => $game]));
+            return $this->insertInformation(array_merge($data, ["game" => $game,"site_id"=>$data['site_id'],"source"=>$data['source']]));
         } else {
             echo "toUpdateInformation:" . $currentInformation['id'] . "\n";
             //校验原有数据
@@ -249,9 +249,9 @@ class InformationModel extends Model
                 }
             }
             if (count($data)) {
-                return $this->updateInformation($currentInformation['id'], $data);
+                return ['result'=>$this->updateInformation($currentInformation['id'], $data),"site_id"=>$currentInformation['site_id'],"source"=>$currentInformation['source'],"game"=>$currentInformation['game']];
             } else {
-                return true;
+                return ['result'=>1,"site_id"=>$currentInformation['site_id'],"source"=>$currentInformation['source'],"game"=>$currentInformation['game']];
             }
         }
     }

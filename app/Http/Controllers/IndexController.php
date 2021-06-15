@@ -6,6 +6,7 @@ use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\Admin\DefaultConfig;
+use App\Models\DataMapModel;
 use App\Models\PlayerModel;
 use App\Models\TeamModel;
 use App\Models\Team\TotalTeamModel;
@@ -167,7 +168,19 @@ class IndexController extends Controller
         $return = $redisService->truncate($prefix);
         return $return;
     }
-
+    public function submit()
+    {
+        $oModel = new DataMapModel();
+        $data = $this->payload;
+        if(isset($data['site_id']))
+        {
+            return ['result'=>$oModel->saveMap($data)];
+        }
+        else
+        {
+            return ['result'=>false];
+        }
+    }
     public function sitemap()
     {
         $data=$this->payload;

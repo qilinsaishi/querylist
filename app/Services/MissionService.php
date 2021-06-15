@@ -79,7 +79,6 @@ class MissionService
     }
 
     //爬取数据
-
     public function getMission($game, $source, $mission_type, $count = 3)
     {
         $asign = config('app.asign');
@@ -413,6 +412,11 @@ class MissionService
                         echo "save:" . $save['result'] . "\n";
                         if ($save['result'] > 0) {
                             $collectModel->updateStatus($result['id'], ['status' => 2]);
+                            if(isset($save['site_id']) && isset($save['source']) && isset($save['game']))
+                            {
+                                $data = ["api_id"=>2,"data_type"=>$result['mission_type'],"site_id"=>$save['site_id'],"source"=>$save['source'],"game"=>$save['game']];
+                                $return = curl_post(config("app.api_url")."/submit",json_encode($data));
+                            }
                         }
                         else
                         {
