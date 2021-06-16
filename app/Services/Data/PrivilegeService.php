@@ -783,7 +783,13 @@ class PrivilegeService
             $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
             $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
             $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
+
+            $functionList = $this->checkFunction($functionList,"totalTeamList");
+            $modelTeamClass = $functionList["totalTeamList"]["class"];
+            $functionTeamSingle = $functionList["totalTeamList"]['functionSingleBySite'];
+
             $tournament = [];
+            $teamList = [];
             if (count($data)) {
                 foreach ($data as $matchKey => $matchInfo) {
                     if (isset($matchInfo['tournament_id'])) {
@@ -794,6 +800,29 @@ class PrivilegeService
 
                     }
                     $data[$matchKey]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
+                    if (isset($matchInfo['home_id']) && $matchInfo['home_id']>0) {
+                        $teamInfo = $modelTeamClass->$functionTeamSingle($matchInfo['home_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
+                        if (isset($teamInfo['team_id'])) {
+                            if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
+                                $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
+                            }
+                            $teamList[$matchInfo['home_id']] = $teamInfo;
+                        }
+
+                    }
+
+                    if (isset($matchInfo['away_id']) && $matchInfo['away_id']>0) {
+                        $teamInfo = $modelTeamClass->$functionTeamSingle($matchInfo['away_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
+                        if (isset($teamInfo['team_id'])) {
+                            if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
+                                $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
+                            }
+                            $teamList[$matchInfo['away_id']] = $teamInfo;
+                        }
+
+                    }
+                    $data[$matchKey]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
+                    $data[$matchKey]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
 
                 }
             }
@@ -1034,6 +1063,7 @@ class PrivilegeService
 
     public function processTournament($data, $functionList, $params = [])
     {
+        $intergrationService = new IntergrationService();
         if ($data['game'] == 'dota2') {
             if (isset($functionList["matchList"."/".$params['source']]) && isset($functionList["matchList"."/".$params['source']]['functionSingle'])) {
 
@@ -1050,11 +1080,39 @@ class PrivilegeService
             ]);
 
             $data['recentMatchList'] =  $matchList;
+            $functionList = $this->checkFunction($functionList,"totalTeamInfo");
+            $teamModelClass = $functionList["totalTeamInfo"]["class"];
+            $teamFunction = $functionList["totalTeamInfo"]['functionSingleBySite'];
             $teamList = [];
             foreach ($matchList as $matchInfo)
             {
-                $teamList[$matchInfo['home_name']] = ['team_name'=>$matchInfo['home_name'] ,'logo'=> $matchInfo['home_logo'],'tid'=> 0];
-                $teamList[$matchInfo['away_name']] = ['team_name'=>$matchInfo['away_name'] ,'logo'=> $matchInfo['away_logo'],'tid'=> 0];
+                if(isset($matchInfo['home_id']) && $matchInfo['home_id']>0 ){
+                    $teamInfo = $teamModelClass->$teamFunction($matchInfo['home_id'], $functionList['tournament'."/".$params['source']]['source'], $data['game'], "team_id,tid,logo");
+                    if (isset($teamInfo['team_id'])) {
+                        if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
+                            $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
+                            $teamList[$matchInfo['home_id']] = $teamInfo;
+                        }
+
+                    }
+                }else{
+                    $teamList[$matchInfo['home_name']] = ['team_name'=>$matchInfo['home_name'] ,'logo'=> $matchInfo['home_logo'],'tid'=> 0];
+                }
+
+                if(isset($matchInfo['away_id']) && $matchInfo['away_id']>0 ){
+                    $teamInfo = $teamModelClass->$teamFunction($matchInfo['away_id'], $functionList['tournament'."/".$params['source']]['source'], $data['game'], "team_id,team_name,tid,logo");
+                    if (isset($teamInfo['team_id'])) {
+                        if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
+                            $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
+                            $teamList[$matchInfo['away_id']] = $teamInfo;
+                        }
+
+                    }
+                }else{
+                    $teamList[$matchInfo['away_name']] = ['team_name'=>$matchInfo['away_name'] ,'logo'=> $matchInfo['away_logo'],'tid'=> 0];
+                }
+
+
             }
 
             $data['teamList'] = $teamList;
@@ -1071,7 +1129,7 @@ class PrivilegeService
             $teamFunction = $functionList["totalTeamInfo"]['functionSingleBySite'];
             $matchList = $matchModelClass->$matchFunction(['tournament_id' => $data['tournament_id'], "page_size" => 1000, "fields" => "match_id,home_id,away_id"]);
             $teamIdList = array_unique(array_merge(array_column($matchList, "home_id"), array_column($matchList, "away_id")));
-            $intergrationService = new IntergrationService();
+
             $teamList = [];
             foreach ($teamIdList as $team_id) {
                 $teamInfo = $teamModelClass->$teamFunction($team_id, $functionList['tournament'."/".$params['source']]['source'], $data['game'], "team_id,tid");
