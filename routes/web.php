@@ -19,7 +19,7 @@ Route::get('/', function () {
 Route::get('home','HomeController@index');
 Route::post('home/list','HomeController@lists');
 Route::get('home/test','HomeController@test');
-Route::post('get','IndexController@get');
+Route::any('get','IndexController@get');
 Route::post('getIntergration','IndexController@getIntergration');
 Route::post('intergration','IndexController@Intergration');
 

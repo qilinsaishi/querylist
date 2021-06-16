@@ -783,7 +783,13 @@ class PrivilegeService
             $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
             $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
             $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
+
+            $functionList = $this->checkFunction($functionList,"totalTeamList");
+            $modelTeamClass = $functionList["totalTeamList"]["class"];
+            $functionTeamSingle = $functionList["totalTeamList"]['functionSingleBySite'];
+
             $tournament = [];
+            $teamList = [];
             if (count($data)) {
                 foreach ($data as $matchKey => $matchInfo) {
                     if (isset($matchInfo['tournament_id'])) {
@@ -794,6 +800,29 @@ class PrivilegeService
 
                     }
                     $data[$matchKey]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
+                    if (isset($matchInfo['home_id']) && $matchInfo['home_id']>0) {
+                        $teamInfo = $modelTeamClass->$functionTeamSingle($matchInfo['home_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
+                        if (isset($teamInfo['team_id'])) {
+                            if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
+                                $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
+                            }
+                            $teamList[$matchInfo['home_id']] = $teamInfo;
+                        }
+
+                    }
+
+                    if (isset($matchInfo['away_id']) && $matchInfo['away_id']>0) {
+                        $teamInfo = $modelTeamClass->$functionTeamSingle($matchInfo['away_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
+                        if (isset($teamInfo['team_id'])) {
+                            if (isset($teamInfo['tid']) && $teamInfo['tid'] > 0) {
+                                $teamInfo = getFieldsFromArray($intergrationService->getTeamInfo(0, $teamInfo['tid'], 1, 0)['data'], "tid,team_name,logo,intergrated_id_list");
+                            }
+                            $teamList[$matchInfo['away_id']] = $teamInfo;
+                        }
+
+                    }
+                    $data[$matchKey]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
+                    $data[$matchKey]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
 
                 }
             }
