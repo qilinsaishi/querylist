@@ -426,7 +426,12 @@ class TeamModel extends Model
         $teamList = $this->getTeamList(["game"=>$game,"fields"=>"team_id,team_name,en_name,aka","page_size"=>10000]);
         foreach($teamList as $team_info)
         {
-            $t = array_unique(array_merge([$team_info['team_name']],[$team_info['en_name']],json_decode($team_info['aka'],true)??[]));
+            $aka = json_decode($team_info['aka'],true);
+            if(!is_array($aka))
+            {
+                $aka = [];
+            }
+            $t = array_unique(array_merge([$team_info['team_name']],[$team_info['en_name']],$aka));
             foreach($t as $value)
             {
                 if(trim($value) != "" && !isset($keywords[trim($value)]))
