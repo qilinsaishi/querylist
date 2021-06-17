@@ -479,6 +479,15 @@ class PrivilegeService
                 'functionSingle' => "getHeroById",
                 'functionProcess' => "processDota2Hero",
             ],
+            "activityList" => [//友链
+                'list' => [
+                    ['model' => 'App\Models\Admin\ActivityList', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getActiveList",
+                'functionCount' => "getActiveListCount",
+                'functionSingle' => "getActiveListById",
+            ],
         ];
         return $privilegeList;
     }
