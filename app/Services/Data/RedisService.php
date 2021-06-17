@@ -237,6 +237,7 @@ class RedisService
     {
         $main = config("app.main");
         //如果当前不在redis配置的缓存中
+        /*
         if(intval($main)<=0)
         {
             $params = "dataType=".$dataType."&params=".json_encode($params);
@@ -247,6 +248,7 @@ class RedisService
             var_dump($request);
             die();
         }
+        */
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
             $redis = app("redis.connection");
@@ -291,6 +293,28 @@ class RedisService
                     {
                         $redis->del($key);
                         $params_list[] = $data['params'];
+                    }
+                    if ($dataType == 'intergratedTeam')
+                    {
+                        $tid = $params[0];
+                        if((isset($data['params']['0']) && $data['params']['0'] == $tid) || (isset($data['params']['tid']) && $data['params']['tid'] == $tid))
+                        {
+                            $redis->del($key);
+                            $params_list[] = $data['params'];
+                        }
+                        $redis_key = "intergrated_team_0-".$tid;
+                        $redis->del($redis_key);
+                    }
+                    if ($dataType == 'intergratedPlayer')
+                    {
+                        $pid = $params[0];
+                        if((isset($data['params']['0']) && $data['params']['0'] == $pid) || (isset($data['params']['tid']) && $data['params']['pid'] == $pid))
+                        {
+                            $redis->del($key);
+                            $params_list[] = $data['params'];
+                        }
+                        $redis_key = "intergrated_player_0-".$pid;
+                        $redis->del($redis_key);
                     }
                     if ($dataType == 'tournament')
                     {
