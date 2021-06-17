@@ -17,6 +17,14 @@ class RedisService
                 'prefix' => "informationList",
                 'expire' => 3600,
             ],
+            "baiduInformaitonList" => [
+                'prefix' => "baiduInformaitonList",
+                'expire' => 3600,
+            ],
+            "5118InformaitonList" => [
+                'prefix' => "5118InformaitonList",
+                'expire' => 3600,
+            ],
             "information" => [
                 'prefix' => "information",
                 'expire' => 86400,

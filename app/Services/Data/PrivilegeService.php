@@ -384,6 +384,15 @@ class PrivilegeService
                 'functionCount' => "getCount",
                 'functionProcess' => "process5118InformationList",
             ],
+            "baiduInformaitonList" => [//由baidu分词索引生成的中文分词
+                'list' => [
+                    ['model' => 'App\Models\BaiduKeywordMapModel', 'source' => ''],
+                ],
+                'withSource' => 0,
+                'function' => "getList",
+                'functionCount' => "getCount",
+                'functionProcess' => "processBaiduInformationList",
+            ],
             "scwsKeyword" => [//由scws分词索引生成的中文分词
                 'list' => [
                     ['model' => 'App\Models\ScwsKeywordMapModel', 'source' => ''],
@@ -1428,6 +1437,20 @@ class PrivilegeService
     }
 
     public function process5118InformationList($data, $functionList)
+    {
+        $functionList = $this->checkFunction($functionList,"information");
+        $modelClass = $functionList["information"]["class"];
+        $function = $functionList["information"]['function'];
+        foreach ($data as $key => $value) {
+            $information = $modelClass->$function($value['content_id'], ["id", "title", "logo", "create_time", "site_time", "content", "type"]);
+            if (isset($information['id'])) {
+                $information['content'] = string_split(strip_tags(html_entity_decode($information['content'])), 100);
+                $data[$key] = $information;
+            }
+        }
+        return $data;
+    }
+    public function processBaiduInformationList($data, $functionList)
     {
         $functionList = $this->checkFunction($functionList,"information");
         $modelClass = $functionList["information"]["class"];

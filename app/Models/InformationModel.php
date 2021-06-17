@@ -59,6 +59,10 @@ class InformationModel extends Model
         if (isset($params['except_source']) && strlen($params['except_source']) > 0) {
             $information_list = $information_list->where("source", '!=', $params['except_source']);
         }
+        //排除的文章
+        if (isset($params['except_id']) && strlen($params['except_id']) > 0) {
+            $information_list = $information_list->where("id", '!=', $params['except_id']);
+        }
         //最后更新时间
         if (isset($params['recent']) && $params['recent'] > 0) {
             $time = date("Y-m-d H:i:s", time() - $params['recent']);
@@ -268,6 +272,10 @@ class InformationModel extends Model
         //排除的来源
         if (isset($params['except_source']) && strlen($params['except_source']) > 0) {
             $information_count = $information_count->where("source", '!=', $params['except_source']);
+        }
+        //排除的文章
+        if (isset($params['except_id']) && strlen($params['except_id']) > 0) {
+            $information_count = $information_count->where("id", '!=', $params['except_id']);
         }
         //是否需要处理关键字
         if (isset($params['keywords'])) {
