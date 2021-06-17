@@ -50,19 +50,7 @@ class ActivityList extends Model
         return $activeList;
     }
 
-    public function getLinkByName($name, $type)
-    {
-        $default_config_info = $this->select("*")
-            ->where("title", $name)
-            ->where("type", $type)
-            ->get()->first();
-        if (isset($default_config_info->id)) {
-            $default_config_info = $default_config_info->toArray();
-        } else {
-            $default_config_info = [];
-        }
-        return $default_config_info;
-    }
+
 
     public function getActiveListCount($params)
     {
@@ -79,7 +67,7 @@ class ActivityList extends Model
         //return true;
     }
 
-    public function getActiveListById($id)
+    public function getActiveById($id)
     {
 
         $get_active_list_info = $this->select("*")
@@ -90,19 +78,6 @@ class ActivityList extends Model
             $get_active_list_info = [];
         }
         return $get_active_list_info;
-    }
-
-    public function getActiveListByKey($keys = [])
-    {
-        $active_list_info = $this->select("*")
-            ->whereIn("key", $keys)
-            ->get()->first();
-        if (isset($active_list_info->id)) {
-            $active_list_info = $active_list_info->toArray();
-        } else {
-            $active_list_info = [];
-        }
-        return $active_list_info;
     }
 
 
