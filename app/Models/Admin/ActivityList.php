@@ -29,45 +29,45 @@ class ActivityList extends Model
     ];
 
 
-    public function getActiveList($params)
+    public function getActivityList($params)
     {
-        $activeList=[];
+        $activityList=[];
         $default_field = ['id', 'title', 'url', 'logo','site_id','description','game','start_time','end_time'];
         $field = isset($params['field']) && !empty($params['field']) ? $params['field'] : $default_field;
-        $activeList = $this->select($field);
+        $activityList = $this->select($field);
         $pageSizge = $params['page_size'] ?? 10;
         $page = $params['page'] ?? 1;
 
         if(isset($params['site_id']) && $params['site_id']>0){
-            $activeList->where('site_id',$params['site_id']);
+            $activityList->where('site_id',$params['site_id']);
         }
-        $activeList = $activeList
+        $activityList = $activityList
             ->limit($pageSizge)
             ->offset(($page - 1) * $pageSizge)
             ->orderBy("create_at","desc")
             ->get()->toArray();
 
-        return $activeList;
+        return $activityList;
     }
 
 
 
-    public function getActiveListCount($params)
+    public function getActivityCount($params)
     {
-        $active_list_count = $this;
+        $activity_list_count = $this;
         $game = $params['game'] ?? '';
         $site_id = $params['site_id'] ?? 0;
         if(!empty($game)){
-            $active_list_count->where('game',$game);
+            $activity_list_count->where('game',$game);
         }
         if(isset($params['site_id']) && $params['site_id']>0){
-            $active_list_count->where('site_id',$params['site_id']);
+            $activity_list_count->where('site_id',$params['site_id']);
         }
-        return $active_list_count->count();
+        return $activity_list_count->count();
         //return true;
     }
 
-    public function getActiveById($id)
+    public function getActivityById($id)
     {
 
         $get_active_list_info = $this->select("*")

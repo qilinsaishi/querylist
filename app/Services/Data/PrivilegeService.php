@@ -484,9 +484,9 @@ class PrivilegeService
                     ['model' => 'App\Models\Admin\ActivityList', 'source' => ''],
                 ],
                 'withSource' => 0,
-                'function' => "getActiveList",
-                'functionCount' => "getActiveListCount",
-                'functionSingle' => "getActiveById",
+                'function' => "getActivityList",
+                'functionCount' => "getActivityCount",
+                'functionSingle' => "getActivityById",
             ],
         ];
         return $privilegeList;
