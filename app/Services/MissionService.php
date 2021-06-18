@@ -282,7 +282,7 @@ class MissionService
                                     }
 
                                     $save = $ModelClass->saveMatch($value);
-                                    echo "saveMatch:".$save."\n";
+                                    echo "saveMatch:".!is_array($save)?$save:$save['result']."\n";
 
                                     if ( count($roundList)>0)
                                     {
