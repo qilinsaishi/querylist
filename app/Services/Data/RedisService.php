@@ -275,6 +275,17 @@ class RedisService
                 //有参数，尝试刷新数据
                 if (isset($data['params'])) {
                     $data['params']['dataType']=$dataType;
+                    if ($data['params']['dataType'] == 'matchDetail' ) {
+                        $home_id = $data['data']['data']['home_team_info']['tid']??0;
+                        $away_id = $data['data']['data']['away_team_info']['tid']??0;
+                        $tid = $params["tid"];
+                        //echo "startToPorcessMatch:\n";
+                        if($home_id == $tid || $away_id == $tid)
+                        {
+                            //echo $data['data']['data']['match_id']."-".$tid."-toDelete\n";
+                            $redis->del($key);
+                        }
+                    }
                     if ($data['params']['dataType'] == 'defaultConfig' ) {
                         $redis->del($key);
                         $params_list[] = $data['params'];
@@ -371,6 +382,11 @@ class RedisService
                 {
                     $redis->del($key);
                 }
+            }
+            //如果是整合队伍，要再调用一次处理关联比赛
+            if($dataType == "intergratedTeam")
+            {
+                $this->refreshCache("matchDetail",['tid'=>$tid]);
             }
             return $params_list;
         }
