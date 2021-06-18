@@ -52,6 +52,7 @@ class PlayerModel extends Model
             $fields[] = "player_id";
         }
         $player_list =$this->select($fields);
+        $player_list = $player_list->where("status",1);
         //队员ID
         if(isset($params['ids']) && is_array($params['ids']) && count($params['ids'])>=0)
         {
@@ -342,6 +343,7 @@ class PlayerModel extends Model
 
     public function getPlayerCount($params=[]){
         $player_count = $this;
+        $player_count = $player_count->where("status",1);
         //队员ID
         if(isset($params['ids']) && is_array($params['ids']) && count($params['ids'])>=0)
         {
