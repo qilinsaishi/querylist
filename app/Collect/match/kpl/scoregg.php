@@ -136,7 +136,7 @@ class scoregg
             }
             if($act=='update' && $res['round_detailed']==0){
                 $currentTime = time();
-                if($currentTime<strtotime($res['start_time']))//比赛尚未开始
+                if($currentTime<$res['start_time'])//比赛尚未开始
                 {
                     //每次推后2小时
                     $res['next_try']= 2*3600 +$res['next_try'];
@@ -151,9 +151,8 @@ class scoregg
                 $res['try']=$try;
                 echo 'try:'.$try."\n";
                 echo 'next_try:'.$res['next_try']."\n";
-            }
-            else{
-                $data['next_try']=strtotime($res['start_time'])-3*86400;
+            } else{
+                $data['next_try']=$res['start_time']-3*86400;
                 $data['try']=0;
             }
 
