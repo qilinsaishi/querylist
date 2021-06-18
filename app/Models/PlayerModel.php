@@ -41,7 +41,7 @@ class PlayerModel extends Model
         "team_history","event_history","aka","stat","aka","player_stat"
     ];
     public $toAppend = [
-        "aka"=>["player_name","en_name","cn_name"]
+        "aka"=>["player_name","en_name","cn_name","aka"]
     ];
     public function getPlayerList($params)
     {
