@@ -115,7 +115,7 @@ class matchListModel extends Model
             $end_time = date("Y-m-d", $currentTime+2*86400);
             $match_list = $match_list->where("start_time", '>=', $start_time);
             $match_list = $match_list->where("start_time", '<=', $end_time);
-            $orderByList = [["start_time","asc"]];
+            $params['order'] = [["start_time","asc"]];
         }
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['next_try']) && $params['next_try'] > 0) {
@@ -124,7 +124,7 @@ class matchListModel extends Model
             //$end_time = $params['start_time']+30*86400;
             $match_list = $match_list->where("next_try", '<=', $currentTime);
             $match_list = $match_list->where("try", '<', 10);
-            $orderByList = [["next_try","asc"]];
+            $params['order'] = [["next_try","asc"]];
             //$match_list = $match_list->whereRaw("unix_timestamp(start_time)+30*3600 <=".$currentTime);
 
         }
