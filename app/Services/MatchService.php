@@ -777,10 +777,10 @@ class MatchService
             'page_size' => $count,
             'page' => 1,
             'game' => $game,
-            'start' => 1,//表示启动开始时间条件
+            'next_try' => 1,
+            'round_detailed' => '0',
             'all' => 1,//表示不管home_id和away_id是否有值
-            'match_status' =>[1,2],//未开赛
-            'fields' => "match_id,game,match_status,game_bo,tournament_id,home_id,away_id,home_name,away_name,home_score,away_score,start_time,away_logo,home_logo",
+            'fields' => "match_id,game,next_try,try,match_status,game_bo,tournament_id,home_id,away_id,home_name,away_name,home_score,away_score,start_time,away_logo,home_logo",
         ];
         $collectClassList = [];
         $matchCache = [];
@@ -793,6 +793,8 @@ class MatchService
             foreach ($shangniuMatchList as &$val) {
                 echo 'start_time:' . date('Y-m-d H:i:s') . "shangniu-match_id:" . $val['match_id'] . "\n";
                 //================创建任务=======================
+                $cdetail['next_try'] = $val['next_try'];
+                $cdetail['try'] = $val['try'];
                 $cdetail['source'] = 'shangniu';
                 $cdetail['id'] = $val['match_id'];
                 $cdetail['status'] = $val['match_status'];
@@ -811,6 +813,7 @@ class MatchService
                 $cdetail['game'] = $game;
                 $cdetail['act'] = 'update';
                 $cdetail['type'] = 'match';
+
                 $cdetail['title'] = 'shangniuMatchId:'.$val['match_id'] ?? '';
                 $cdata = [
                     "asign_to" => 1,
@@ -864,8 +867,7 @@ class MatchService
                     } else {
                         //任务状态更新为3
                         $missionModel->updateMission($insert_mission, ['mission_status' => 3]);
-                        $match_delete++;
-                        $matchCache[$game] = $match_delete;
+
                         echo "match_id：" . $val['match_id'] . "更新失败：shangniu站点的match_id被删除" . "\n";
                     }
 
@@ -878,12 +880,10 @@ class MatchService
 
 
             }
-            //=========================同步到数据库wca_match_list===============================
+            //=========================刷新缓存===============================
+            $redisService = new RedisService();
+            $redisService->refreshCache("matchList",['game' =>[$game]]);
 
-            if (count($matchCache) > 0) {//原站点删除才会刷新缓存
-                $redisService = new RedisService();
-                $redesReturn = $redisService->refreshCache('matchList', ['game' => array_keys($matchCache)]);
-            }
 
         }
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
