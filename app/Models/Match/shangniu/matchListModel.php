@@ -315,4 +315,18 @@ class matchListModel extends Model
             }
         }
     }
+    public function setMatchDisplay($team_id,$display)
+    {
+        if($team_id>0)
+        {
+            $currentTime = date("Y-m-d H:i:s");
+            $home_update = $this->where('home_id',$team_id)->update(['home_display'=>$display,'update_time'=>$currentTime]);
+            $away_update = $this->where('away_id',$team_id)->update(['away_display'=>$display,'update_time'=>$currentTime]);
+            return ['home'=>$home_update,'away'=>$away_update,'total'=>$home_update+$away_update];
+        }
+        else
+        {
+            return ['home'=>0,'away'=>0,'total'=>0];
+        }
+    }
 }

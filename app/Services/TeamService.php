@@ -7,9 +7,11 @@ use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\CollectUrlModel;
 use App\Models\Match\scoregg\tournamentModel;
+use App\Models\Match\shangniu\matchListModel;
 use App\Models\MissionModel;
 use App\Models\TeamModel;
 use App\Models\PlayerModel;
+use App\Services\Data\IntergrationService;
 use App\Services\MissionService as oMission;
 use App\Models\Player\TotalPlayerModel as TotalPlayerModel;
 use App\Models\Player\PlayerMapModel as PlayerMapModel;
@@ -1125,6 +1127,42 @@ class TeamService
             'red_lose' => $red_lose_count,//红方失败场数
         ];
         return $team_ability_and_base;
+    }
+    public function processTeamDisplay($team_id)
+    {
+        $teamModel = new TeamModel();
+        $totalTeamModel = new TotalTeamModel();
+        $teamInfo = $teamModel->getTeamById($team_id,"team_id,tid,status,site_id,original_source");
+        //找到并且是整合队伍
+        if(isset($teamInfo['team_id']) && $teamInfo['tid']>0)
+        {
+            //更新整合表的状态，根据详情表的汇总显示状态
+            $teamList = $teamModel->getTeamList(['tid'=>$teamInfo['tid'],"fields"=>"team_id,tid,status"]);
+            $displayStatus = array_sum(array_column($teamList,'status'));
+            $totalTeamModel->updateTeam($teamInfo['tid'],['display'=>$displayStatus]);
+            //todo 刷新缓存
+            (new IntergrationService())->getTeamInfo(0,$teamInfo['tid'],1,1);
+        }
+        //找到
+        if(isset($teamInfo['team_id']))
+        {
+            if($teamInfo['original_source'] == "shangniu")
+            {
+                //设置比赛的显示
+                $setDisplay = (new matchListModel())->setMatchDisplay($teamInfo['site_id'],$teamInfo['status']);
+                //如果有更新到显示的比赛
+                if($setDisplay['total']>0)
+                {
+                    //todo 刷新缓存
+                    //refresh
+                }
+            }
+            elseif(($teamInfo['source'] == "scoregg"))
+            {
+                //暂不更新
+            }
+        }
+
     }
 
 }

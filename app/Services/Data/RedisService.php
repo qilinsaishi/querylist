@@ -4,6 +4,7 @@ namespace App\Services\Data;
 
 use App\Models\Admin\Site;
 use App\Models\InformationModel;
+use App\Services\TeamService;
 use PhpParser\Node\Stmt\Else_;
 
 class RedisService
@@ -387,6 +388,12 @@ class RedisService
             if($dataType == "intergratedTeam")
             {
                 $this->refreshCache("matchDetail",['tid'=>$tid]);
+            }
+            //如果是整合队伍，要再调用一次处理关联比赛
+            if($dataType == "totalTeamInfo")
+            {
+                $team_id = $params[0];
+                (new TeamService())->processTeamDisplay($team_id);
             }
             return $params_list;
         }
