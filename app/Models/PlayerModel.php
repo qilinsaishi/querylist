@@ -41,7 +41,7 @@ class PlayerModel extends Model
         "team_history","event_history","aka","stat","aka","player_stat"
     ];
     public $toAppend = [
-        "aka"=>["player_name","en_name","cn_name"]
+        "aka"=>["player_name","en_name","cn_name","aka"]
     ];
     public function getPlayerList($params)
     {
@@ -52,6 +52,7 @@ class PlayerModel extends Model
             $fields[] = "player_id";
         }
         $player_list =$this->select($fields);
+        $player_list = $player_list->where("status",1);
         //队员ID
         if(isset($params['ids']) && is_array($params['ids']) && count($params['ids'])>=0)
         {
@@ -234,7 +235,7 @@ class PlayerModel extends Model
         {
             $data['aka'] = is_array($data['aka'])?$data['aka']:[$data['aka']];
         }
-        $currentPlayer = $this->getPlayerBySiteId($data['site_id'],$game,$data['original_source']);
+        $currentPlayer = $this->getPlayerBySiteId($data['site_id'],$game,$data['original_source'],"*");
         if(!isset($currentPlayer['player_id']))
         {
             echo "toInsertPlayer:\n";
@@ -242,6 +243,9 @@ class PlayerModel extends Model
             if($insert)
             {
                 $return['player_id'] = $insert;
+                $return['site_id'] = $data['site_id'];
+                $return['source'] = $data['original_source'];
+                $return['game'] = $game;
                 $return['result'] = 1;
             }
             else
@@ -253,13 +257,16 @@ class PlayerModel extends Model
         }
         else
         {
-            echo "source:".$currentPlayer['original_source'] ."-". $data['original_source']."\n";
+            //echo "source:".$currentPlayer['original_source'] ."-". $data['original_source']."\n";
             //非同来源不做覆盖
             if($currentPlayer['original_source'] != $data['original_source'])
             {
-                echo "differentSorce4Team:pass\n";
+                echo "differentSource4Player:pass\n";
                 $return['player_id'] = $currentPlayer['player_id'];
                 $return['result'] = 1;
+                $return['site_id'] = $currentPlayer['site_id'];
+                $return['source'] = $currentPlayer['original_source'];
+                $return['game'] = $currentPlayer['game'];
                 return $return;
             }
             echo "toUpdatePlayer:".$currentPlayer['player_id']."\n";
@@ -317,17 +324,26 @@ class PlayerModel extends Model
                 {
                     $data['aka']=$currentPlayer['aka'] ?? [];
                 }
-                return $this->updatePlayer($currentPlayer['player_id'],$data);
+                $return['result'] = $this->updatePlayer($currentPlayer['player_id'],$data);
+                $return['site_id'] = $currentPlayer['site_id'];
+                $return['source'] = $currentPlayer['original_source'];
+                $return['game'] = $currentPlayer['game'];
+                return $return;
             }
             else
             {
-                return true;
+                $return['result'] = 1;
+                $return['site_id'] = $currentPlayer['site_id'];
+                $return['source'] = $currentPlayer['original_source'];
+                $return['game'] = $currentPlayer['game'];
+                return $return;
             }
         }
     }
 
     public function getPlayerCount($params=[]){
         $player_count = $this;
+        $player_count = $player_count->where("status",1);
         //队员ID
         if(isset($params['ids']) && is_array($params['ids']) && count($params['ids'])>=0)
         {
@@ -421,7 +437,7 @@ class PlayerModel extends Model
         }
         return $player_info;
     }
-    public function getPlayerBySiteId($site_id,$game,$source,$fields = "player_id,player_name,logo,pid,game,original_source,aka")
+    public function getPlayerBySiteId($site_id,$game,$source,$fields = "player_id,player_name,logo,pid,game,original_source,aka,site_id")
     {
         $player_info =$this->select(explode(",",$fields))
             ->where("site_id",$site_id)

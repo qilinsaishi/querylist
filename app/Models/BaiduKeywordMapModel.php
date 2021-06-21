@@ -71,11 +71,16 @@ class BaiduKeywordMapModel extends Model
     public function getList($params)
     {
         $connection = DB::connection($this->connection);
-        $keyword_list =$this->select("content_id",$connection->raw('sum(weight) as weight'));
-        //目标ID
-        if(isset($params['game']) && strlen($params['game'])>0)
+        $keyword_list =$this->select("content_id",$connection->raw('sum(score) as score'));
+        //游戏
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>0)
         {
             $keyword_list = $keyword_list->where("game",$params['game']);
+        }
+        //游戏
+        if(isset($params['game']) && is_array($params['game']) && count($params['game'])>0)
+        {
+            $keyword_list = $keyword_list->whereIn("game",$params['game']);
         }
         //类型
         if(isset($params['type']) && strlen($params['type'])>0)
@@ -116,17 +121,22 @@ class BaiduKeywordMapModel extends Model
             ->limit($pageSizge)
             ->offset(($page-1)*$pageSizge)
             ->groupBy('content_id')
-            ->orderBy("id","desc")
+            ->orderBy("content_id","desc")
             ->get()->toArray();
         return $keyword_list;
     }
     public function getCount($params)
     {
         $keyword_count =$this;
-        //目标ID
-        if(isset($params['game']) && strlen($params['game'])>0)
+        //游戏
+        if(isset($params['game']) && !is_array($params['game']) && strlen($params['game'])>0)
         {
             $keyword_count = $keyword_count->where("game",$params['game']);
+        }
+        //游戏
+        if(isset($params['game']) && is_array($params['game']) && count($params['game'])>0)
+        {
+            $keyword_count = $keyword_count->whereIn("game",$params['game']);
         }
         //类型
         if(isset($params['type']) && strlen($params['type'])>0)

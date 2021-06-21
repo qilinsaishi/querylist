@@ -17,6 +17,14 @@ class RedisService
                 'prefix' => "informationList",
                 'expire' => 3600,
             ],
+            "baiduInformaitonList" => [
+                'prefix' => "baiduInformaitonList",
+                'expire' => 3600,
+            ],
+            "5118InformaitonList" => [
+                'prefix' => "5118InformaitonList",
+                'expire' => 3600,
+            ],
             "information" => [
                 'prefix' => "information",
                 'expire' => 86400,
@@ -237,6 +245,7 @@ class RedisService
     {
         $main = config("app.main");
         //如果当前不在redis配置的缓存中
+        /*
         if(intval($main)<=0)
         {
             $params = "dataType=".$dataType."&params=".json_encode($params);
@@ -247,6 +256,7 @@ class RedisService
             var_dump($request);
             die();
         }
+        */
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
             $redis = app("redis.connection");
@@ -265,6 +275,17 @@ class RedisService
                 //有参数，尝试刷新数据
                 if (isset($data['params'])) {
                     $data['params']['dataType']=$dataType;
+                    if ($data['params']['dataType'] == 'matchDetail' ) {
+                        $home_id = $data['data']['data']['home_team_info']['tid']??0;
+                        $away_id = $data['data']['data']['away_team_info']['tid']??0;
+                        $tid = $params["tid"];
+                        //echo "startToPorcessMatch:\n";
+                        if($home_id == $tid || $away_id == $tid)
+                        {
+                            //echo $data['data']['data']['match_id']."-".$tid."-toDelete\n";
+                            $redis->del($key);
+                        }
+                    }
                     if ($data['params']['dataType'] == 'defaultConfig' ) {
                         $redis->del($key);
                         $params_list[] = $data['params'];
@@ -292,6 +313,28 @@ class RedisService
                         $redis->del($key);
                         $params_list[] = $data['params'];
                     }
+                    if ($dataType == 'intergratedTeam')
+                    {
+                        $tid = $params[0];
+                        if((isset($data['params']['0']) && $data['params']['0'] == $tid) || (isset($data['params']['tid']) && $data['params']['tid'] == $tid))
+                        {
+                            $redis->del($key);
+                            $params_list[] = $data['params'];
+                        }
+                        $redis_key = "intergrated_team_0-".$tid;
+                        $redis->del($redis_key);
+                    }
+                    if ($dataType == 'intergratedPlayer')
+                    {
+                        $pid = $params[0];
+                        if((isset($data['params']['0']) && $data['params']['0'] == $pid) || (isset($data['params']['tid']) && $data['params']['pid'] == $pid))
+                        {
+                            $redis->del($key);
+                            $params_list[] = $data['params'];
+                        }
+                        $redis_key = "intergrated_player_0-".$pid;
+                        $redis->del($redis_key);
+                    }
                     if ($dataType == 'tournament')
                     {
                         if($data['data']['data']['tournament_id']==$params['tournament_id'] && $data['params']['source']==$params['source'])
@@ -303,11 +346,11 @@ class RedisService
                     if (in_array($dataType,[ "matchList"])) {
                         $toDelete = 0;
                         $dataParams = $data['params'];
-                        if (is_array($dataParams['game'])) {
+                        if (isset($dataParams['game']) && is_array($dataParams['game'])) {
                             if (count(array_intersect($dataParams['game'], $params['game']))) {
                                 $toDelete = 1;
                             }
-                        } else {
+                        } elseif(isset($dataParams['game']) && !is_array($dataParams['game'])) {
                             if (in_array($dataParams['game'], $params['game'])) {
                                 $toDelete = 1;
                             }
@@ -339,6 +382,11 @@ class RedisService
                 {
                     $redis->del($key);
                 }
+            }
+            //如果是整合队伍，要再调用一次处理关联比赛
+            if($dataType == "intergratedTeam")
+            {
+                $this->refreshCache("matchDetail",['tid'=>$tid]);
             }
             return $params_list;
         }

@@ -276,6 +276,8 @@ class TeamModel extends Model
         if(!isset($currentTeam['team_id']))
         {
             $return['team_id'] = $this->insertTeam(array_merge($data,["game"=>$game]));
+            $return['source'] = $data['original_source'];
+            $return['game'] = $game;
             $return['result'] =  $return['team_id']?1:0;
             $return['site_id'] =  $return['team_id']?$data['site_id']:0;
             return $return;
@@ -286,9 +288,11 @@ class TeamModel extends Model
             //非同来源不做覆盖
             if($currentTeam['original_source'] != $data['original_source'])
             {
-                echo "differentSorce4Team:pass\n";
+                echo "differentSource4Team:pass\n";
                 $return['team_id'] = $currentTeam['team_id'];
                 $return['site_id'] = $currentTeam['site_id'];
+                $return['source'] = $currentTeam['original_source'];
+                $return['game'] = $currentTeam['game'];
                 $return['result'] = 1;
                 return $return;
             }
@@ -339,20 +343,24 @@ class TeamModel extends Model
             if(count($data))
             {
                 if(!isset($data['logo']) || (isset($data['logo']) && strlen($data['logo'])<=10)){
-                    $data['logo']=$currentPlayer['logo'] ?? '';
+                    $data['logo']=$currentTeam['logo'] ?? '';
                 }
                 if(!isset($data['aka']) || (isset($data['aka']) && $data['aka']=='') || is_null($data['aka']) )
                 {
-                    $data['aka']=$currentPlayer['aka'] ?? [];
+                    $data['aka']=$currentTeam['aka'] ?? [];
                 }
                 $return['result'] = $this->updateTeam($currentTeam['team_id'],$data);
-                $return['site_id'] = $site_id;
+                $return['site_id'] = $currentTeam['site_id'];
+                $return['source'] = $currentTeam['original_source'];
+                $return['game'] = $currentTeam['game'];
                 return $return;
             }
             else
             {
                 $return['result'] = 1;
-                $return['site_id'] = $site_id;
+                $return['site_id'] = $currentTeam['site_id'];
+                $return['source'] = $currentTeam['original_source'];
+                $return['game'] = $currentTeam['game'];
                 return $return;
             }
         }
@@ -418,7 +426,12 @@ class TeamModel extends Model
         $teamList = $this->getTeamList(["game"=>$game,"fields"=>"team_id,team_name,en_name,aka","page_size"=>10000]);
         foreach($teamList as $team_info)
         {
-            $t = array_unique(array_merge([$team_info['team_name']],[$team_info['en_name']],json_decode($team_info['aka'],true)??[]));
+            $aka = json_decode($team_info['aka'],true);
+            if(!is_array($aka))
+            {
+                $aka = [];
+            }
+            $t = array_unique(array_merge([$team_info['team_name']],[$team_info['en_name']],$aka));
             foreach($t as $value)
             {
                 if(trim($value) != "" && !isset($keywords[trim($value)]))

@@ -43,12 +43,12 @@ class matchListModel extends Model
     ];
     public function getMatchList($params)
     {
+
         $start = microtime(true);
         $fields = $params['fields'] ?? "match_id,game,match_status,round_id,tournament_id,home_id,away_id,home_score,away_score,start_time,match_data";
         $match_list =$this->select(explode(",",$fields));
-        $pageSizge = $params['page_size']??4;
+        $pageSize = $params['page_size']??4;
         $page = $params['page']??1;
-
         if (isset($params['tournament_id']) && $params['tournament_id']>0) {
             $match_list = $match_list ->where("tournament_id", $params['tournament_id']);
         }
@@ -111,10 +111,11 @@ class matchListModel extends Model
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['recent']) && $params['recent'] > 0) {
             $currentTime = time();
-            $start_time = date("Y-m-d", $currentTime-3*86400);
-            $end_time = date("Y-m-d", $currentTime+2*86400);
+            $start_time = date("Y-m-d H:00:00", $currentTime);
+            $end_time = date("Y-m-d", $currentTime+4*86400);
             $match_list = $match_list->where("start_time", '>=', $start_time);
             $match_list = $match_list->where("start_time", '<=', $end_time);
+            $params['order'] = [["start_time","asc"]];
         }
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['next_try']) && $params['next_try'] > 0) {
@@ -123,6 +124,7 @@ class matchListModel extends Model
             //$end_time = $params['start_time']+30*86400;
             $match_list = $match_list->where("next_try", '<=', $currentTime);
             $match_list = $match_list->where("try", '<', 10);
+            $params['order'] = [["start_time","desc"]];
             //$match_list = $match_list->whereRaw("unix_timestamp(start_time)+30*3600 <=".$currentTime);
 
         }
@@ -151,16 +153,8 @@ class matchListModel extends Model
         if(isset($params['team_id']) && is_array($params['team_id']) && count($params['team_id']) >0){
             $match_list=$match_list->whereRaw('((home_id in ('.implode(",",$params['team_id']) .')) or (away_id in ('.implode(",",$params['team_id']).')))');
         }
-
-
-        $match_list = $match_list->limit($pageSizge)
-        /*    ->whereHas('getHomeInfo', function($query){
-                return $query->select('team_name');
-            })->whereHas('getawayInfo', function($query){
-                return $query->select('team_name');
-            })
-        */
-        ->offset(($page-1)*$pageSizge);
+        $match_list = $match_list->limit($pageSize)
+        ->offset(($page-1)*$pageSize);
         if(!isset($params['order']) || !is_array($params['order']))
         {
             $orderByList = [["start_time","desc"]];
@@ -175,14 +169,12 @@ class matchListModel extends Model
         }
         $match_list  = $match_list
             ->get()->toArray();
-
         $end = microtime(true);
         return $match_list;
     }
     public function getMatchCount($params)
     {
         $match_count = $this;
-        $pageSizge = $params['page_size']??4;
         if (isset($params['tournament_id']) && $params['tournament_id']>0) {
             $match_count = $match_count ->where("tournament_id", $params['tournament_id']);
         }
@@ -245,8 +237,8 @@ class matchListModel extends Model
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['recent']) && $params['recent'] > 0) {
             $currentTime = time();
-            $start_time = date("Y-m-d", $currentTime-3*86400);
-            $end_time = date("Y-m-d", $currentTime+2*86400);
+            $start_time = date("Y-m-d H:00:00", $currentTime);
+            $end_time = date("Y-m-d", $currentTime+4*86400);
             $match_list = $match_count->where("start_time", '>=', $start_time);
             $match_list = $match_count->where("start_time", '<=', $end_time);
         }
@@ -285,15 +277,7 @@ class matchListModel extends Model
         if(isset($params['team_id']) && is_array($params['team_id']) && count($params['team_id']) >0){
             $match_count=$match_count->whereRaw('((home_id in ('.implode(",",$params['team_id']) .')) or (away_id in ('.implode(",",$params['team_id']).')))');
         }
-
-
-        $match_count = $match_count->limit($pageSizge)
-            /*    ->whereHas('getHomeInfo', function($query){
-                    return $query->select('team_name');
-                })->whereHas('getawayInfo', function($query){
-                    return $query->select('team_name');
-                })
-            */
+        $match_count = $match_count
             ->count();
         return $match_count;
     }
@@ -399,7 +383,7 @@ class matchListModel extends Model
             echo "toInsertMatch:"."\n";
             $insert = $this->insertMatch($data);
             $insert = ($insert==0)?$data['match_id']:0;
-            return $insert;
+            return ['result'=>$insert,"site_id"=>$data['match_id'],"source"=>"scoregg","game"=>$data['game']];
         }
         else
         {
@@ -426,7 +410,7 @@ class matchListModel extends Model
                 if(isset($currentMatch[$key]) && ($currentMatch[$key] == $value))
                 {
                     //echo $currentMatch[$key]."-".$value."\n";
-                    echo $key.":passed\n";
+                    //echo $key.":passed\n";
                     unset($data[$key]);
                 }
                 else
@@ -436,11 +420,11 @@ class matchListModel extends Model
             }
             if(count($data))
             {
-                return $this->updateMatch($currentMatch['match_id'],$data);
+                return ['result'=>$this->updateMatch($currentMatch['match_id'],$data),"site_id"=>$currentMatch['match_id'],"source"=>"scoregg","game"=>$currentMatch['game']];
             }
             else
             {
-                return true;
+                return ['result'=>1,"site_id"=>$currentMatch['match_id'],"source"=>"scoregg","game"=>$currentMatch['game']];
             }
         }
     }

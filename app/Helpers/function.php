@@ -521,6 +521,10 @@ use App\Services\AliyunService;
     }
     function generateNameHash($name = "")
     {
+        if(!is_string($name))
+        {
+            $name = "";
+        }
         $name = strtolower($name);
         $name = trim($name);
         $replaceList = [" ","."];
@@ -561,7 +565,7 @@ use App\Services\AliyunService;
             {
                 $data=str_replace('https','http',$data);
                 $image_url=getImage($data,$redis);
-                echo $image_url."\n";
+                //echo $image_url."\n";
                 return $image_url;
             }
         }

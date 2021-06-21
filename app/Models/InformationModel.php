@@ -59,6 +59,10 @@ class InformationModel extends Model
         if (isset($params['except_source']) && strlen($params['except_source']) > 0) {
             $information_list = $information_list->where("source", '!=', $params['except_source']);
         }
+        //排除的文章
+        if (isset($params['except_id']) && strlen($params['except_id']) > 0) {
+            $information_list = $information_list->where("id", '!=', $params['except_id']);
+        }
         //最后更新时间
         if (isset($params['recent']) && $params['recent'] > 0) {
             $time = date("Y-m-d H:i:s", time() - $params['recent']);
@@ -222,7 +226,7 @@ class InformationModel extends Model
         $currentInformation = $this->getInformationBySiteId($data['site_id'], $game, $data['source']);
         if (!isset($currentInformation['id'])) {
             echo "toInsertInformation:\n";
-            return $this->insertInformation(array_merge($data, ["game" => $game]));
+            return $this->insertInformation(array_merge($data, ["game" => $game,"site_id"=>$data['site_id'],"source"=>$data['source']]));
         } else {
             echo "toUpdateInformation:" . $currentInformation['id'] . "\n";
             //校验原有数据
@@ -249,9 +253,9 @@ class InformationModel extends Model
                 }
             }
             if (count($data)) {
-                return $this->updateInformation($currentInformation['id'], $data);
+                return ['result'=>$this->updateInformation($currentInformation['id'], $data),"site_id"=>$currentInformation['site_id'],"source"=>$currentInformation['source'],"game"=>$currentInformation['game']];
             } else {
-                return true;
+                return ['result'=>1,"site_id"=>$currentInformation['site_id'],"source"=>$currentInformation['source'],"game"=>$currentInformation['game']];
             }
         }
     }
@@ -268,6 +272,10 @@ class InformationModel extends Model
         //排除的来源
         if (isset($params['except_source']) && strlen($params['except_source']) > 0) {
             $information_count = $information_count->where("source", '!=', $params['except_source']);
+        }
+        //排除的文章
+        if (isset($params['except_id']) && strlen($params['except_id']) > 0) {
+            $information_count = $information_count->where("id", '!=', $params['except_id']);
         }
         //是否需要处理关键字
         if (isset($params['keywords'])) {

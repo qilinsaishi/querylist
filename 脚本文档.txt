@@ -1,0 +1,77 @@
+1.KPLl/LOL比赛爬取 (scoregg站点)：
+　　赛事爬取最新数据到任务表:
+　　php artisan mission:collect insert_mission schedule kpl --force=0 
+　　php artisan mission:collect insert_mission schedule lol --force=0 
+　　比赛爬取到任务表
+　　php artisan mission:collect insert_mission match lol --force=0 
+　　php artisan mission:collect insert_mission match kpl --force=0 
+　　对赛事比赛数据进一步处理
+　　php artisan mission:collect collect  match lol 
+　　php artisan mission:collect collect  match kpl
+　　同步到scoregg_match_list，scoregg_tournament_info，scoregg_round_info三张表：
+　　php artisan mission:collect process  match lol  
+　　php artisan mission:collect process  match kpl
+2.dota2 比赛爬取（shangniu站点）：
+　　赛事爬取最新数据到任务表:
+　　php artisan mission:collect insert_mission schedule dota2 --force=0 
+　　比赛爬取到任务表
+　　php artisan mission:collect insert_mission match dota2 --force=0 
+　　对赛事比赛数据进一步处理
+　　php artisan mission:collect collect  match dota2
+　　同步到shangniu_match_list，shangniu_tournament_info，wca_match_list,wca_tournament_info四张表：
+　　php artisan mission:collect process  match dota2
+3.对比赛数据进行更新操作：
+　　php artisan mission:collect updateRecentMatch  match  lol
+　　php artisan mission:collect updateRecentMatch  match  kpl
+　　php artisan mission:collect updateRecentMatch  match  dota2
+4.dota2战队（来源shangniu）：
+　　爬取最新战队到任务表:
+　　php artisan mission:collect insert_mission team dota2 --force=0
+　　对战队数据进一步处理
+　　php artisan mission:collect collect  match dota2
+　　同步到team_info表同时生成战队对应的队员到任务表
+　　php artisan mission:collect process team dota2 
+5.KPL/LOL战队（scoregg站点和2cpseo站点）：
+　　爬取最新战队到任务表:
+　　php artisan mission:collect insert_mission team  kpl --force=0 
+　　php artisan mission:collect insert_mission team  lol --force=0 
+　　对任务表里面的数据进行进一步的处理
+　　php artisan mission:collect collect team  kpl
+　　php artisan mission:collect collect team  lol
+　　同步到到team_info表同时生成战队对应的队员(cpseo)到任务表
+　　php artisan mission:collect process team  kpl
+　　php artisan mission:collect process team  lol
+6.队员爬取：
+　　主要针对scoregg站点爬取队员到任务表：
+　　php artisan mission:collect insert_mission player kpl
+　　php artisan mission:collect insert_mission player lol
+　　对任务表所有的mission_type=player 的队员进一步处理
+　　php artisan mission:collect collect  player kpl
+　　php artisan mission:collect collect  player lol
+　　php artisan mission:collect collect  player dota2
+　　同步到player_info表
+　　php artisan mission:collect process  player kpl
+　　php artisan mission:collect process  player lol
+　　php artisan mission:collect process  player dota2
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
+　　
