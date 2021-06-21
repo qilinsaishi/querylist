@@ -636,7 +636,7 @@ class MatchService
             'all' => 1,//表示不管home_id和away_id是否有值
             'game' => $game,
             'round_detailed' => '0',
-            'fields' => "match_id,game,next_try,try",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
+            'fields' => "match_id,game,next_try,try,start_time",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
         ];
         $collectClassList = [];
         $matchList = $scoreggMatchModel->getMatchList($params);//获取round_detailed=0的数据
@@ -647,7 +647,7 @@ class MatchService
         if (count($matchList) > 0) {
             foreach ($matchList as &$val) {
 
-                echo 'start_time:' . date('Y-m-d H:i:s') . "-match_id:" . $val['match_id'] . "\n";
+                echo 'start_time:' . $val['start_time'] . "-match_id:" . $val['match_id'] . "\n";
                 $rt = $this->updateOneScoreggMatchList( $val['match_id'], $game, $val['next_try'],$val['try']);
                 if ($rt > 0) {
                     echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
@@ -780,7 +780,7 @@ class MatchService
             'next_try' => 1,
             'round_detailed' => '0',
             'all' => 1,//表示不管home_id和away_id是否有值
-            'fields' => "match_id,game,next_try,try,match_status,game_bo,tournament_id,home_id,away_id,home_name,away_name,home_score,away_score,start_time,away_logo,home_logo",
+            'fields' => "match_id,start_time,game,next_try,try,match_status,game_bo,tournament_id,home_id,away_id,home_name,away_name,home_score,away_score,start_time,away_logo,home_logo",
         ];
         $collectClassList = [];
         $matchCache = [];
@@ -791,7 +791,7 @@ class MatchService
         $rt=0;
         if (count($shangniuMatchList) > 0) {
             foreach ($shangniuMatchList as &$val) {
-                echo 'start_time:' . date('Y-m-d H:i:s') . "shangniu-match_id:" . $val['match_id'] . "\n";
+                echo 'start_time:' . $val['start_time'] . "shangniu-match_id:" . $val['match_id'] . "\n";
                 //================创建任务=======================
                 $cdetail['next_try'] = $val['next_try'];
                 $cdetail['try'] = $val['try'];
@@ -860,7 +860,7 @@ class MatchService
                         if(isset($rt['site_id']) && isset($rt['source']) && isset($rt['game']))
                         {
                             $data = ["api_id"=>2,"data_type"=>"match","site_id"=>$rt['site_id'],"source"=>$rt['source'],"game"=>$rt['game']];
-                            $return = curl_post(config("app.api_url")."/submit",json_encode($data));
+                            //$return = curl_post(config("app.api_url")."/submit",json_encode($data));
                         }
                         //任务状态更新为2
                         $missionModel->updateMission($insert_mission, ['mission_status' =>2]);
@@ -929,7 +929,7 @@ class MatchService
                 if(isset($rt['site_id']) && isset($rt['source']) && isset($rt['game']))
                 {
                     $data = ["api_id"=>2,"data_type"=>"match","site_id"=>$rt['site_id'],"source"=>$rt['source'],"game"=>$rt['game']];
-                    $return = curl_post(config("app.api_url")."/submit",json_encode($data));
+                    //$return = curl_post(config("app.api_url")."/submit",json_encode($data));
                 }
                 //任务状态更新为2
                 $missionModel->updateMission($insert_mission, ['mission_status' => 2]);

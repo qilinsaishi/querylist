@@ -124,7 +124,7 @@ class matchListModel extends Model
             //$end_time = $params['start_time']+30*86400;
             $match_list = $match_list->where("next_try", '<=', $currentTime);
             $match_list = $match_list->where("try", '<', 10);
-            $params['order'] = [["next_try","desc"]];
+            $params['order'] = [["start_time","desc"]];
             //$match_list = $match_list->whereRaw("unix_timestamp(start_time)+30*3600 <=".$currentTime);
 
         }
@@ -428,7 +428,7 @@ class matchListModel extends Model
                 if(isset($currentMatch[$key]) && ($currentMatch[$key] == $value))
                 {
                     //echo $currentMatch[$key]."-".$value."\n";
-                    echo $key.":passed\n";
+                    //echo $key.":passed\n";
                     unset($data[$key]);
                 }
                 else

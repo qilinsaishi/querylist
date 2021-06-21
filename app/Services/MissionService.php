@@ -282,7 +282,7 @@ class MissionService
                                     }
 
                                     $save = $ModelClass->saveMatch($value);
-                                    echo "saveMatch:".!is_array($save)?$save:$save['result']."\n";
+                                    //echo "saveMatch:".!is_array($save)?$save:$save['result']."\n";
 
                                     if ( count($roundList)>0)
                                     {
@@ -415,7 +415,7 @@ class MissionService
                             if(isset($save['site_id']) && isset($save['source']) && isset($save['game']))
                             {
                                 $data = ["api_id"=>2,"data_type"=>$result['mission_type'],"site_id"=>$save['site_id'],"source"=>$save['source'],"game"=>$save['game']];
-                                $return = curl_post(config("app.api_url")."/submit",json_encode($data));
+                                //$return = curl_post(config("app.api_url")."/submit",json_encode($data));
                             }
                         }
                         else
