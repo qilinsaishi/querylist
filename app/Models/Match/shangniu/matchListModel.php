@@ -72,7 +72,7 @@ class matchListModel extends Model
                 $match_list = $match_list->where("game",$params['game']);
             }
         }
-        //状态
+        //状态(0：数据异常，12：取消，13：延期，15：待定)
         if (isset($params['match_status']))
         {
             if(!is_array($params['match_status']))
@@ -84,7 +84,7 @@ class matchListModel extends Model
                     if($params['match_status']>0){
                         $match_list=$match_list->where("match_status", $params['match_status']);
                     }else{
-                        $match_list=$match_list->where("match_status",'<>', 0);//数据异常
+                        $match_list=$match_list->whereNotIn('match_status',[0,12,13,15]);//数据异常
                     }
                 }
 
@@ -94,7 +94,7 @@ class matchListModel extends Model
                 $match_list=$match_list->whereIn("match_status", $params['match_status']);
             }
         }else{
-            $match_list=$match_list->where("match_status",'<>', 0);////数据异常
+            $match_list=$match_list->whereNotIn('match_status',[0,12,13,15]);
         }
         //比赛开始时间start>0时间条件
         if (isset($params['start']) && $params['start'] > 0) {
