@@ -150,8 +150,8 @@ class scoregg
                 echo 'try:'.$try."\n";
                 echo 'next_try:'.$res['next_try']."\n";
             } else{
-                $data['next_try']=$res['start_time']-3*86400;
-                $data['try']=0;
+                $res['next_try']=$res['start_time']-3*86400;
+                $res['try']=0;
             }
 
         }
