@@ -126,11 +126,12 @@ class ScheduleService
                         $toGet = 1;
                     } elseif ($force == 0) {
                         $tournament=$tournamentModel->getTournamentById($tournamentInfo['tournamentId']);
+
                         //找到
-                        if (isset($tournament['tournamentId'])) {
+                        if (isset($tournament['tournament_id'])) {
                             $toGet = 0;
                             $mission_repeat++;
-                            echo "exits-shangniu-tournament-tournamentId:" . $tournamentInfo['tournamentId'] . "\n";
+                            echo "exits-shangniu-tournament-tournamentId:" . $tournament['tournament_id'] . "\n";
                             if ($mission_repeat >= self::MISSION_REPEAT) {
                                 echo $game . "shangniu-tournament-重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
                                 return;
