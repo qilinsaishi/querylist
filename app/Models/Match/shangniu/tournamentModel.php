@@ -139,8 +139,8 @@ class tournamentModel extends Model
     {
         $data['tournament_name'] = preg_replace("/\s+/", "",$data['tournament_name']);
         $data['tournament_name'] = trim($data['tournament_name']);
+        $currentTournament = $this->getTournamentById( $data['tournament_id']);
 
-        $currentTournament = $this->getTournamentByName( $data['tournament_name'], $data['game']);
         if(!isset($currentTournament['tournament_id']))
         {
             echo "toInsertTournament:"."\n";
