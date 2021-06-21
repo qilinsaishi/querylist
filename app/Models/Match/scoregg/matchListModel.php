@@ -111,11 +111,11 @@ class matchListModel extends Model
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['recent']) && $params['recent'] > 0) {
             $currentTime = time();
-            $start_time = date("Y-m-d", $currentTime);
+            $start_time = date("Y-m-d H:00:00", $currentTime);
             $end_time = date("Y-m-d", $currentTime+2*86400);
             $match_list = $match_list->where("start_time", '>=', $start_time);
             $match_list = $match_list->where("start_time", '<=', $end_time);
-            $orderByList = [["start_time","asc"]];
+            $params['order'] = [["start_time","asc"]];
         }
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['next_try']) && $params['next_try'] > 0) {
@@ -124,6 +124,7 @@ class matchListModel extends Model
             //$end_time = $params['start_time']+30*86400;
             $match_list = $match_list->where("next_try", '<=', $currentTime);
             $match_list = $match_list->where("try", '<', 10);
+            $params['order'] = [["start_time","desc"]];
             //$match_list = $match_list->whereRaw("unix_timestamp(start_time)+30*3600 <=".$currentTime);
 
         }
@@ -246,7 +247,7 @@ class matchListModel extends Model
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['recent']) && $params['recent'] > 0) {
             $currentTime = time();
-            $start_time = date("Y-m-d", $currentTime-3*86400);
+            $start_time = date("Y-m-d H:00:00", $currentTime);
             $end_time = date("Y-m-d", $currentTime+2*86400);
             $match_list = $match_count->where("start_time", '>=', $start_time);
             $match_list = $match_count->where("start_time", '<=', $end_time);
@@ -427,7 +428,7 @@ class matchListModel extends Model
                 if(isset($currentMatch[$key]) && ($currentMatch[$key] == $value))
                 {
                     //echo $currentMatch[$key]."-".$value."\n";
-                    echo $key.":passed\n";
+                    //echo $key.":passed\n";
                     unset($data[$key]);
                 }
                 else

@@ -815,7 +815,6 @@ class PrivilegeService
                         if (isset($tournamentInfo['tournament_id'])) {
                             $tournament[$matchInfo['tournament_id']] = $tournamentInfo;
                         }
-
                     }
                     $data[$matchKey]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
                     if (isset($matchInfo['home_id']) && $matchInfo['home_id']>0) {
@@ -826,9 +825,7 @@ class PrivilegeService
                             }
                             $teamList[$matchInfo['home_id']] = $teamInfo;
                         }
-
                     }
-
                     if (isset($matchInfo['away_id']) && $matchInfo['away_id']>0) {
                         $teamInfo = $modelTeamClass->$functionTeamSingle($matchInfo['away_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
                         if (isset($teamInfo['team_id'])) {
@@ -954,6 +951,7 @@ class PrivilegeService
                         $playerDetail = [];
                         if (isset($matchData['result_list']) && count($matchData['result_list']) > 0) {
                             foreach ($matchData['result_list'] as $r_key => $result) {
+                                $playerDetail[$r_key]['win_teamID'] = $result['win_teamID'];
                                 $currentKey = "";
                                 if (isset($result['detail'])) {
                                     foreach ($result['detail']['result_list'] as $result_key => $value) {

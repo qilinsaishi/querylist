@@ -180,7 +180,7 @@ class Mission extends Command
                     /* php artisan mission:collect updateRecentMatch  match dota2 --count=50
                     (更新scoregg_match_list表里面的round_detailed=0的数据)*/
                     //$matchService->updateWcaMatchListStatus($game,$count);
-                    $matchService->updateShangniuMatchListStatus($game, $count = 50);
+                    $matchService->updateShangniuMatchListStatus($game, $count);
 
                 }
 
