@@ -55,7 +55,7 @@ class matchListModel extends Model
             $match_list = $match_list ->where("round_detailed", $params['round_detailed']);
         }
 
-
+        $match_list = $match_list->whereRaw('(home_display * away_display)>0');
         //游戏类型
         if(isset($params['game']))
         {
