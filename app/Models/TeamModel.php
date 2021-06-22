@@ -53,7 +53,7 @@ class TeamModel extends Model
     ];
     public function getTeamList($params)
     {
-        $fields = $params['fields']??"team_id,team_name,logo";
+        $fields = $params['fields']??"team_id,team_name,logo,status";
         $fields = explode(",",$fields);
         if($fields!=["*"] && !in_array("team_id",$fields))
         {
@@ -64,6 +64,12 @@ class TeamModel extends Model
         if(isset($params['ids']) && count($params['ids'])>0)
         {
             $team_list = $team_list->whereIn("team_id",$params['ids']);
+        }
+        //显示状态， 0不显示 1显示
+        $params['status'] = $params['status'] ?? 1;
+        if ($params['status'] >= 0)
+        {
+            $team_list = $team_list->where("status",$params['status']);
         }
         //总表队伍ID
         if(isset($params['tid']) && intval($params['tid'])>=0)

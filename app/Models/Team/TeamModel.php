@@ -55,6 +55,12 @@ class TeamModel extends Model
     {
         $fields = $params['fields']??"team_id,team_name,logo,team_history,tid,game";
         $team_list =$this->select(explode(",",$fields));
+        //显示状态，负值全部 0不显示 1显示
+        $params['status'] = $params['status'] ?? 1;
+        if ($params['status'] >= 0)
+        {
+            $team_list = $team_list->where("status",$params['status']);
+        }
         //总表队伍ID
         if(isset($params['tid']) && intval($params['tid'])>=0)
         {
