@@ -1302,7 +1302,7 @@ class  PlayerService
         $totalPlayerModel = new TotalPlayerModel();
         if($team_id>0)
         {
-            $playerList = $playerModel->getPlayerList(['team_id'=>$team_id,"fields"=>"player_id,pid,status,original_source"]);
+            $playerList = $playerModel->getPlayerList(['team_id'=>$team_id,'page_size'=>1000,"fields"=>"player_id,pid,status,original_source"]);
             foreach($playerList as $playerInfo)
             {
                 if($playerInfo['status']!=$status)
