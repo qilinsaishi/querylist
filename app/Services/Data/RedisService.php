@@ -4,6 +4,7 @@ namespace App\Services\Data;
 
 use App\Models\Admin\Site;
 use App\Models\InformationModel;
+use App\Services\PlayerService;
 use App\Services\TeamService;
 use PhpParser\Node\Stmt\Else_;
 
@@ -245,19 +246,6 @@ class RedisService
     public function refreshCache($dataType, $params = [], $keyName = '')
     {
         $main = config("app.main");
-        //如果当前不在redis配置的缓存中
-        /*
-        if(intval($main)<=0)
-        {
-            $params = "dataType=".$dataType."&params=".json_encode($params);
-            $apiUrl = config("app.api_url")."/refresh?".$params;
-            echo $apiUrl;
-            echo "\n";
-            $request = curl_get($apiUrl);
-            var_dump($request);
-            die();
-        }
-        */
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
             $redis = app("redis.connection");
@@ -389,11 +377,26 @@ class RedisService
             {
                 $this->refreshCache("matchDetail",['tid'=>$tid]);
             }
-            //如果是整合队伍，要再调用一次处理关联比赛
+            //队伍
             if($dataType == "totalTeamInfo")
             {
                 $team_id = $params[0];
+                //处理队伍关联的显示状态
                 (new TeamService())->processTeamDisplay($team_id);
+                $cacheConfig = $this->getCacheConfig();
+                //清空比赛列表
+                $this->truncate($cacheConfig['matchList']['prefix']);
+                //清空所有整合队伍关联的缓存
+                $this->truncate($cacheConfig['intergratedTeamList']['prefix']);
+            }
+            //如果是整合队伍，要再调用一次处理关联比赛
+            if($dataType == "totalPlayerInfo")
+            {
+                $player_id = $params[0];
+                (new PlayerService())->processPlayerDisplay(0,$player_id,-1);
+                $cacheConfig = $this->getCacheConfig();
+                //清空所有整合队员关联的缓存
+                $this->truncate($cacheConfig['intergratedPlayerList']['prefix']);
             }
             return $params_list;
         }
