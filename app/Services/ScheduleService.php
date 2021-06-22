@@ -127,7 +127,7 @@ class ScheduleService
                     } elseif ($force == 0) {
                         $tournament=$tournamentModel->getTournamentById($tournamentInfo['tournamentId']);
                         //找到
-                        if (isset($tournament['tournamentId'])) {
+                        if (isset($tournament['tournament_id'])) {
                             $toGet = 0;
                             $mission_repeat++;
                             echo "exits-shangniu-tournament-tournamentId:" . $tournamentInfo['tournamentId'] . "\n";
