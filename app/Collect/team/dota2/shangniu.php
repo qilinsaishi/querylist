@@ -31,6 +31,7 @@ class shangniu
         $cdata=[];
         $url=$arr['detail']['url'] ?? $arr['source_link'];
         $res= $arr['detail'] ?? [];
+
         $teamInfo=$this->shangniuTeam($url,$res['teamId']);
         $res=array_merge($res,$teamInfo);
 
@@ -50,9 +51,9 @@ class shangniu
         return $cdata;
     }
     public function process($arr)
-    {
+    {print_r($arr);exit;
         $redis = app("redis.connection");
-        $arr['content']['teamLogo'] = getImage($arr['content']['teamLogo'],$redis);
+        $arr['content']['teamLogo'] = getImage($arr['content']['teamLogo']??'',$redis);
         $data = getDataFromMapping($this->data_map,$arr['content']);
         return $data;
     }

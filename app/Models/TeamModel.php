@@ -448,4 +448,23 @@ class TeamModel extends Model
         }
         return $keywords;
     }
+    //查询不全的队伍去更新任务
+    public function getUpdateTeam($game)
+    {
+        if($game=='dota2'){
+            $source='shangniu';
+            $table='shangniu_match_list';
+        }else{
+            $source='scoregg';
+            $table='scoregg_match_list';
+        }
+        $homeSql="SELECT distinct(home_id) FROM ".$table." WHERE home_id  not in (select DISTINCT(site_id) from team_info where original_source ='".$source."' and game='".$game."')";
+        $awaySql="SELECT distinct(away_id) FROM ".$table." WHERE away_id not in (select DISTINCT(site_id) from team_info where original_source ='".$source."' and game='".$game."')";
+        $homeTeamInfo=array_column(json_decode(json_encode(\DB::select($homeSql)),true),"home_id");
+        $awayTeamInfo=array_column(json_decode(json_encode(\DB::select($awaySql)),true),"away_id");
+
+        $team_info =  array_unique(array_merge($homeTeamInfo,$awayTeamInfo));
+
+        return $team_info??[];
+    }
 }
