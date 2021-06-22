@@ -203,7 +203,7 @@ class IntergrationService
                             //不在需要json的列表中
                             if(!in_array($column,$jsonList))
                             {
-                                if(strlen($teamInfo[$column])>strlen($temp))
+                                if(isset($teamInfo[$column]) && strlen($teamInfo[$column])>strlen($temp))
                                 {
                                     $temp = $teamInfo[$column];
                                     $current_team = $teamInfo['team_id']."|".$source['source'];
@@ -435,7 +435,7 @@ class IntergrationService
                             //不在需要json的列表中
                             if(!in_array($column,$jsonList))
                             {
-                                if(strlen($playerInfo[$column])>strlen($temp))
+                                if(isset($playerInfo[$column]) && strlen($playerInfo[$column])>strlen($temp))
                                 {
                                     $temp = $playerInfo[$column];
                                     $current_player = $playerInfo['player_id']."|".$source['source'];

@@ -1290,5 +1290,43 @@ class  PlayerService
         ];
         return $player_ability_and_base;
     }
-
+    //设置关联队员的各项显示状态
+    public function processPlayerDisplay($team_id = 0,$player_id = 0,$status = 0)
+    {
+        //只在隐藏状态下有效
+        if($status == 1)
+        {
+            return;
+        }
+        $playerModel = new PlayerModel();
+        $totalPlayerModel = new TotalPlayerModel();
+        if($team_id>0)
+        {
+            $playerList = $playerModel->getPlayerList(['team_id'=>$team_id,"fields"=>"player_id,pid,status,original_source"]);
+            foreach($playerList as $playerInfo)
+            {
+                if($playerInfo['status']!=$status)
+                {
+                    $this->processPlayerDisplay(0,$playerInfo['player_id'],$status);
+                }
+                else
+                {
+                    echo "sameStatus\n";
+                    echo "pass\n";
+                }
+            }
+        }
+        elseif($player_id>0)
+        {
+            $playerInfo = $playerModel->getPlayerById($player_id,"player_id,pid,status,original_source");
+            $playerModel->updatePlayer($player_id,['status'=>$status]);
+            $connectPlayerList = $playerModel->getPlayerList(['pid'=>$playerInfo['pid'],"fields"=>"player_id,pid,status,original_source"]);
+            $displayStatus = array_sum(array_column($connectPlayerList,'status'));
+            if($displayStatus == 0)
+            {
+                $totalPlayerModel->updatePlayer($playerInfo['pid'],['display'=>$displayStatus]);
+                (new IntergrationService())->getPlayerInfo(0,$playerInfo['pid'],1,1);
+            }
+        }
+    }
 }

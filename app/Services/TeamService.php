@@ -1128,22 +1128,13 @@ class TeamService
         ];
         return $team_ability_and_base;
     }
+    //设置关联队伍的各项显示状态
     public function processTeamDisplay($team_id)
     {
         $teamModel = new TeamModel();
         $totalTeamModel = new TotalTeamModel();
         $teamInfo = $teamModel->getTeamById($team_id,"team_id,tid,status,site_id,original_source");
         //找到并且是整合队伍
-        if(isset($teamInfo['team_id']) && $teamInfo['tid']>0)
-        {
-            //更新整合表的状态，根据详情表的汇总显示状态
-            $teamList = $teamModel->getTeamList(['tid'=>$teamInfo['tid'],"fields"=>"team_id,tid,status"]);
-            $displayStatus = array_sum(array_column($teamList,'status'));
-            $totalTeamModel->updateTeam($teamInfo['tid'],['display'=>$displayStatus]);
-            //todo 刷新缓存
-            (new IntergrationService())->getTeamInfo(0,$teamInfo['tid'],1,1);
-        }
-        //找到
         if(isset($teamInfo['team_id']))
         {
             if($teamInfo['original_source'] == "shangniu")
@@ -1161,8 +1152,16 @@ class TeamService
             {
                 //暂不更新
             }
+            if($teamInfo['tid']>0)
+            {
+                //更新整合表的状态，根据详情表的汇总显示状态
+                $teamList = $teamModel->getTeamList(['tid'=>$teamInfo['tid'],"fields"=>"team_id,tid,status"]);
+                $displayStatus = array_sum(array_column($teamList,'status'));
+                $totalTeamModel->updateTeam($teamInfo['tid'],['display'=>$displayStatus]);
+                //todo 刷新缓存
+                (new IntergrationService())->getTeamInfo(0,$teamInfo['tid'],1,1);
+            }
+            (new PlayerService())->processPlayerDisplay($teamInfo['team_id'],0,$teamInfo['status']);
         }
-
     }
-
 }
