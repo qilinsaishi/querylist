@@ -52,7 +52,13 @@ class PlayerModel extends Model
             $fields[] = "player_id";
         }
         $player_list =$this->select($fields);
-        $player_list = $player_list->where("status",1);
+        //显示状态， 0不显示 1显示
+        $params['status'] = $params['status'] ?? 1;
+        if ($params['status'] >= 0)
+        {
+            $player_list = $player_list->where("status",$params['status']);
+        }
+
         //队员ID
         if(isset($params['ids']) && is_array($params['ids']) && count($params['ids'])>=0)
         {

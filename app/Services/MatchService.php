@@ -10,6 +10,8 @@ use App\Models\InformationModel;
 use App\Models\Match\scoregg\matchListModel;
 use App\Models\Match\scoregg\tournamentModel;
 use App\Models\MissionModel;
+use App\Models\Team\TotalTeamModel;
+use App\Models\TeamModel;
 use App\Services\Data\RedisService;
 use App\Services\MissionService as oMission;
 use QL\QueryList;
@@ -27,7 +29,7 @@ class MatchService
         }
         if ($game == 'dota2') {
             $this->shangniuMatch($game, $week, $force);
-            $this->wcaMatchList($game, $week, $force);
+            //$this->wcaMatchList($game, $week, $force);
         }
         /* if ($game == 'dota2') {//这个dota2的数据不用改，是拼接起来的专题。暂时不用改
              $this->getDota2International($game);
@@ -43,6 +45,8 @@ class MatchService
         //赛事赛程列表
         $client = new ClientServices();
         $missionModel = new MissionModel();
+        $teamModel=new TeamModel();
+        $totalTeamModel=new TotalTeamModel();
         $shangniuMatchModel=new \App\Models\Match\shangniu\matchListModel();
         $curtime = date('Y-m-d', strtotime('Monday') - $week * 7 * 86400);
         for($i = 0; $i < 4; $i++){
@@ -62,6 +66,20 @@ class MatchService
                     if(count($matchList)>0){
                         //比赛列表
                         foreach ($matchList as $matchInfo){
+                            //主队战队信息
+                            $homeTeamObj=$teamModel->getTeamBySiteId($matchInfo['homeId'],'shangniu',$game);
+                            $homeTid=$homeTeamObj['tid']??0;
+                            $homeTotalTeamObj=$totalTeamModel->getTeamById($homeTid);
+                            //home_display主队显示信息
+                            $matchInfo['home_display']=$homeTotalTeamObj['display'] ?? 0;
+
+                            //客队战队信息
+                            $awayTeamObj=$teamModel->getTeamBySiteId($matchInfo['awayId'],'shangniu',$game);
+                            $awayId=$awayTeamObj['tid'] ?? 0;
+                            $awayTotalTeamObj=$totalTeamModel->getTeamById($awayId);
+                            //away_display客队显示状态
+                            $matchInfo['away_display']=$awayTotalTeamObj['display'] ?? 0;
+
                             //　强制爬取
                             if ($force == 1) {
                                 $toGet = 1;

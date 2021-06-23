@@ -60,6 +60,12 @@ class TotalPlayerModel extends Model
             $player_list = $player_list->whereIn("original_source",array_column($sourceList,"source"));
         }
         */
+        //显示状态，负值全部 0不显示 1显示
+        $params['display'] = $params['display'] ?? 1;
+        if ($params['display'] >= 0)
+        {
+            $player_list = $player_list->where("display",$params['display']);
+        }
         //总表队员ID
         if(isset($params['pids']) && count($params['pid'])>=1)
         {

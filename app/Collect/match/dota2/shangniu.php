@@ -41,6 +41,9 @@ class shangniu
                 'round_detailed'=>['path'=>"round_detailed",'default'=>0],//客队id
                 'next_try'=>['path'=>"next_try",'default'=>0],//客队id
                 'try'=>['path'=>"try",'default'=>0],//轮次
+                'home_display'=>['path'=>"home_display",'default'=>0],//主队要求显示
+                'away_display'=>['path'=>"away_display",'default'=>0],//客队要求显示
+
             ]
         ];
     public function collect($arr)

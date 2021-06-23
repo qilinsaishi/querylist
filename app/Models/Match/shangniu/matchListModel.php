@@ -55,7 +55,7 @@ class matchListModel extends Model
             $match_list = $match_list ->where("round_detailed", $params['round_detailed']);
         }
 
-
+        $match_list = $match_list->whereRaw('(home_display * away_display)>0');
         //游戏类型
         if(isset($params['game']))
         {
@@ -124,7 +124,7 @@ class matchListModel extends Model
             //$end_time = $params['start_time']+30*86400;
             $match_list = $match_list->where("next_try", '<=', $currentTime);
             $match_list = $match_list->where("try", '<', 10);
-            $params['order'] = [["start_time","asc"]];
+            $params['order'] = [["start_time","desc"]];
             //$match_list = $match_list->whereRaw("unix_timestamp(start_time)+30*3600 <=".$currentTime);
 
         }
@@ -313,6 +313,20 @@ class matchListModel extends Model
             {
                 return ['result'=>1,"site_id"=>$currentMatch['match_id'],"source"=>"shangniu","game"=>$currentMatch['game']];
             }
+        }
+    }
+    public function setMatchDisplay($team_id,$display)
+    {
+        if($team_id>0)
+        {
+            $currentTime = date("Y-m-d H:i:s");
+            $home_update = $this->where('home_id',$team_id)->update(['home_display'=>$display,'update_time'=>$currentTime]);
+            $away_update = $this->where('away_id',$team_id)->update(['away_display'=>$display,'update_time'=>$currentTime]);
+            return ['home'=>$home_update,'away'=>$away_update,'total'=>$home_update+$away_update];
+        }
+        else
+        {
+            return ['home'=>0,'away'=>0,'total'=>0];
         }
     }
 }

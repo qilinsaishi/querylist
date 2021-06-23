@@ -7,9 +7,11 @@ use App\Libs\ClientServices;
 use App\Models\CollectResultModel;
 use App\Models\CollectUrlModel;
 use App\Models\Match\scoregg\tournamentModel;
+use App\Models\Match\shangniu\matchListModel;
 use App\Models\MissionModel;
 use App\Models\TeamModel;
 use App\Models\PlayerModel;
+use App\Services\Data\IntergrationService;
 use App\Services\MissionService as oMission;
 use App\Models\Player\TotalPlayerModel as TotalPlayerModel;
 use App\Models\Player\PlayerMapModel as PlayerMapModel;
@@ -87,7 +89,9 @@ class TeamService
                         }
                     }
                     if($toGet==1){
-                        $source_link='https://www.shangniu.cn/esports/dota-team-'.$teamInfo['teamId'].'.html';
+                        $source_link='https://www.shangniu.cn/esports/dota-team
+-'.$teamInfo['teamId'].'.html';
+
                         unset($teamInfo['kda']);
 
                         $params = [
@@ -134,6 +138,41 @@ class TeamService
         }
         return true;
 
+    }
+    public function createTeamMission($game,$id,$source){
+        echo "game:".$game."-id:".$id."-：".$source."\n";
+        if($source == "scoregg")
+        {
+            $team_url = 'https://www.scoregg.com/big-data/team/' . $id . '?tournamentID=&type=baike';
+            $params = [
+            'team_url' => $team_url,
+            'game' => $game,
+             'team_id'=>$id,
+            'source' => $source];
+        }
+        elseif($source = "shangniu")
+        {
+            $team_url='https://www.shangniu.cn/esports/dota-team-'.$id.'.html';
+            $params = [
+                'team_url' => $team_url,
+                'game' => $game,
+                'teamId'=>$id,
+                'source' => $source];
+
+        }
+        $params['team_id']=$id;
+        $adata = [
+            "asign_to" => 1,
+            "mission_type" => 'team',
+            "mission_status" => 1,
+            "game" => $game,
+            "source" => $source,
+            "title" => "",
+            'source_link' => $team_url,
+            "detail" => json_encode($params),
+        ];
+        $insert = (new oMission())->insertMission($adata);
+        return $insert;
     }
 
     public function getScoreggTeamDetail($game, $force = 0)
@@ -1126,5 +1165,58 @@ class TeamService
         ];
         return $team_ability_and_base;
     }
+    //设置关联队伍的各项显示状态
+    public function processTeamDisplay($team_id)
+    {
+        $teamModel = new TeamModel();
+        $totalTeamModel = new TotalTeamModel();
+        $teamInfo = $teamModel->getTeamById($team_id,"team_id,tid,status,site_id,original_source");
+        //找到并且是整合队伍
+        if(isset($teamInfo['team_id']))
+        {
+            if($teamInfo['original_source'] == "shangniu")
+            {
+                //设置比赛的显示
+                $setDisplay = (new matchListModel())->setMatchDisplay($teamInfo['site_id'],$teamInfo['status']);
+                //如果有更新到显示的比赛
+                if($setDisplay['total']>0)
+                {
+                    //todo 刷新缓存
+                    //refresh
+                }
+            }
+            elseif(($teamInfo['source'] == "scoregg"))
+            {
+                //暂不更新
+            }
+            if($teamInfo['tid']>0)
+            {
+                //更新整合表的状态，根据详情表的汇总显示状态
+                $teamList = $teamModel->getTeamList(['tid'=>$teamInfo['tid'],"fields"=>"team_id,tid,status"]);
+                $displayStatus = array_sum(array_column($teamList,'status'));
+                $totalTeamModel->updateTeam($teamInfo['tid'],['display'=>$displayStatus]);
+                //todo 刷新缓存
+                (new IntergrationService())->getTeamInfo(0,$teamInfo['tid'],1,1);
+            }
+            //只有隐藏队伍时才显示隐藏队员
+            if($teamInfo['status']==0){
+                (new PlayerService())->processPlayerDisplay($teamInfo['team_id'],0,$teamInfo['status']);
+            }
 
+        }
+    }
+
+    public function createTeamMissionForMissingTeam($game){
+        $teamModel=new TeamModel();
+        $teamList=$teamModel->getUpdateTeam($game);
+        echo "game:".$game."\n";
+        if(count($teamList)>0){
+            foreach ($teamList as $teamInfo){
+                $mission_id = $this->createTeamMission($game,$teamInfo,$game=="dota2"?"shangniu":"scoregg");
+                echo "mission_id:".$mission_id."\n";
+            }
+        }
+
+        return true;
+    }
 }

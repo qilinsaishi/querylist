@@ -1290,5 +1290,46 @@ class  PlayerService
         ];
         return $player_ability_and_base;
     }
-
+    //设置关联队员的各项显示状态
+    //-1表示沿用当前状态 0表示设定隐藏 1表示设定显示
+    public function processPlayerDisplay($team_id = 0,$player_id = 0,$status = -1)
+    {
+        $playerModel = new PlayerModel();
+        $totalPlayerModel = new TotalPlayerModel();
+        if($team_id>0)
+        {
+            $playerList = $playerModel->getPlayerList(['team_id'=>$team_id,'page_size'=>1000,"fields"=>"player_id,pid,status,original_source"]);
+            foreach($playerList as $playerInfo)
+            {
+                //不沿用当前状态 且目标状态与现有状态不一致
+                if($status !=-1 && $playerInfo['status']!=$status)
+                {
+                    $this->processPlayerDisplay(0,$playerInfo['player_id'],$status);
+                }
+                else
+                {
+                    echo "sameStatus\n";
+                    echo "pass\n";
+                }
+            }
+        }
+        elseif($player_id>0)
+        {
+            $playerInfo = $playerModel->getPlayerById($player_id,"player_id,pid,status,original_source");
+            //不沿用当前状态 且目标状态与现有状态不一致
+            if($status != -1 && $status != $playerInfo['status'])
+            {
+                //更新原有记录
+                $playerModel->updatePlayer($player_id,['status'=>$status]);
+            }
+            $connectPlayerList = $playerModel->getPlayerList(['pid'=>$playerInfo['pid'],"fields"=>"player_id,pid,status,original_source"]);
+            $displayStatus = array_sum(array_column($connectPlayerList,'status'));
+            $totalPlayerModel->updatePlayer($playerInfo['pid'],['display'=>$displayStatus]);
+           /* if($displayStatus == 0)
+            {
+                $totalPlayerModel->updatePlayer($playerInfo['pid'],['display'=>$displayStatus]);
+            }*/
+            (new IntergrationService())->getPlayerInfo(0,$playerInfo['pid'],1,1);
+        }
+    }
 }

@@ -185,7 +185,22 @@ class Mission extends Command
                 }
 
                 break;
+            case 'fillTeam':
+                $teamService=new TeamService();
+                if($game != "all")
+                {
+                    $gameList = [$game];
+                }
+                else
+                {
+                    $gameList = ['lol','kpl','dota2'];
+                }
+                foreach($gameList as $game){
+                    $teamService->createTeamMissionForMissingTeam($game);
+                }
+                die();
 
+                break;
 
             default:
 

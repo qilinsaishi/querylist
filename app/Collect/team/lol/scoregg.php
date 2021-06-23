@@ -38,6 +38,7 @@ class scoregg
             $res = $url = $arr['detail'] ?? [];
             $res=array_merge($res,$teamInfo);
 
+
             $team_stat=(new TeamService())->getScoreggTeamInfo($res['team_id']);
             $res['team_stat']=$team_stat;
             if (count($res) >0) {
@@ -132,7 +133,7 @@ class scoregg
             $arr['content']['en_name'] = $arr['content']['team_name'];
         }*/
 
-        $arr['content']['team_image'] = getImage($arr['content']['team_image'],$redis);
+        $arr['content']['team_image'] = getImage($arr['content']['team_image']??"",$redis);
         $arr['content']['raceStat'] = ["win"=>intval($arr['content']['win']??0),"draw"=>0,"lose"=>intval($arr['content']['los']??0)];
         //$arr['content']['description'] = $arr['content']['team_history'];
         //$arr['content']['team_history'] = json_encode($arr['content']['team_history']);

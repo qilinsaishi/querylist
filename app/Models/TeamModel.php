@@ -53,7 +53,7 @@ class TeamModel extends Model
     ];
     public function getTeamList($params)
     {
-        $fields = $params['fields']??"team_id,team_name,logo";
+        $fields = $params['fields']??"team_id,team_name,logo,status";
         $fields = explode(",",$fields);
         if($fields!=["*"] && !in_array("team_id",$fields))
         {
@@ -64,6 +64,12 @@ class TeamModel extends Model
         if(isset($params['ids']) && count($params['ids'])>0)
         {
             $team_list = $team_list->whereIn("team_id",$params['ids']);
+        }
+        //显示状态， 0不显示 1显示
+        $params['status'] = $params['status'] ?? 1;
+        if ($params['status'] >= 0)
+        {
+            $team_list = $team_list->where("status",$params['status']);
         }
         //总表队伍ID
         if(isset($params['tid']) && intval($params['tid'])>=0)
@@ -441,5 +447,24 @@ class TeamModel extends Model
             }
         }
         return $keywords;
+    }
+    //查询不全的队伍去更新任务
+    public function getUpdateTeam($game)
+    {
+        if($game=='dota2'){
+            $source='shangniu';
+            $table='shangniu_match_list';
+        }else{
+            $source='scoregg';
+            $table='scoregg_match_list';
+        }
+        $homeSql="SELECT distinct(home_id) FROM ".$table." WHERE home_id  not in (select DISTINCT(site_id) from team_info where original_source ='".$source."' and game='".$game."')";
+        $awaySql="SELECT distinct(away_id) FROM ".$table." WHERE away_id not in (select DISTINCT(site_id) from team_info where original_source ='".$source."' and game='".$game."')";
+        $homeTeamInfo=array_column(json_decode(json_encode(\DB::select($homeSql)),true),"home_id");
+        $awayTeamInfo=array_column(json_decode(json_encode(\DB::select($awaySql)),true),"away_id");
+
+        $team_info =  array_unique(array_merge($homeTeamInfo,$awayTeamInfo));
+
+        return $team_info??[];
     }
 }

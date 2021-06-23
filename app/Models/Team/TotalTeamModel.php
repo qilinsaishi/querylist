@@ -52,7 +52,13 @@ class TotalTeamModel extends Model
     }
     public function getTeamList($params)
     {
-        $team_list =$this->select("*");
+        $team_list = $this->select("*");
+        //显示状态，负值全部 0不显示 1显示
+        $params['display'] = $params['display'] ?? 1;
+        if ($params['display'] >= 0)
+        {
+            $team_list = $team_list->where("display",$params['display']);
+        }
         //总表队伍ID
         if(isset($params['tid']) && !is_array($params['tid']) && intval($params['tid'])>=0)
         {
@@ -177,6 +183,13 @@ class TotalTeamModel extends Model
     public function getTeamCount($params=[])
     {
         $team_count =$this;
+
+        //显示状态，负值全部 0不显示 1显示
+        $params['display'] = $params['display'] ?? 1;
+        if ($params['display'] >= 0)
+        {
+            $team_count = $team_count->where("display",$params['display']);
+        }
         //总表队伍ID
         if(isset($params['tid']) && !is_array($params['tid']) && intval($params['tid'])>=0)
         {
