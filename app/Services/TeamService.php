@@ -1198,7 +1198,11 @@ class TeamService
                 //todo 刷新缓存
                 (new IntergrationService())->getTeamInfo(0,$teamInfo['tid'],1,1);
             }
-            (new PlayerService())->processPlayerDisplay($teamInfo['team_id'],0,$teamInfo['status']);
+            //只有隐藏队伍时才显示隐藏队员
+            if($teamInfo['status']==0){
+                (new PlayerService())->processPlayerDisplay($teamInfo['team_id'],0,$teamInfo['status']);
+            }
+
         }
     }
 
