@@ -42,7 +42,7 @@ class matchListModel extends Model
     ];
     public function getMatchList($params)
     {
-        //\DB::connection()->enableQueryLog();
+        \DB::connection()->enableQueryLog();
         $start = microtime(true);
         $fields = $params['fields'] ?? "match_id,game,match_status,tournament_id,home_id,away_id,home_name,away_name,home_logo,away_logo,home_score,away_score,start_time,match_data";
         $match_list =$this->select(explode(",",$fields));
