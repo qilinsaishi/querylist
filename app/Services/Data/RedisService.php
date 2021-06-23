@@ -4,6 +4,8 @@ namespace App\Services\Data;
 
 use App\Models\Admin\Site;
 use App\Models\InformationModel;
+use App\Models\PlayerModel;
+use App\Models\TeamModel;
 use App\Services\PlayerService;
 use App\Services\TeamService;
 use PhpParser\Node\Stmt\Else_;
@@ -375,6 +377,7 @@ class RedisService
             //如果是整合队伍，要再调用一次处理关联比赛
             if($dataType == "intergratedTeam")
             {
+                $tid=$tid??$params[0];
                 $this->refreshCache("matchDetail",['tid'=>$tid]);
             }
             //队伍
@@ -394,9 +397,21 @@ class RedisService
             {
                 $player_id = $params[0];
                 (new PlayerService())->processPlayerDisplay(0,$player_id,-1);
+
                 $cacheConfig = $this->getCacheConfig();
                 //清空所有整合队员关联的缓存
                 $this->truncate($cacheConfig['intergratedPlayerList']['prefix']);
+                //清空战队详情关联缓存
+                $playerModel=new PlayerModel();
+                $playerInfo=$playerModel->getPlayerById($player_id);
+                $team_id=$playerInfo['team_id'] ?? 0;
+                //通过team_id获取tid
+                $teamInfo=(new TeamModel())->getTeamById($team_id);
+                $tid=$teamInfo['tid']??0;
+                $params=[$tid];
+
+                $this->refreshCache("intergratedTeam",($params));
+
             }
             return $params_list;
         }
