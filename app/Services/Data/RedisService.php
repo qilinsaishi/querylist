@@ -389,6 +389,9 @@ class RedisService
                 $cacheConfig = $this->getCacheConfig();
                 //清空比赛列表
                 $this->truncate($cacheConfig['matchList']['prefix']);
+                //清空赛事详情
+                $this->truncate($cacheConfig['tournament']['prefix']);
+
                 //清空所有整合队伍关联的缓存
                 $this->truncate($cacheConfig['intergratedTeamList']['prefix']);
             }
