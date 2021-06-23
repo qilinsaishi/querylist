@@ -838,6 +838,7 @@ class PrivilegeService
                     }
                     $data[$matchKey]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
                     $data[$matchKey]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
+                    unset($data[$matchKey]['match_data']);
 
                 }
             }
