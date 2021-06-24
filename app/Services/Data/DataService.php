@@ -141,24 +141,29 @@ class DataService
         $return = [];
         $siteMapConfig = [
             1=>[
-            "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'team_id'],
-            "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'player_id'],
-            "herodetail"=>['dataType'=>'lolHeroList','page_size'=>100,"fields"=>"hero_id"],
-            "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>1,"fields"=>'id'],
+            "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'team_id','reset'=>1],
+            "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'lol',"source"=>"cpseo","fields"=>'player_id','reset'=>1],
+            "herodetail"=>['dataType'=>'lolHeroList','page_size'=>100,"fields"=>"hero_id",'reset'=>1],
+            "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>1,"fields"=>'id','reset'=>1],
             ],
             3=>[
-            "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'kpl',"source"=>"scoregg","fields"=>'team_id'],
-            "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'kpl',"source"=>"scoregg","fields"=>'player_id'],
-            "herodetail"=>['dataType'=>'kplHeroList','page_size'=>100,"fields"=>"hero_id"],
-            "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id'],
+            "teamdetail"=>['dataType'=>'totalTeamList',"page_size"=>1000,"game"=>'kpl',"source"=>"scoregg","fields"=>'team_id','reset'=>1],
+            "playerdetail"=>['dataType'=>'totalPlayerList',"page_size"=>1000,"game"=>'kpl',"source"=>"scoregg","fields"=>'player_id','reset'=>1],
+            "herodetail"=>['dataType'=>'kplHeroList','page_size'=>100,"fields"=>"hero_id",'reset'=>1],
+            "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id','reset'=>1],
             ],
             2=>[
-                "detail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>1,"fields"=>'id'],
+                "detail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>1,"fields"=>'id','reset'=>1],
             ],
             4=>[
-                "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id'],
-                "videodetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'dota2',"type"=>"7","source"=>"gamedota2","fields"=>'id'],
-                "tournament"=>["dataType"=>"tournamentList","game"=>'dota2',"page"=>1,"page_size"=>1000,"source"=>"gamedota2","fields"=>'tournament_id'],
+                "newsdetail"=>['dataType'=>'informationList',"page_size"=>1000,"site"=>3,"fields"=>'id','reset'=>1],
+                "videodetail"=>['dataType'=>'informationList',"page_size"=>1000,"game"=>'dota2',"type"=>"7","source"=>"gamedota2","fields"=>'id','reset'=>1],
+                "tournament"=>["dataType"=>"tournamentList","game"=>'dota2',"page"=>1,"page_size"=>1000,"source"=>"gamedota2","fields"=>'tournament_id','reset'=>1],
+            ],
+            5=>[
+                "newsdetail"=>['dataType'=>'informationList',"page_size"=>10,"site"=>5,"fields"=>'id','reset'=>1],
+                "teamdetail"=>['dataType'=>'intergratedTeamList',"page_size"=>200,"game"=>['lol','kpl','dota2'],"fields"=>'tid,team_name','reset'=>1],
+                "playerdetail"=>['dataType'=>'intergratedPlayerList',"page_size"=>200,"game"=>['lol','kpl','dota2'],"fields"=>'pid,player_name','reset'=>1],
             ],
         ];
         $menu = $siteMapConfig[$data['site_id']]??[];
@@ -175,7 +180,8 @@ class DataService
                 $count = count($dataList[$type]['data']);
                 if($count>0)
                 {
-                    $return[$type] = array_merge($return[$type],array_column($dataList[$type]['data'],$menu_detail['fields']));
+                    $fields = explode(",",$menu_detail['fields']);
+                    $return[$type] = array_merge($return[$type],array_column($dataList[$type]['data'],$fields['0']));
                 }
                 $page ++;
             }

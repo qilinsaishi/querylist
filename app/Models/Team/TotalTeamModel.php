@@ -82,6 +82,11 @@ class TotalTeamModel extends Model
         {
             $team_list = $team_list->where("tid","!=",$params['except_team']);
         }
+        //最后更新时间
+        if (isset($params['recent']) && $params['recent'] > 0) {
+            $time = date("Y-m-d H:i:s", time() - $params['recent']);
+            $team_list = $team_list->where("update_time", '>=', $time);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         if(isset($params['rand']) && $params['rand'] >0)
@@ -212,6 +217,11 @@ class TotalTeamModel extends Model
         if(isset($params['except_team']) && $params['except_team']>0)
         {
             $team_count = $team_count->where("tid","!=",$params['except_team']);
+        }
+        //最后更新时间
+        if (isset($params['recent']) && $params['recent'] > 0) {
+            $time = date("Y-m-d H:i:s", time() - $params['recent']);
+            $team_count = $team_count->where("update_time", '>=', $time);
         }
         return $team_count->count();
     }
