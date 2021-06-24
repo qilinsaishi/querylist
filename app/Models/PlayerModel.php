@@ -349,7 +349,12 @@ class PlayerModel extends Model
 
     public function getPlayerCount($params=[]){
         $player_count = $this;
-        $player_count = $player_count->where("status",1);
+        //显示状态， 0不显示 1显示
+        $params['status'] = $params['status'] ?? 1;
+        if ($params['status'] >= 0)
+        {
+            $player_count = $player_count->where("status",$params['status']);
+        }
         //队员ID
         if(isset($params['ids']) && is_array($params['ids']) && count($params['ids'])>=0)
         {

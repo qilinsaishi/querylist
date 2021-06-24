@@ -374,6 +374,12 @@ class TeamModel extends Model
     public function getTeamCount($params=[])
     {
         $team_count =$this;
+        //显示状态， 0不显示 1显示
+        $params['status'] = $params['status'] ?? 1;
+        if ($params['status'] >= 0)
+        {
+            $team_count = $team_count->where("status",$params['status']);
+        }
         //队伍ID
         if(isset($params['ids']) && count($params['ids'])>0)
         {
