@@ -87,7 +87,6 @@ class shangniu
 
             }
 
-
             //=============================比赛数据=====================================
             $matchData = [];
             $matchLiveUrl = 'https://www.shangniu.cn/api/game/user/match/getMatchLive?gameType=dota&matchId=' . $res['id'] . '&tournamentId=' . $res['tournamentId'];
@@ -103,6 +102,8 @@ class shangniu
                 $res['homeName']=$qt->find('.games-header-style-new .score .team-name:eq(0)')->text();
                 $res['awayName']=$qt->find('.games-header-style-new .score .team-name:eq(1)')->text();
                 $res['matchTime']=$qt->find('.games-header-style-new .score .time-status .date')->text();
+                $res['homeScore']=$qt->find('.games-header-style-new .score .team-score:eq(0)')->text();
+                $res['awayScore']=$qt->find('.games-header-style-new .score .team-score:eq(1)')->text();
 
                 if (count($matchDiveData) > 0) {
 
@@ -114,14 +115,6 @@ class shangniu
                         $res['status'] = $matchDiveData['status'];
                     }
 
-                    if (isset($matchDiveData['homeTeam']['score'])) {
-
-                        $res['homeScore'] = $matchDiveData['homeTeam']['score'] ?? $res['homeScore'];
-                    }
-                    if (isset($matchDiveData['awayTeam']['score'])) {
-
-                        $res['awayScore'] = $matchDiveData['awayTeam']['score'] ?? $res['awayScore'];
-                    }
                 }
 
             }
