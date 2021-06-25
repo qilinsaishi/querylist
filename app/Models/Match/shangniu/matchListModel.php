@@ -55,7 +55,6 @@ class matchListModel extends Model
             $match_list = $match_list ->where("round_detailed", $params['round_detailed']);
         }
 
-        $match_list = $match_list->whereRaw('(home_display * away_display)>0');
         //游戏类型
         if(isset($params['game']))
         {
@@ -125,6 +124,7 @@ class matchListModel extends Model
             $match_list = $match_list->where("next_try", '<=', $currentTime);
             $match_list = $match_list->where("try", '<', 10);
             $params['order'] = [["start_time","desc"]];
+            $params['all'] = 0;
             //$match_list = $match_list->whereRaw("unix_timestamp(start_time)+30*3600 <=".$currentTime);
 
         }
@@ -154,6 +154,11 @@ class matchListModel extends Model
         if(isset($params['team_id']) && is_array($params['team_id']) && count($params['team_id']) >0){
             $match_list=$match_list->whereRaw('((home_id in ('.implode(",",$params['team_id']) .')) or (away_id in ('.implode(",",$params['team_id']).')))');
         }
+        $whereAll = $params['all']??1;
+        if($whereAll)
+        {
+            $match_list = $match_list->whereRaw('(home_display * away_display)>0');
+        }
 
 
         $match_list = $match_list->limit($pageSizge)
@@ -172,7 +177,6 @@ class matchListModel extends Model
         }
               $match_list  = $match_list->get()->toArray();
         $end = microtime(true);
-        //print_r(\DB::getQueryLog());exit;
         return $match_list;
     }
 
