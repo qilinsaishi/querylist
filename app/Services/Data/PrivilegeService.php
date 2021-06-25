@@ -863,8 +863,8 @@ class PrivilegeService
                                         $playerList[$homePlayerInfo['playerId']]['homePlayerId']=$homePlayerInfo['playerId']??'';
                                         $playerList[$homePlayerInfo['playerId']]['homePlayerName']=$homePlayerInfo['playerName']??'';
                                         $playerList[$homePlayerInfo['playerId']]['homePlayerLogo']=$homePlayerInfo['playerLogo']??'';
-                                        $playerList[$homePlayerInfo['playerId']]['homeHeroName']=$homePlayerInfo['heroName']??'';
-                                        $playerList[$homePlayerInfo['playerId']]['homeHeroLogo']=$homePlayerInfo['heroLogo']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['HeroName']=$homePlayerInfo['heroName']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['HeroLogo']=$homePlayerInfo['heroLogo']??'';
                                         $playerList[$homePlayerInfo['playerId']]['equipmentList']=$homePlayerInfo['equipmentList']??'';
                                         if($matchDataInfo['homeTeam']['score']>=$matchDataInfo['awayTeam']['score']){
                                             $playerList[$homePlayerInfo['playerId']]['win_teamID']=$matchDataInfo['homeTeam']['teamId'];
@@ -898,8 +898,8 @@ class PrivilegeService
                                         $playerList[$awayPlayerInfo['playerId']]['awayPlayerId']=$awayPlayerInfo['playerId']??'';
                                         $playerList[$awayPlayerInfo['playerId']]['awayPlayerName']=$awayPlayerInfo['playerName']??'';
                                         $playerList[$awayPlayerInfo['playerId']]['awayPlayerLogo']=$awayPlayerInfo['playerLogo']??'';
-                                        $playerList[$awayPlayerInfo['playerId']]['awayHeroName']=$awayPlayerInfo['heroName']??'';
-                                        $playerList[$awayPlayerInfo['playerId']]['awayHeroLogo']=$awayPlayerInfo['heroLogo']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['HeroName']=$awayPlayerInfo['heroName']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['HeroLogo']=$awayPlayerInfo['heroLogo']??'';
                                         $playerList[$awayPlayerInfo['playerId']]['equipmentList']=$awayPlayerInfo['equipmentList']??'';
                                         $playerList[$awayPlayerInfo['playerId']]['killCount']=$awayPlayerInfo['playerStat']['killCount']?? 0;
                                         $playerList[$awayPlayerInfo['playerId']]['dieCount']=$awayPlayerInfo['playerStat']['dieCount']?? 0;
