@@ -613,7 +613,7 @@ class  PlayerService
         }
         return true;
     }
-    //合并1个未整合过的队伍
+    //合并1个未整合过的队员
     public function merge1unmergedPlayer($playerid=0)
     {
         $return = ["result"=>false,"log"=>[]];
