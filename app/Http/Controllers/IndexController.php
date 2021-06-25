@@ -144,6 +144,9 @@ class IndexController extends Controller
             case "merge2unmergedPlayer":
                 $return = (new PlayerService())->merge2unmergedPlayer($data['player_id_1'],$data['player_id_2']);
                 break;
+            case "merge1unmergedPlayer":
+                $return = (new PlayerService())->merge1unmergedPlayer($data['player_id']);
+                break;
         }
         return $return;
     }
