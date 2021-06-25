@@ -96,13 +96,12 @@ class shangniu
             if ($act == 'update') {
                 $collect_url='https://www.shangniu.cn/esports/dota-live-'.$res['id'] ;
                 $qt=QueryList::get($collect_url);
-                $homeUrl=$qt->find('.games-header-style-new .score a:eq(1)')->attr('href');
-                $awayUrl=$qt->find('.games-header-style-new .score a:eq(0)')->attr('href');
+                $homeUrl=$qt->find('.games-header-style-new .score a:eq(0)')->attr('href');
+                $awayUrl=$qt->find('.games-header-style-new .score a:eq(1)')->attr('href');
                 $res['homeId']=str_replace(array('/esports/dota-team-','.html'),'',$homeUrl);
                 $res['awayId']=str_replace(array('/esports/dota-team-','.html'),'',$awayUrl);
-                $res['homeName']=$qt->find('.games-header-style-new .score .team-name:eq(1)')->text();
-                $res['awayName']=$qt->find('.games-header-style-new .score .team-name:eq(0)')->text();
-                $res['awayName']=$qt->find('.games-header-style-new .score .team-name:eq(0)')->text();
+                $res['homeName']=$qt->find('.games-header-style-new .score .team-name:eq(0)')->text();
+                $res['awayName']=$qt->find('.games-header-style-new .score .team-name:eq(1)')->text();
                 $res['matchTime']=$qt->find('.games-header-style-new .score .time-status .date')->text();
 
                 if (count($matchDiveData) > 0) {
