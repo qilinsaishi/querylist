@@ -805,11 +805,14 @@ class PrivilegeService
             $functionList = $this->checkFunction($functionList,"totalTeamList");
             $modelTeamClass = $functionList["totalTeamList"]["class"];
             $functionTeamSingle = $functionList["totalTeamList"]['functionSingleBySite'];
-
             $tournament = [];
             $teamList = [];
-            if (count($data)) {
+            $playerList = [];
+            $teamMap = ["a" => "home", "b" => "away"];
+            if (count($data)>0) {
                 foreach ($data as $matchKey => $matchInfo) {
+
+                    //赛事详情
                     if (isset($matchInfo['tournament_id'])) {
                         $tournamentInfo = $modelTournamentClass->$functionTournamentSingle($matchInfo['tournament_id']);
                         if (isset($tournamentInfo['tournament_id'])) {
@@ -817,6 +820,7 @@ class PrivilegeService
                         }
                     }
                     $data[$matchKey]['tournament_info'] = $tournament[$matchInfo['tournament_id']] ?? [];
+                    //=====================================战队信息=====================================
                     if (isset($matchInfo['home_id']) && $matchInfo['home_id']>0) {
                         $teamInfo = $modelTeamClass->$functionTeamSingle($matchInfo['home_id'], $functionList["matchList"."/".$params['source']]['source'], $matchInfo['game']);
                         if (isset($teamInfo['team_id'])) {
@@ -836,8 +840,93 @@ class PrivilegeService
                         }
 
                     }
+
                     $data[$matchKey]['home_team_info'] = $teamList[$matchInfo['home_id']] ?? [];//战队
                     $data[$matchKey]['away_team_info'] = $teamList[$matchInfo['away_id']] ?? [];
+                    //=====================================战队信息=====================================
+                    //=====================================队员关联比赛信息=====================================
+                    $matchData = json_decode($matchInfo['match_data'], true);
+                    array_multisort(array_column($matchData['matchData'],"boxNum"),SORT_ASC,$matchData['matchData']);
+                    if(isset($matchData['matchData']) && $matchData['matchData']>0){
+                        foreach ($matchData['matchData'] as $matchDataKey=>$matchDataInfo){
+                            $data[$matchKey]['game_count']=$matchDataInfo['boxNum'];
+                            //=========================================主队信息
+                            if(isset($matchDataInfo['homeTeam']['playerList']) && count($matchDataInfo['homeTeam']['playerList'])>0) {
+                                foreach ($matchDataInfo['homeTeam']['playerList'] as $playerKey=>$homePlayerInfo){
+                                    if(isset($homePlayerInfo['playerId']) && isset($params['player_id'][0]) && $homePlayerInfo['playerId']== $params['player_id'][0]){
+                                        $playerList[$homePlayerInfo['playerId']]['boxNum']=$matchDataInfo['boxNum'];
+                                        $playerList[$homePlayerInfo['playerId']]['matchId']=$matchDataInfo['matchId'];
+                                        $playerList[$homePlayerInfo['playerId']]['homeName']=$matchDataInfo['homeTeam']['teamName']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['homeId']=$matchDataInfo['homeTeam']['teamId']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['homeScore']=$matchDataInfo['homeTeam']['score']??0;
+                                        $playerList[$homePlayerInfo['playerId']]['homeLogo']=$matchDataInfo['homeTeam']['teamLogo']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['homePlayerId']=$homePlayerInfo['playerId']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['homePlayerName']=$homePlayerInfo['playerName']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['homePlayerLogo']=$homePlayerInfo['playerLogo']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['homeHeroName']=$homePlayerInfo['heroName']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['homeHeroLogo']=$homePlayerInfo['heroLogo']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['equipmentList']=$homePlayerInfo['equipmentList']??'';
+                                        if($matchDataInfo['homeTeam']['score']>=$matchDataInfo['awayTeam']['score']){
+                                            $playerList[$homePlayerInfo['playerId']]['win_teamID']=$matchDataInfo['homeTeam']['teamId'];
+                                        }else{
+                                            $playerList[$homePlayerInfo['playerId']]['win_teamID']=$matchDataInfo['awayTeam']['teamId'];
+                                        }
+                                        $playerList[$homePlayerInfo['playerId']]['killCount']=$homePlayerInfo['playerStat']['killCount']?? 0;
+                                        $playerList[$homePlayerInfo['playerId']]['dieCount']=$homePlayerInfo['playerStat']['dieCount']?? 0;
+                                        $playerList[$homePlayerInfo['playerId']]['assistsCount']=$homePlayerInfo['playerStat']['assistsCount']?? 0;
+                                        $playerList[$homePlayerInfo['playerId']]['awayName']=$matchDataInfo['awayTeam']['teamName']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['awayId']=$matchDataInfo['awayTeam']['teamId']??'';
+                                        $playerList[$homePlayerInfo['playerId']]['awayScore']=$matchDataInfo['awayTeam']['score']??0;
+                                        $playerList[$homePlayerInfo['playerId']]['awayLogo']=$matchDataInfo['awayTeam']['teamLogo']??'';
+
+                                    }
+
+                                }
+
+                            }
+                            //==================================主队================================================
+                            //==================================客队================================================
+                            if(isset($matchDataInfo['awayTeam']['playerList']) && count($matchDataInfo['awayTeam']['playerList'])>0) {
+                                foreach ($matchDataInfo['awayTeam']['playerList'] as $playerKey=>$awayPlayerInfo){
+                                    if(isset($awayPlayerInfo['playerId']) && isset($params['player_id'][0]) && $awayPlayerInfo['playerId']== $params['player_id'][0]){
+                                        $playerList[$awayPlayerInfo['playerId']]['boxNum']=$matchDataInfo['boxNum'];
+                                        $playerList[$awayPlayerInfo['playerId']]['matchId']=$matchDataInfo['matchId'];
+                                        $playerList[$awayPlayerInfo['playerId']]['awayName']=$matchDataInfo['awayTeam']['teamName']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['awayId']=$matchDataInfo['awayTeam']['teamId']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['awayScore']=$matchDataInfo['awayTeam']['score']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['awayLogo']=$matchDataInfo['awayTeam']['teamLogo']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['awayPlayerId']=$awayPlayerInfo['playerId']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['awayPlayerName']=$awayPlayerInfo['playerName']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['awayPlayerLogo']=$awayPlayerInfo['playerLogo']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['awayHeroName']=$awayPlayerInfo['heroName']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['awayHeroLogo']=$awayPlayerInfo['heroLogo']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['equipmentList']=$awayPlayerInfo['equipmentList']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['killCount']=$awayPlayerInfo['playerStat']['killCount']?? 0;
+                                        $playerList[$awayPlayerInfo['playerId']]['dieCount']=$awayPlayerInfo['playerStat']['dieCount']?? 0;
+                                        $playerList[$awayPlayerInfo['playerId']]['assistsCount']=$awayPlayerInfo['playerStat']['assistsCount']?? 0;
+                                        if($matchDataInfo['homeTeam']['score']>=$matchDataInfo['awayTeam']['score']){
+                                            $playerList[$awayPlayerInfo['playerId']]['win_teamID']=$matchDataInfo['homeTeam']['teamId'];
+                                        }else{
+                                            $playerList[$awayPlayerInfo['playerId']]['win_teamID']=$matchDataInfo['awayTeam']['teamId'];
+                                        }
+                                        $playerList[$awayPlayerInfo['playerId']]['homeName']=$matchDataInfo['homeTeam']['teamName']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['homeId']=$matchDataInfo['homeTeam']['teamId']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['homeScore']=$matchDataInfo['homeTeam']['score']??'';
+                                        $playerList[$awayPlayerInfo['playerId']]['homeLogo']=$matchDataInfo['homeTeam']['teamLogo']??'';
+
+                                    }
+
+                                }
+
+                            //=====================================客队=================================
+
+                            }
+
+
+                        }
+                    }
+                    $data[$matchKey]['player_detail'] = (count($playerList)>0)?array_values($playerList):[];
+                    //=====================================队员信息=====================================
                     unset($data[$matchKey]['match_data']);
 
                 }
@@ -1532,7 +1621,7 @@ class PrivilegeService
             $intergrationService = (new IntergrationService());
             $data = $intergrationService->getTeamInfo(0, $data["tid"], 1, $params['reset'] ?? 0)['data'];
             $functionList = $this->checkFunction($functionList,"totalPlayerList");
-            $functionList = $this->checkFunction($functionList,"matchList","scoregg");
+            $functionList = $this->checkFunction($functionList,"matchList",$data['original_source']);
             $data['recentMatchList'] = [];
             $data['playerList'] = [];
             $modelClass = $functionList["totalPlayerList"]["class"];
@@ -1549,11 +1638,11 @@ class PrivilegeService
                         }
                     }
                 }
-                $modelMatchList = $functionList["matchList"."/scoregg"]["class"];
-                $functionMatchList = $functionList["matchList"."/scoregg"]["function"];
-                $functionProcessMatchList = $functionList["matchList"."/scoregg"]["functionProcess"];
-                $matchList = $modelMatchList->$functionMatchList(["team_id" => $data['intergrated_site_id_list']['scoregg'] ?? [0],"start"=>1, "page_size" => 4]);
-                $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList,['source'=>'scoregg']);
+                $modelMatchList = $functionList["matchList"."/".$data['original_source']]["class"];
+                $functionMatchList = $functionList["matchList"."/".$data['original_source']]["function"];
+                $functionProcessMatchList = $functionList["matchList"."/".$data['original_source']]["functionProcess"];
+                $matchList = $modelMatchList->$functionMatchList(["team_id" => $data['intergrated_site_id_list'][$data['original_source']] ?? [0],"start"=>1, "page_size" => 4]);
+                $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList,['source'=>$data['original_source']]);
             } else {
                 $data['playerList'] = [];
                 $data['recentMatchList'] = [];
@@ -1649,7 +1738,8 @@ class PrivilegeService
             $ingergratedTeam = $intergrationService->getTeamInfo($data['team_id'], 0, 1, $params['reset'] ?? 0)['data'];
             $functionList = $this->checkFunction($functionList,"totalPlayerList");
             $sourceList = config('app.intergration.player');
-            $functionList = $this->checkFunction($functionList,"matchList","scoregg");
+            //echo $data['original_source'];echo "\n";echo  $data['game'];exit;
+            $functionList = $this->checkFunction($functionList,"matchList",$data['original_source']);
             $data['recentMatchList'] = [];
             $data['playerList'] = [];
             $data['teamInfo'] = $ingergratedTeam;
@@ -1667,11 +1757,12 @@ class PrivilegeService
             foreach ($radarArray as $key => $name) {
                 $radarData[$key] = ["name" => $name, "empno" => intval(rand(40, 100))];
             }
-            $modelMatchList = $functionList["matchList"."/scoregg"]["class"];
-            $functionMatchList = $functionList["matchList"."/scoregg"]["function"];
-            $functionProcessMatchList = $functionList["matchList"."/scoregg"]["functionProcess"];
-            $matchList = $modelMatchList->$functionMatchList(["team_id" => $ingergratedTeam['intergrated_site_id_list']['scoregg'] ?? [0],"start"=>1, "page_size" => 10]);
-            $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList, ["source"=>"scoregg","pid" => $data["pid"], "player_id" => $data['intergrated_site_id_list']['scoregg'] ?? [0]]);
+
+            $modelMatchList = $functionList["matchList"."/".$data['original_source']]["class"];
+            $functionMatchList = $functionList["matchList"."/".$data['original_source']]["function"];
+            $functionProcessMatchList = $functionList["matchList"."/".$data['original_source']]["functionProcess"];
+            $matchList = $modelMatchList->$functionMatchList(["team_id" => $ingergratedTeam['intergrated_site_id_list'][$data['original_source']] ?? [0],"start"=>1, "page_size" => 10]);
+            $data['recentMatchList'] = $this->$functionProcessMatchList($matchList, $functionList, ["source"=>$data['original_source'],"pid" => $data["pid"], "player_id" => $data['intergrated_site_id_list'][$data['original_source']] ?? [0]]);
             $data['radarData'] = $radarData;
         } else {
             $data = [];
