@@ -672,6 +672,7 @@ class MatchService
                 } else {
                     echo "match_id：" . $val['match_id'] . "更新失败" . "\n";
                 }
+                $redisService->refreshCache("matchDetail",['game' =>$game,"match_id" => $val['match_id']]);
                 sleep(1);
             }
 
@@ -790,6 +791,7 @@ class MatchService
     //查询查询wcaMatchList里面的数据
     public function updateShangniuMatchListStatus($game, $count = 50){
         $shangniuMatchModel=new \App\Models\Match\shangniu\matchListModel();
+        $redisService = new RedisService();
         $missionModel=new MissionModel();
         $params = [
             'page_size' => $count,
@@ -875,6 +877,7 @@ class MatchService
 
                     if ($rt>0) {
                         echo "match_id：" . $val['match_id'] . "shangniuMatchList更新成功" . "\n";
+                        $redisService->refreshCache("matchDetail",['game' =>$game,"match_id" => $val['match_id']]);
                         if(isset($rt['site_id']) && isset($rt['source']) && isset($rt['game']))
                         {
                             $data = ["api_id"=>2,"data_type"=>"match","site_id"=>$rt['site_id'],"source"=>$rt['source'],"game"=>$rt['game']];
@@ -899,7 +902,6 @@ class MatchService
 
             }
             //=========================刷新缓存===============================
-            $redisService = new RedisService();
             $redisService->refreshCache("matchList",['game' =>[$game]]);
 
 
