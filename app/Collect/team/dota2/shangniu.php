@@ -33,6 +33,8 @@ class shangniu
         $res= $arr['detail'] ?? [];
 
         $teamInfo=$this->shangniuTeam($url,$res['teamId']);
+        $res['teamLogo']=$res['teamLogo'] ?? ($teamInfo['teamLogo'] ?? '');
+        $res['teamName']=$res['teamName'] ?? ($teamInfo['teamName'] ?? '');
         $res=array_merge($res,$teamInfo);
 
         if (is_array($res) && count($res)>0) {
@@ -51,7 +53,7 @@ class shangniu
         return $cdata;
     }
     public function process($arr)
-    {print_r($arr);exit;
+    {
         $redis = app("redis.connection");
         $arr['content']['teamLogo'] = getImage($arr['content']['teamLogo']??'',$redis);
         $data = getDataFromMapping($this->data_map,$arr['content']);

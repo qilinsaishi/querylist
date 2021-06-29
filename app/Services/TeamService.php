@@ -39,6 +39,11 @@ class TeamService
 
         return 'finish';
     }
+    //通过site_id重新抓取页面信息
+    public function insertTeamDataBySiteId(){
+        $teamModel=new TeamModel();
+        $missionModel=new MissionModel();
+    }
 
     //尚牛赛程
     public function insertShangniuTeam($game = 'dota2', $force = 0){

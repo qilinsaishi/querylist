@@ -198,7 +198,18 @@ class Mission extends Command
                 foreach($gameList as $game){
                     $teamService->createTeamMissionForMissingTeam($game);
                 }
-                die();
+
+                break;
+            case 'tryCollectBySiteId':
+                $teamService=new TeamService();
+                $sourceList=['shangniu','scoregg'];
+                foreach ($sourceList as $source){
+                    //通过site_id抓取比赛数据
+                    if($mission_type=='team'){
+                        $teamService->insertTeamDataBySiteId($game,$source);
+                    }
+
+                }
 
                 break;
 
