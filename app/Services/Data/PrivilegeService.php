@@ -1109,7 +1109,7 @@ class PrivilegeService
             $data['away_team_info'] = getFieldsFromArray($intergrationService->getTeamInfo(0, $data['away_team_info']['tid'], 1, 0)['data'], "tid,team_name,description,logo");
         }
         $playerList = [];
-       
+
         //处理比赛数据
         if (isset($data['match_data'])) {
             $oPlayerModel = $functionList["totalPlayerInfo"]["class"];
@@ -1119,12 +1119,42 @@ class PrivilegeService
                 //处理尚牛的数据
                 if(isset($data['match_data']['matchData']) && $data['match_data']['matchData']>0) {
                     foreach ($data['match_data']['matchData'] as $matchKey=>$matchDataInfo){
-                        //home下面的pick
-                       /* if(isset($matchDataInfo['homeTeam']['pick']) && count($matchDataInfo['homeTeam']['pick'])>0){
-                            foreach ($matchDataInfo['homeTeam']['pick'] as $homePickKey=>$homePickInfo){
-                               print_r($homePickInfo);exit;
+                        //homeTeam下面的pick
+                       if(isset($matchDataInfo['homeTeam']['pick']) && count($matchDataInfo['homeTeam']['pick'])>0){
+                            foreach ($matchDataInfo['homeTeam']['pick'] as $homePickKey=>&$homePickInfo){
+                                if(strpos($homePickInfo['logo'],'esports-cdn.namitiyu.com') !==false){
+                                    $homePickInfo['logo']='';
+                                }
+
                             }
-                        }*/
+                        }
+                        //awayTeam下面的pick
+                        if(isset($matchDataInfo['awayTeam']['pick']) && count($matchDataInfo['awayTeam']['pick'])>0){
+                            foreach ($matchDataInfo['awayTeam']['pick'] as $awayPickKey=>&$awayPickInfo){
+                                if(strpos($awayPickInfo['logo'],'esports-cdn.namitiyu.com') !==false){
+                                    $awayPickInfo['logo']='';
+                                }
+
+                            }
+                        }
+                        //homeTeam下面的ban
+                        if(isset($matchDataInfo['homeTeam']['ban']) && count($matchDataInfo['homeTeam']['ban'])>0){
+                            foreach ($matchDataInfo['homeTeam']['ban'] as $homeBanKey=>&$homeBanInfo){
+                                if(strpos($homeBanInfo['logo'],'esports-cdn.namitiyu.com') !==false){
+                                    $homeBanInfo['logo']='';
+                                }
+
+                            }
+                        }
+                        //awayTeam下面的ban
+                        if(isset($matchDataInfo['awayTeam']['ban']) && count($matchDataInfo['awayTeam']['ban'])>0){
+                            foreach ($matchDataInfo['awayTeam']['ban'] as $awayBanKey=>&$awayBanInfo){
+                                if(strpos($awayBanInfo['logo'],'esports-cdn.namitiyu.com') !==false){
+                                    $awayBanInfo['logo']='';
+                                }
+
+                            }
+                        }
 
                         //homeTeam playerList
                         if(isset($matchDataInfo['homeTeam']['playerList']) && count($matchDataInfo['homeTeam']['playerList'])>0){
@@ -1170,6 +1200,10 @@ class PrivilegeService
                         }
                         $data['match_data']['matchData'][$matchKey]['homeTeam']['playerList']=$matchDataInfo['homeTeam']['playerList'];
                         $data['match_data']['matchData'][$matchKey]['awayTeam']['playerList']=$matchDataInfo['awayTeam']['playerList'];
+                        $data['match_data']['matchData'][$matchKey]['homeTeam']['pick']=$matchDataInfo['homeTeam']['pick'];
+                        $data['match_data']['matchData'][$matchKey]['awayTeam']['pick']=$matchDataInfo['awayTeam']['pick'];
+                        $data['match_data']['matchData'][$matchKey]['homeTeam']['ban']=$matchDataInfo['homeTeam']['ban'];
+                        $data['match_data']['matchData'][$matchKey]['awayTeam']['ban']=$matchDataInfo['awayTeam']['ban'];
 
                     }
 
