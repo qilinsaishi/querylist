@@ -104,6 +104,11 @@ class shangniu
                 $res['matchTime']=$qt->find('.games-header-style-new .score .time-status .date')->text();
                 $res['homeScore']=$qt->find('.games-header-style-new .score .team-score:eq(0)')->text();
                 $res['awayScore']=$qt->find('.games-header-style-new .score .team-score:eq(1)')->text();
+                $res['box']=$qt->find('.games-header-style-new .name .text')->text();
+                if(strpos($res['box'],'BO')!==false){
+                    $res['box']=substr($res['box'],strpos($res['box'],'BO')+2);
+                }
+
 
                 if (count($matchDiveData) > 0) {
 
@@ -111,7 +116,7 @@ class shangniu
                         $res['round_detailed'] = 1;
                     }
 
-                    if ($matchDiveData['status'] != null && $matchDiveData['status'] > $res['status']) {
+                    if ($matchDiveData['status'] != null && $matchDiveData['status'] > 0) {
                         $res['status'] = $matchDiveData['status'];
                     }
 

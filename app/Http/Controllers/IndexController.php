@@ -173,7 +173,6 @@ class IndexController extends Controller
         $match_id = $this->request->get("match_id",13436);
         $source = in_array($game,["lol","kpl"])?"scoregg":"shangniu";
         $params = ["matchDetail"=>["dataType"=>"matchDetail","source"=>$source,"match_id"=>$match_id,"game"=>$game],"reset"=>1];
-        print_R($params);
 
         $functionList = (new PrivilegeService())->getFunction($params);
         if(count($functionList))
@@ -181,6 +180,7 @@ class IndexController extends Controller
             $class = current($functionList);
             $function = $class['function'];
             $matchDetail = $class['class']->$function($match_id);
+
             if(isset($matchDetail['match_id']))
             {
                 if($source=="scoregg")
@@ -189,7 +189,7 @@ class IndexController extends Controller
                 }
                 elseif($source=="shangniu")
                 {
-                    (new MatchService())->updateShangniuMatchListStatus($match_id,$game,$matchDetail['next_try'],$matchDetail['try']);
+                    (new MatchService())->updateOneShangMatchList($match_id,$game,$matchDetail['next_try'],$matchDetail['try'],$matchDetail['tournament_id']);
                 }
             }
         }
