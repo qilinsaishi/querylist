@@ -267,15 +267,26 @@ class RedisService
                 if (isset($data['params'])) {
                     $data['params']['dataType']=$dataType;
                     if ($data['params']['dataType'] == 'matchDetail' ) {
-                        $home_id = $data['data']['data']['home_team_info']['tid']??0;
-                        $away_id = $data['data']['data']['away_team_info']['tid']??0;
-                        $tid = $params["tid"];
-                        //echo "startToPorcessMatch:\n";
-                        if($home_id == $tid || $away_id == $tid)
+                        if(isset($params['game']) && isset($params['match_id']) && $params['match_id']>0)
                         {
-                            //echo $data['data']['data']['match_id']."-".$tid."-toDelete\n";
-                            $redis->del($key);
+                            $game = $data['data']['data']['game'];
+                            $match_id = $data['data']['data']['match_id'];
+                            if($params['match_id'] == $match_id && $params['game'] == $game)
+                            {
+                                $redis->del($key);
+                            }
                         }
+                        else
+                        {
+                            $home_id = $data['data']['data']['home_team_info']['tid']??0;
+                            $away_id = $data['data']['data']['away_team_info']['tid']??0;
+                            $tid = $params["tid"];
+                            if($home_id == $tid || $away_id == $tid)
+                            {
+                                $redis->del($key);
+                            }
+                        }
+
                     }
                     if ($data['params']['dataType'] == 'defaultConfig' ) {
                         $redis->del($key);
@@ -412,9 +423,7 @@ class RedisService
                 $teamInfo=(new TeamModel())->getTeamById($team_id);
                 $tid=$teamInfo['tid']??0;
                 $params=[$tid];
-
                 $this->refreshCache("intergratedTeam",($params));
-
             }
             return $params_list;
         }
