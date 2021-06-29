@@ -155,12 +155,14 @@ class matchListModel extends Model
             $match_list=$match_list->whereRaw('((home_id in ('.implode(",",$params['team_id']) .')) or (away_id in ('.implode(",",$params['team_id']).')))');
         }
         $whereAll = $params['all']??1;
-        if($whereAll)
+        if($whereAll>0)
         {
             $match_list = $match_list->whereRaw('(home_display * away_display)>0');
         }
-
-
+        elseif($whereAll<0)
+        {
+            $match_list = $match_list->whereRaw('(home_display * away_display)=0');
+        }
         $match_list = $match_list->limit($pageSizge)
         ->offset(($page-1)*$pageSizge);
         if(!isset($params['order']) || !is_array($params['order']))

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 
+use App\Services\MatchService;
 use App\Services\PlayerService;
 use App\Services\TeamService;
 use Illuminate\Console\Command;
@@ -75,6 +76,10 @@ class Test extends Command
                 die();
                 //$teamInfo = (new TeamService())->disintegration($id);
                 break;
+            }
+            case "checkMatchDisplay":
+            {
+                (new MatchService())->checkShangniuDisplay();
             }
         }
     }

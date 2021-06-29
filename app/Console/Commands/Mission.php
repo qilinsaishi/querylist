@@ -198,15 +198,13 @@ class Mission extends Command
                 foreach($gameList as $game){
                     $teamService->createTeamMissionForMissingTeam($game);
                 }
-                die();
-
                 break;
-
+            case 'setMatchDisplay':
+                (new MatchService())->checkShangniuDisplay();
+                break;
             default:
-
                 break;
         }
-
     }
     public function insert(){
 

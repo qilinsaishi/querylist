@@ -799,7 +799,7 @@ class MatchService
             'game' => $game,
             'next_try' => 1,
             'round_detailed' => '0',
-            'all' => 1,//表示不管home_id和away_id是否有值
+            //'all' => 0,//表示不管home_id和away_id是否有值
             'fields' => "match_id,start_time,game,next_try,try,match_status,game_bo,tournament_id,home_id,away_id,home_name,away_name,home_score,away_score,start_time,away_logo,home_logo",
         ];
         $collectClassList = [];
@@ -970,5 +970,43 @@ class MatchService
 
     }
 
-
+    public function checkShangniuDisplay()
+    {
+        $redisService = new RedisService();
+        $matchListModel = new \App\Models\Match\shangniu\matchListModel();
+        $matchList = $matchListModel->getMatchList(['display'=>0,"fields"=>"match_id,home_id,away_id,home_display,away_display","all"=>-1,"page_size"=>10000]);
+        $teamIdList = [];
+        foreach($matchList as $matchInfo)
+        {
+            if($matchInfo['home_display']==0)
+            {
+                $teamIdList[$matchInfo['home_id']][] = $matchInfo['match_id'];
+            }
+            if($matchInfo['away_display']==0)
+            {
+                $teamIdList[$matchInfo['away_id']][] = $matchInfo['match_id'];
+            }
+        }
+        $siteIdList = array_keys($teamIdList);
+        $teamModel = new TeamModel();
+        foreach($siteIdList as $site_id)
+        {
+            $teamInfo = $teamModel->getTeamBySiteId($site_id,"shangniu","dota2","team_id,status");
+            if(isset($teamInfo['team_id']) && $teamInfo['status']==1)
+            {
+                echo "setDisplay:".$site_id."\n";
+                $matchListModel->setMatchDisplay($site_id,1);
+                $teamIdList[$site_id] = array_unique($teamIdList[$site_id]);
+                foreach($teamIdList[$site_id] as $match_id)
+                {
+                    echo "refreshMatch:".$match_id."\n";
+                    $redisService->refreshCache("matchDetail",['game' =>"doat2","match_id" => $match_id]);
+                }
+            }
+            else
+            {
+                echo $site_id."-pass\n";
+            }
+        }
+    }
 }
