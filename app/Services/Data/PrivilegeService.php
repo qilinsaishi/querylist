@@ -1109,11 +1109,74 @@ class PrivilegeService
             $data['away_team_info'] = getFieldsFromArray($intergrationService->getTeamInfo(0, $data['away_team_info']['tid'], 1, 0)['data'], "tid,team_name,description,logo");
         }
         $playerList = [];
+        $player_default_img='http://qilingsaishi-01.oss-cn-hangzhou.aliyuncs.com/65d87d548f76492fab2eb9fea7f59ecda381650b.png';
+        $hero_default_img='http://qilingsaishi-01.oss-cn-hangzhou.aliyuncs.com/ec23d5978f3a349012462cb44a3e94f56ee0316c.png';
         //处理比赛数据
         if (isset($data['match_data'])) {
             $oPlayerModel = $functionList["totalPlayerInfo"]["class"];
             $oPlayerFunction = $functionList["totalPlayerInfo"]["functionSingleBySite"];
             $data['match_data'] = json_decode($data['match_data'], true);
+            if($params['source']=='shangniu'){
+                //处理尚牛的数据
+                if(isset($data['match_data']['matchData']) && $data['match_data']['matchData']>0) {
+                    foreach ($data['match_data']['matchData'] as $matchKey=>$matchDataInfo){
+                        //home下面的pick
+                       /* if(isset($matchDataInfo['homeTeam']['pick']) && count($matchDataInfo['homeTeam']['pick'])>0){
+                            foreach ($matchDataInfo['homeTeam']['pick'] as $homePickKey=>$homePickInfo){
+                               print_r($homePickInfo);exit;
+                            }
+                        }*/
+
+                        //homeTeam playerList
+                        if(isset($matchDataInfo['homeTeam']['playerList']) && count($matchDataInfo['homeTeam']['playerList'])>0){
+                            foreach ($matchDataInfo['homeTeam']['playerList'] as $homePlayerKey=>&$homePlayerInfo){
+                                $playerInfo = $oPlayerModel->$oPlayerFunction($homePlayerInfo['playerId'], $data['game'],$params['source']);
+                                $homePlayerInfo['playerName']=$playerInfo['player_name'] ??$homePlayerInfo['playerName'];
+                                $homePlayerInfo['playerLogo']=$playerInfo['logo'] ?? $player_default_img;
+                                if(strpos($homePlayerInfo['heroLogo'],'esports-cdn.namitiyu.com') !==false){
+                                    $homePlayerInfo['heroLogo']=$hero_default_img;
+                                }
+                                if(is_array($homePlayerInfo['equipmentList']) && $homePlayerInfo['equipmentList']){
+                                    foreach ($homePlayerInfo['equipmentList'] as &$equipmentInfo){//装备
+                                        if(strpos($equipmentInfo['logo'],'esports-cdn.namitiyu.com') !==false){
+                                            $equipmentInfo['logo']=$hero_default_img;
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+                        }
+                        //awayTeam playerList
+                        if(isset($matchDataInfo['awayTeam']['playerList']) && count($matchDataInfo['awayTeam']['playerList'])>0){
+                            foreach ($matchDataInfo['awayTeam']['playerList'] as $awayPlayerKey=>&$awayPlayerInfo){
+                                $playerInfo = $oPlayerModel->$oPlayerFunction($awayPlayerInfo['playerId'], $data['game'],$params['source']);
+                                $awayPlayerInfo['playerName']=$playerInfo['player_name'] ??$awayPlayerInfo['playerName'];
+                                $awayPlayerInfo['playerLogo']=$playerInfo['logo'] ?? $player_default_img;
+                                if(strpos($awayPlayerInfo['heroLogo'],'esports-cdn.namitiyu.com') !==false){
+                                    $awayPlayerInfo['heroLogo']=$hero_default_img;
+                                }
+                                if(is_array($awayPlayerInfo['equipmentList']) && $awayPlayerInfo['equipmentList']){
+                                    foreach ($awayPlayerInfo['equipmentList'] as &$equipmentInfo){//装备
+                                        if(strpos($equipmentInfo['logo'],'esports-cdn.namitiyu.com') !==false){
+                                            $equipmentInfo['logo']=$hero_default_img;
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+                        }
+                        $data['match_data']['matchData'][$matchKey]['homeTeam']['playerList']=$matchDataInfo['homeTeam']['playerList'];
+                        $data['match_data']['matchData'][$matchKey]['awayTeam']['playerList']=$matchDataInfo['awayTeam']['playerList'];
+
+                    }
+
+                }
+
+            }
             if (isset($data['match_data']['result_list']) && count($data['match_data']['result_list']) > 0) {
                 foreach ($data['match_data']['result_list'] as $key => $result) {
                     unset($data['match_data']['result_list'][$key]['team_a_image_thumb']);
