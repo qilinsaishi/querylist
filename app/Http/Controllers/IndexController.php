@@ -13,7 +13,9 @@ use App\Models\Team\TotalTeamModel;
 use App\Services\Data\DataService;
 use App\Services\Data\ExtraProcessService;
 use App\Services\Data\IntergrationService;
+use App\Services\Data\PrivilegeService;
 use App\Services\Data\RedisService;
+use App\Services\MatchService;
 use App\Services\TeamService;
 use App\Services\PlayerService;
 use Illuminate\Http\Request;
@@ -163,6 +165,35 @@ class IndexController extends Controller
             $return = (new DataService())->getData($data);
         }
         return $return;
+    }
+    public function refreshGame()
+    {
+        $redisService = new RedisService();
+        $game = $this->request->get("game","lol");
+        $match_id = $this->request->get("match_id",13436);
+        $source = in_array($game,["lol","kpl"])?"scoregg":"shangniu";
+        $params = ["matchDetail"=>["dataType"=>"matchDetail","source"=>$source,"match_id"=>$match_id,"game"=>$game],"reset"=>1];
+        print_R($params);
+
+        $functionList = (new PrivilegeService())->getFunction($params);
+        if(count($functionList))
+        {
+            $class = current($functionList);
+            $function = $class['function'];
+            $matchDetail = $class['class']->$function($match_id);
+            if(isset($matchDetail['match_id']))
+            {
+                if($source=="scoregg")
+                {
+                    (new MatchService())->updateOneScoreggMatchList($match_id,$game,$matchDetail['next_try'],$matchDetail['try']);
+                }
+                elseif($source=="shangniu")
+                {
+                    (new MatchService())->updateShangniuMatchListStatus($match_id,$game,$matchDetail['next_try'],$matchDetail['try']);
+                }
+            }
+        }
+
     }
     public function truncate()
     {
