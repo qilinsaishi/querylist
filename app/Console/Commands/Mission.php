@@ -198,13 +198,11 @@ class Mission extends Command
                 foreach($gameList as $game){
                     $teamService->createTeamMissionForMissingTeam($game);
                 }
-                die();
-
+                break;
+            case 'doat2TournamentDisplay':
+                (new MatchService())->setDota2TournamentDisplay();
                 break;
 
-            default:
-
-                break;
         }
 
     }

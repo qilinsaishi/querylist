@@ -969,6 +969,24 @@ class MatchService
         return $rt;
 
     }
+    public function setDota2TournamentDisplay()
+    {
+        $tournamentModel = new \App\Models\Match\shangniu\tournamentModel();
+        $matchListModel = new \App\Models\Match\shangniu\matchListModel();
+        $tournamentList = $tournamentModel->getTournamentList(['page_size'=>2000,"fields"=>"tournament_id","all"=>1]);
+        foreach ($tournamentList as $tournament)
+        {
+            $matchList = $matchListModel->getMatchList(["tournament_id"=>$tournament['tournament_id'],"page_size"=>1,"all"=>0,"fields"=>'match_id']);
+            if(count($matchList)>0)
+            {
+                $tournamentModel->updateTournament($tournament['tournament_id'],['display'=>1]);
+            }
+            else
+            {
+            //    $tournamentModel->updateTournament($tournament['tournament_id'],['display'=>0]);
+            }
+        }
+    }
 
 
 }
