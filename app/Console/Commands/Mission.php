@@ -212,10 +212,10 @@ class Mission extends Command
                 }
 
                 break;
-
-            default:
-
+            case 'doat2TournamentDisplay':
+                (new MatchService())->setDota2TournamentDisplay();
                 break;
+
         }
 
     }

@@ -24,8 +24,7 @@ Route::post('getIntergration','IndexController@getIntergration');
 Route::post('intergration','IndexController@Intergration');
 
 Route::post('sitemap','IndexController@sitemap');
-Route::any('lol/team_info','HomeController@teamInfo');
-Route::any('lol/refresh','lolIndexController@refresh');
 Route::any('refresh','IndexController@refresh');
+Route::any('refreshGame','IndexController@refreshGame');
 Route::any('truncate','IndexController@truncate');
 Route::any('submit','IndexController@submit');

@@ -48,6 +48,14 @@ class tournamentModel extends Model
         {
             $tournament_list = $tournament_list->where("game",$params['game']);
         }
+        //游戏类型
+        if(isset($params['all']) && intval($params['all'])>0)
+        {
+        }
+        else
+        {
+            $tournament_list = $tournament_list->where("display",1);
+        }
         $pageSizge = $params['page_size']??3;
         $page = $params['page']??1;
         $tournament_list = $tournament_list
@@ -59,7 +67,21 @@ class tournamentModel extends Model
     }
     public function getTournamentCount($params)
     {
-        $tournament_count =$this->count();
+        $tournament_count = $this;
+        //游戏类型
+        if(isset($params['game']) && strlen($params['game'])>=3)
+        {
+            $tournament_count = $tournament_count->where("game",$params['game']);
+        }
+        //游戏类型
+        if(isset($params['all']) && intval($params['all'])>0)
+        {
+        }
+        else
+        {
+            $tournament_count = $tournament_count->where("display",1);
+        }
+        $tournament_count =$tournament_count->count();
         return $tournament_count;
     }
     public function getTournamentByName($tournament_name,$game)

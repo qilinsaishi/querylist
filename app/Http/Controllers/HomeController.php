@@ -93,26 +93,6 @@ class HomeController extends Controller
         }
         return $levelData;
     }
-    //dota2官网赛事
-    public function getGmaeDotaMatch($url,$type){
-        $data=[];
-        $dpcList=curl_get($url);
-        if($dpcList['status']=='success'){
-            $return=$dpcList['result'] ?? [];
-            $current_season=$return['current_season'] ?? 0;//当前赛季
-            $selected_phase=$return['selected_phase'] ?? '';//所有阶段
-            $data=$return['data'] ?? [];
-            if(count($data) > 0){
-                foreach ($data as $k=>&$v){
-                    $v['type']=$type;
-                    $v['season']=$current_season;
-
-                }
-            }
-
-        }
-        return $data;
-    }
     //dota2赛事赛程列表
     public function dotaMatchList(){
         //赛事赛程列表
