@@ -76,11 +76,7 @@ class shangniu
             $heroBaseUrl = 'https://www.shangniu.cn/api/game/user/hero/getHeroStat?matchId=' . $res['id'] . '&gameType=dota';
             $heroStatData = $client->curlGet($heroBaseUrl, [], $headers);
             $heroStatData = $heroStatData['body'] ?? [];
-            $res['match_pre'] = [
-                'teamBaseData' => $teamBaseData,
-                'playerStatData' => $playerStatData,
-                'heroStatData' => $heroStatData
-            ];
+
             //=============================赛前数据=====================================
             if ($act != 'update') {
                 $res['matchTime'] = date("Y-m-d H:i:s", substr($res['matchTime'], 0, -3));
@@ -104,6 +100,10 @@ class shangniu
                 $res['matchTime']=$qt->find('.games-header-style-new .score .time-status .date')->text();
                 $res['homeScore']=$qt->find('.games-header-style-new .score .team-score:eq(0)')->text();
                 $res['awayScore']=$qt->find('.games-header-style-new .score .team-score:eq(1)')->text();
+                $res['box']=$qt->find('.games-header-style-new .name .text')->text();
+                if(strpos($res['box'],'BO')!==false){
+                    $res['box']=substr($res['box'],strpos($res['box'],'BO')+2);
+                }
 
                 if (count($matchDiveData) > 0) {
 
@@ -111,7 +111,7 @@ class shangniu
                         $res['round_detailed'] = 1;
                     }
 
-                    if ($matchDiveData['status'] != null && $matchDiveData['status'] > $res['status']) {
+                    if ($matchDiveData['status'] != null && $matchDiveData['status'] > 0) {
                         $res['status'] = $matchDiveData['status'];
                     }
 
@@ -127,7 +127,7 @@ class shangniu
                     $matchDiveBoxNumData = $client->curlGet($matchLiveBoxNumUrl, [], $headers);
                     $matchDiveBoxNumData = $matchDiveBoxNumData['body'] ?? [];
                     $matchData[$boxNum] = $matchDiveBoxNumData;
-                    echo $matchLiveBoxNumUrl . "\n";
+                    //echo $matchLiveBoxNumUrl . "\n";
                 }
 
             }
@@ -154,6 +154,11 @@ class shangniu
             }
 
             $res['matchData'] = $matchData;
+            $res['match_pre'] = [
+                'teamBaseData' => $teamBaseData,
+                'playerStatData' => $playerStatData,
+                'heroStatData' => $heroStatData
+            ];
             //=============================比赛数据=====================================
 
         } else {//赛事
