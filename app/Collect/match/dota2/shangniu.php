@@ -23,7 +23,7 @@ class shangniu
 
             'list' => [
                 'match_id' => ['path' => "id", 'default' => 0],//比赛唯一ID
-                'match_status' => ['path' => "status", 'default' => 0],//比赛状态
+                'match_status' => ['path' => "status", 'default' => 1],//比赛状态
                 'game' => ['path' => "", 'default' => "dota2"],//游戏
                 'home_score' => ['path' => "homeScore", 'default' => 0],//主队得分
                 'away_score' => ['path' => "awayScore", 'default' => 0],//客队得分
@@ -106,6 +106,7 @@ class shangniu
                 if(strpos($res['box'],'BO')!==false){
                     $res['box']=substr($res['box'],strpos($res['box'],'BO')+2);
                 }
+
 
                 if (count($matchDiveData) > 0) {
 
