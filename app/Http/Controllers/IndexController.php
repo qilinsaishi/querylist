@@ -180,16 +180,20 @@ class IndexController extends Controller
             $class = current($functionList);
             $function = $class['function'];
             $matchDetail = $class['class']->$function($match_id);
-
+            $rt=0;
             if(isset($matchDetail['match_id']))
             {
                 if($source=="scoregg")
                 {
-                    (new MatchService())->updateOneScoreggMatchList($match_id,$game,$matchDetail['next_try'],$matchDetail['try']);
+                    $res=(new MatchService())->updateOneScoreggMatchList($match_id,$game,$matchDetail['next_try'],$matchDetail['try']);
+                    $rt= $res['result']??0;
+                    return  $rt;
                 }
                 elseif($source=="shangniu")
                 {
-                    (new MatchService())->updateOneShangMatchList($match_id,$game,$matchDetail['next_try'],$matchDetail['try'],$matchDetail['tournament_id']);
+                    $res=(new MatchService())->updateOneShangMatchList($match_id,$game,$matchDetail['next_try'],$matchDetail['try'],$matchDetail['tournament_id']);
+                    $rt= $res['result']??0;
+                    return $rt;
                 }
             }
         }

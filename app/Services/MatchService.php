@@ -726,7 +726,7 @@ class MatchService
             $processData = $collectClass->process($collectData);
 
             unset($processData['match_list'][0]['tournament_name']);
-
+            \DB::connection()->enableQueryLog();
             $rt = $shangniuMatchModel->saveMatch($processData['match_list'][0]);
 
             if ($rt>0) {
@@ -750,9 +750,7 @@ class MatchService
             }
 
         } else {
-            //任务状态更新为3
-            $updateData['match_status'] = 0;
-            $shangniuMatchModel->updateMatch($match_id, $updateData);
+
             $missionModel->updateMission($insert_mission, ['mission_status' => 3]);
         }
 
@@ -808,7 +806,7 @@ class MatchService
                 }
                 //任务状态更新为2
                 $missionModel->updateMission($insert_mission, ['mission_status' => 2]);
-                $redisService->refreshCache("matchDetail",['game' =>$game,"match_id" => $val['match_id']]);
+                $redisService->refreshCache("matchDetail",['game' =>$game,"match_id" =>$match_id]);
                 sleep(1);
             } else {
                 //任务状态更新为3

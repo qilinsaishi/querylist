@@ -76,11 +76,7 @@ class shangniu
             $heroBaseUrl = 'https://www.shangniu.cn/api/game/user/hero/getHeroStat?matchId=' . $res['id'] . '&gameType=dota';
             $heroStatData = $client->curlGet($heroBaseUrl, [], $headers);
             $heroStatData = $heroStatData['body'] ?? [];
-            $res['match_pre'] = [
-                'teamBaseData' => $teamBaseData,
-                'playerStatData' => $playerStatData,
-                'heroStatData' => $heroStatData
-            ];
+
             //=============================赛前数据=====================================
             if ($act != 'update') {
                 $res['matchTime'] = date("Y-m-d H:i:s", substr($res['matchTime'], 0, -3));
@@ -109,7 +105,6 @@ class shangniu
                     $res['box']=substr($res['box'],strpos($res['box'],'BO')+2);
                 }
 
-
                 if (count($matchDiveData) > 0) {
 
                     if ($matchDiveData['box'] == $matchDiveData['boxNum']) {
@@ -132,7 +127,7 @@ class shangniu
                     $matchDiveBoxNumData = $client->curlGet($matchLiveBoxNumUrl, [], $headers);
                     $matchDiveBoxNumData = $matchDiveBoxNumData['body'] ?? [];
                     $matchData[$boxNum] = $matchDiveBoxNumData;
-                    echo $matchLiveBoxNumUrl . "\n";
+                    //echo $matchLiveBoxNumUrl . "\n";
                 }
 
             }
@@ -159,6 +154,11 @@ class shangniu
             }
 
             $res['matchData'] = $matchData;
+            $res['match_pre'] = [
+                'teamBaseData' => $teamBaseData,
+                'playerStatData' => $playerStatData,
+                'heroStatData' => $heroStatData
+            ];
             //=============================比赛数据=====================================
 
         } else {//赛事
