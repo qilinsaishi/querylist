@@ -56,8 +56,11 @@ class shangniu
         $type = $arr['detail']['type'] ?? '';
         $act = $arr['detail']['act'] ?? 'insert';
         $try = $res['try'] ?? 0;
+        $res['home_display']=$res['home_display'] ??0;
+        $res['away_display']=$res['away_display'] ??0;
         $res['round_detailed'] = 0;
 
+print_r( $res);exit;
 
         if ($type == 'match') {//赛程
             //=============================赛前数据=====================================
