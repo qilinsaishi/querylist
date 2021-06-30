@@ -202,15 +202,11 @@ class Mission extends Command
                 break;
             case 'tryCollectBySiteId':
                 $teamService=new TeamService();
-                $sourceList=['shangniu','scoregg'];
-                foreach ($sourceList as $source){
-                    //通过site_id抓取比赛数据
-                    if($mission_type=='team'){
-                        $teamService->insertTeamDataBySiteId($game,$source);
-                    }
-
+                $site_id=19370;
+                //通过site_id抓取比赛数据
+                if($mission_type=='team'){
+                    $teamService->insertTeamDataBySiteId($game,$site_id);
                 }
-
                 break;
             case 'doat2TournamentDisplay':
                 (new MatchService())->setDota2TournamentDisplay();

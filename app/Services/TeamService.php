@@ -40,7 +40,17 @@ class TeamService
         return 'finish';
     }
     //通过site_id重新抓取页面信息
-    public function insertTeamDataBySiteId(){
+    public function insertTeamDataBySiteId($game,$site_id){
+        //$data='["https:\u002F\u002Fimg.scoregg.com\u002Fz\u002F2373870\u002Fp\u002F214\u002F2714270689136.png"]';
+       // print_r(json_decode($data,true));
+        $source=$game=="dota2"?"shangniu":"scoregg";
+        $mission_id = $this->createTeamMission($game,$site_id,$source);
+        echo "mission_id:".$mission_id."\n";
+        if($mission_id){
+
+        }
+
+        echo 'game:'.$game.",source:".$source; ;exit;
         $teamModel=new TeamModel();
         $missionModel=new MissionModel();
     }
@@ -145,7 +155,7 @@ class TeamService
 
     }
     public function createTeamMission($game,$id,$source){
-        echo "game:".$game."-id:".$id."-：".$source."\n";
+        echo "game:".$game."-id:".$id."-：".$source."\n";exit;
         if($source == "scoregg")
         {
             $team_url = 'https://www.scoregg.com/big-data/team/' . $id . '?tournamentID=&type=baike';
