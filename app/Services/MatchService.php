@@ -639,7 +639,7 @@ class MatchService
             'next_try' => 1,
             'round_detailed' => '0',
             'all' => 1,//表示不管home_id和away_id是否有值
-            'fields' => "match_id,game,next_try,try,tournament_id",
+            'fields' => "match_id,game,next_try,try,tournament_id,home_display,away_display",
         ];
         $collectClassList = [];
         $matchCache = [];
@@ -651,7 +651,7 @@ class MatchService
         if (count($shangniuMatchList) > 0) {
             foreach ($shangniuMatchList as &$val) {
                 echo  "shangniu-match_id:" . $val['match_id'] . "\n";
-                $rt=$this->updateOneShangMatchList($val['match_id'], $game,$val['next_try'],$val['try'],$val['tournament_id']);
+                $rt=$this->updateOneShangMatchList($val['match_id'], $game,$val['next_try'],$val['try'],$val['tournament_id'],$val['home_display'],$val['away_display']);
                 if ($rt > 0) {
                     echo "match_id：" . $val['match_id'] . "更新成功" . "\n";
                 } else {
@@ -668,7 +668,7 @@ class MatchService
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
     }
     //封装更新一条shangniuMatchList数据
-    public function updateOneShangMatchList($match_id, $game,$next_try=0,$try=0,$tournament_id)
+    public function updateOneShangMatchList($match_id, $game,$next_try=0,$try=0,$tournament_id=0,$home_display=0,$away_display=0)
     {
         $shangniuMatchModel=new \App\Models\Match\shangniu\matchListModel();
         $redisService = new RedisService();
@@ -677,6 +677,8 @@ class MatchService
         //================创建任务=======================
         $cdetail['next_try'] = $next_try;
         $cdetail['try'] = $try;
+        $cdetail['home_display'] = $home_display;
+        $cdetail['away_display'] = $away_display;
         $cdetail['source'] = 'shangniu';
         $cdetail['id'] = $match_id;
         $cdetail['url'] = 'https://www.shangniu.cn/esports/dota-live-'.$match_id.'.html';

@@ -191,7 +191,7 @@ class IndexController extends Controller
                 }
                 elseif($source=="shangniu")
                 {
-                    $res=(new MatchService())->updateOneShangMatchList($match_id,$game,$matchDetail['next_try'],$matchDetail['try'],$matchDetail['tournament_id']);
+                    $res=(new MatchService())->updateOneShangMatchList($match_id,$game,$matchDetail['next_try'],$matchDetail['try'],$matchDetail['tournament_id'],$matchDetail['home_display'],$matchDetail['away_display']);
                     $rt= $res['result']??0;
                     return $rt;
                 }
