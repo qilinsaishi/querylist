@@ -1195,7 +1195,7 @@ class TeamService
                 //更新整合表的状态，根据详情表的汇总显示状态
                 $teamList = $teamModel->getTeamList(['tid'=>$teamInfo['tid'],"fields"=>"team_id,tid,status"]);
                 $displayStatus = array_sum(array_column($teamList,'status'));
-                $totalTeamModel->updateTeam($teamInfo['tid'],['display'=>$displayStatus]);
+                $totalTeamModel->updateTeam($teamInfo['tid'],['display'=>$displayStatus>0?1:0]);
                 //todo 刷新缓存
                 (new IntergrationService())->getTeamInfo(0,$teamInfo['tid'],1,1);
             }
