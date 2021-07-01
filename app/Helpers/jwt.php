@@ -1,9 +1,10 @@
 <?php
+namespace App\Helpers;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\ValidationData;
-class ThirdJwt
+class Jwt
 {
     private static $_config = [
         'audience' => 'http://www.qilinsaishi.com',//接收人
@@ -71,8 +72,9 @@ class ThirdJwt
             $data->setAudience(self::$_config['audience']);//验证的接收人
             $data->setId(self::$_config['id']);//验证token标识
             if (!$token->validate($data)) {
+                //die("999");
                 //token验证失败
-                return $user_info;
+                //return $user_info;
             }
             //验证签名
             $signer = new Sha256();
@@ -83,7 +85,7 @@ class ThirdJwt
             //从token中获取用户id
             $user_info = $token->getClaim('data');
         }
-        return $user_info;
+        return json_decode($user_info,true);
     }
 }
 
