@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 
 use App\Services\PlayerService;
 use App\Services\TeamService;
+use App\Services\UserService;
 use Illuminate\Console\Command;
 use App\Services\Data\IntergrationService;
 class Test extends Command
@@ -75,6 +76,10 @@ class Test extends Command
                 die();
                 //$teamInfo = (new TeamService())->disintegration($id);
                 break;
+            }
+            case "jwt":
+            {
+                (new UserService())->test();
             }
         }
     }
