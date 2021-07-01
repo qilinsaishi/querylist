@@ -2,6 +2,9 @@
 
 namespace App\Collect\match\kpl;
 
+use App\Models\TeamModel;
+use App\Services\TeamService;
+
 class scoregg
 {
     protected $data_map =
@@ -220,6 +223,20 @@ class scoregg
         }
         else
         {
+            $teamModel=new TeamModel();
+            $teamService=new TeamService();
+            $homeTeamInfo=$teamModel->getTeamBySiteId($arr['content']['teamID_a'],$arr['content']['source'],$arr['content']['game']);
+            $awayTeamInfo=$teamModel->getTeamBySiteId($arr['content']['teamID_b'],$arr['content']['source'],$arr['content']['game']);
+            //如果主队数据库不存在则创建数据库
+            if(!isset($homeTeamInfo['team_id'])){
+                $teamService->createTeamMission($arr['content']['game'],$arr['content']['teamID_a'],$arr['content']['source']);
+                echo "createTeamMissionByTeamID_a:team_id:".$arr['content']['teamID_a']."\n";
+            }
+            //如果客队数据库不存在则创建数据库
+            if(!isset($awayTeamInfo['team_id'])){
+                $teamService->createTeamMission($arr['content']['game'],$arr['content']['teamID_b'],$arr['content']['source']);
+                echo "createTeamMissionByTeamID_b:team_id:".$arr['content']['teamID_b']."\n";
+            }
             $currentKeyList = array_column($this->data_map['list'],'path');
             $keyList = array_keys($arr['content']);
             /*

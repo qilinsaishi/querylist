@@ -3,6 +3,8 @@
 namespace App\Collect\match\dota2;
 
 use App\Libs\ClientServices;
+use App\Models\TeamModel;
+use App\Services\TeamService;
 use http\Message\Body;
 use QL\QueryList;
 
@@ -61,8 +63,6 @@ class shangniu
         $res['round_detailed'] = 0;
         $res['home_display']=$res['home_display'] ?? 0;
         $res['away_display']=$res['away_display'] ?? 0;
-
-print_r( $res);exit;
 
         if ($type == 'match') {//赛程
             //=============================赛前数据=====================================
@@ -204,6 +204,22 @@ print_r( $res);exit;
             $data['tournament'][] = getDataFromMapping($this->data_map['tournament'], $arr['content']);
 
         } else {
+
+            $teamModel=new TeamModel();
+            $teamService=new TeamService();
+            $homeTeamInfo=$teamModel->getTeamBySiteId($arr['content']['homeId'],$arr['content']['source'],$arr['content']['game']);
+            $awayTeamInfo=$teamModel->getTeamBySiteId($arr['content']['awayId'],$arr['content']['source'],$arr['content']['game']);
+            //如果主队数据库不存在则创建数据库
+            if(!isset($homeTeamInfo['team_id'])){
+                $teamService->createTeamMission($arr['content']['game'],$arr['content']['homeId'],$arr['content']['source']);
+                echo "createTeamMissionByHomeId:team_id:".$arr['content']['homeId']."\n";
+            }
+            //如果客队数据库不存在则创建数据库
+            if(!isset($awayTeamInfo['team_id'])){
+                $teamService->createTeamMission($arr['content']['game'],$arr['content']['awayId'],$arr['content']['source']);
+                echo "createTeamMissionByAwayId:team_id:".$arr['content']['awayId']."\n";
+            }
+
             $currentKeyList = array_column($this->data_map['list'], 'path');
             $keyList = array_keys($arr['content']);
             $arr['content']['match_data'] = [];
