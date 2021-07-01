@@ -1064,6 +1064,7 @@ class TeamService
             }
             if ($new_tid > 0) {
                 $totalTeam['redirect']['tid'] = $new_tid;
+                                $totalTeam['display'] = 0;
             } else {
                 unset($totalTeam['redirect']['tid']);
             }
