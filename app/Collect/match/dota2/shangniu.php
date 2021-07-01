@@ -61,8 +61,6 @@ class shangniu
         $res['home_display']=$res['home_display'] ??0;
         $res['away_display']=$res['away_display'] ??0;
         $res['round_detailed'] = 0;
-        $res['home_display']=$res['home_display'] ?? 0;
-        $res['away_display']=$res['away_display'] ?? 0;
 
         if ($type == 'match') {//赛程
             //=============================赛前数据=====================================
