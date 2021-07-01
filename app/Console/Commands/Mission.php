@@ -202,10 +202,14 @@ class Mission extends Command
                 break;
             case 'tryCollectBySiteId':
                 $teamService=new TeamService();
-                $site_id=19370;
-                //通过site_id抓取比赛数据
+                $playerService=new PlayerService();
+                $site_id=198254;
+                //通过site_id抓取战队
                 if($mission_type=='team'){
                     $teamService->insertTeamDataBySiteId($game,$site_id);
+                }
+                if($mission_type=='player'){
+                    $playerService->insertPlayerDataBySiteId($game,$site_id);
                 }
                 break;
             case 'doat2TournamentDisplay':
