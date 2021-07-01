@@ -34,25 +34,25 @@ class TeamService
         }
         if($game=='lol' || $game=='kpl'){
             $this->getScoreggTeamDetail($game, $force);//scoregg 比赛
-            $this->insertCpseoTeam($game, $force);//seo
+            //$this->insertCpseoTeam($game, $force);//seo
         }
 
         return 'finish';
     }
     //通过site_id重新抓取页面信息
     public function insertTeamDataBySiteId($game,$site_id){
-        //$data='["https:\u002F\u002Fimg.scoregg.com\u002Fz\u002F2373870\u002Fp\u002F214\u002F2714270689136.png"]';
-       // print_r(json_decode($data,true));
+
         $source=$game=="dota2"?"shangniu":"scoregg";
-        $mission_id = $this->createTeamMission($game,$site_id,$source);
-        echo "mission_id:".$mission_id."\n";
-        if($mission_id){
-
-        }
-
-        echo 'game:'.$game.",source:".$source; ;exit;
+        echo 'game:'.$game.",source:".$source;
         $teamModel=new TeamModel();
         $missionModel=new MissionModel();
+
+        $mission_id = $this->createTeamMission($game,$site_id,$source);
+        echo "mission_id:".$mission_id."\n";
+       return $mission_id;
+
+
+
     }
 
     //尚牛赛程
@@ -115,27 +115,15 @@ class TeamService
                             'source_link' => $source_link?? '',
                         ];
                         $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的赛事任务
-                        $tournamentInfo['game'] = $game;
-                        $tournamentInfo['source'] = 'shangniu';
-                        $tournamentInfo['type'] = 'team';
-                        $tournamentInfo['url'] = $source_link;
+
                         if($missionCount==0){
-                            $data = [
-                                "asign_to" => 1,
-                                "mission_type" => 'team',//赛事
-                                "mission_status" => 1,
-                                "game" => $game,
-                                "source" => 'shangniu',//
-                                'title' => 'shangniu-team-'.$teamInfo['teamName'],
-                                'source_link' => $source_link,
-                                "detail" => json_encode($teamInfo),
-                            ];
-                            $insert = $missionModel->insertMission($data);
+                            $insert = $this->createTeamMission($game,$teamInfo['teamId'],'shangniu');
+
                             if($insert){
                                 $mission_repeat = 0;
-                                echo "insert:" . $insert . ' team:' . $teamInfo['teamId']. '加入任务成功' . "\n";
+                                echo "insert:" . $insert . ' team_id:' . $teamInfo['teamId']. '加入任务成功' . "\n";
                             } else {
-                                echo "insert:" . $insert . ' team:' . $teamInfo['teamId'] . '加入任务失败' . "\n";
+                                echo "insert:" . $insert . ' team_id:' . $teamInfo['teamId'] . '加入任务失败' . "\n";
                             }
 
                         }else{
@@ -155,7 +143,7 @@ class TeamService
 
     }
     public function createTeamMission($game,$id,$source){
-        echo "game:".$game."-id:".$id."-：".$source."\n";exit;
+        echo "game:".$game."-id:".$id."-：".$source."\n";
         if($source == "scoregg")
         {
             $team_url = 'https://www.scoregg.com/big-data/team/' . $id . '?tournamentID=&type=baike';
@@ -285,19 +273,9 @@ class TeamService
                                         return;
                                     }
                                 } else {
-                                    $adata = [
-                                        "asign_to" => 1,
-                                        "mission_type" => 'team',
-                                        "mission_status" => 1,
-                                        "game" => $game,
-                                        "source" => 'scoregg',
-                                        "title" => $v['team_name'] ?? '',
-                                        'source_link' => $team_url,
-                                        "detail" => json_encode($v),
-                                    ];
-                                    $insert = (new oMission())->insertMission($adata);
+                                    $mission_id = $this->createTeamMission($game,$v['team_id'],'scoregg');
                                     $mission_repeat = 0;
-                                    echo $game . "-scoregg-mission-insert:" . $insert . ' lenth:' . strlen($adata['detail']) . "\n";
+                                    echo $game . "-scoregg-mission-insert:" . $mission_id . ' site_id:' . $v['team_id'] . "\n";
                                 }
                             }
                         }

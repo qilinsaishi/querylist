@@ -668,7 +668,7 @@ class MatchService
         return "第" . $params['page'] . "页游戏" . $params['game'] . "执行完毕";
     }
     //封装更新一条shangniuMatchList数据
-    public function updateOneShangMatchList($match_id, $game,$next_try=0,$try=0,$tournament_id,$home_display,$away_display)
+    public function updateOneShangMatchList($match_id, $game,$next_try=0,$try=0,$tournament_id=0,$home_display=0,$away_display=0)
     {
         $shangniuMatchModel=new \App\Models\Match\shangniu\matchListModel();
         $redisService = new RedisService();

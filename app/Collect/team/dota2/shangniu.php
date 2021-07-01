@@ -33,8 +33,11 @@ class shangniu
         $res= $arr['detail'] ?? [];
 
         $teamInfo=$this->shangniuTeam($url,$res['teamId']);
-        $res['teamLogo']=$res['teamLogo'] ?? ($teamInfo['teamLogo'] ?? '');
-        $res['teamName']=$res['teamName'] ?? ($teamInfo['teamName'] ?? '');
+        $res['teamLogo']=$res['teamLogo'] ?? ($teamInfo['team_logo'] ?? '');
+        $res['teamName']=$res['teamName'] ?? ($teamInfo['team_name'] ?? '');
+        unset($teamInfo['team_logo']);
+        unset($teamInfo['team_name']);
+
         $res=array_merge($res,$teamInfo);
 
         if (is_array($res) && count($res)>0) {
@@ -133,6 +136,8 @@ class shangniu
         $html=substr($content,$start,$end-$start);
         //================战队基本信息=================================
         $teamInfo = QueryList::html($html)->rules([
+            "team_logo" => [".team-info-new .logo-box img","src"],
+            "team_name" => [".team-info-new .name","text"],
             "team_full_name" => [".team-info-new .full-name","text"],
             "descList" => [".team-info-new .desc-list .item","texts"],
         ])->query(function ($item){
@@ -167,12 +172,17 @@ class shangniu
         $playerList=$playerList->all();
         //=====================战队所属队员列表=========================
 
+       // $res['teamLogo']=$res['teamLogo'] ?? ($teamInfo['teamLogo'] ?? '');
+        //$res['teamName']=$res['teamName'] ?? ($teamInfo['teamName'] ?? '');
+
         $res=[
             'team_full_name'=>$teamInfo['team_full_name'] ?? '',
             'location'=>$teamInfo['location'] ?? '',
             'en_name'=>$teamInfo['en_name'] ?? '',
             'playerList'=>$playerList,
             'team_stat'=>$teamStat ?? [],
+            'team_name'=>$teamInfo['team_name'] ?? '',
+            'team_logo'=>$teamInfo['team_logo'] ?? '',
         ];
 
         return $res;
