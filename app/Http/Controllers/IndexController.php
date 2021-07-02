@@ -199,6 +199,17 @@ class IndexController extends Controller
         }
 
     }
+    public function createMission(){
+        $game = $this->request->get("game","lol");
+        $site_id = $this->request->get("site_id",0);
+        $type=$this->request->get("type","team");
+        $source=$game=="dota2"?"shangniu":"scoregg";
+        $mission_id=0;
+        if($type=='team'){
+            $mission_id=(new TeamService())->createTeamMission($game,$site_id,$source);
+        }
+        return $mission_id;
+    }
     public function truncate()
     {
         $redisService = new RedisService();

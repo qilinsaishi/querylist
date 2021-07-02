@@ -28,3 +28,4 @@ Route::any('refresh','IndexController@refresh');
 Route::any('refreshGame','IndexController@refreshGame');
 Route::any('truncate','IndexController@truncate');
 Route::any('submit','IndexController@submit');
+Route::any('createMission','IndexController@createMission');

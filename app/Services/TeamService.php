@@ -43,12 +43,12 @@ class TeamService
     public function insertTeamDataBySiteId($game,$site_id){
 
         $source=$game=="dota2"?"shangniu":"scoregg";
-        echo 'game:'.$game.",source:".$source;
+     //   echo 'game:'.$game.",source:".$source;
         $teamModel=new TeamModel();
         $missionModel=new MissionModel();
 
         $mission_id = $this->createTeamMission($game,$site_id,$source);
-        echo "mission_id:".$mission_id."\n";
+      //  echo "mission_id:".$mission_id."\n";
        return $mission_id;
 
 
@@ -143,7 +143,7 @@ class TeamService
 
     }
     public function createTeamMission($game,$id,$source){
-        echo "game:".$game."-id:".$id."-：".$source."\n";
+        //echo "game:".$game."-id:".$id."-：".$source."\n";
         if($source == "scoregg")
         {
             $team_url = 'https://www.scoregg.com/big-data/team/' . $id . '?tournamentID=&type=baike';
