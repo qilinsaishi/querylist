@@ -178,36 +178,12 @@ class Mission extends Command
 
                 }elseif($game=='dota2'){
                     /* php artisan mission:collect updateRecentMatch  match dota2 --count=50
-                    (更新scoregg_match_list表里面的round_detailed=0的数据)*/
+                    (更新shangniu_match_list表里面的round_detailed=0的数据)*/
                     //$matchService->updateWcaMatchListStatus($game,$count);
                     $matchService->updateShangniuMatchListStatus($game, $count);
 
                 }
 
-                break;
-            case 'fillTeam':
-                $teamService=new TeamService();
-                if($game != "all")
-                {
-                    $gameList = [$game];
-                }
-                else
-                {
-                    $gameList = ['lol','kpl','dota2'];
-                }
-                foreach($gameList as $game){
-                    $teamService->createTeamMissionForMissingTeam($game);
-                }
-
-                break;
-            case 'tryCollectBySiteId':
-                $teamService=new TeamService();
-                $playerService=new PlayerService();
-                //通过site_id抓取战队
-                /*if($mission_type=='team'){
-                    $teamService->insertTeamDataBySiteId($game,$site_id=0);
-                }
-                */
                 break;
             case 'doat2TournamentDisplay':
                 (new MatchService())->setDota2TournamentDisplay();

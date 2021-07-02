@@ -23,27 +23,15 @@ class  PlayerService
     public function insertPlayerData($game,$force = 0)
     {
         //$this->getPlayerListByCollectResult($game, $mission_type);
-        $this->getScoreggPlayerDetail($game, $force);
+        if($game !='dota2'){
+            $this->getScoreggPlayerDetail($game, $force);
+        }
+
         //$this->insertCpseoPlayer($game, $mission_type);
         //$this->repairPlayerData();//修复队员scoregg 下面team_id错误数据
         return 'finish';
     }
 
-    //通过site_id重新抓取页面信息
-    public function insertPlayerDataBySiteId($game,$site_id){
-
-        $source=$game=="dota2"?"shangniu":"scoregg";
-        echo 'game:'.$game.",source:".$source;
-        $playerModel=new PlayerModel();
-        $missionModel=new MissionModel();
-
-        $mission_id = $this->createPlayerMission($game,$site_id,$source);
-        echo "mission_id:".$mission_id."\n";
-        return $mission_id;
-
-
-
-    }
 
     public function insertCpseoPlayer($game, $mission_type)
     {
@@ -231,7 +219,7 @@ class  PlayerService
         return true;
     }
     public function createPlayerMission($game,$player_id,$source){
-        echo "game:".$game."-id:".$player_id."-：".$source."\n";
+       // echo "game:".$game."-id:".$player_id."-：".$source."\n";
         if($source == "scoregg")
         {
             $player_url = 'https://www.scoregg.com/big-data/player/' . $player_id . '?tournamentID=&type=baike';

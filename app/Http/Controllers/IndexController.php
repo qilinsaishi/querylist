@@ -208,6 +208,9 @@ class IndexController extends Controller
         if($type=='team'){
             $mission_id=(new TeamService())->createTeamMission($game,$site_id,$source);
         }
+        if($type=='player'){
+            $mission_id=(new PlayerService())->createPlayerMission($game,$site_id,$source);
+        }
         return $mission_id;
     }
     public function truncate()

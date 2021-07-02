@@ -264,7 +264,7 @@ class TeamModel extends Model
         {
             if(is_array($data['aka']))
             {
-                $data['aka'] = $data['aka'][0] ?? '';
+                $data['aka'] = $data['aka'][0] ?? [];
             }
             else
             {

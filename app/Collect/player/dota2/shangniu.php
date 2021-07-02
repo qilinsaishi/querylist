@@ -3,6 +3,7 @@
 namespace App\Collect\player\dota2;
 
 use App\Libs\ClientServices;
+use App\Models\PlayerModel;
 use QL\QueryList;
 
 class shangniu
@@ -37,6 +38,15 @@ class shangniu
         if(isset($res['player_logo']) && strpos($res['player_logo'],'/mrtp.png') !==false){
             $res['player_logo']='http://qilingsaishi-01.oss-cn-hangzhou.aliyuncs.com/65d87d548f76492fab2eb9fea7f59ecda381650b.png';
         }
+        $res['site_id']=$res['site_id'] ??$res['player_id'];
+        $playerModel = new PlayerModel();
+        $playerInfo = $playerModel->getPlayerBySiteId($res['site_id'], $res['game'], $res['source']);
+        $res['team_id']=$res['team_id'] ?? ($playerInfo['team_id'] ?? 0);
+        $res['current']=$res['current'] ??1;
+        $res['position']=$res['position'] ?? ($playerInfo['position'] ?? '');
+        $res['player_name']=$res['player_name'] ?? ($playerInfo['player_name'] ?? '');
+        $res['player_logo']=$res['logo'] ?? ($playerInfo['logo'] ?? '');
+
         $playerInfo = $this->shangniuPlayer($url,$res['site_id']);
         $res=array_merge($res,$playerInfo);
 

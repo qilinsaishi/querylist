@@ -2,6 +2,7 @@
 
 namespace App\Collect\player\kpl;
 use App\Models\MissionModel;
+use App\Models\PlayerModel;
 use App\Models\TeamModel;
 use App\Services\MissionService as oMission;
 use App\Services\PlayerService;
@@ -38,6 +39,12 @@ class scoregg
         if($player_id >0){
             $teamInfo = $this->getScoreggInfo($url,$team_id);
             $res = $url = $arr['detail'] ?? [];
+            $playerModel = new PlayerModel();
+            $playerInfo = $playerModel->getPlayerBySiteId($res['player_id'], $res['game'], $res['source']);
+            $res['team_id']=$res['team_id'] ?? ($playerInfo['team_id'] ?? 0);
+            $res['current']=isset($playerInfo['team_id']) ?1:0;
+            $res['player_name']=$res['player_name'] ?? ($playerInfo['player_name'] ?? '');
+            $res['player_image']=$res['player_image'] ?? ($playerInfo['logo'] ?? '');
             $res = array_merge($res, $teamInfo);
             $player_stat=(new PlayerService())->getScoreggPlayerInfo($player_id);
             $res['player_stat']=$player_stat;
@@ -69,73 +76,19 @@ class scoregg
     public function process($arr)
     {
         $redis = app("redis.connection");
-        /**
-         * [tournament_id] => 197 //赛事id
-         * [player_id] => 3771  //队员id
-         * [player_name] => 救赎  //队员名称
-         * [player_image] => https://img.scoregg.com/m/2373870/p/213/0913420918641.png  /队员头像
-         * [team_id] => 338  //战队id
-         * [team_name] => 北京WB  //战队名称
-         * [team_image] => https://img.scoregg.com/z/554377/p/213/0115180837633_100X100.png  //战队名称
-         * [position] => 辅助 //位置
-         * [KDA] => 13.5
-         * [PLAYS_TIMES] => 2 //玩家出场次数
-         * [OFFERED_RATE] => 87.0 //参团率
-         * [AVERAGE_KILLS] => 1.5 //场均击杀
-         * [AVERAGE_ASSISTS] => 12.0 //场均助攻
-         * [AVERAGE_DEATHS] => 1.0  //场均死亡
-         * [MINUTE_ECONOMIC] => 452.1 //每分钟经济
-         * [MINUTE_HITS] => 0.0  //每分钟补刀
-         * [MINUTE_DAMAGEDEALT] => 1287.1 //每分钟输出
-         * [DAMAGEDEALT_RATE] => 7.7  //输出占比
-         * [MINUTE_DAMAGETAKEN] => 4525.9 //每分钟承受伤害
-         * [DAMAGETAKEN_RATE] => 21.5  //承受伤害占比
-         * [MINUTE_WARDSPLACED] => 0.0 //每分钟插眼数
-         * [MINUTE_WARDKILLED] => 0.0 //每分钟拆眼熟
-         * [update_time] => 1615932892
-         * [MVP] => 0 //mvp次数
-         * [player_chinese_name] => 张佳豪
-         * [win] => 1  //胜利
-         * [los] => 1 //失败
-         * [VICTORY_RATE] => 50.0 //胜利率
-         * [country_id] => 1 //国家id
-         * [country_image] => https://img1.famulei.com/z/0/p/1610/1213053470757.png //国家图标
-         * [f_score] => 99.7  //战力评分
-         * [position_id] => 5
-         * [total_kills] => 3 //总击杀数
-         * [total_deaths] => 2 //总死亡数
-         * [total_assists] => 24  //总助攻数
-         * [player_url] => https://www.scoregg.com/big-data/player/3771?tournamentID=197&type=baike
-         * [game] => kpl
-         * [source] => scoregg
-         * [country]=>国家
-         * [birthday]=>出生日期
-         * [status]=>所在队伍输出状态（主力）
-         * [content]=>介绍
-         * [history_honor]=>[//历史荣誉
-         *      match_time => 2018-10-20 //时间
-         *      ranking => 5-8名 //荣誉/名次
-         *      ranking_icon => https://img.scoregg.com/web_static/static/img/a40de7d.png //荣誉/名次icon
-         *      t_image => https://img1.famulei.com/z/5688126/p/189/1620433552131.png //赛事图片
-         *      t_name => S8世界总决赛//赛事
-         *      team_a_image => https://img1.famulei.com/z/0/p/171/0411152029924_100X100.png //战队a图片
-         *      team_name_a => RNG //战队a名称
-         *      team_b_image => https://img1.famulei.com/z/0/p/1612/2915402013103_100X100.png //战队b图片
-         *      team_name_b => G2 //战队b名称
-         *      team_a_win => 2  //战队a比分
-         *      team_b_win => 3 //战队b比分
-         * ]
-         */
+
         $qt = QueryList::get($arr['source_link']);
         $player_name=$qt->find('.right-content h2')->text();
         $arr['content']['player_name']=$player_name ?? $arr['content']['player_name'];
         $arr['content']['stat'] =
             getFieldsFromArray($arr['content'],"KDA,PLAYS_TIMES,OFFERED_RATE,AVERAGE_KILLS,AVERAGE_ASSISTS,AVERAGE_DEATHS,MINUTE_ECONOMIC,MINUTE_HITS,MINUTE_DAMAGEDEALT,DAMAGEDEALT_RATE,MINUTE_DAMAGETAKEN,DAMAGETAKEN_RATE,MINUTE_WARDSPLACED,MINUTE_WARDKILLED,MVP,win,los,VICTORY_RATE,total_kills,total_deaths,total_assists");
-        $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","kpl");
-        if(isset($teamInfo['team_id']))
+        if($arr['content']['current']!=1) {
+            $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","lol");
+            $arr['content']['team_id'] = $teamInfo['team_id']??0;
+        }
+        if($arr['content']['team_id']>0)
         {
             $arr['content']['player_image'] = getImage($arr['content']['player_image'],$redis);
-            $arr['content']['team_id'] = $teamInfo['team_id'];
             $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
             if(isset($arr['content']['real_name']) && preg_match($patten, $arr['content']['real_name'])){
                 $arr['content']['cn_name'] = $arr['content']['real_name'];
@@ -158,46 +111,7 @@ class scoregg
             $data = getDataFromMapping($this->data_map,$arr['content']);
             return $data;
         }
-        else
-        {
-            $infos = $qt->find('.left-content .game-history .hero-info .info-item')->texts()->all();
-            $cn_name=$en_name='';
-            if (count($infos) > 0) {
-                $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
-                foreach ($infos as $val) {
-                    if (strpos($val, '队伍：') !== false) {
-                        $name = str_replace('队伍：', '', $val);
-                        if(preg_match($patten, $name)){
-                            $cn_name=trim($name);
-                        }else{
-                            $en_name=trim($name);
-                        }
-                    }
-                }
-            }
-            $detail=[
-                'team_id'=>$arr['content']['team_id'] ?? 0,
-                'team_name'=>$arr['content']['team_name'] ?? 0,
-                'team_image'=>$arr['content']['team_image'] ?? 0,
-                'source' => 'scoregg',
-                'game'=>$arr['game'] ?? 'kpl',
-                'team_url'=>'https://www.scoregg.com/big-data/team/'.$arr['content']['team_id'].'?tournamentID=&type=baike',
-                'cn_name'=>$cn_name,
-                'en_name'=>$en_name,
-            ];
-            $adata = [
-                "asign_to" => 1,
-                "mission_type" => 'team',
-                "mission_status" => 1,
-                "game" => $arr['game'] ?? 'kpl',
-                "source" => 'scoregg',
-                "title" => $arr['content']['team_name'] ?? '',
-                'source_link' => 'https://www.scoregg.com/big-data/team/'.$arr['content']['team_id'].'?tournamentID=&type=baike',
-                "detail" => json_encode($detail),
-            ];
-            $insert = (new oMission())->insertMission($adata);
-            return false;
-        }
+
     }
 
     //获取战队scoregg战队详情

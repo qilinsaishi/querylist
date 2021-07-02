@@ -39,21 +39,6 @@ class TeamService
 
         return 'finish';
     }
-    //通过site_id重新抓取页面信息
-    public function insertTeamDataBySiteId($game,$site_id){
-
-        $source=$game=="dota2"?"shangniu":"scoregg";
-     //   echo 'game:'.$game.",source:".$source;
-        $teamModel=new TeamModel();
-        $missionModel=new MissionModel();
-
-        $mission_id = $this->createTeamMission($game,$site_id,$source);
-      //  echo "mission_id:".$mission_id."\n";
-       return $mission_id;
-
-
-
-    }
 
     //尚牛赛程
     public function insertShangniuTeam($game = 'dota2', $force = 0){

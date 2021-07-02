@@ -3,6 +3,7 @@
 namespace App\Collect\player\lol;
 
 use App\Models\MissionModel;
+use App\Models\PlayerModel;
 use App\Models\TeamModel;
 use App\Services\MissionService as oMission;
 use App\Services\PlayerService;
@@ -39,6 +40,13 @@ class scoregg
         if($player_id >0){
             $teamInfo = $this->getScoreggInfo($url,$team_id);
             $res = $url = $arr['detail'] ?? [];
+            $playerModel = new PlayerModel();
+            $playerInfo = $playerModel->getPlayerBySiteId($res['player_id'], $res['game'], $res['source']);
+            $res['team_id']=$res['team_id'] ?? ($playerInfo['team_id'] ?? 0);
+            $res['current']=isset($playerInfo['team_id']) ?1:0;
+            $res['player_name']=$res['player_name'] ?? ($playerInfo['player_name'] ?? '');
+            $res['player_image']=$res['player_image'] ?? ($playerInfo['logo'] ?? '');
+
             $res = array_merge($res, $teamInfo);
             $player_stat=(new PlayerService())->getScoreggPlayerInfo($player_id);
             $res['player_stat']=$player_stat;
@@ -129,22 +137,18 @@ class scoregg
          */
         $qt = QueryList::get($arr['source_link']);
         $player_name=$qt->find('.right-content h2')->text();
-        $arr['content']['player_name']=$player_name ?? $arr['content']['player_name'];
+        $arr['content']['player_name']=$arr['content']['player_name'] ?? $player_name ;
         $arr['content']['stat'] =
             getFieldsFromArray($arr['content'],"KDA,PLAYS_TIMES,OFFERED_RATE,AVERAGE_KILLS,AVERAGE_ASSISTS,AVERAGE_DEATHS,MINUTE_ECONOMIC,MINUTE_HITS,MINUTE_DAMAGEDEALT,DAMAGEDEALT_RATE,MINUTE_DAMAGETAKEN,DAMAGETAKEN_RATE,MINUTE_WARDSPLACED,MINUTE_WARDKILLED,MVP,win,los,VICTORY_RATE,total_kills,total_deaths,total_assists");
 
-        $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","lol");
-        if(isset($teamInfo['team_id']))
-        {
-            /*$stat_arr_list = ['KDA','PLAYS_TIMES'];
-            $arr['content'] = [];
-            foreach($stat_arr_list as $key_name)
-            {
-                $arr['content']['stat'][$key_name] = $arr['content'][$key_name];
-            }*/
-            $arr['content']['player_image'] = getImage($arr['content']['player_image'],$redis);
+        if($arr['content']['current']!=1) {
+            $teamInfo = (new TeamModel())->getTeamBySiteId($arr['content']['team_id'],"scoregg","lol");
+            $arr['content']['team_id'] = $teamInfo['team_id']??0;
+        }
 
-            $arr['content']['team_id'] = $teamInfo['team_id'];
+        if( $arr['content']['team_id']>0)
+        {
+            $arr['content']['player_image'] = getImage($arr['content']['player_image'],$redis);
             $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
             if(isset($arr['content']['real_name']) && preg_match($patten, $arr['content']['real_name'])){
                 $arr['content']['cn_name'] = $arr['content']['real_name'];
@@ -167,47 +171,7 @@ class scoregg
             $data = getDataFromMapping($this->data_map,$arr['content']);
             return $data;
         }
-        else
-        {
-            $infos = $qt->find('.left-content .game-history .hero-info .info-item')->texts()->all();
-            $cn_name=$en_name='';
-            if (count($infos) > 0) {
-                $patten = '/([\x{4e00}-\x{9fa5}]+)/u';
-                foreach ($infos as $val) {
-                    if (strpos($val, '队伍：') !== false) {
-                        $name = str_replace('队伍：', '', $val);
-                        if(preg_match($patten, $name)){
-                            $cn_name=trim($name);
-                        }else{
-                            $en_name=trim($name);
-                        }
-                    }
-                }
-            }
-            $detail=[
-                'team_id'=>$arr['content']['team_id'] ?? 0,
-                'team_name'=>$arr['content']['team_name'] ?? 0,
-                'team_image'=>$arr['content']['team_image'] ?? 0,
-                'source' => 'scoregg',
-                'game'=>$arr['game'] ?? 'lol',
-                'team_url'=>'https://www.scoregg.com/big-data/team/'.$arr['content']['team_id'].'?tournamentID=&type=baike',
-                'cn_name'=>$cn_name,
-                'en_name'=>$en_name,
-            ];
-            $adata = [
-                "asign_to" => 1,
-                "mission_type" => 'team',
-                "mission_status" => 1,
-                "game" => $arr['game'] ?? 'lol',
-                "source" => 'scoregg',
-                "title" => $arr['content']['team_name'] ?? '',
-                'source_link' => 'https://www.scoregg.com/big-data/team/'.$arr['content']['team_id'].'?tournamentID=&type=baike',
-                "detail" => json_encode($detail),
-            ];
-            $insert = (new oMission())->insertMission($adata);
 
-            return false;
-        }
     }
 
     //获取战队scoregg战队详情

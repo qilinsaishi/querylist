@@ -74,75 +74,9 @@ class scoregg
     public function process($arr)
     {
         $redis = app("redis.connection");
-        /*[team_id] => 5
-        [team_name] => RNG
-        [team_image] => https://img1.famulei.com/z/2373870/p/201/0815415242776_100X100.png //战队图片
-        [KDA] => 5.0
-        [MACTH_TIMES] => 13  //比赛场次
-        [AVERAGE_TIME] => 00:31:57  //场均时长
-        [FIRSTBLOODKILL] => 58.1   //首次杀戮(一血率%)
-        [AVERAGE_KILLS] => 15.6 //场均击杀 人数
-        [AVERAGE_ASSISTS] => 39.2 //平均助攻
-        [AVERAGE_DEATHS] => 10.8  //场均死亡
-        [AVERAGE_CHAMPIONS] => 61828.5  //场均伤害）
-        [MINUTE_OUTPUT] => 1994.5 //每分钟输出
-        [MINUTE_HITS] => 35.1  //每分钟补刀
-        [AVERAGE_MONEY] => 60248.4  //场均经济
-        [MINUTE_MONEY] => 1943.5  //每分钟输出
-        [AVERAGE_SMALLDRAGON] => 2.7 //场均小龙
-        [SMALLDRAGON_RATE] => 57.4  //小龙控制率(%)
-        [MINUTE_WARDSPLACED] => 3.7  //每分钟插眼数
-        [MINUTE_WARDSKILLED] => 1.8  //每分钟拆眼熟
-        [AVERAGE_TOWER_SUCCESS] => 7.5 //场均推塔
-        [AVERAGE_TOWER_FAIL] => 3.8 //场均被推塔数
-        [AVERAGE_BIGDRAGON] => 1.0  //场均大龙
-        [BIGDRAGON_RATE] => 68.9  大龙控制率（%）
-        [update_time] => 1615865101
-        [win] => 11  //胜利
-        [los] => 2   //失败
-        [VICTORY_RATE] => 84.6 //胜率
-        [RESULT_TIMES] => 31 比赛(总)场次
-        [f_score] => 188.0  //战力评分
-        [total_kills] => 485 总击杀数
-        [total_deaths] => 335 //总死亡数
-        [total_SMALLDRAGON] => 85 //总小龙数
-        [total_BIGDRAGON] => 31 //总大龙数
-        [total_assists] => 1216 //总击助攻数
-        [cn_name]=>$cn_name ?? '',//中文名
-        [team_history]=>$content ?? '',//战队历程
-        [play_list]=> [
-                contract_end_time: "1669046400"
-                country_image: "https://img1.famulei.com/z/0/p/1610/1213053470757.png"
-                join_time: "2020-06-17"
-                nickname: "GALA"
-                playerID: "1689"
-                player_image: "https://img1.famulei.com/z/6328686/p/201/0818350594029.png"
-                position_name: "ADC"
-        ],//现役队员列表
-        [history_honor]=>[//历史荣誉
-                match_time => 2018-10-20 //时间
-                ranking => 5-8名 //荣誉/名次
-                ranking_icon => https://img.scoregg.com/web_static/static/img/a40de7d.png //荣誉/名次icon
-                t_image => https://img1.famulei.com/z/5688126/p/189/1620433552131.png //赛事图片
-                t_name => S8世界总决赛//赛事
-                team_a_image => https://img1.famulei.com/z/0/p/171/0411152029924_100X100.png //战队a图片
-                team_name_a => RNG //战队a名称
-                team_b_image => https://img1.famulei.com/z/0/p/1612/2915402013103_100X100.png //战队b图片
-                team_name_b => G2 //战队b名称
-                bonus => //奖金
-                team_a_win => 2  //战队a比分
-                team_b_win => 3 //战队b比分
-        ],//荣誉信息数组*/
-        //     '/^[\x7f-\xff]+$/' 全是中文
-       /* if(!preg_match('/[\x7f-\xff]/', $arr['content']['team_name']))
-        {
-            $arr['content']['en_name'] = $arr['content']['team_name'];
-        }*/
 
         $arr['content']['team_image'] = getImage($arr['content']['team_image']??"",$redis);
         $arr['content']['raceStat'] = ["win"=>intval($arr['content']['win']??0),"draw"=>intval($arr['content']['draw']??0),"lose"=>intval($arr['content']['lose']??0)];
-        //$arr['content']['description'] = $arr['content']['team_history'];
-        //$arr['content']['team_history'] = json_encode($arr['content']['team_history']);
 
         $data = getDataFromMapping($this->data_map,$arr['content']);
 
