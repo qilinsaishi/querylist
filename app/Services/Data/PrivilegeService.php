@@ -1147,7 +1147,7 @@ class PrivilegeService
 
                 }
                 $home_description=trim($home_description,'，');
-                if($pidListCount>=4){
+                if($pidListCount>=5){
                     $home_description=$home_description.' 等';
                 }
                 $data['home_team_info']['description']=$home_description;
@@ -1194,7 +1194,7 @@ class PrivilegeService
 
                 }
                 $away_description=trim($away_description,'，');
-                if($pidListCount>=4){
+                if($pidListCount>=5){
                     $away_description=$away_description.' 等';
                 }
                 $data['away_team_info']['description']=$away_description;
