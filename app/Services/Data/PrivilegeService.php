@@ -1073,6 +1073,7 @@ class PrivilegeService
         $functionList = $this->checkFunction($functionList,"tournament",$params['source']);
         $functionList = $this->checkFunction($functionList,"totalTeamInfo");
         $functionList = $this->checkFunction($functionList,"totalPlayerInfo");
+        $functionList = $this->checkFunction($functionList,"totalPlayerList");
         $modelTournamentClass = $functionList["tournament"."/".$params['source']]["class"];
         $functionTournamentSingle = $functionList["tournament"."/".$params['source']]['functionSingle'];
         $modelClass = $functionList["totalTeamInfo"]["class"];
@@ -1102,11 +1103,103 @@ class PrivilegeService
         $data['home_team_info'] = $teamList[$data['home_id']] ?? [];//战队
         $data['away_team_info'] = $teamList[$data['away_id']] ?? [];
         $data['tournament_info'] = $tournament[$data['tournament_id']] ?? [];
+
+        $oPlayerListModel = $functionList["totalPlayerList"]["class"];
+        $oplayerFunction = $functionList["totalPlayerList"]['function'];
+        $sourceList = config('app.intergration.player');
         if (isset($data['home_team_info']['tid']) && $data['home_team_info']['tid'] > 0) {
-            $data['home_team_info'] = getFieldsFromArray($intergrationService->getTeamInfo(0, $data['home_team_info']['tid'], 1, 0)['data'], "tid,team_name,description,logo");
+            $data['home_team_info'] = getFieldsFromArray($intergrationService->getTeamInfo(0, $data['home_team_info']['tid'], 1, 0)['data'], "tid,team_name,en_name,game,description,logo,intergrated_id_list");
+            $home_description='';
+            if(strip_tags($data['home_team_info']['description'])=='暂无') {
+                if(strpos($data['home_team_info']['team_name'],'战队')===false){
+                    $home_description.=$data['home_team_info']['team_name'].'战队，';
+                }
+                if(strpos($data['home_team_info']['team_name'],'俱乐部')===false){
+                    if($data['home_team_info']['en_name']!=''){
+                        $home_description.='全称'.$data['home_team_info']['en_name'].'电子竞技俱乐部，';
+                    }else{
+                        $home_description.='全称'.$data['home_team_info']['team_name'].'电子竞技俱乐部，';
+                    }
+
+                }
+                if($data['home_team_info']['game']=='lol'){
+                    $home_description.="英雄联盟职业电竞俱乐部，旗下成员包括";
+                }elseif($data['home_team_info']['game']=='kpl'){
+                    $home_description.="王者荣耀职业电竞俱乐部，旗下成员包括";
+                }elseif($data['home_team_info']['game']=='dota2'){
+                    $home_description.="DOTA2职业电竞俱乐部，旗下成员包括";
+                }
+                if (count($data['home_team_info']['intergrated_id_list'])) {
+                    $pidList = $oPlayerListModel->$oplayerFunction(['team_ids' => $data['home_team_info']['intergrated_id_list'], "sources" => array_column($sourceList, "source"), "fields" => "player_id,pid", "page_size" => 6]);
+                    $pidList = array_unique(array_column($pidList, "pid"));
+                    $pidListCount=count($pidList);
+                    foreach ($pidList as $pid) {
+                        if ($pid > 0) {
+                            $aPlayerInfo = $intergrationService->getPlayerInfo(0, $pid, 1, $params['reset'] ?? 0);
+                            if(isset($aPlayerInfo['data']['player_name']) && $aPlayerInfo['data']['player_name']!='') {
+                                $home_description.=$aPlayerInfo['data']['player_name'].'，';
+
+                            }
+
+
+                        }
+                    }
+
+                }
+                $home_description=trim($home_description,'，');
+                if($pidListCount>=5){
+                    $home_description=$home_description.' 等';
+                }
+                $data['home_team_info']['description']=$home_description;
+
+            }
         }
         if (isset($data['away_team_info']['tid']) && $data['away_team_info']['tid'] > 0) {
-            $data['away_team_info'] = getFieldsFromArray($intergrationService->getTeamInfo(0, $data['away_team_info']['tid'], 1, 0)['data'], "tid,team_name,description,logo");
+            $data['away_team_info'] = getFieldsFromArray($intergrationService->getTeamInfo(0, $data['away_team_info']['tid'], 1, 0)['data'], "tid,team_name,en_name,game,description,logo,intergrated_id_list");
+            $away_description='';
+            if(strip_tags($data['away_team_info']['description'])=='暂无') {
+                if(strpos($data['away_team_info']['team_name'],'战队')===false){
+                    $away_description.=$data['away_team_info']['team_name'].'战队，';
+                }
+                if(strpos($data['away_team_info']['team_name'],'俱乐部')===false){
+                    if($data['away_team_info']['en_name']!=''){
+                        $away_description.='全称'.$data['away_team_info']['en_name'].'电子竞技俱乐部，';
+                    }else{
+                        $away_description.='全称'.$data['away_team_info']['team_name'].'电子竞技俱乐部，';
+                    }
+
+                }
+                if($data['away_team_info']['game']=='lol'){
+                    $away_description.="英雄联盟职业电竞俱乐部，旗下成员包括";
+                }elseif($data['away_team_info']['game']=='kpl'){
+                    $away_description.="王者荣耀职业电竞俱乐部，旗下成员包括";
+                }elseif($data['away_team_info']['game']=='dota2'){
+                    $away_description.="DOTA2职业电竞俱乐部，旗下成员包括";
+                }
+                if (count($data['away_team_info']['intergrated_id_list'])) {
+                    $pidList = $oPlayerListModel->$oplayerFunction(['team_ids' => $data['away_team_info']['intergrated_id_list'], "sources" => array_column($sourceList, "source"), "fields" => "player_id,pid", "page_size" => 6]);
+                    $pidList = array_unique(array_column($pidList, "pid"));
+                    $pidListCount=count($pidList);
+                    foreach ($pidList as $pid) {
+                        if ($pid > 0) {
+                            $aPlayerInfo = $intergrationService->getPlayerInfo(0, $pid, 1, $params['reset'] ?? 0);
+                            if(isset($aPlayerInfo['data']['player_name']) && $aPlayerInfo['data']['player_name']!='') {
+                                $away_description.=$aPlayerInfo['data']['player_name'].'，';
+
+                            }
+
+
+                        }
+                    }
+
+                }
+                $away_description=trim($away_description,'，');
+                if($pidListCount>=5){
+                    $away_description=$away_description.' 等';
+                }
+                $data['away_team_info']['description']=$away_description;
+
+            }
         }
         $playerList = [];
 

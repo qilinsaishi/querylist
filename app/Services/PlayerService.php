@@ -1375,7 +1375,7 @@ class  PlayerService
             }
             $connectPlayerList = $playerModel->getPlayerList(['pid'=>$playerInfo['pid'],"fields"=>"player_id,pid,status,original_source"]);
             $displayStatus = array_sum(array_column($connectPlayerList,'status'));
-            $totalPlayerModel->updatePlayer($playerInfo['pid'],['display'=>$displayStatus]);
+            $totalPlayerModel->updatePlayer($playerInfo['pid'],['display'=>$displayStatus>0?1:0]);
            /* if($displayStatus == 0)
             {
                 $totalPlayerModel->updatePlayer($playerInfo['pid'],['display'=>$displayStatus]);
