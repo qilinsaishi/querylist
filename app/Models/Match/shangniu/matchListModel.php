@@ -123,7 +123,7 @@ class matchListModel extends Model
             //$end_time = $params['start_time']+30*86400;
             $match_list = $match_list->where("next_try", '<=', $currentTime);
             $match_list = $match_list->where("try", '<', 15);
-            $match_list = $match_list->where("status", '!=', 3);
+            $match_list = $match_list->whereRaw("((match_status != 3) or (round_detailed =0))");
             $params['order'] = [["start_time","desc"]];
             $params['all'] = 0;
             //$match_list = $match_list->whereRaw("unix_timestamp(start_time)+30*3600 <=".$currentTime);

@@ -637,7 +637,7 @@ class MatchService
             'page' => 1,
             'game' => $game,
             'next_try' => 1,
-            'round_detailed' => '0',
+            //'round_detailed' => '0',
             'all' => 1,//表示不管home_id和away_id是否有值
             'fields' => "match_id,game,next_try,try,tournament_id,home_display,away_display",
         ];
