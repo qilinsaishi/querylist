@@ -493,7 +493,7 @@ class MatchService
             'next_try' => 1,
             'all' => 1,//表示不管home_id和away_id是否有值
             'game' => $game,
-            'round_detailed' => '0',
+            //'round_detailed' => '0',
             'fields' => "match_id,game,next_try,try,start_time",//game,match_status,match_data,match_pre,home_id,away_id,home_score,away_score"
         ];
         $collectClassList = [];
