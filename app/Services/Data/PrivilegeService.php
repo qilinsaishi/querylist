@@ -846,8 +846,8 @@ class PrivilegeService
                     //=====================================战队信息=====================================
                     //=====================================队员关联比赛信息=====================================
                     $matchData = json_decode($matchInfo['match_data'], true);
-                    array_multisort(array_column($matchData['matchData'],"boxNum"),SORT_ASC,$matchData['matchData']);
                     if(isset($matchData['matchData']) && $matchData['matchData']>0){
+                        array_multisort(array_column($matchData['matchData'],"boxNum"),SORT_ASC,$matchData['matchData']);
                         foreach ($matchData['matchData'] as $matchDataKey=>$matchDataInfo){
                             $data[$matchKey]['game_count']=$matchDataInfo['boxNum'];
                             //=========================================主队信息
