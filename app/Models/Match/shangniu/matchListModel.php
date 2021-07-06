@@ -110,7 +110,7 @@ class matchListModel extends Model
         if (isset($params['recent']) && $params['recent'] > 0) {
             $currentTime = time();
             $start_time = date("Y-m-d H:00:00", $currentTime);
-            $end_time = date("Y-m-d", $currentTime+2*86400);
+            $end_time = date("Y-m-d", $currentTime+10*86400);
             $match_list = $match_list->where("start_time", '>=', $start_time);
             $match_list = $match_list->where("start_time", '<=', $end_time);
             $params['order'] = [["start_time","asc"]];
