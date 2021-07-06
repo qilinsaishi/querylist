@@ -42,7 +42,6 @@ class matchListModel extends Model
     ];
     public function getMatchList($params)
     {
-        \DB::connection()->enableQueryLog();
         $start = microtime(true);
         $fields = $params['fields'] ?? "match_id,game,match_status,tournament_id,home_id,away_id,home_name,away_name,home_logo,away_logo,home_score,away_score,start_time,match_data";
         $match_list =$this->select(explode(",",$fields));
@@ -160,8 +159,6 @@ class matchListModel extends Model
         {
             $match_list = $match_list->whereRaw('(home_display * away_display)>0');
         }
-
-
         $match_list = $match_list->limit($pageSizge)
         ->offset(($page-1)*$pageSizge);
         if(!isset($params['order']) || !is_array($params['order']))
@@ -333,5 +330,118 @@ class matchListModel extends Model
         {
             return ['home'=>0,'away'=>0,'total'=>0];
         }
+    }
+    public function getMatchCount($params)
+    {
+        $match_count = $this;
+        if (isset($params['tournament_id']) && $params['tournament_id']>0) {
+            $match_count = $match_count ->where("tournament_id", $params['tournament_id']);
+        }
+        if (isset($params['round_detailed'])) {//主要修复match_data里面的数据
+            $match_count = $match_count ->where("round_detailed", $params['round_detailed']);
+        }
+        //游戏类型
+        if(isset($params['game']))
+        {
+            if(is_array($params['game']) && count($params['game'])>1)
+            {//数组里面多个元素
+                $match_count = $match_count->whereIn("game",$params['game']);
+            }
+            elseif(is_array($params['game']) && count($params['game'])==1)
+            {
+                $match_count = $match_count->where("game",$params['game']['0']);
+            }
+            else
+            {
+                $match_count = $match_count->where("game",$params['game']);
+            }
+        }
+        //状态(0：数据异常，12：取消，13：延期，15：待定)
+        if (isset($params['match_status']))
+        {
+            if(!is_array($params['match_status']))
+            {
+                if(strpos($params['match_status'],',') !==false){
+                    $status = explode(",", $params['match_status']);
+                    $match_count=$match_count->whereIn("match_status", $status);
+                }else{
+                    if($params['match_status']>0){
+                        $match_count=$match_count->where("match_status", $params['match_status']);
+                    }else{
+                        $match_count=$match_count->whereNotIn('match_status',[0,12,13,15]);//数据异常
+                    }
+                }
+
+            }
+            else
+            {
+                $match_count=$match_count->whereIn("match_status", $params['match_status']);
+            }
+        }else{
+            $match_count=$match_count->whereNotIn('match_status',[0,12,13,15]);
+        }
+        //比赛开始时间start>0时间条件
+        if (isset($params['start']) && $params['start'] > 0) {
+            $start_time = date("Y-m-d H:i:s", time());
+            //$end_time = date("Y-m-d H:i:s", time() - (8-4) * 3600);
+            $match_count = $match_count->where("start_time", '<=', $start_time);//->where("start_time", '<', $end_time);
+        }
+        //比赛开始时间start<0表示启动开始时间条件
+        if (isset($params['start']) && $params['start'] < 0) {
+            $start_time = date("Y-m-d H:00:00", time());
+            //$end_time = date("Y-m-d H:i:s", time() - (8-4) * 3600);
+            $match_count = $match_count->where("start_time", '>', $start_time);//->where("start_time", '<', $end_time);
+        }
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['recent']) && $params['recent'] > 0) {
+            $currentTime = time();
+            $start_time = date("Y-m-d H:00:00", $currentTime);
+            $end_time = date("Y-m-d", $currentTime+2*86400);
+            $match_count = $match_count->where("start_time", '>=', $start_time);
+            $match_count = $match_count->where("start_time", '<=', $end_time);
+            $params['order'] = [["start_time","asc"]];
+        }
+        //比赛开始时间start=1表示启动开始时间条件
+        if (isset($params['next_try']) && $params['next_try'] > 0) {
+            $currentTime = time();
+            $start_time = date("Y-m-d H:i:s", $currentTime);
+            $match_count = $match_count->where("next_try", '<=', $currentTime);
+            $match_count = $match_count->where("try", '<', 15);
+            $match_count = $match_count->whereRaw("((match_status != 3) or (round_detailed =0))");
+            $params['order'] = [["start_time","desc"]];
+            $params['all'] = 0;
+        }
+        //比赛日期
+        if (isset($params['start_date']) && strtotime($params['start_date']) > 0)
+        {
+            $match_count = $match_count->where("start_time",">=" , date("Y-m-d H:i:s",strtotime($params['start_date'])));
+
+        }
+        //比赛日期
+        if (isset($params['end_date']) && strtotime($params['end_date']) > 0)
+        {
+            $match_count = $match_count->where("start_time","<" , date("Y-m-d H:i:s",strtotime($params['end_date'])+86400-1));
+        }
+        //否则要求确定的主客队双方
+        if(!isset($params['all']) || $params['all'] <=0){
+            $match_count=$match_count->where("home_id",">",0)->where("away_id",">",0);
+        }
+
+        //主客队双方
+        if(isset($params['team_id']) && !is_array($params['team_id']) && $params['team_id'] >0){
+            $match_count=$match_count->whereRaw('((home_id ='.$params['team_id'] .') or (away_id = '.$params['team_id'].'))');
+        }
+        //主客队双方
+        if(isset($params['team_id']) && is_array($params['team_id']) && count($params['team_id']) >0){
+            $match_count=$match_count->whereRaw('((home_id in ('.implode(",",$params['team_id']) .')) or (away_id in ('.implode(",",$params['team_id']).')))');
+        }
+        $whereAll = $params['all']??1;
+        if($whereAll)
+        {
+            $match_count = $match_count->whereRaw('(home_display * away_display)>0');
+        }
+        $match_count = $match_count
+            ->count();
+        return $match_count;
     }
 }
