@@ -43,7 +43,6 @@ class matchListModel extends Model
     ];
     public function getMatchList($params)
     {
-
         $start = microtime(true);
         $fields = $params['fields'] ?? "match_id,game,match_status,round_id,tournament_id,home_id,away_id,home_score,away_score,start_time,match_data";
         $match_list =$this->select(explode(",",$fields));
@@ -240,8 +239,9 @@ class matchListModel extends Model
             $currentTime = time();
             $start_time = date("Y-m-d H:00:00", $currentTime);
             $end_time = date("Y-m-d", $currentTime+4*86400);
-            $match_list = $match_count->where("start_time", '>=', $start_time);
-            $match_list = $match_count->where("start_time", '<=', $end_time);
+            $match_count = $match_count->where("start_time", '>=', $start_time);
+            $match_count = $match_count->where("start_time", '<=', $end_time);
+            //$params['order'] = [["start_time","asc"]];
         }
         //比赛开始时间start=1表示启动开始时间条件
         if (isset($params['next_try']) && $params['next_try'] > 0) {

@@ -81,7 +81,14 @@ class DataService
                     }
                     if($functionProcess!="")
                     {
-                        $d = $privilegeService->$functionProcess($d,$functionList,$params);
+                        if(isset($params['process']) && ($params['process']==0))
+                        {
+
+                        }
+                        else
+                        {
+                            $d = $privilegeService->$functionProcess($d,$functionList,$params);
+                        }
                     }
                     $dataArr = ['data'=>$d,'count'=>$count];
                 }
@@ -164,6 +171,7 @@ class DataService
                 "newsdetail"=>['dataType'=>'informationList',"page_size"=>10,"site"=>5,"fields"=>'id','reset'=>1],
                 "teamdetail"=>['dataType'=>'intergratedTeamList',"page_size"=>200,"game"=>['lol','kpl','dota2'],"fields"=>'tid,team_name','reset'=>1],
                 "playerdetail"=>['dataType'=>'intergratedPlayerList',"page_size"=>200,"game"=>['lol','kpl','dota2'],"fields"=>'pid,player_name','reset'=>1],
+                "matchdetail"=>['dataType'=>'matchList',"page_size"=>100,"game"=>['lol','kpl'],"start"=>-1,"fields"=>'match_id,game',"source"=>"scoregg","process"=>0],
             ],
         ];
         $menu = $siteMapConfig[$data['site_id']]??[];
