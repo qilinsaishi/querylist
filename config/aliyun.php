@@ -37,4 +37,7 @@ return [
         'site_url_internal' => env('OSS_SITE_URL_INTERNAL'),
 
     ],
+    'sms' => [
+        'endpoint' => env('SMS_ENDPOINT'),
+    ],
 ];

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 
+use App\Services\AliyunService;
 use App\Services\PlayerService;
 use App\Services\TeamService;
 use App\Services\UserService;
@@ -80,6 +81,10 @@ class Test extends Command
             case "jwt":
             {
                 (new UserService())->test();
+            }
+            case "sms":
+            {
+                print_R((new AliyunService())::sms());
             }
         }
     }
