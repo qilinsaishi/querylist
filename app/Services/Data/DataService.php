@@ -172,24 +172,26 @@ class DataService
                 "teamdetail"=>['dataType'=>'intergratedTeamList',"page_size"=>200,"game"=>['lol','kpl','dota2'],"fields"=>'tid,team_name','reset'=>1],
                 "playerdetail"=>['dataType'=>'intergratedPlayerList',"page_size"=>200,"game"=>['lol','kpl','dota2'],"fields"=>'pid,player_name','reset'=>1],
                 "matchdetail"=>['dataType'=>'matchList',"page_size"=>100,"game"=>['lol','kpl'],"start"=>-1,"fields"=>'match_id,game',"source"=>"scoregg","process"=>0],
+                "matchdetail_2"=>['aka'=>'matchdetail','dataType'=>'matchList',"page_size"=>100,"game"=>"dota2","start"=>-1,"fields"=>'match_id,game',"source"=>"shangniu","process"=>0],
             ],
         ];
         $menu = $siteMapConfig[$data['site_id']]??[];
         foreach($menu as $type => $menu_detail)
         {
-            $return[$type] = [];
+            $name = $menu_detail["aka"]??$type;
+            $return[$name] = $return[$name]??[];
             $page = 1;
             $count = 1;
             while($count>0)
             {
                 $menu_detail['page'] = $page;
                 $menu_detail['recent'] = $data['recent']??0;
-                $dataList = $this->getData([$type=>$menu_detail]);
-                $count = count($dataList[$type]['data']);
+                $dataList = $this->getData([$name=>$menu_detail]);
+                $count = count($dataList[$name]['data']);
                 if($count>0)
                 {
                     $fields = explode(",",$menu_detail['fields']);
-                    $return[$type] = array_merge($return[$type],array_column($dataList[$type]['data'],$fields['0']));
+                    $return[$name] = array_merge($return[$name],array_column($dataList[$name]['data'],$fields['0']));
                 }
                 $page ++;
             }
