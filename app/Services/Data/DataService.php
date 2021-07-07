@@ -197,12 +197,16 @@ class DataService
                         {
                             $dataList[$name]['data'][$key][$fields['0']] = $detail[$fields['1']]."-".$detail[$fields['0']];
                         }
+                        $return[$name] = array_merge($return[$name],array_column($dataList[$name]['data'],$fields['0']));
                     }
-                    $return[$name] = array_merge($return[$name],array_column($dataList[$name]['data'],$fields['0']));
+                    else
+                    {
+                        $return[$name] = array_merge($return[$name],array_column($dataList[$name]['data'],$fields['0']));
+                    }
                 }
                 $page ++;
             }
-
+        }
         return $return;
     }
 
