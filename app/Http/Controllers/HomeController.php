@@ -116,7 +116,14 @@ class HomeController extends Controller
 
     public function index()
     {
+        $url='https://ray73.com';
+        $data=curl_get('https://gameinfo.365raylines.com/v2/match?page=1&match_type=3');
+        print_r($data);exit;
 
+        $qt=QueryList::get($url);
+        $content=$qt->find('body')->html();
+        print_r($content);exit;
+//=============================================
         $url='https://www.scoregg.com/big-data/player/2854';
         $qt=QueryList::get($url);
         $bodyHtml=$qt->find('body')->html();

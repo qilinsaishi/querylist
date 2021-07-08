@@ -22,6 +22,8 @@ class MatchService
 
     public function insertMatchData($game, $force = 0, $week = 0)
     {
+        $this->rayMatch();
+        exit;
 
         if ($game == 'kpl' || $game == 'lol') {
             //$this->saveMissionByScoreggMatchId(12280,$game);//这个是测试单个比赛的方法案例
@@ -38,6 +40,62 @@ class MatchService
          }*/
 
         return 'finish';
+    }
+    //尚牛赛程
+    public function rayMatch(){
+        $client = new ClientServices();
+        $gameList=["DOTA2","LOL","KOG"];
+        $matchPageList=[];
+        //获取ray游戏接口
+        //============================================获取赛前数据分页列表==================================
+        $i=0;
+        do{
+            $url='https://gameinfo.365raylines.com/v2/match?page='.$i.'&match_type=3';
+            $result= $client->curlGet($url);
+            $resultData=$result['result'] ?? [];
+            $i++;
+           $uri='https://gameinfo.365raylines.com/v2/match?page='.$i.'&match_type=3';
+           array_push($matchPageList,$uri);
+
+           // echo $uri."\n";
+        }
+        while(count($resultData)>0);
+        //============================================获取赛前数据分页列表==================================
+        if(count($matchPageList)>0){
+            foreach ($matchPageList as $pageUrl){
+                echo $pageUrl;
+                $result= $client->curlGet($pageUrl);
+
+                print_r($result);exit;
+            }
+        }
+
+
+
+
+
+        print_r($matchPageList);exit;
+
+
+        return true;
+    }
+    public function createMatchMission($game,$detail,$source){
+
+        $detail['source']=$source;
+        $detail['game']=$game;
+        $detail['match']='match';
+        $adata = [
+            "asign_to" => 1,
+            "mission_type" => 'match',
+            "mission_status" => 1,
+            "game" => $game,
+            "source" => $source,
+            "title" => $detail['match_name']??'',
+            'source_link' => $detail['match_url']??'',
+            "detail" => json_encode($detail),
+        ];
+        $insert = (new oMission())->insertMission($adata);
+        return $insert;
     }
 
     //尚牛赛程
