@@ -22,9 +22,8 @@ class MatchService
 
     public function insertMatchData($game, $force = 0, $week = 0)
     {
-        $this->rayMatch();
-        exit;
-
+        //https://ray73.com站点比赛
+        $this->rayMatch($force);
         if ($game == 'kpl' || $game == 'lol') {
             //$this->saveMissionByScoreggMatchId(12280,$game);//这个是测试单个比赛的方法案例
             $this->scoreggMatch($game, $force);//scoregg 比赛数据
@@ -42,9 +41,10 @@ class MatchService
         return 'finish';
     }
     //尚牛赛程
-    public function rayMatch(){
+    public function rayMatch($force=0){
         $client = new ClientServices();
-        $gameList=["DOTA2","LOL","KOG"];
+        $rayMatchModel=new \App\Models\Match\ray\matchListModel();
+        $gameList=["DOTA2","英雄联盟","王者荣耀"];
         $matchPageList=[];
         //获取ray游戏接口
         //============================================获取赛前数据分页列表==================================
@@ -57,24 +57,67 @@ class MatchService
            $uri='https://gameinfo.365raylines.com/v2/match?page='.$i.'&match_type=3';
            array_push($matchPageList,$uri);
 
-           // echo $uri."\n";
         }
         while(count($resultData)>0);
         //============================================获取赛前数据分页列表==================================
         if(count($matchPageList)>0){
+            $mission_repeat = 0;
             foreach ($matchPageList as $pageUrl){
-                echo $pageUrl;
+                //echo $pageUrl;
                 $result= $client->curlGet($pageUrl);
+                $matchList=$result['result'] ?? [];
+                if(count($matchList)>0){
+                    foreach ($matchList as $matchInfo){
+                        if($matchInfo['game_name']=="英雄联盟"){
+                            $game='lol';
+                        }elseif($matchInfo['game_name']=="王者荣耀"){
+                            $game='kpl';
+                        }elseif($matchInfo['game_name']=="DOTA2"){
+                            $game='dota2';
+                        }
+                        //判断游戏是否在DOTA2,Kpl,lol三个游戏里面
+                        if(in_array($matchInfo['game_name'],$gameList)){
+                            //　强制爬取
+                            if ($force == 1) {
+                                $toGet = 1;
+                            } elseif ($force == 0) {
+                                //获取当前比赛数据
+                                $rayMatchInfo = $rayMatchModel->getMatchById($matchInfo['id']);
+                                //找到
+                                if (isset($rayMatchInfo['match_id'])) {
+                                    $toGet = 0;
+                                    $mission_repeat++;
+                                    echo "exits-ray-match-matchID:" . $matchInfo['id'] . "\n";
+                                    if ($mission_repeat >= self::MISSION_REPEAT) {
+                                        echo $game . "ray-match-重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                        return;
+                                    }
+                                } else {
+                                    $mission_repeat = 0;
+                                    $toGet = 1;
+                                }
+                            }
+                            if($toGet==1){
+                                $rt=$this->getOneRayMatchInfo($matchInfo,$game);
+                                if($rt>0){
+                                    $mission_repeat = 0;
+                                    echo $game . "rayMatchInsertToMission success,match_id:".$matchInfo['id']  . "\n";
+                                }else{
+                                    $mission_repeat++;
+                                    if ($mission_repeat >= self::MISSION_REPEAT) {
+                                        echo $game . "ray-match-重复任务超过" . self::MISSION_REPEAT . "次，任务终止\n";
+                                        return;
+                                    }
+                                }
+                            }
+                        }
 
-                print_r($result);exit;
+
+                    }
+                }
+
             }
         }
-
-
-
-
-
-        print_r($matchPageList);exit;
 
 
         return true;
@@ -83,7 +126,7 @@ class MatchService
 
         $detail['source']=$source;
         $detail['game']=$game;
-        $detail['match']='match';
+        $detail['type']='match';
         $adata = [
             "asign_to" => 1,
             "mission_type" => 'match',
@@ -96,6 +139,30 @@ class MatchService
         ];
         $insert = (new oMission())->insertMission($adata);
         return $insert;
+    }
+
+    //https://ray73.com站点比赛采集单条数据入库
+    public function getOneRayMatchInfo($matchInfo,$game){
+        $gameList=["DOTA2","英雄联盟","王者荣耀"];
+        $missionModel = new MissionModel();
+            $missionId=0;
+
+            $source='ray';
+            $matchInfo['match_url']='https://ray73.com/match/'.$matchInfo['id'];
+            $params = [
+                'game' => $game,
+                'mission_type' => 'match',
+                'source_link' => $matchInfo['match_url'] ?? '',
+            ];
+            $missionCount = $missionModel->getMissionCount($params);//过滤已经采集过的赛事任务
+            if($missionCount==0){
+                $missionId=$this->createMatchMission($game,$matchInfo,$source);
+            }else{
+                echo $game . "rayMatchMissionExits,match_id".$matchInfo['id'] . "\n";
+                return $missionId;
+            }
+            return  $missionId;
+
     }
 
     //尚牛赛程
