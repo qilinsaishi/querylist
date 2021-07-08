@@ -188,6 +188,11 @@ class Mission extends Command
             case 'doat2TournamentDisplay':
                 (new MatchService())->setDota2TournamentDisplay();
                 break;
+            case 'autoIntergrationTeam':
+                //自动整合队伍php artisan mission:collect autoIntergrationTeam  team kpl
+
+                (new TeamService())->autoIntergrationTeam($game);
+                break;
 
         }
 

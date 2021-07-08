@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Team\TotalTeamModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
@@ -453,6 +454,45 @@ class TeamModel extends Model
             }
         }
         return $keywords;
+    }
+    public function getSiteIdFromTeam2AutoIntergration($game){
+        if($game=='dota2'){
+            $table='shangniu_match_list';
+        }else{
+            $table='scoregg_match_list';
+        }
+        $team_intergration = config("app.intergration.team.".$game) ?? [];
+        $teamList= $this->getTeamList(['game'=>$game,'tid'=>0,"sources"=>array_column($team_intergration,"source"),"fields"=>'team_id,site_id',"page_size"=>100]);
+        if(count($teamList)>0){
+            foreach ($teamList as $teamInfo){
+                $homeSql="SELECT distinct(home_id) FROM ".$table." WHERE home_id  in (".implode(",",array_column($teamList,"site_id"))." and game = '".$game."')";
+                $awaySql="SELECT distinct(away_id) FROM ".$table." WHERE away_id  in (".implode(",",array_column($teamList,"site_id"))." and game = '".$game."')";
+
+                $homeList = [];
+                $awayList = [];
+                $homeList=array_column(json_decode(json_encode(\DB::select($homeSql)),true),"home_id");
+                $awayList=array_column(json_decode(json_encode(\DB::select($awaySql)),true),"away_id");
+                $teamList2Check = array_unique(array_merge($homeList,$awayList));
+                //$teamListFlip = array_combine(array_column($teamList,"site_id"),array_column($teamList,"team_id"));
+                //if(count($teamList2Check)>0){
+                    foreach ($teamList as $key => $teamInfo){
+                        if(!in_array($teamInfo['site_id'],$teamList2Check))
+                        {
+                           unset($teamList[$key]);
+                            //$teamInfo = $this->getTeamById($teamListFlip[$site_id],"team_id,tid,team_name,en_name,cn_name,aka,original_source,game");
+                           //print_R($teamInfo);
+                           //die();
+                        }
+
+                    }
+                    return $teamList;
+
+                //}
+
+            }
+        }
+
+
     }
     //查询不全的队伍去更新任务
     public function getUpdateTeam($game)

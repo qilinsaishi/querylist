@@ -1185,6 +1185,48 @@ class TeamService
         }
     }
 
+    public function autoIntergrationTeam($game){
+        $teamModel=new TeamModel();
+        $teamNameMapModel = new TeamNameMapModel();
+        $teamList=$teamModel->getSiteIdFromTeam2AutoIntergration($game);
+        foreach($teamList as $teamInfo2Check)
+        {
+            $intergrated = 0;
+            $teamInfo = $teamModel->getTeamById($teamInfo2Check['team_id'],"team_id,tid,team_name,en_name,cn_name,aka,original_source,game");
+            $detailNameList = getNames($teamInfo, ["team_name", "en_name", "cn_name"], ["aka"]);
+            foreach ($detailNameList as $name)
+            {
+                if($intergrated ==1)
+                {
+                    break;
+                }
+                $currentMapList = $teamNameMapModel->getTeamByNameHash($name, $teamInfo['game']);
+                if(count($currentMapList))
+                {
+                    echo "site_id:".$teamInfo2Check['site_id']."\n";
+                    echo "team_id:".$teamInfo2Check['team_id']."\n";
+                    echo "name:".$name."\n";
+                }
+                foreach($currentMapList as $currentMap)
+                {
+                    if($intergrated == 0)
+                    {
+                        $intergration = $this->mergeTeam2mergedTeam($currentMap['tid'],$teamInfo2Check['team_id']);
+                        if($intergration['result']=="true")
+                        {
+                            $intergrated = 1;
+                            if($game=="dota2")
+                            {
+                                $this->processTeamDisplay($teamInfo2Check['team_id']);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     public function createTeamMissionForMissingTeam($game){
         $teamModel=new TeamModel();
         $teamList=$teamModel->getUpdateTeam($game);
