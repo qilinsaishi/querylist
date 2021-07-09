@@ -43,7 +43,7 @@ class AliyunService
     }
     public static function sms($phone = "18621758237",$type = "common",$params = ["code"=>123456])
     {
-        $params = ["code"=>rand(111111,999999)];
+        //$params = ["code"=>rand(111111,999999)];
         $client = self::createSmsClient();
         $typeList = ["common"=>"SMS_218630389"];
         $sendSmsRequest = new SendSmsRequest([
@@ -54,7 +54,14 @@ class AliyunService
         ]);
         // 复制代码运行请自行打印 API 的返回值
         $return = $client->sendSms($sendSmsRequest);
-        return $return;
+        if($return->body->code=="OK")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     public static function createSmsClient()
     {
