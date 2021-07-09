@@ -65,6 +65,7 @@ class ray
         if(isset($res['team'][1]['score']) && count($res['team'][1]['score'])>0){
             $res['away_score']=$res['team'][1]['score']['total']??0;
         }
+        $res['tournament_id']=$res['tournament_id'] ?? ($res['odds'][0]['tournament_id']??0);
         $res['home_odds']=$res['odds'][0]['odds']??0;
         $res['away_odds']=$res['odds'][1]['odds']??0;
         unset($res['odds']);
