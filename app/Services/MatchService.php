@@ -22,8 +22,7 @@ class MatchService
 
     public function insertMatchData($game, $force = 0, $week = 0)
     {
-        //https://ray73.com站点比赛
-        $this->rayMatch($force);
+
         if ($game == 'kpl' || $game == 'lol') {
             //$this->saveMissionByScoreggMatchId(12280,$game);//这个是测试单个比赛的方法案例
             $this->scoreggMatch($game, $force);//scoregg 比赛数据
@@ -32,6 +31,8 @@ class MatchService
             $this->shangniuMatch($game, $week, $force);
             //$this->wcaMatchList($game, $week, $force);
         }
+        //https://ray73.com站点比赛
+        $this->rayMatch($force);
         /* if ($game == 'dota2') {//这个dota2的数据不用改，是拼接起来的专题。暂时不用改
              $this->getDota2International($game);
              $this->getBilibiliDota2($game);
