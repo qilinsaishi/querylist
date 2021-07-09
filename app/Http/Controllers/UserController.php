@@ -25,9 +25,8 @@ class UserController extends Controller
             case "checkMobileAvailable"://检查手机号可用（登陆/注册）
                 $return = $userService->checkMobileAvailable($data['params']['mobile']??"",$data['params']['action']??"login");
                 break;
-            case "sendRegSms":
-                break;
-            case "sendLoginSms":
+            case "sendSmsCode"://发短信（登陆/注册）
+                $return = $userService->sendSmsCode($data['params']['mobile']??"",$data['params']['action']??"login");
                 break;
             case "loginBySms":
                 break;

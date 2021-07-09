@@ -1,0 +1,18 @@
+接口请求为api_url/user
+传输内容为payload json对象
+返回值全部为json对象
+通用输出
+result表示结果 1成功/可用 0失败/不可用
+msg用以显示的文字
+
+检查手机号是否可用
+注册时
+{"type":"checkMobileAvailable","params":{"mobile":"18621758237","action":"reg"}}
+登陆时
+{"type":"checkMobileAvailable","params":{"mobile":"18621758237","action":"login"}}
+
+发短信
+注册时
+{"type":"sendSmsCode","params":{"mobile":"18621758237","action":"reg"}}
+登陆时
+{"type":"sendSmsCode","params":{"mobile":"18621758237","action":"login"}}
