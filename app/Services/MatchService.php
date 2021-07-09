@@ -32,7 +32,7 @@ class MatchService
             //$this->wcaMatchList($game, $week, $force);
         }
         //https://ray73.com站点比赛
-        $this->rayMatch($force);
+        //$this->rayMatch($force);//暂时关闭
         /* if ($game == 'dota2') {//这个dota2的数据不用改，是拼接起来的专题。暂时不用改
              $this->getDota2International($game);
              $this->getBilibiliDota2($game);
