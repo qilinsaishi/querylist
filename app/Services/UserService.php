@@ -69,38 +69,32 @@ class UserService
         $available = $this->checkMobileAvailable($mobile,$action);
         if($available['result'])
         {
-            //检车手机号在缓存中存在
-            $key = "mobile_".$action."_".$mobile;
-            $exists = $this->user_redis->exists($key);
-            //有发送记录
-            if($exists)
+            $code = $this->getSmsCode($mobile,$action);
+            //有获取到
+            if($code['result']==1)
             {
-                $cache = $this->user_redis->get($key);
-                $cache = json_decode($cache,true);
-                $timeLag = time()-$cache['send_time'];
-                //当前时间与发送时间的时间差超过最小等待时间
-                if($timeLag>$resendTime)
+                if(isset($code['wait']))
                 {
-                    //发新的
-                    $this->user_redis->del($key);
-                    $return = $this->sendSmsCode($mobile,$action);
+                    $return = ['result'=>1,'msg'=>"短信已发送,".intval($cacheTime/60)."分钟内有效，请注意查收,剩余等待时间为：".$code['wait']."秒"];
                 }
                 else
                 {
-                    $return = ['result'=>1,'msg'=>"短信已发送,".intval($cacheTime/60)."分钟内有效，请注意查收,剩余等待时间为：".($resendTime-$timeLag)."秒"];
+                    //发新的
+                    $this->deleteSmsRedisKey($mobile,$action);
+                    $return = $this->sendSmsCode($mobile,$action);
                 }
             }
             else
             {
                 //生成验证码
-                $code = sprintf("%06d",rand(0,999999));
+                $code2Send = sprintf("%06d",rand(0,999999));
                 //发动短信
                 $sendSms = true;
                 //$sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code]);
                 if($sendSms)
                 {
                     //标记缓存
-                    $this->user_redis->set($key,json_encode(['code'=>$code,'send_time'=>time()]),$cacheTime);
+                    $this->user_redis->set($code['keyIfExist'],json_encode(['code'=>$code2Send,'send_time'=>time()]),$cacheTime);
                     $return = ['result'=>1,'msg'=>"短信已发送,".intval($cacheTime/60)."分钟内有效，请注意查收"];
                 }
                 else
@@ -114,7 +108,6 @@ class UserService
             $return = $available;
         }
         return $return;
-
     }
     //以用户ID为依据，更新用户信息
     public function updateUserByUser($user_id,$userInfo)
@@ -126,10 +119,15 @@ class UserService
     {
         //检查手机号是否可用
         $available = $this->checkMobileAvailable($mobile,"login");
-        if($available[['result']])
+        if($available['result'])
         {
 
         }
+        else
+        {
+            $return = $available;
+        }
+        return $return;
     }
     //密码登陆
     public function loginByUser($mobile,$password)
@@ -139,12 +137,58 @@ class UserService
     //短信注册
     public function regBySms($mobile,$code)
     {
-
+        //检查手机号是否可用
+        $available = $this->checkMobileAvailable($mobile,"reg");
+        if($available['result'])
+        {
+            die("777");
+        }
+        else
+        {
+            $return = $available;
+        }
+        return $return;
     }
     //用户名注册
     public function regByUser($username,$password,$password_repeat)
     {
 
+    }
+    //获取缓存中的验证码发送记录
+    public function getSmsCode($mobile,$action="login")
+    {
+        $resendTime = 10;
+        $currentTime = time();
+        //检车手机号在缓存中存在
+        $key = "mobile_".$action."_".$mobile;
+        $exists = $this->user_redis->exists($key);
+        if($exists)
+        {
+            $cache = $this->user_redis->get($key);
+            $cache = json_decode($cache,true);
+            $timeLag = $currentTime-$cache['send_time'];
+            //如果时间差大于最小等待时间 正常返回
+            if($timeLag>$resendTime)
+            {
+                $return = ["result"=>1,"code"=>$cache['code']];
+            }
+            else//返回验证码 标记需要继续等待
+            {
+                $return = ["result"=>1,"code"=>$cache['code'],"wait"=>$resendTime-$timeLag];
+            }
+        }
+        else
+        {
+            $return = ["result"=>0,"keyIfExist"=>$key];
+        }
+        return $return;
+    }
+    //删除缓存中的短信发送记录
+    public function deleteSmsRedisKey($mobile,$action)
+    {
+        $key = "mobile_".$action."_".$mobile;
+        $this->user_redis->del($key);
+        return true;
     }
 
 
