@@ -16,7 +16,7 @@ class UserService
         $this->userModel = new UserModel();
     }
     //检查手机号码是否已经注册
-    public function checkMobileExist($mobile)
+    public function checkMobileAvailable($mobile,$action="login")
     {
         //检查手机号是否有效
         $checkMobile = checkMobile($mobile);
@@ -31,34 +31,32 @@ class UserService
             $exists = $this->user_redis->exists($key);
             if($exists)
             {
-                echo "key_found;";die();
                 $cache = $this->user_redis->get($key);
-                print_R($cache);
-                die();
+                if($cache==0)
+                {
+                    $return = ['result'=>$action=="login"?0:1,'msg'=>"手机号码尚未注册"];
+                }
+                else
+                {
+                    $return = ['result'=>$action=="login"?1:0,'msg'=>"手机号码已经注册"];
+                }
             }
             else//不存在，查用户表
             {
-                echo "key_not_found;";
                 $userInfo = $this->userModel->getUserByMobile($mobile);
                 //查到
                 if(isset($userInfo['user_id']))
                 {
                     $this->user_redis->set($key,$userInfo['user_id'],86400);
-                    $return = ['result'=>1,'msg'=>"手机号码已经注册"];
+                    $return = ['result'=>$action=="login"?1:0,'msg'=>"手机号码已经注册"];
                 }
                 else
                 {
                     $this->user_redis->set($key,0,60);
-                    $return = ['result'=>1,'msg'=>"手机号码尚未注册"];
+                    $return = ['result'=>$action=="login"?0:1,'msg'=>"手机号码尚未注册"];
                 }
-                echo "888";die();
             }
-            echo "777";
-            //print_R($cache);
-            die();
-            $return = ['result'=>1,'msg'=>"成功"];
         }
-
         return $return;
     }
 

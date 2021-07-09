@@ -22,8 +22,8 @@ class UserController extends Controller
         $userService = new UserService();
         switch($data['type'])
         {
-            case "checkMobileExist"://检查手机号存在
-                $return = $userService->checkMobileExist($data['params']['mobile']??"");
+            case "checkMobileAvailable"://检查手机号可用（登陆/注册）
+                $return = $userService->checkMobileAvailable($data['params']['mobile']??"",$data['params']['action']??"login");
                 break;
             case "sendRegSms":
                 break;
