@@ -148,7 +148,7 @@ class RedisService
     //尝试从缓存获取
     public function processCache($dataType, $params)
     {
-
+        $redis = app("redis.connection");
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
             ksort($params);
