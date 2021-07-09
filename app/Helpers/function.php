@@ -599,3 +599,19 @@ use App\Services\AliyunService;
         }
         return '127.0.0.1';
     }
+    //检查手机号码是否有效（开头为1，后面10位纯数字
+    function checkMobile($mobile)
+    {
+        $g = "/^1\d{10}$/";
+        preg_match_all($g, $mobile, $result);
+        if(isset($result['0']) && count($result['0'])>0)
+        {
+            $return = true;
+        }
+        else
+        {
+            $return = false;
+        }
+        return $return;
+    }
+

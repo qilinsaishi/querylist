@@ -161,6 +161,13 @@ return [
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
         ],
+        'user_redis' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST_USER', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD_USER', '123456'),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_DB', '0'),
+        ],
 
         'cache' => [
             'url' => env('REDIS_URL'),
