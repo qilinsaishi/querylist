@@ -64,7 +64,8 @@ class UserService
     //发短信
     public function sendSmsCode($mobile,$action="login")
     {
-        $cacheTime = 600;
+        $cacheTime = 30*60;
+        $resendTime = 10;
         $available = $this->checkMobileAvailable($mobile,$action);
         if($available['result'])
         {
@@ -74,18 +75,32 @@ class UserService
             //有发送记录
             if($exists)
             {
-                $return = ['result'=>1,'msg'=>"短信已发送,".intval($cacheTime/60)."分钟内有效，请注意查收"];
+                $cache = $this->user_redis->get($key);
+                $cache = json_decode($cache,true);
+                $timeLag = time()-$cache['send_time'];
+                //当前时间与发送时间的时间差超过最小等待时间
+                if($timeLag>$resendTime)
+                {
+                    //发新的
+                    $this->user_redis->del($key);
+                    $return = $this->sendSmsCode($mobile,$action);
+                }
+                else
+                {
+                    $return = ['result'=>1,'msg'=>"短信已发送,".intval($cacheTime/60)."分钟内有效，请注意查收,剩余等待时间为：".($resendTime-$timeLag)."秒"];
+                }
             }
             else
             {
                 //生成验证码
                 $code = sprintf("%06d",rand(0,999999));
                 //发动短信
-                $sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code]);
+                $sendSms = true;
+                //$sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code]);
                 if($sendSms)
                 {
                     //标记缓存
-                    $this->user_redis->set($key,$code,$cacheTime);
+                    $this->user_redis->set($key,json_encode(['code'=>$code,'send_time'=>time()]),$cacheTime);
                     $return = ['result'=>1,'msg'=>"短信已发送,".intval($cacheTime/60)."分钟内有效，请注意查收"];
                 }
                 else
@@ -101,26 +116,20 @@ class UserService
         return $return;
 
     }
-
     //以用户ID为依据，更新用户信息
     public function updateUserByUser($user_id,$userInfo)
-    {
-
-    }
-    //发送注册用的短信验证码
-    public function sendRegSMS($mobile)
-    {
-
-    }
-    //发送登陆用的短信验证码
-    public function sendLoginSms($mobile)
     {
 
     }
     //短信登陆
     public function loginBySms($mobile,$code)
     {
+        //检查手机号是否可用
+        $available = $this->checkMobileAvailable($mobile,"login");
+        if($available[['result']])
+        {
 
+        }
     }
     //密码登陆
     public function loginByUser($mobile,$password)
