@@ -19,23 +19,21 @@ class UserController extends Controller
     public function index()
     {
         $data=$this->payload;
+        $userService = new UserService();
+        switch($data['type'])
         {
-            $data=$this->payload;
-            switch($data['type'])
-            {
-                case "checkMobileExist":
-                    $return = [];
-                    break;
-                case "sendRegSms":
-                    break;
-                case "sendLoginSms":
-                    break;
-                case "loginBySms":
-                    break;
-                case "loginByUser":
-                    break;
-            }
-            return $return;
+            case "checkMobileAvailable"://检查手机号可用（登陆/注册）
+                $return = $userService->checkMobileAvailable($data['params']['mobile']??"",$data['params']['action']??"login");
+                break;
+            case "sendSmsCode"://发短信（登陆/注册）
+                $return = $userService->sendSmsCode($data['params']['mobile']??"",$data['params']['action']??"login");
+                break;
+            case "loginBySms":
+                break;
+            case "loginByUser":
+                break;
         }
+        return $return;
+
     }
 }

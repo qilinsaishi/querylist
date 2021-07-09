@@ -370,9 +370,9 @@ use App\Services\AliyunService;
             $save_dir .= '/';
         }
         //创建保存目录
-        if (!file_exists($save_dir) && !mkdir($save_dir, 0777, true)) {
-            return $url;
-        }
+        //if (!file_exists($save_dir) && !mkdir($save_dir, 0777, true)) {
+        //    return $url;
+        //}
         try{
             //获取远程文件所采用的方法
             if ($type) {
@@ -599,3 +599,19 @@ use App\Services\AliyunService;
         }
         return '127.0.0.1';
     }
+    //检查手机号码是否有效（开头为1，后面10位纯数字
+    function checkMobile($mobile)
+    {
+        $g = "/^1\d{10}$/";
+        preg_match_all($g, $mobile, $result);
+        if(isset($result['0']) && count($result['0'])>0)
+        {
+            $return = true;
+        }
+        else
+        {
+            $return = false;
+        }
+        return $return;
+    }
+

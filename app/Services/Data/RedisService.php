@@ -148,10 +148,9 @@ class RedisService
     //尝试从缓存获取
     public function processCache($dataType, $params)
     {
-
+        $redis = app("redis.connection");
         $cacheConfig = $this->getCacheConfig();
         if (isset($cacheConfig[$dataType])) {
-            $redis = app("redis.connection");
             ksort($params);
             //如果接口指定了缓存时间
             if(isset($params['cache_time']))
@@ -539,5 +538,9 @@ class RedisService
             }
 
         }
+    }
+    public function getDataByKey($connection=null,$key="")
+    {
+
     }
 }
