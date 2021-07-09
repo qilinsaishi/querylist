@@ -2,18 +2,57 @@
 
 namespace App\Services;
 
-use App\Helpers\Jwt;
+use App\Libs\AjaxRequest;
+use App\Libs\ClientServices;
+use App\Services\Data\RedisService;
+use QL\QueryList;
 
 class UserService
 {
-    public function test($arr = [])
+    //检查手机号码是否已经注册
+    public function checkMobileExist($mobile)
     {
-        $arr = ['a'=>1,'b'=>2,'c'=>3,'expire_time'=>3600];
-        $token = (Jwt::getToken($arr));
-        //echo "token:".$token;
-        $info = (Jwt::getUserId($token));
-        //echo "info:".$info;
-        print_R($info);
-        die();
+
     }
+    //以用户ID为依据，更新用户信息
+    public function updateUserByUser($user_id,$userInfo)
+    {
+
+    }
+    //发送注册用的短信验证码
+    public function sendRegSMS($mobile)
+    {
+
+    }
+    //发送登陆用的短信验证码
+    public function sendLoginSms($mobile)
+    {
+
+    }
+    //短信登陆
+    public function loginBySms($mobile,$code)
+    {
+
+    }
+    //密码登陆
+    public function loginByUser($mobile,$password)
+    {
+
+    }
+    //短信注册
+    public function regBySms($mobile,$code)
+    {
+
+    }
+    //用户名注册
+    public function regByUser($username,$password,$password_repeat)
+    {
+
+    }
+
+
+
+
+
+
 }
