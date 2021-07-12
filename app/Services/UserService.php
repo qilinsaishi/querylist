@@ -29,11 +29,11 @@ class UserService
             $mobileUserCache = $this->getMobileUserCache($mobile);
             if($mobileUserCache>0)
             {
-                $return = ['result'=>($action=="login"?0:1),'msg'=>"手机号码已经注册"];
+                $return = ['result'=>($action=="login"?1:0),'msg'=>"手机号码已经注册"];
             }
             elseif($mobileUserCache==0)
             {
-                $return = ['result'=>($action=="login"?1:0),'msg'=>"手机号码尚未注册"];
+                $return = ['result'=>($action=="login"?0:1),'msg'=>"手机号码尚未注册"];
             }
             else
             {
@@ -250,11 +250,4 @@ class UserService
             return -1;
         }
     }
-
-
-
-
-
-
-
 }
