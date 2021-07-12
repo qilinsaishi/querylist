@@ -74,6 +74,21 @@ class UserModel extends Model
         }
         return $user_info;
     }
+    public function getUserByReference($referenceCode)
+    {
+        $user_info =$this->select("*")
+            ->where("reference_code",$referenceCode)
+            ->get()->first();
+        if(isset($user_info->user_id))
+        {
+            $user_info = $user_info->toArray();
+        }
+        else
+        {
+            $user_info = [];
+        }
+        return $user_info;
+    }
     public function insertUser($data)
     {
         foreach($this->attributes as $key => $value)
