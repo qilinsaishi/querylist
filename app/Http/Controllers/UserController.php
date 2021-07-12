@@ -58,7 +58,8 @@ class UserController extends Controller
     {
         $data=$this->payload;
         //获取缓存中的返回值
-        $cache = $this->cacheFirewall($data);
+        //$cache = $this->cacheFirewall($data);
+        $cache = [];
         //获取到，直接返回
         if(count($cache))
         {
@@ -77,7 +78,7 @@ class UserController extends Controller
                 $return = $userService->loginBySms($data['params']['mobile']??"",$data['params']['code']??"123456");
                 break;
             case "regBySms"://短信注册
-                $return = $userService->regBySms($data['params']['mobile']??"",$data['params']['code']??"123456");
+                $return = $userService->regBySms($data['params']['mobile']??"",$data['params']['code']??"123456",$data['params']['reference_code']??0);
                 break;
             case "loginByUser":
                 break;

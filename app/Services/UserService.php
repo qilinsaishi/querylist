@@ -152,7 +152,7 @@ class UserService
 
     }
     //短信注册
-    public function regBySms($mobile,$code)
+    public function regBySms($mobile,$code,$referenceCode=0)
     {
         $action = "reg";
         //检查手机号是否可用
@@ -167,8 +167,13 @@ class UserService
                 //验证码正确
                 if($currentCode['code']==trim($code))
                 {
+                    //如果有包含推荐码
+                    if($referenceCode != 0)
+                    {
+                        $referenceUser = $this->userModel->getUserByReference($referenceCode);
+                    }
                     //尝试注册用户
-                    $reg = $this->reg(["mobile"=>$mobile,"reg_type"=>1,"nick_name"=>$this->generateNickName("sms")]);
+                    $reg = $this->reg(["mobile"=>$mobile,"reference_user_id"=>$referenceUser['user_id']??0,"reg_type"=>1,"reference_code"=>md5(trim($mobile)),"nick_name"=>$this->generateNickName("sms")]);
                     if($reg['result']>0)
                     {
                         //清除缓存里面的发送记录
