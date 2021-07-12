@@ -125,25 +125,10 @@ class UserService
                 //验证码正确
                 if($currentCode['code']==trim($code))
                 {
-                    //获取用户数据
-                    $userInfo = $this->userModel->getUserById($available['user_id']);
-                    if(isset($userInfo['user_id']))
-                    {
-                        $currentTime = time();
-                        //生成用户信息有效时间
-                        $userInfo['expire_time'] = $currentTime + 7*86400;
-                        //摘取一部分返回用
-                        $userInfo4Login = getFieldsFromArray($userInfo,"user_id,nick_name,mobile,credit");
-                        //生成token
-                        $token = Jwt::getToken($userInfo);
-                        //清除缓存里面的发送记录
-                        $this->deleteSmsRedisKey($mobile,$action);
-                        $return = ['reuslt'=>1,"token"=>$token,"msg"=>"登陆成功","userInfo"=>$userInfo4Login];
-                    }
-                    else
-                    {
-                        $return = ['reuslt'=>0,"msg"=>"登陆失败"];
-                    }
+                    //以用户ID方式登陆
+                    $return = $this->logById($available['user_id']);
+                    //清除缓存里面的发送记录
+                    $this->deleteSmsRedisKey($mobile,$action);
                 }
                 else
                 {
@@ -190,7 +175,10 @@ class UserService
                         $this->deleteSmsRedisKey($mobile,$action);
                         //设置手机号码和用户ID的缓存
                         $this->setMobileUserCache($mobile,$reg['user_id']);
-                        $return = ['result'=>1,"msg"=>"注册成功","user_id"=>$reg['user_id']];
+                        //登陆
+                        $login = getFieldsFromArray($this->logById($reg['user_id']),"token,userInfo");
+                        $return = ['result'=>1,"msg"=>"注册成功"];
+                        $return = array_merge($return,$login);
                     }
                     else
                     {
@@ -265,6 +253,28 @@ class UserService
         else
         {
             $return = ["result"=>0,"user_id"=>0];
+        }
+        return $return;
+    }
+    //以用户ID登陆
+    public function logById($user_id)
+    {
+        //获取用户数据
+        $userInfo = $this->userModel->getUserById($user_id);
+        if(isset($userInfo['user_id']))
+        {
+            $currentTime = time();
+            //生成用户信息有效时间
+            $userInfo['expire_time'] = $currentTime + 7*86400;
+            //摘取一部分返回用
+            $userInfo4Login = getFieldsFromArray($userInfo,"user_id,nick_name,mobile,credit");
+            //生成token
+            $token = Jwt::getToken($userInfo);
+            $return = ['reuslt'=>1,"token"=>$token,"msg"=>"登陆成功","userInfo"=>$userInfo4Login];
+        }
+        else
+        {
+            $return = ['reuslt'=>0,"msg"=>"登陆失败"];
         }
         return $return;
     }
