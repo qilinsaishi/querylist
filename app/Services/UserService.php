@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\Jwt;
 use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\User\UserModel;
@@ -29,7 +30,7 @@ class UserService
             $mobileUserCache = $this->getMobileUserCache($mobile);
             if($mobileUserCache>0)
             {
-                $return = ['result'=>($action=="login"?1:0),'msg'=>"手机号码已经注册"];
+                $return = ['result'=>($action=="login"?1:0),'msg'=>"手机号码已经注册","user_id"=>$mobileUserCache];
             }
             elseif($mobileUserCache==0)
             {
@@ -112,11 +113,47 @@ class UserService
     //短信登陆
     public function loginBySms($mobile,$code)
     {
+        $action = "login";
         //检查手机号是否可用
-        $available = $this->checkMobileAvailable($mobile,"login");
+        $available = $this->checkMobileAvailable($mobile,$action);
         if($available['result'])
         {
-
+            //获取缓存中的验证码记录
+            $currentCode = $this->getSmsCode($mobile,$action);
+            if($currentCode['result'])
+            {
+                //验证码正确
+                if($currentCode['code']==trim($code))
+                {
+                    //获取用户数据
+                    $userInfo = $this->userModel->getUserById($available['user_id']);
+                    if(isset($userInfo['user_id']))
+                    {
+                        $currentTime = time();
+                        //生成用户信息有效时间
+                        $userInfo['expire_time'] = $currentTime + 7*86400;
+                        //摘取一部分返回用
+                        $userInfo4Login = getFieldsFromArray($userInfo,"user_id,nick_name,mobile,credit");
+                        //生成token
+                        $token = Jwt::getToken($userInfo);
+                        //清除缓存里面的发送记录
+                        $this->deleteSmsRedisKey($mobile,$action);
+                        $return = ['reuslt'=>1,"token"=>$token,"msg"=>"登陆成功","userInfo"=>$userInfo4Login];
+                    }
+                    else
+                    {
+                        $return = ['reuslt'=>0,"msg"=>"登陆失败"];
+                    }
+                }
+                else
+                {
+                    $return = ['result'=>0,"msg"=>"验证码有误,请重新尝试"];
+                }
+            }
+            else
+            {
+                $return = ['result'=>0,"msg"=>"验证码尚未发送"];
+            }
         }
         else
         {
@@ -132,23 +169,27 @@ class UserService
     //短信注册
     public function regBySms($mobile,$code)
     {
+        $action = "reg";
         //检查手机号是否可用
-        $available = $this->checkMobileAvailable($mobile,"reg");
+        $available = $this->checkMobileAvailable($mobile,$action);
         //可用
         if($available['result'])
         {
             //获取缓存中的验证码记录
-            $currentCode = $this->getSmsCode($mobile,"reg");
+            $currentCode = $this->getSmsCode($mobile,$action);
             if($currentCode['result'])
             {
                 //验证码正确
                 if($currentCode['code']==trim($code))
                 {
                     //尝试注册用户
-                    $reg = $this->reg(["mobile"=>$mobile,"reg_type"=>1]);
+                    $reg = $this->reg(["mobile"=>$mobile,"reg_type"=>1,"nick_name"=>$this->generateNickName("sms")]);
                     if($reg['result']>0)
                     {
-                        $this->deleteSmsRedisKey($mobile,"reg");
+                        //清除缓存里面的发送记录
+                        $this->deleteSmsRedisKey($mobile,$action);
+                        //设置手机号码和用户ID的缓存
+                        $this->setMobileUserCache($mobile,$reg['user_id']);
                         $return = ['result'=>1,"msg"=>"注册成功","user_id"=>$reg['user_id']];
                     }
                     else
@@ -158,7 +199,7 @@ class UserService
                 }
                 else
                 {
-                    $return = ['result'=>0,"msg"=>"验证码有误"];
+                    $return = ['result'=>0,"msg"=>"验证码有误,请重新尝试"];
                 }
             }
             else
@@ -248,6 +289,18 @@ class UserService
         else
         {
             return -1;
+        }
+    }
+    //生成随机用户名
+    public function generateNickName($type="sms")
+    {
+        if($type=="sms")
+        {
+            return "短信注册网友".date("ymdhis").sprintf("%03d",rand(1,999));
+        }
+        else
+        {
+            return "用户名注册网友".date("ymdhis").sprintf("%03d",rand(1,999));
         }
     }
 }
