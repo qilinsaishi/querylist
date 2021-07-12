@@ -1,5 +1,13 @@
 <?php
+//echo "777";
+/*
+register_shutdown_function(
+    function(){
+        if(error_get_last()){var_dump(error_get_last());
+        }
 
+    });
+*/
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 define ('ROOT_PATH',dirname(dirname(__FILE__)));

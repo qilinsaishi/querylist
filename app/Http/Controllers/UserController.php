@@ -28,7 +28,11 @@ class UserController extends Controller
             case "sendSmsCode"://发短信（登陆/注册）
                 $return = $userService->sendSmsCode($data['params']['mobile']??"",$data['params']['action']??"login");
                 break;
-            case "loginBySms":
+            case "loginBySms"://短信登陆
+                $return = $userService->loginBySms($data['params']['mobile']??"",$data['params']['code']??"123456");
+                break;
+            case "regBySms"://短信注册
+                $return = $userService->regBySms($data['params']['mobile']??"",$data['params']['code']??"123456");
                 break;
             case "loginByUser":
                 break;
