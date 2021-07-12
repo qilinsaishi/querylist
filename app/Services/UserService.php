@@ -48,13 +48,15 @@ class UserService
                 if(isset($userInfo['user_id']))
                 {
                     //标记缓存
-                    $this->user_redis->set($key,$userInfo['user_id'],86400);
+                    $this->user_redis->set($key,$userInfo['user_id']);
+                    $this->user_redis->expire($key,86400);
                     $return = ['result'=>($action=="login"?1:0),'msg'=>"手机号码已经注册"];
                 }
                 else
                 {
                     //标记缓存
-                    $this->user_redis->set($key,0,60);
+                    $this->user_redis->set($key,0);
+                    $this->user_redis->expire($key,60);
                     $return = ['result'=>($action=="login"?0:1),'msg'=>"手机号码尚未注册"];
                 }
             }
@@ -94,7 +96,8 @@ class UserService
                 if($sendSms)
                 {
                     //标记缓存
-                    $this->user_redis->set($code['keyIfExist'],json_encode(['code'=>$code2Send,'send_time'=>time()]),$cacheTime);
+                    $this->user_redis->set($code['keyIfExist'],json_encode(['code'=>$code2Send,'send_time'=>time()]));
+                    $this->user_redis->expire($code['keyIfExist'], $cacheTime);
                     $return = ['result'=>1,'msg'=>"短信已发送,".intval($cacheTime/60)."分钟内有效，请注意查收"];
                 }
                 else
@@ -139,9 +142,27 @@ class UserService
     {
         //检查手机号是否可用
         $available = $this->checkMobileAvailable($mobile,"reg");
+        //可用
         if($available['result'])
         {
-            die("777");
+            //获取缓存中的验证码记录
+            $currentCode = $this->getSmsCode($mobile,"reg");
+            if($currentCode['result'])
+            {
+                //验证码正确
+                if($currentCode['code']==trim($code))
+                {
+
+                }
+                else
+                {
+                    $return = ['result'=>0,"msg"=>"验证码有误"];
+                }
+            }
+            else
+            {
+                $return = ['result'=>0,"msg"=>"验证码尚未发送"];
+            }
         }
         else
         {
