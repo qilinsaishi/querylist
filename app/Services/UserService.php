@@ -84,8 +84,8 @@ class UserService
                 //生成验证码
                 $code2Send = sprintf("%06d",rand(0,999999));
                 //发动短信
-                $sendSms = true;
-                //$sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code]);
+                //$sendSms = true;
+                $sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code2Send]);
                 if($sendSms)
                 {
                     //标记缓存
@@ -152,7 +152,7 @@ class UserService
 
     }
     //短信注册
-    public function regBySms($mobile,$code,$referenceCode=0)
+    public function regBySms($mobile,$code,$referenceCode="")
     {
         $action = "reg";
         //检查手机号是否可用
@@ -168,7 +168,7 @@ class UserService
                 if($currentCode['code']==trim($code))
                 {
                     //如果有包含推荐码
-                    if($referenceCode != 0)
+                    if($referenceCode != "")
                     {
                         $referenceUser = $this->userModel->getUserByReference($referenceCode);
                     }
@@ -288,7 +288,7 @@ class UserService
     {
         $key = "mobile_".$mobile;
         $this->user_redis->set($key,$user_id);
-        $this->user_redis->expire($user_id>0?86400:60);
+        $this->user_redis->expire($key,$user_id>0?86400:60);
         return true;
     }
     //设置缓存里面的用户手机和用户ID的对应

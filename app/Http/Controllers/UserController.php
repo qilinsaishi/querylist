@@ -84,7 +84,7 @@ class UserController extends Controller
                 break;
         }
         //依据配置将借口返回值放到缓存中
-        $this->returnCache($data,$return);
+        //sss$this->returnCache($data,$return);
         return $return;
     }
     //获取缓存防火墙配置
