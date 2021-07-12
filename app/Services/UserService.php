@@ -26,37 +26,29 @@ class UserService
         }
         else
         {
-            //检车手机号在缓存中存在
-            $key = "mobile_".$mobile;
-            $exists = $this->user_redis->exists($key);
-            if($exists)
+            $mobileUserCache = $this->getMobileUserCache($mobile);
+            if($mobileUserCache>0)
             {
-                $cache = $this->user_redis->get($key);
-                if($cache==0)
-                {
-                    $return = ['result'=>($action=="login"?0:1),'msg'=>"手机号码尚未注册"];
-                }
-                else
-                {
-                    $return = ['result'=>($action=="login"?1:0),'msg'=>"手机号码已经注册"];
-                }
+                $return = ['result'=>($action=="login"?0:1),'msg'=>"手机号码已经注册"];
             }
-            else//不存在，查用户表
+            elseif($mobileUserCache==0)
+            {
+                $return = ['result'=>($action=="login"?1:0),'msg'=>"手机号码尚未注册"];
+            }
+            else
             {
                 $userInfo = $this->userModel->getUserByMobile($mobile);
                 //查到
                 if(isset($userInfo['user_id']))
                 {
                     //标记缓存
-                    $this->user_redis->set($key,$userInfo['user_id']);
-                    $this->user_redis->expire($key,86400);
+                    $this->setMobileUserCache($mobile,$userInfo['user_id']);
                     $return = ['result'=>($action=="login"?1:0),'msg'=>"手机号码已经注册"];
                 }
                 else
                 {
                     //标记缓存
-                    $this->user_redis->set($key,0);
-                    $this->user_redis->expire($key,60);
+                    $this->setMobileUserCache($mobile,0);
                     $return = ['result'=>($action=="login"?0:1),'msg'=>"手机号码尚未注册"];
                 }
             }
@@ -152,7 +144,17 @@ class UserService
                 //验证码正确
                 if($currentCode['code']==trim($code))
                 {
-
+                    //尝试注册用户
+                    $reg = $this->reg(["mobile"=>$mobile,"reg_type"=>1]);
+                    if($reg['result']>0)
+                    {
+                        $this->deleteSmsRedisKey($mobile,"reg");
+                        $return = ['result'=>1,"msg"=>"注册成功","user_id"=>$reg['user_id']];
+                    }
+                    else
+                    {
+                        $return = ['result'=>0,"msg"=>"注册失败"];
+                    }
                 }
                 else
                 {
@@ -211,6 +213,44 @@ class UserService
         $this->user_redis->del($key);
         return true;
     }
+    //注册用户
+    public function reg($userInfo)
+    {
+        $reg = $this->userModel->insertUser($userInfo);
+        if($reg>0)
+        {
+            $return = ["result"=>1,"user_id"=>$reg];
+        }
+        else
+        {
+            $return = ["result"=>0,"user_id"=>0];
+        }
+        return $return;
+    }
+    //设置缓存里面的用户手机和用户ID的对应
+    public function setMobileUserCache($mobile,$user_id)
+    {
+        $key = "mobile_".$mobile;
+        $this->user_redis->set($key,$user_id);
+        $this->user_redis->expire($user_id>0?86400:60);
+        return true;
+    }
+    //设置缓存里面的用户手机和用户ID的对应
+    public function getMobileUserCache($mobile)
+    {
+        $key = "mobile_".$mobile;
+        $exists = $this->user_redis->exists($key);
+        if($exists)
+        {
+            $cache = $this->user_redis->get($key);
+            return intval($cache);
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
 
 
 
