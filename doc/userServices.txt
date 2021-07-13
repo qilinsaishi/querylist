@@ -16,3 +16,8 @@ msg用以显示的文字
 {"type":"sendSmsCode","params":{"mobile":"18621758237","action":"reg"}}
 登陆时
 {"type":"sendSmsCode","params":{"mobile":"18621758237","action":"login"}}
+
+短信注册
+{"type":"regBySms","params":{"mobile":"18621758238","code":537380,"reference_code":"0c926b734a82adadf850f69ab90b9a01"}}
+短信登陆
+{"type":"loginBySms","params":{"mobile":"18621758238","code":537380}}

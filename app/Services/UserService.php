@@ -6,6 +6,8 @@ use App\Helpers\Jwt;
 use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
 use App\Models\User\UserModel;
+use App\Models\User\LoginLogModel;
+
 use Illuminate\Support\Facades\Redis;
 use QL\QueryList;
 
@@ -85,7 +87,7 @@ class UserService
                 $code2Send = sprintf("%06d",rand(0,999999));
                 //发动短信
                 $sendSms = true;
-                //$sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code2Send]);
+                $sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code2Send]);
                 if($sendSms)
                 {
                     //标记缓存
@@ -116,11 +118,10 @@ class UserService
         $action = "login";
         //检查手机号是否可用
         $available = $this->checkMobileAvailable($mobile,$action);
-        if(1 || $available['result'])
+        if($available['result'])
         {
             //获取缓存中的验证码记录
             $currentCode = $this->getSmsCode($mobile,$action);
-            $currentCode = ["result"=>1,"code"=>123456];
             if($currentCode['result'])
             {
                 //验证码正确
@@ -163,7 +164,6 @@ class UserService
         {
             //获取缓存中的验证码记录
             $currentCode = $this->getSmsCode($mobile,$action);
-            $currentCode = ["result"=>1,"code"=>123456];
             if($currentCode['result'])
             {
                 //验证码正确
@@ -281,6 +281,10 @@ class UserService
             $userInfo4Login = getFieldsFromArray($userInfo,"user_id,nick_name,mobile,credit");
             //生成token
             $token = Jwt::getToken($userInfo);
+            //写登录记录
+            $login_ip = $_SERVER["REMOTE_ADDR"];
+            $loginLog = ['user_id'=>$userInfo['user_id'],"reference_user_id"=>$userInfo['reference_user_id'],"login_type"=>1,"login_ip"=>ip2long($login_ip)];
+            $log = (new LoginLogModel())->insertLoginLog($loginLog);
             $return = ['result'=>1,"authToken"=>$token,"msg"=>"登陆成功","userInfo"=>$userInfo4Login];
         }
         else
