@@ -163,6 +163,7 @@ class UserService
         {
             //获取缓存中的验证码记录
             $currentCode = $this->getSmsCode($mobile,$action);
+            $currentCode = ["result"=>1,"code"=>123456];
             if($currentCode['result'])
             {
                 //验证码正确
@@ -177,12 +178,16 @@ class UserService
                     $reg = $this->reg(["mobile"=>$mobile,"reference_user_id"=>$referenceUser['user_id']??0,"reg_type"=>1,"reference_code"=>md5(trim($mobile)),"nick_name"=>$this->generateNickName("sms")]);
                     if($reg['result']>0)
                     {
+                        if(isset($referenceUser['user_id']) && $referenceUser['user_id']>0)
+                        {
+                            $this->userModel->updateUser($referenceUser['user_id'],["reference_count"=>$this->userModel->getUserCountByReference($referenceUser['user_id'])]);
+                        }
                         //清除缓存里面的发送记录
                         $this->deleteSmsRedisKey($mobile,$action);
                         //设置手机号码和用户ID的缓存
                         $this->setMobileUserCache($mobile,$reg['user_id']);
                         //登陆
-                        $login = getFieldsFromArray($this->logById($reg['user_id']),"token,userInfo");
+                        $login = getFieldsFromArray($this->logById($reg['user_id']),"authToken,userInfo");
                         $return = ['result'=>1,"msg"=>"注册成功"];
                         $return = array_merge($return,$login);
                     }

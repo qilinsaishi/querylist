@@ -89,6 +89,11 @@ class UserModel extends Model
         }
         return $user_info;
     }
+    public function getUserCountByReference($user_id)
+    {
+        $user_count =$this->where("reference_user_id",$user_id)->count();
+        return $user_count;
+    }
     public function insertUser($data)
     {
         foreach($this->attributes as $key => $value)
