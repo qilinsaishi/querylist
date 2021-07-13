@@ -341,7 +341,7 @@ class UserService
     {
         return Jwt::getUserId(\Request::header('auth-token'));
     }
-    //更新用户密码
+    //设置用户密码
     public function setPassword($userInfo,$new_password,$new_password_repeat)
     {
         $userInfo = $this->userModel->getUserById($userInfo['user_id']);
@@ -376,6 +376,52 @@ class UserService
         else
         {
             $return = ['result'=>0,"msg"=>"当前用户状态无法设置密码"];
+        }
+        return $return;
+    }
+    //重新设置用户密码
+    public function resetPassword($userInfo,$password,$new_password,$new_password_repeat)
+    {
+        $userInfo = $this->userModel->getUserById($userInfo['user_id']);
+        //只有密码为空的用户才可以设置密码
+        if($userInfo['password']!="")
+        {
+            if($userInfo['password'] == md5(md5($password)))
+            {
+                //检查密码有效性
+                $checkPassword = $this->checkNewPassword(md5(md5($password)),$new_password,$new_password_repeat);
+                if($checkPassword['result']==1)
+                {
+                    //更新用户
+                    $updateUser = $this->userModel->updateUser($userInfo['user_id'],['password'=>$checkPassword['password']]);
+                    if($updateUser)
+                    {
+                        //写密码更新记录
+                        $login_ip = $_SERVER["REMOTE_ADDR"];
+                        $passwordLog = ["user_id"=>$userInfo['user_id'],"update_ip"=>ip2long($login_ip)];
+                        $log = (new PasswordLogModel())->insertPasswordLog($passwordLog);
+                        $return = ['result'=>1,"msg"=>"密码重置成功","need_login"=>1];
+                        //清空token?
+                    }
+                    else
+                    {
+                        $return = ['result'=>0,"msg"=>"密码设置失败"];
+                    }
+                }
+                else
+                {
+                    $return = $checkPassword;
+                }
+            }
+            else
+            {
+                $return = ['result'=>0,"msg"=>"密码校验失败"];
+            }
+
+        }
+        else
+        {
+            $return = ['result'=>0,"msg"=>"当前用户状态无法重置密码"];
         }
         return $return;
     }

@@ -95,6 +95,9 @@ class UserController extends Controller
             case "setPassword":
                 $return = $userService->setPassword($loggedUser,$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
                 break;
+            case "resetPassword":
+                $return = $userService->resetPassword($loggedUser,$data['params']['password']??"",$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
+                break;
             default:
                 $return = $userService->test();
                 break;
@@ -116,7 +119,7 @@ class UserController extends Controller
     public function  getLoginConfig()
     {
         return  [
-            "setPassword","userInfo"
+            "setPassword","userInfo","resetPassword"
         ];
     }
 }
