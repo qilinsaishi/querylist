@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Helpers\Jwt;
 use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
+use App\Models\User\PasswordLogModel;
 use App\Models\User\UserModel;
 use App\Models\User\LoginLogModel;
 
@@ -335,5 +336,93 @@ class UserService
     public function test()
     {
         return Jwt::getUserId(\Request::header('auth-token'));
+    }
+    public function getUserFromToken()
+    {
+        return Jwt::getUserId(\Request::header('auth-token'));
+    }
+    //更新用户密码
+    public function setPassword($userInfo,$new_password,$new_password_repeat)
+    {
+        $userInfo = $this->userModel->getUserById($userInfo['user_id']);
+        //只有密码为空的用户才可以设置密码
+        if($userInfo['password']=="")
+        {
+            //检查密码有效性
+            $checkPassword = $this->checkNewPassword("",$new_password,$new_password_repeat);
+            if($checkPassword['result']==1)
+            {
+                //更新用户
+                $updateUser = $this->userModel->updateUser($userInfo['user_id'],['password'=>$checkPassword['password']]);
+                if($updateUser)
+                {
+                    //写密码更新记录
+                    $login_ip = $_SERVER["REMOTE_ADDR"];
+                    $passwordLog = ["user_id"=>$userInfo['user_id'],"update_ip"=>ip2long($login_ip)];
+                    $log = (new PasswordLogModel())->insertPasswordLog($passwordLog);
+                    $return = ['result'=>1,"msg"=>"密码重置成功","need_login"=>1];
+                    //清空token?
+                }
+                else
+                {
+                    $return = ['result'=>0,"msg"=>"密码设置失败"];
+                }
+            }
+            else
+            {
+                $return = $checkPassword;
+            }
+        }
+        else
+        {
+            $return = ['result'=>0,"msg"=>"当前用户状态无法设置密码"];
+        }
+        return $return;
+    }
+    //检查两次输入的新密码的有效性
+    public function checkNewPassword($password,$new_password,$new_password_repeat)
+    {
+        $s1 = strlen($new_password);
+        $s2 = strlen($new_password_repeat);
+        //密码长度6-10位
+        if($s1<6 || $s1>10 || $s2<6 || $s2>10)
+        {
+            $return = ['result'=>0,"msg"=>"密码长度有误"];
+        }
+        else
+        {
+            //正则校验只包含数字英文
+            $p1 = preg_match("/^[a-zA-Z0-9]+$/u",$new_password);
+            $p2 = preg_match("/^[a-zA-Z0-9]+$/u",$new_password_repeat);
+            if($p1*$p2==0)
+            {
+                $return = ['result'=>0,"msg"=>"密码中只能包含数字和英文字母"];
+            }
+            else
+            {
+                //校验两次密码是否一致
+                if($new_password != $new_password_repeat)
+                {
+                    $return = ['result'=>0,"msg"=>"两次输入的密码不一致"];
+                }
+                else
+                {
+                    if(md5(md5($new_password)) == $password)
+                    {
+                        $return = ['result'=>0,"msg"=>"新老密码不能一致"];
+                    }
+                    else
+                    {
+                        $return = ['result'=>1,"password"=>md5(md5($new_password))];
+                    }
+                }
+            }
+
+        }
+        return $return;
+    }
+    public function expireToken($token)
+    {
+        return true;
     }
 }

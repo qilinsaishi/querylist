@@ -21,3 +21,7 @@ msg用以显示的文字
 {"type":"regBySms","params":{"mobile":"18621758238","code":537380,"reference_code":"0c926b734a82adadf850f69ab90b9a01"}}
 短信登陆
 {"type":"loginBySms","params":{"mobile":"18621758238","code":537380}}
+
+更新密码
+{"type":"setPassword","params":{"new_password":"123456","new_password_repeat":"123456"}}
+

@@ -55,6 +55,16 @@ class UserController extends Controller
     public function index()
     {
         $data=$this->payload;
+        $loginConfig = $this->getLoginConfig();
+        $userService = new UserService();
+        if(in_array($data['type'],$loginConfig))
+        {
+            $loggedUser = $userService->getUserFromToken();
+            if(!isset($loggedUser['user_id']) || time()>$loggedUser['expire_time'])
+            {
+                return ["result"=>0,"need_login"=>1,"msg"=>"执行的操作需要登陆,尚未登陆或登陆状态过期"];
+            }
+        }
         //获取缓存中的返回值
         //$cache = $this->cacheFirewall($data);
         $cache = [];
@@ -63,7 +73,6 @@ class UserController extends Controller
         {
             return $cache;
         }
-        $userService = new UserService();
         switch($data['type'])
         {
             case "checkMobileAvailable"://检查手机号可用（登陆/注册）
@@ -83,6 +92,9 @@ class UserController extends Controller
             case "userInfo":
                 $return = $userService->test();
                 break;
+            case "setPassword":
+                $return = $userService->setPassword($loggedUser,$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
+                break;
             default:
                 $return = $userService->test();
                 break;
@@ -98,6 +110,13 @@ class UserController extends Controller
             "sendSms"=>60,
             "loginBySms"=>60,
             "regBySms"=>60,
+        ];
+    }
+    //获取需要登陆的接口列表
+    public function  getLoginConfig()
+    {
+        return  [
+            "setPassword","userInfo"
         ];
     }
 }
