@@ -80,6 +80,9 @@ class UserController extends Controller
                 break;
             case "loginByUser":
                 break;
+            case "userInfo":
+                $return = $userService->test();
+                break;
             default:
                 $return = $userService->test();
                 break;
