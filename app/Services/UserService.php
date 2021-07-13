@@ -84,8 +84,8 @@ class UserService
                 //生成验证码
                 $code2Send = sprintf("%06d",rand(0,999999));
                 //发动短信
-                //$sendSms = true;
-                $sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code2Send]);
+                $sendSms = true;
+                //$sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code2Send]);
                 if($sendSms)
                 {
                     //标记缓存
@@ -95,7 +95,7 @@ class UserService
                 }
                 else
                 {
-                    $return = ['result'=>1,'msg'=>"短信发送失败，请稍后再试，请注意查收"];
+                    $return = ['result'=>0,'msg'=>"短信发送失败，请稍后再试，请注意查收"];
                 }
             }
         }
@@ -116,10 +116,11 @@ class UserService
         $action = "login";
         //检查手机号是否可用
         $available = $this->checkMobileAvailable($mobile,$action);
-        if($available['result'])
+        if(1 || $available['result'])
         {
             //获取缓存中的验证码记录
             $currentCode = $this->getSmsCode($mobile,$action);
+            $currentCode = ["result"=>1,"code"=>123456];
             if($currentCode['result'])
             {
                 //验证码正确
@@ -275,11 +276,11 @@ class UserService
             $userInfo4Login = getFieldsFromArray($userInfo,"user_id,nick_name,mobile,credit");
             //生成token
             $token = Jwt::getToken($userInfo);
-            $return = ['reuslt'=>1,"token"=>$token,"msg"=>"登陆成功","userInfo"=>$userInfo4Login];
+            $return = ['result'=>1,"authToken"=>$token,"msg"=>"登陆成功","userInfo"=>$userInfo4Login];
         }
         else
         {
-            $return = ['reuslt'=>0,"msg"=>"登陆失败"];
+            $return = ['result'=>0,"msg"=>"登陆失败"];
         }
         return $return;
     }
@@ -317,5 +318,13 @@ class UserService
         {
             return "用户名注册网友".date("ymdhis").sprintf("%03d",rand(1,999));
         }
+    }
+    public function authList()
+    {
+        return ["updatePassword"];
+    }
+    public function test()
+    {
+        return Jwt::getUserId(\Request::header('auth-token'));
     }
 }

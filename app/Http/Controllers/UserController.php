@@ -7,8 +7,6 @@ use App\Libs\ClientServices;
 use App\Services\Data\DataService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-
-
 use Illuminate\Support\Facades\Redis;
 use QL\QueryList;
 use GuzzleHttp\Client;
@@ -81,6 +79,9 @@ class UserController extends Controller
                 $return = $userService->regBySms($data['params']['mobile']??"",$data['params']['code']??"123456",$data['params']['reference_code']??0);
                 break;
             case "loginByUser":
+                break;
+            default:
+                $return = $userService->test();
                 break;
         }
         //依据配置将借口返回值放到缓存中

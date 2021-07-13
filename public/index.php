@@ -1,4 +1,9 @@
 <?php
+
+
+header('Access-Control-Allow-Origin: *');
+
+
 //echo "777";
 /*
 register_shutdown_function(
