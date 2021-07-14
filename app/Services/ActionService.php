@@ -63,7 +63,7 @@ class ActionService
         $reference_user_id = intval($params['0']);
         if($reference_user_id<=0)
         {
-            $return = ['result'=>0];git
+            $return = ['result'=>0];
         }
     }
 }
