@@ -60,7 +60,7 @@ class UserController extends Controller
         if(in_array($data['type'],$loginConfig))
         {
             $loggedUser = $userService->getUserFromToken();
-            if(!isset($loggedUser['user_id']) || time()>$loggedUser['expire_time'])
+            if(!isset($loggedUser['userInfo']['user_id']))
             {
                 return ["result"=>0,"need_login"=>1,"msg"=>"执行的操作需要登陆,尚未登陆或登陆状态过期"];
             }

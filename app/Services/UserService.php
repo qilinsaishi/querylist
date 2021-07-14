@@ -348,22 +348,30 @@ class UserService
         }
         else
         {
-            //检查用户token的有效性
-            $checkToken = $this->checkTokenMapCache($tokenUser['user_id'],$token);
-            if($checkToken['result']==0)
+            if(time()>$tokenUser["expire_time"])
             {
                 $return = ['rusult'=>0,"need_login"=>1];
             }
             else
             {
-                $userInfo = $this->loadUserInfo($tokenUser['user_id']);
-                if(isset($userInfo['user_id']))
+                //检查用户token的有效性
+                $checkToken = $this->checkTokenMapCache($tokenUser['user_id'],$token);
+                if($checkToken['result']==0)
                 {
-                    $return = ['result'=>1,"userInfo"=>$userInfo];
+                    $return = ['rusult'=>0,"need_login"=>1];
                 }
                 else
                 {
-                    $return = ['rusult'=>0,"need_login"=>1];
+                    $userInfo = $this->loadUserInfo($tokenUser['user_id']);
+                    if(isset($userInfo['user_id']))
+                    {
+                        $userInfo['expire_time'] = $tokenUser['expire_time'];
+                        $return = ['result'=>1,"userInfo"=>$userInfo];
+                    }
+                    else
+                    {
+                        $return = ['rusult'=>0,"need_login"=>1];
+                    }
                 }
             }
             return $return;
@@ -559,7 +567,7 @@ class UserService
     public function checkTokenMapCache($user_id,$token)
     {
         $key = "token_map_".md5(intval($user_id));
-        $exists = $this->user_redis->exist($key);
+        $exists = $this->user_redis->exists($key);
         if($exists)
         {
             $tokenMap = $this->user_redis->get($key);
