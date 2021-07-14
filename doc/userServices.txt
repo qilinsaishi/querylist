@@ -5,6 +5,9 @@
 result表示结果 1成功/可用 0失败/不可用
 msg用以显示的文字
 
+获取登陆用户信息
+{"type":"userInfo"}
+
 检查手机号是否可用
 注册时
 {"type":"checkMobileAvailable","params":{"mobile":"18621758237","action":"reg"}}
