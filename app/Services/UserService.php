@@ -380,7 +380,7 @@ class UserService
     //设置用户密码
     public function setPassword($userInfo,$new_password,$new_password_repeat)
     {
-        $userInfo = $this->loadUserInfo($userInfo['user_id']);
+        $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
         //只有密码为空的用户才可以设置密码
         if($userInfo['password']=="")
         {
@@ -419,7 +419,7 @@ class UserService
     //重新设置用户密码
     public function resetPassword($userInfo,$password,$new_password,$new_password_repeat)
     {
-        $userInfo = $this->loadUserInfo($userInfo['user_id']);
+        $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
         //只有密码为空的用户才可以设置密码
         if($userInfo['password']!="")
         {
