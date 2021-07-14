@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
+use App\Services\ActionService;
 use App\Services\Data\DataService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -104,6 +105,9 @@ class UserController extends Controller
             case "rebuild":
                 $return = $userService->rebuildUserCache($loggedUser['userInfo']['user_id']);
                 break;
+            case "actionTest":
+                $return = (new ActionService())->test($data['type'],$loggedUser['userInfo']);
+                break;
             default:
                 $return = $userService->getUserFromToken();
                 break;
@@ -125,7 +129,7 @@ class UserController extends Controller
     public function  getLoginConfig()
     {
         return  [
-            "setPassword","userInfo","resetPassword","rebuild"
+            "setPassword","userInfo","resetPassword","rebuild","actionTest"
         ];
     }
 }

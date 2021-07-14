@@ -7,7 +7,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class CoinLogModel extends Model
+class ActionModel extends Model
 {
     protected $table = "action";
     public $primaryKey = "action_id";
@@ -44,11 +44,11 @@ class CoinLogModel extends Model
     ];
     protected $keep = [
     ];
-    public function getActionList($params)
+    public function getActionList($params=[])
     {
         $action_list =$this->select("*");
         $currentTime = date("Y-m-d H:i:s");
-        $action_list = $action_list->whereRaw("end_time <= ".$currentTime);
+        $action_list = $action_list->where("end_time",">=",$currentTime);
         $action_list = $action_list
             ->orderBy("start_time")
             ->get()->toArray();
