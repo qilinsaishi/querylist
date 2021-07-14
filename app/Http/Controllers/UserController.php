@@ -90,7 +90,7 @@ class UserController extends Controller
             case "loginByUser":
                 break;
             case "userInfo":
-                $return = $userService->test();
+                $return = $userService->getUserFromToken();
                 break;
             case "setPassword":
                 $return = $userService->setPassword($loggedUser,$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
@@ -99,7 +99,7 @@ class UserController extends Controller
                 $return = $userService->resetPassword($loggedUser,$data['params']['password']??"",$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
                 break;
             default:
-                $return = $userService->test();
+                $return = $userService->getUserFromToken();
                 break;
         }
         //依据配置将借口返回值放到缓存中

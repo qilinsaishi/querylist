@@ -129,7 +129,7 @@ class UserService
                 if($currentCode['code']==trim($code))
                 {
                     //以用户ID方式登陆
-                    $return = $this->logById($available['user_id']);
+                    $return = $this->loginById($available['user_id']);
                     //清除缓存里面的发送记录
                     $this->deleteSmsRedisKey($mobile,$action);
                 }
@@ -181,14 +181,17 @@ class UserService
                     {
                         if(isset($referenceUser['user_id']) && $referenceUser['user_id']>0)
                         {
+                            //更新推荐用户
                             $this->userModel->updateUser($referenceUser['user_id'],["reference_count"=>$this->userModel->getUserCountByReference($referenceUser['user_id'])]);
+                            //重建用户缓存
+                            $this->rebuildUserCache($referenceUser['user_id']);
                         }
                         //清除缓存里面的发送记录
                         $this->deleteSmsRedisKey($mobile,$action);
                         //设置手机号码和用户ID的缓存
                         $this->setMobileUserCache($mobile,$reg['user_id']);
                         //登陆
-                        $login = getFieldsFromArray($this->logById($reg['user_id']),"authToken,userInfo");
+                        $login = getFieldsFromArray($this->loginById($reg['user_id']),"authToken,userInfo");
                         $return = ['result'=>1,"msg"=>"注册成功"];
                         $return = array_merge($return,$login);
                     }
@@ -261,6 +264,8 @@ class UserService
         if($reg>0)
         {
             $return = ["result"=>1,"user_id"=>$reg];
+            //重建用户缓存
+            $this->rebuildUserCache($reg);
         }
         else
         {
@@ -269,10 +274,10 @@ class UserService
         return $return;
     }
     //以用户ID登陆
-    public function logById($user_id)
+    public function loginById($user_id)
     {
         //获取用户数据
-        $userInfo = $this->userModel->getUserById($user_id);
+        $userInfo = $this->loadUserInfo($user_id);
         if(isset($userInfo['user_id']))
         {
             $currentTime = time();
@@ -287,6 +292,9 @@ class UserService
             $loginLog = ['user_id'=>$userInfo['user_id'],"reference_user_id"=>$userInfo['reference_user_id'],"login_type"=>1,"login_ip"=>ip2long($login_ip)];
             $log = (new LoginLogModel())->insertLoginLog($loginLog);
             $return = ['result'=>1,"authToken"=>$token,"msg"=>"登陆成功","userInfo"=>$userInfo4Login];
+            $this->setTokenMapCache($userInfo['user_id'],$token);
+            //重建用户缓存
+            $this->rebuildUserCache($userInfo['user_id']);
         }
         else
         {
@@ -329,22 +337,42 @@ class UserService
             return "用户名注册网友".date("ymdhis").sprintf("%03d",rand(1,999));
         }
     }
-    public function authList()
-    {
-        return ["updatePassword"];
-    }
-    public function test()
-    {
-        return Jwt::getUserId(\Request::header('auth-token'));
-    }
+    //从token中获取用户数据
     public function getUserFromToken()
     {
-        return Jwt::getUserId(\Request::header('auth-token'));
+        $token = \Request::header('auth-token');
+        $tokenUser = Jwt::getUserId($token);
+        if(!isset($tokenUser['user_id']))
+        {
+            $return = ['rusult'=>0,"need_login"=>1];
+        }
+        else
+        {
+            //检查用户token的有效性
+            $checkToken = $this->checkTokenMapCache($tokenUser['user_id'],$token);
+            if($checkToken['result']==0)
+            {
+                $return = ['rusult'=>0,"need_login"=>1];
+            }
+            else
+            {
+                $userInfo = $this->loadUserInfo($tokenUser['user_id']);
+                if(isset($userInfo['user_id']))
+                {
+                    $return = ['result'=>1,"userInfo"=>$userInfo];
+                }
+                else
+                {
+                    $return = ['rusult'=>0,"need_login"=>1];
+                }
+            }
+            return $return;
+        }
     }
     //设置用户密码
     public function setPassword($userInfo,$new_password,$new_password_repeat)
     {
-        $userInfo = $this->userModel->getUserById($userInfo['user_id']);
+        $userInfo = $this->loadUserInfo($userInfo['user_id']);
         //只有密码为空的用户才可以设置密码
         if($userInfo['password']=="")
         {
@@ -360,6 +388,7 @@ class UserService
                     $login_ip = $_SERVER["REMOTE_ADDR"];
                     $passwordLog = ["user_id"=>$userInfo['user_id'],"update_ip"=>ip2long($login_ip)];
                     $log = (new PasswordLogModel())->insertPasswordLog($passwordLog);
+                    $this->rebuildUserCache($userInfo['user_id']);
                     $return = ['result'=>1,"msg"=>"密码重置成功","need_login"=>1];
                     //清空token?
                 }
@@ -382,7 +411,7 @@ class UserService
     //重新设置用户密码
     public function resetPassword($userInfo,$password,$new_password,$new_password_repeat)
     {
-        $userInfo = $this->userModel->getUserById($userInfo['user_id']);
+        $userInfo = $this->loadUserInfo($userInfo['user_id']);
         //只有密码为空的用户才可以设置密码
         if($userInfo['password']!="")
         {
@@ -400,6 +429,7 @@ class UserService
                         $login_ip = $_SERVER["REMOTE_ADDR"];
                         $passwordLog = ["user_id"=>$userInfo['user_id'],"update_ip"=>ip2long($login_ip)];
                         $log = (new PasswordLogModel())->insertPasswordLog($passwordLog);
+                        $this->rebuildUserCache($userInfo['user_id']);
                         $return = ['result'=>1,"msg"=>"密码重置成功","need_login"=>1];
                         //清空token?
                     }
@@ -467,8 +497,93 @@ class UserService
         }
         return $return;
     }
-    public function expireToken($token)
+    //载入用户的数据 缓存->数据库
+    public function loadUserInfo($user_id)
     {
+        $key = "user_info_".md5(intval($user_id));
+        //缓存中获取用户数据
+        $exists = $this->user_redis->exists($key);
+        if($exists)
+        {
+            //获取缓存，尝试解包
+            $cache = $this->user_redis->get($key);
+            $cache = json_decode($cache,true);
+            //包含关键数据
+            if(isset($cache['user_id']))
+            {
+                $return = $cache;
+            }
+            else
+            {
+                $return = [];
+            }
+        }
+        else
+        {
+            //尝试重建用户缓存
+            $return = $this->rebuildUserCache($user_id);
+        }
+        return $return;
+    }
+    //重建用户缓存
+    public function rebuildUserCache($user_id)
+    {
+        $key = "user_info_".md5(intval($user_id));
+        //从数据库中获取
+        $userInfo = $this->userModel->getUserById($user_id);
+        //获取到
+        if(isset($userInfo['user_id']))
+        {
+            $this->user_redis->set($key,json_encode($userInfo));
+            $this->user_redis->expire($key,86400);
+            $return = $userInfo;
+        }
+        else
+        {
+            //没获取到，空数据缓存30分钟
+            $this->user_redis->set($key,json_encode([]));
+            $this->user_redis->expire($key,1800);
+            $return = [];
+        }
+        return $return;
+    }
+    //设置用户id到token的缓存映射
+    public function setTokenMapCache($user_id,$token)
+    {
+        $key = "token_map_".md5(intval($user_id));
+        $this->user_redis->set($key,md5($token));
+        $this->user_redis->expire($key,30*86400);
         return true;
     }
+    //检查用户id到token的缓存映射
+    public function checkTokenMapCache($user_id,$token)
+    {
+        $key = "token_map_".md5(intval($user_id));
+        $exists = $this->user_redis->exist($key);
+        if($exists)
+        {
+            $tokenMap = $this->user_redis->get($key);
+            if(md5($token)==$tokenMap)
+            {
+                $return = ['result'=>1];
+            }
+            else
+            {
+                $return = ['reuslt'=>0];
+            }
+        }
+        else
+        {
+            $return = ['result'=>1];
+        }
+        return $return;
+    }
+    //使得登陆Token失效
+    public function expireToken($user_id)
+    {
+        $key = "token_map_".md5(intval($user_id));
+        $this->user_redis->del($key);
+        return true;
+    }
+
 }
