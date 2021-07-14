@@ -16,6 +16,8 @@ msg用以显示的文字
 {"type":"sendSmsCode","params":{"mobile":"18621758237","action":"reg"}}
 登陆时
 {"type":"sendSmsCode","params":{"mobile":"18621758237","action":"login"}}
+重置密码
+{"type":"sendSmsCode","params":{"mobile":"18621758237","action":"resetPassword"}}
 
 短信注册
 {"type":"regBySms","params":{"mobile":"18621758238","code":537380,"reference_code":"0c926b734a82adadf850f69ab90b9a01"}}
@@ -24,5 +26,8 @@ msg用以显示的文字
 
 新用户设置密码
 {"type":"setPassword","params":{"new_password":"123456","new_password_repeat":"123456"}}
-重置密码
+重置密码(通过密码）
 {"type":"resetPassword","params":{"password":"123456","new_password":"123456","new_password_repeat":"123456"}}
+重置密码(通过短信验证码）
+{"type":"resetPasswordByCode","params":{"mobile":"18621758237","code":"123456","new_password":"123456","new_password_repeat":"123456"}}
+

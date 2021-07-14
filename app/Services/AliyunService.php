@@ -45,7 +45,11 @@ class AliyunService
     {
         //$params = ["code"=>rand(111111,999999)];
         $client = self::createSmsClient();
-        $typeList = ["common"=>"SMS_218630389"];
+        $typeList = ["common"=>"SMS_218630389",
+            "login"=>"SMS_218630389",
+            "reg"=>"SMS_218630389",
+            "resetPassword"=>"SMS_218630389",
+            ];
         $sendSmsRequest = new SendSmsRequest([
             "signName" => "电竞人",
             "phoneNumbers" => $phone,

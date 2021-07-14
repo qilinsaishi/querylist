@@ -33,7 +33,7 @@ class UserService
             $mobileUserCache = $this->getMobileUserCache($mobile);
             if($mobileUserCache>0)
             {
-                $return = ['result'=>($action=="login"?1:0),'msg'=>"手机号码已经注册","user_id"=>$mobileUserCache];
+                $return = ['result'=>($action=="reg"?0:1),'msg'=>"手机号码已经注册","user_id"=>$mobileUserCache];
             }
             elseif($mobileUserCache==0)
             {
@@ -87,7 +87,6 @@ class UserService
                 //生成验证码
                 $code2Send = sprintf("%06d",rand(0,999999));
                 //发动短信
-                $sendSms = true;
                 $sendSms = (new AliyunService())->sms($mobile,"common",$params = ["code"=>$code2Send]);
                 if($sendSms)
                 {
@@ -397,8 +396,7 @@ class UserService
                     $passwordLog = ["user_id"=>$userInfo['user_id'],"update_ip"=>ip2long($login_ip)];
                     $log = (new PasswordLogModel())->insertPasswordLog($passwordLog);
                     $this->rebuildUserCache($userInfo['user_id']);
-                    $return = ['result'=>1,"msg"=>"密码重置成功","need_login"=>1];
-                    //清空token?
+                    $return = ['result'=>1,"msg"=>"密码设置成功","need_login"=>1];
                 }
                 else
                 {
@@ -416,8 +414,75 @@ class UserService
         }
         return $return;
     }
-    //重新设置用户密码
-    public function resetPassword($userInfo,$password,$new_password,$new_password_repeat)
+    //设置用户密码（通过短信验证码）
+    public function resetPasswordByCode($mobile,$code,$new_password,$new_password_repeat)
+    {
+        $action = "resetPassword";
+        $available = $this->checkMobileAvailable($mobile,$action);
+        if($available['result'])
+        {
+            $userInfo = $this->loadUserInfo($available['user_id']);
+            //只有密码为空的用户才可以设置密码
+            if($userInfo['mobile']!="")
+            {
+                //获取缓存中的验证码记录
+                $currentCode = $this->getSmsCode($userInfo['mobile'],$action);
+                if($currentCode["result"]==1)
+                {
+                    //验证码错误
+                    if($currentCode['code'] != trim($code))
+                    {
+                        $return = ['result'=>0,"msg"=>"验证码有误,请重新尝试"];
+                    }
+                    else
+                    {
+                        //检查密码有效性
+                        $checkPassword = $this->checkNewPassword($userInfo['password'],$new_password,$new_password_repeat);
+                        if($checkPassword['result']==1)
+                        {
+                            //更新用户
+                            $updateUser = $this->userModel->updateUser($userInfo['user_id'],['password'=>$checkPassword['password']]);
+                            if($updateUser)
+                            {
+                                //$this->deleteSmsRedisKey($userInfo['mobile'],$action);
+                                //写密码更新记录
+                                $login_ip = $_SERVER["REMOTE_ADDR"];
+                                $passwordLog = ["user_id"=>$userInfo['user_id'],"update_ip"=>ip2long($login_ip)];
+                                $log = (new PasswordLogModel())->insertPasswordLog($passwordLog);
+                                $this->rebuildUserCache($userInfo['user_id']);
+                                $return = ['result'=>1,"msg"=>"密码设置成功","need_login"=>1];
+                            }
+                            else
+                            {
+                                $return = ['result'=>0,"msg"=>"密码设置失败"];
+                            }
+                        }
+                        else
+                        {
+                            $return = $checkPassword;
+                        }
+                    }
+                }
+                else
+                {
+                    $return = ['result'=>0,"msg"=>"验证码尚未发送"];
+                }
+            }
+            else
+            {
+                $return = ['result'=>0,"msg"=>"用户尚未绑定手机号码"];
+            }
+        }
+        else
+        {
+            $return = $available;
+        }
+
+
+        return $return;
+    }
+    //重新设置用户密码（通过密码）
+    public function resetPasswordByPassword($userInfo,$password,$new_password,$new_password_repeat)
     {
         $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
         //只有密码为空的用户才可以设置密码

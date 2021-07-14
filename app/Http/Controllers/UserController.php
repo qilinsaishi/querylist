@@ -96,7 +96,10 @@ class UserController extends Controller
                 $return = $userService->setPassword($loggedUser,$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
                 break;
             case "resetPassword":
-                $return = $userService->resetPassword($loggedUser,$data['params']['password']??"",$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
+                $return = $userService->resetPasswordByPassword($loggedUser,$data['params']['password']??"",$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
+                break;
+            case "resetPasswordByCode":
+                $return = $userService->resetPasswordByCode($data['params']['mobile']??"",$data['params']['code']??"",$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
                 break;
             case "rebuild":
                 $return = $userService->rebuildUserCache($loggedUser['userInfo']['user_id']);
