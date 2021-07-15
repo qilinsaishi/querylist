@@ -30,3 +30,4 @@ Route::any('truncate','IndexController@truncate');
 Route::any('submit','IndexController@submit');
 Route::any('createMission','IndexController@createMission');
 Route::any('user','UserController@index');
+Route::any('upload','UploadController@index');

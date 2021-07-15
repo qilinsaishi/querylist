@@ -283,7 +283,7 @@ class UserService
             //生成用户信息有效时间
             $userInfo['expire_time'] = $currentTime + 7*86400;
             //摘取一部分返回用
-            $userInfo4Login = getFieldsFromArray($userInfo,"user_id,nick_name,mobile,credit");
+            $userInfo4Login = getFieldsFromArray($userInfo,"user_id,nick_name,mobile,credit,gold,user_image");
             //生成token
             $token = Jwt::getToken($userInfo);
             //写登录记录
@@ -395,6 +395,7 @@ class UserService
                     $login_ip = $_SERVER["REMOTE_ADDR"];
                     $passwordLog = ["user_id"=>$userInfo['user_id'],"update_ip"=>ip2long($login_ip)];
                     $log = (new PasswordLogModel())->insertPasswordLog($passwordLog);
+                    //重建用户缓存
                     $this->rebuildUserCache($userInfo['user_id']);
                     $return = ['result'=>1,"msg"=>"密码设置成功","need_login"=>1];
                 }
@@ -449,6 +450,7 @@ class UserService
                                 $login_ip = $_SERVER["REMOTE_ADDR"];
                                 $passwordLog = ["user_id"=>$userInfo['user_id'],"update_ip"=>ip2long($login_ip)];
                                 $log = (new PasswordLogModel())->insertPasswordLog($passwordLog);
+                                //重建用户缓存
                                 $this->rebuildUserCache($userInfo['user_id']);
                                 $return = ['result'=>1,"msg"=>"密码设置成功","need_login"=>1];
                             }
@@ -502,6 +504,7 @@ class UserService
                         $login_ip = $_SERVER["REMOTE_ADDR"];
                         $passwordLog = ["user_id"=>$userInfo['user_id'],"update_ip"=>ip2long($login_ip)];
                         $log = (new PasswordLogModel())->insertPasswordLog($passwordLog);
+                        //重建用户缓存
                         $this->rebuildUserCache($userInfo['user_id']);
                         $return = ['result'=>1,"msg"=>"密码重置成功","need_login"=>1];
                         //清空token?
@@ -593,7 +596,7 @@ class UserService
         }
         else
         {
-            //尝试重建用户缓存
+            //重建用户缓存
             $return = $this->rebuildUserCache($user_id);
         }
         return $return;
@@ -658,5 +661,31 @@ class UserService
         $this->user_redis->del($key);
         return true;
     }
-
+    //更新用户头像
+    public function uploadUserImage($userInfo,$file)
+    {
+        $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
+        //文件上传到阿里云
+        $upload = (new UploadService())->upload($file,"image");
+        if($upload['result'])
+        {
+            //更新用户
+            $updateUser = $this->userModel->updateUser($userInfo['user_id'],["user_img"=>$upload['url']]);
+            if($updateUser)
+            {
+                //重建用户缓存
+                $this->rebuildUserCache($userInfo['user_id']);
+                $return = ['result'=>1,"msg"=>"用户头像上传成功","user_img"=>$this->loadUserInfo($userInfo['user_id'])['user_img']];
+            }
+            else
+            {
+                $return = ['result'=>0,"msg"=>"用户头像上传成功"];
+            }
+        }
+        else
+        {
+            $return = $upload;
+        }
+        return $return;
+    }
 }

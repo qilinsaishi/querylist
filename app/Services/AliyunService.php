@@ -18,7 +18,15 @@ class AliyunService
         foreach($fileArr as $key => $file)
         {
             try {
-                $res = $client->uploadFile($bucket, $file/*$object*/, $file/*$local_file*/);
+                if(substr($file,0,3)=="../")
+                {
+                    $destination = trim($file,"../");
+                }
+                else
+                {
+                    $destination = $file;
+                }
+                $res = $client->uploadFile($bucket, $destination/*$object*/, $file/*$local_file*/);
                 $returnArr[$key] = $res['info']['url']??"";
             }catch(\OSS\Core\OssException $e) {
                 $returnArr[$key] = false;

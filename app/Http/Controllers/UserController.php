@@ -109,6 +109,10 @@ class UserController extends Controller
                 $return = (new ActionService())->test($data['type'],$loggedUser['userInfo']);
                 break;
             default:
+                $request = new Request();
+                if($request->hasFile('file')&&$request->file('file')->isValid()){
+                    echo "666";
+                }
                 $return = $userService->getUserFromToken();
                 break;
         }
