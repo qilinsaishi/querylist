@@ -51,4 +51,19 @@ class LoginLogModel extends Model
         $data['login_time'] = date("Y-m-d H:i:s",$currentTime);
         return $this->insertGetId($data);
     }
+    public function getUserLoginDateCountByReference($reference_user_id,$start_date,$end_date)
+    {
+        $count = $this->selectRaw("user_id,count(distinct(login_date)) as date")
+            ->where("reference_user_id",$reference_user_id);
+        if(strtotime($start_date)>0)
+        {
+            $count = $count->where("login_date",">=",$start_date);
+        }
+        if(strtotime($end_date)>0)
+        {
+            $count = $count->where("login_date","<=",$end_date);
+        }
+        $count = $count->groupBy("user_id")->get()->toArray();
+        return $count;
+    }
 }

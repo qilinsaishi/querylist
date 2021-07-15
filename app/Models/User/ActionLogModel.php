@@ -7,9 +7,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class CoinLogModel extends Model
+class ActionLogModel extends Model
 {
-    protected $table = "coin_log";
+    protected $table = "action_log";
     public $primaryKey = "log_id";
     public $timestamps = false;
     protected $connection = "user";
@@ -44,14 +44,28 @@ class CoinLogModel extends Model
     ];
     protected $keep = [
     ];
-    public function insertCoinLog($data)
+    public function insertActionLog($data)
     {
         $currentTime = date("Y-m-d H:i:s");
-        $data['coin'] = intval($data['coin']);
         if(!isset($data['add_time']))
         {
             $data['add_time'] = $currentTime;
         }
         return $this->insertGetId($data);
+    }
+    public function getActionLogCountByAction($user_id,$action_id,$start_date,$end_date)
+    {
+        $count = $this
+            ->where("user_id",$user_id)->where("action_id",$action_id);
+        if(strtotime($start_date)>0)
+        {
+            $count = $count->where("start_date",$start_date);
+        }
+        if(strtotime($end_date)>0)
+        {
+            $count = $count->where("end_date",$end_date);
+        }
+        $count = $count->count();
+        return $count;
     }
 }

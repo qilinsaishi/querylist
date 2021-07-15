@@ -614,4 +614,35 @@ use App\Services\AliyunService;
         }
         return $return;
     }
+    //根据频率计算日期范围
+    function processDateRange($date,$frequency)
+    {
+        if($frequency == "all")
+        {
+            $return = ['start_date'=>0,'end_date'=>0];
+        }
+        //当天
+        elseif($frequency == "Today")
+        {
+            $start_date = $end_date = $date;
+            $return = ['start_date'=>$start_date,'end_date'=>$end_date];
+        }
+        //自然周
+        elseif($frequency == "CurrentWeek")
+        {
+            $w = date("w",strtotime($date));
+            $start_date = date("Y-m-d",strtotime($date)-($w-1)*86400);
+            $end_date = date("Y-m-d",strtotime($start_date)+6*86400);
+            $return = ['start_date'=>$start_date,'end_date'=>$end_date];
+        }
+        //上一自然周
+        elseif($frequency == "LastWeek")
+        {
+            $w = date("w",strtotime($date));
+            $start_date = date("Y-m-d",strtotime($date)-($w-1+7)*86400);
+            $end_date = date("Y-m-d",strtotime($start_date)+6*86400);
+            $return = ['start_date'=>$start_date,'end_date'=>$end_date];
+        }
+        return $return;
+    }
 
