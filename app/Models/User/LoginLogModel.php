@@ -46,11 +46,9 @@ class LoginLogModel extends Model
     ];
     public function insertLoginLog($data)
     {
-        $currentTime = date("Y-m-d H:i:s");
-        if(!isset($data['login_time']))
-        {
-            $data['login_time'] = $currentTime;
-        }
+        $currentTime = time();
+        $data['login_date'] = date("Y-m-d",$currentTime);
+        $data['login_time'] = date("Y-m-d H:i:s",$currentTime);
         return $this->insertGetId($data);
     }
 }
