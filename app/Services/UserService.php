@@ -693,6 +693,37 @@ class UserService
         return $return;
     }
     //更新用户头像
+    public function updateUserImageByBase64($userInfo,$content)
+    {
+        $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
+        $save = saveFileByBase64($content);
+        if(!$save)
+        {
+            $return = ['result'=>0,"msg"=>"文件内容有误，请重新上传"];
+        }
+        else
+        {
+            $upload = (new AliyunService())->upload2Oss([$save]);
+            if(isset($upload['0']) && strlen($upload['0'])>10)
+            {
+                //更新用户
+                $updateUser = $this->userModel->updateUser($userInfo['user_id'],["user_img"=>$upload['0']]);
+                if($updateUser)
+                {
+                    //重建用户缓存
+                    $this->rebuildUserCache($userInfo['user_id']);
+                    $return = ['result'=>1,"msg"=>"用户头像上传成功","user_img"=>$this->loadUserInfo($userInfo['user_id'])['user_img']];
+                }
+                else
+                {
+                    $return = ['result'=>0,"msg"=>"用户头像上传失败"];
+                }
+            }
+
+        }
+        return $return;
+    }
+    //更新用户昵称
     public function updateNickName($userInfo,$nick_name)
     {
         $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);

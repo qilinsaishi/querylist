@@ -645,4 +645,36 @@ use App\Services\AliyunService;
         }
         return $return;
     }
+    //base64编码保存到本地文件
+    function saveFileByBase64($content)
+    {
+        $t = explode(";",$content);
+        $t2 = explode("/",$t['0']);
+        $t3 = explode(":",$t2['0']);
+        $fileType = $t3['1'];
+        $ext = $t2['1'];
+        $allowedUploadFile = (new \App\Services\UploadService())->allowedFileExt;
+        if(isset($allowedUploadFile[$fileType]))
+        {
+            if(in_array($ext,$allowedUploadFile[$fileType]))
+            {
+                $destinationPath = '../storage/uploads/';
+                $file = $destinationPath.md5($content).".".$ext; //$file：图片地址
+                if (strstr($content,",")){
+                    $content = explode(',',$content);
+                    $content = $content[1];
+                }
+                file_put_contents($file, base64_decode($content));
+                return $file;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
 

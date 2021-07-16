@@ -55,7 +55,6 @@ class UserController extends Controller
     }
     public function index()
     {
-
         $data=$this->payload;
         $loginConfig = $this->getLoginConfig();
         $userService = new UserService();
@@ -112,6 +111,9 @@ class UserController extends Controller
             case "actionTest":
                 $return = (new ActionService())->test($data['type'],$loggedUser['userInfo']);
                 break;
+            case "updateUserImageByBase64"://更新用户头像
+                $return = $userService->updateUserImageByBase64($loggedUser,$data['params']['content']??"");
+                break;
             default:
                 $request = new Request();
                 if($request->hasFile('file')&&$request->file('file')->isValid()){
@@ -137,7 +139,7 @@ class UserController extends Controller
     public function  getLoginConfig()
     {
         return  [
-            "setPassword","userInfo","resetPassword","rebuild","actionTest","updateNickName"
+            "setPassword","userInfo","resetPassword","rebuild","actionTest","updateNickName","updateUserImageByBase64"
         ];
     }
 }

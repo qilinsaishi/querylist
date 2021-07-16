@@ -20,7 +20,7 @@ class AliyunService
             try {
                 if(substr($file,0,3)=="../")
                 {
-                    $destination = trim($file,"../");
+                    $destination = substr($file,3);
                 }
                 else
                 {
