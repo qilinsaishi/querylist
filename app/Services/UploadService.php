@@ -47,7 +47,6 @@ class UploadService
                 $move = $file->move($destinationPath,$fileName);
                 $new_name = md5_file($destinationPath.$fileName) .".". $ext;
                 rename($destinationPath.$fileName, $destinationPath.$new_name);
-
                 $upload = (new AliyunService())->upload2Oss([$destinationPath.$new_name]);
                 if(isset($upload['0']) && strlen($upload['0'])>10)
                 {

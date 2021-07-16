@@ -374,8 +374,8 @@ class UserService
                     }
                 }
             }
-            return $return;
         }
+        return $return;
     }
     //设置用户密码
     public function setPassword($userInfo,$new_password,$new_password_repeat)
@@ -723,6 +723,52 @@ class UserService
         }
         return $return;
     }
+    //更新用户基本信息（部分）
+    public function updateUserInfo($userInfo,$params)
+    {
+        $allowedParamList = ["gender","birthday"];
+        $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
+        foreach($params as $key => $value)
+        {
+            if(!in_array($key,$allowedParamList))
+            {
+                unset($params[$key]);
+            }
+            else
+            {
+                //检查并格式化数据
+                $funcName = "check".ucfirst($key);
+                $value = $this->$funcName($value);
+                if($userInfo[$key]==$value)
+                {
+                    unset($params[$key]);
+                }
+                else
+                {
+                    $params[$key] = $value;
+                }
+            }
+        }
+        if(count($params)>0)
+        {
+            //更新用户
+            $updateUser = $this->userModel->updateUser($userInfo['user_id'],$params);
+            if($updateUser)
+            {
+                $this->rebuildUserCache($userInfo['user_id']);
+                $return = ['result'=>1,"msg"=>"用户信息更新成功"];
+            }
+            else
+            {
+                $return = ['result'=>0,"msg"=>"用户信息更新失败"];
+            }
+        }
+        else//没必要更新
+        {
+            $return = ['result'=>1,"msg"=>"用户信息更新成功"];
+        }
+        return $return;
+    }
     //更新用户昵称
     public function updateNickName($userInfo,$nick_name)
     {
@@ -779,5 +825,15 @@ class UserService
             }
         }
         return $return;
+    }
+    //检查性别的有效性
+    public function checkGender($gender)
+    {
+        return in_array($gender,[0,1,2])?$gender:0;
+    }
+    //检查日期的有效性
+    public function checkBirthday($birthday)
+    {
+        return strtotime($birthday)>0?date("Y-m-d",strtotime($birthday)):"2020-01-01";
     }
 }
