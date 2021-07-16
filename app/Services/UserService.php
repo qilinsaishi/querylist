@@ -284,7 +284,7 @@ class UserService
             //生成用户信息有效时间
             $userInfo['expire_time'] = $currentTime + 7*86400;
             //摘取一部分返回用
-            $userInfo4Login = getFieldsFromArray($userInfo,"user_id,nick_name,mobile,credit,gold,user_image");
+            $userInfo4Login = getFieldsFromArray($userInfo,"user_id,nick_name,mobile,credit,gold,user_image,nick_name_changeable");
             //生成token
             $token = Jwt::getToken($userInfo);
             //写登录记录
@@ -608,6 +608,9 @@ class UserService
         $key = "user_info_".md5(intval($user_id));
         //从数据库中获取
         $userInfo = $this->userModel->getUserById($user_id);
+        //获取改名次数
+        $nameLogCount = (new NameLogModel())->getNameLogCountByUser($user_id);
+        $userInfo['nick_name_changeable'] = $nameLogCount>=config('app.user.nickname_update_count')?0:1;
         //获取到
         if(isset($userInfo['user_id']))
         {
@@ -646,7 +649,7 @@ class UserService
             }
             else
             {
-                $return = ['reuslt'=>0];
+                $return = ['result'=>0];
             }
         }
         else
@@ -692,14 +695,9 @@ class UserService
     //更新用户头像
     public function updateNickName($userInfo,$nick_name)
     {
-        $userInfo['userInfo']['user_id'] = 8;
-
         $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
         //检查敏感词
-        //$sensitive = (new BannedWordService())->sensitive($nick_name);
-        echo "777";
-        //print_R($sensitive);
-        die();
+        $sensitive = (new BannedWordService())->sensitive($nick_name);
         if(!$sensitive['result'])
         {
             $return = ['result'=>0,"msg"=>"昵称中含有当地非法的敏感词，请修改后重试"];
@@ -714,9 +712,9 @@ class UserService
             {
                 $nameLogModel = new NameLogModel();
                 $nickNameUpdateCount = $nameLogModel->getNameLogCountByUser($userInfo['user_id']);
-                if($nickNameUpdateCount>=config('user.nickname_update_count'))
+                if($nickNameUpdateCount>=config('app.user.nickname_update_count'))
                 {
-                    $return = ['result'=>0,"msg"=>"只能更改".config('user.nickname_update_count')."次昵称"];
+                    $return = ['result'=>0,"msg"=>"只能更改".config('app.user.nickname_update_count')."次昵称"];
                 }
                 else
                 {

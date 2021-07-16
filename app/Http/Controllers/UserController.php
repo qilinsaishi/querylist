@@ -138,7 +138,7 @@ class UserController extends Controller
     public function  getLoginConfig()
     {
         return  [
-            "setPassword","userInfo","resetPassword","rebuild","actionTest"
+            "setPassword","userInfo","resetPassword","rebuild","actionTest","updateNickName"
         ];
     }
 }

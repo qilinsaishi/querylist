@@ -54,8 +54,6 @@ class NameLogModel extends Model
     //获取用户的改名记录
     public function getNameLogCountByUser($user_id)
     {
-        echo "user_id:".$user_id;
-        die();
         $count = $this->where("user_id",$user_id)->count();;
         return $count;
     }
