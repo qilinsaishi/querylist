@@ -21,6 +21,7 @@ class UserService
     {
         $this->user_redis = Redis::connection('user_redis');
         $this->userModel = new UserModel();
+        $this->creditType = [1=>["name"=>"积分","type"=>"credit"],2=>["name"=>"金币","type"=>"gold"]];
     }
     //检查手机号码是否已经注册
     public function checkMobileAvailable($mobile,$action="login")
@@ -849,17 +850,17 @@ class UserService
     //积分变更
     public function addCredit($user_id,$amount,$type,$action="",$comment="")
     {
-        $credit_type = [1=>"credit",2=>"coin"];
+        $credit_type = $this->creditType;
         $userInfo = $this->loadUserInfo($user_id);
-        if($amount<0 && ($amount+$userInfo[$credit_type[$type]])>0)
+        if($amount<0 && ($amount+$userInfo[$credit_type[$type]['type']])<0)
         {
-            $return = ['result'=>0,"msg"=>'余额不足'];
+            $return = ['result'=>0,"msg"=>$credit_type[$type]['name'].'余额不足'];
         }
         else
         {
             $creditModel = (new CreditLogModel());
             DB::beginTransaction();
-            $modifyCoin = $this->userModel->coinModify($user_id,$credit_type[$type],$amount);
+            $modifyCoin = $this->userModel->coinModify($user_id,$credit_type[$type]['type'],$amount);
             if($modifyCoin>0)
             {
                 $insertCoinLog = $creditModel->insertCreditLog(['user_id'=>$user_id,"type"=>$type,"credit"=>$amount,"action"=>$action,"content"=>json_encode(['comment'=>$comment])]);
@@ -885,7 +886,10 @@ class UserService
     }
     public function rebuildCreditSummary($user_id)
     {
+        $credit_type = $this->creditType;
+
         $totalSummary = (new CreditLogModel())->getSumAmountByUser($user_id,0,0);
+        $totalSummary = array_combine(array_column($totalSummary,"type"),array_values($totalSummary));
         $monthSummary = (new CreditLogModel())->getSumAmountByUser($user_id,date("Y-m-01"),date("Y-m-t"));
         $todaySummary = (new CreditLogModel())->getSumAmountByUser($user_id,date("Y-m-d"),date("Y-m-d"));
         print_R($totalSummary);
