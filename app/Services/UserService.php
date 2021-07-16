@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Helpers\Jwt;
 use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
+use App\Models\User\NameLogModel;
 use App\Models\User\PasswordLogModel;
 use App\Models\User\UserModel;
 use App\Models\User\LoginLogModel;
@@ -679,12 +680,74 @@ class UserService
             }
             else
             {
-                $return = ['result'=>0,"msg"=>"用户头像上传成功"];
+                $return = ['result'=>0,"msg"=>"用户头像上传失败"];
             }
         }
         else
         {
             $return = $upload;
+        }
+        return $return;
+    }
+    //更新用户头像
+    public function updateNickName($userInfo,$nick_name)
+    {
+        $userInfo['userInfo']['user_id'] = 8;
+
+        $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
+        //检查敏感词
+        //$sensitive = (new BannedWordService())->sensitive($nick_name);
+        echo "777";
+        //print_R($sensitive);
+        die();
+        if(!$sensitive['result'])
+        {
+            $return = ['result'=>0,"msg"=>"昵称中含有当地非法的敏感词，请修改后重试"];
+        }
+        else
+        {
+            if($nick_name == $userInfo['nick_name'])
+            {
+                $return = ['result'=>1,"msg"=>"新老昵称相同，无需更改"];
+            }
+            else
+            {
+                $nameLogModel = new NameLogModel();
+                $nickNameUpdateCount = $nameLogModel->getNameLogCountByUser($userInfo['user_id']);
+                if($nickNameUpdateCount>=config('user.nickname_update_count'))
+                {
+                    $return = ['result'=>0,"msg"=>"只能更改".config('user.nickname_update_count')."次昵称"];
+                }
+                else
+                {
+                    //获取当前使用这个昵称的用户
+                    $currentNickName = $this->userModel->getUserByNickName($nick_name);
+                    //无人使用或自己在用
+                    if(!isset($currentNickName['user_id']))
+                    {
+                        //更新用户
+                        $update = $this->userModel->updateUser($userInfo['user_id'],['nick_name'=>$nick_name]);
+                        if($update)
+                        {
+                            $log = $nameLogModel->insertNameLog(['user_id'=>$userInfo['user_id'],'nick_name'=>$nick_name]);
+                            $return = ['result'=>1,"msg"=>"更新成功"];
+                            $this->rebuildUserCache($userInfo['user_id']);
+                        }
+                        else
+                        {
+                            $return = ['result'=>0,"msg"=>"昵称更新失败，请稍后重试"];
+                        }
+                    }
+                    elseif($currentNickName['user_id'] == $userInfo["user_id"])
+                    {
+                        $return = ['result'=>1,"msg"=>"新老昵称相同，无需更改"];
+                    }
+                    else
+                    {
+                        $return = ['result'=>0,"msg"=>"昵称：'".$nick_name."'已经被其他用户占用"];
+                    }
+                }
+            }
         }
         return $return;
     }

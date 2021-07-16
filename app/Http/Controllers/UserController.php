@@ -55,6 +55,7 @@ class UserController extends Controller
     }
     public function index()
     {
+
         $data=$this->payload;
         $loginConfig = $this->getLoginConfig();
         $userService = new UserService();
@@ -104,6 +105,10 @@ class UserController extends Controller
                 break;
             case "rebuild":
                 $return = $userService->rebuildUserCache($loggedUser['userInfo']['user_id']);
+                break;
+            case "updateNickName":
+                die("666");
+                $return = $userService->updateNickName($loggedUser,$data['params']['nick_name']??"");
                 break;
             case "actionTest":
                 $return = (new ActionService())->test($data['type'],$loggedUser['userInfo']);

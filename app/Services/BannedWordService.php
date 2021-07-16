@@ -100,6 +100,6 @@ class BannedWordService extends Command
             $log .= "匹配到 [ {$count} ]个敏感词：[ {$sensitiveWord} ]<br/>".
                 "替换后为：[ {$stringAfter} ]";
         }
-        return $stringAfter;
+        return ['string'=>$stringAfter,'result'=>$count>0?0:1];
     }
 }

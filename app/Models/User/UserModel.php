@@ -74,6 +74,21 @@ class UserModel extends Model
         }
         return $user_info;
     }
+    public function getUserByNickName($nick_name)
+    {
+        $user_info =$this->select("*")
+            ->where("nick_name",$nick_name)
+            ->get()->first();
+        if(isset($user_info->user_id))
+        {
+            $user_info = $user_info->toArray();
+        }
+        else
+        {
+            $user_info = [];
+        }
+        return $user_info;
+    }
     public function getUserByReference($referenceCode)
     {
         $user_info =$this->select("*")

@@ -124,13 +124,13 @@ class DataService
                             {
                                 if(!is_array($v_2))
                                 {
-                                    $dataArr["data"][$k_1][$k_2] = $bannedWordService->sensitive($v_2);
+                                    $dataArr["data"][$k_1][$k_2] = $bannedWordService->sensitive($v_2)["string"];
                                 }
                             }
                         }
                         else
                         {
-                            $dataArr["data"][$k_1] = $bannedWordService->sensitive($v_1);
+                            $dataArr["data"][$k_1] = $bannedWordService->sensitive($v_1)["string"];
                         }
                     }
                 }

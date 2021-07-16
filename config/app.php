@@ -71,6 +71,7 @@ return [
         'API_KEY'=>env('BAIDU_APP_KEY'),
         'SECRET_KEY'=>env('BAIDU_SECRET_KEY'),
     ],
+    'user'=>['nickname_update_count'=>env('NICKNAME_UPDATE_COUNT')],
     /*
     |--------------------------------------------------------------------------
     | Application Environment
