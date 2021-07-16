@@ -44,14 +44,33 @@ class CreditLogModel extends Model
     ];
     protected $keep = [
     ];
+    //新增积分变更记录
     public function insertCreditLog($data)
     {
-        $currentTime = date("Y-m-d H:i:s");
+        $currentTime = time();
         $data['credit'] = intval($data['credit']);
         if(!isset($data['add_time']))
         {
-            $data['add_time'] = $currentTime;
+            $data['add_time'] = date("Y-m-d H:i:s",$currentTime);
+            $data['add_date'] = date("Y-m-d",$currentTime);
         }
         return $this->insertGetId($data);
     }
+    //获取用户在指定范围内的消费汇总
+    public function getSumAmountByUser($user_id,$start_date,$end_date)
+    {
+        $sum = $this->selectRaw("sum(credit) as credit,type")
+            ->where("user_id",$user_id);
+        if(strtotime($start_date)>0)
+        {
+            $sum = $sum->where("add_date",">=",$start_date);
+        }
+        if(strtotime($end_date)>0)
+        {
+            $sum = $sum->where("add_date","<=",$end_date);
+        }
+        $sum = $sum->groupBy(["type"])->get()->toArray();
+        return $sum;
+    }
+
 }

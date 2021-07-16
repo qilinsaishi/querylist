@@ -158,6 +158,19 @@ class UserModel extends Model
         }
         return $this->where('user_id',$user_id)->update($data);
     }
+    //金币金额处理
+    public function coinModify($user_id,$type,$amount)
+    {
+        if($amount>0)
+        {
+            $update = $this->where("user_id",$user_id)->increment($type,$amount);
+        }
+        else
+        {
+            $update = $this->where("user_id",$user_id)->where($type,">=",-1*$amount)->increment($type,$amount);
+        }
+        return $update;
+    }
 
     public function saveUser($user_id,$data)
     {
@@ -211,4 +224,5 @@ class UserModel extends Model
             return $this->getUserById($currentUser['user_id']);
         }
     }
+
 }

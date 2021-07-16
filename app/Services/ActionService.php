@@ -125,6 +125,9 @@ class ActionService
                 }
                 if($success)
                 {
+
+                    (new UserService())->addCredit($reference_user_id,$coin,1,$action['action'],$dateRange['start_date']."-".$dateRange['end_date']."推荐用户登陆数量达标，发放积分".$coin);
+                    die();
                     $return = ['result'=>1,"dateRange"=>$dateRange];
                 }
                 else

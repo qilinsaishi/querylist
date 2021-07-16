@@ -5,11 +5,13 @@ namespace App\Services;
 use App\Helpers\Jwt;
 use App\Libs\AjaxRequest;
 use App\Libs\ClientServices;
+use App\Models\User\CreditLogModel;
 use App\Models\User\NameLogModel;
 use App\Models\User\PasswordLogModel;
 use App\Models\User\UserModel;
 use App\Models\User\LoginLogModel;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use QL\QueryList;
 
@@ -843,5 +845,53 @@ class UserService
     public function checkBirthday($birthday)
     {
         return strtotime($birthday)>0?date("Y-m-d",strtotime($birthday)):"2020-01-01";
+    }
+    //积分变更
+    public function addCredit($user_id,$amount,$type,$action="",$comment="")
+    {
+        $credit_type = [1=>"credit",2=>"coin"];
+        $userInfo = $this->loadUserInfo($user_id);
+        if($amount<0 && ($amount+$userInfo[$credit_type[$type]])>0)
+        {
+            $return = ['result'=>0,"msg"=>'余额不足'];
+        }
+        else
+        {
+            $creditModel = (new CreditLogModel());
+            DB::beginTransaction();
+            $modifyCoin = $this->userModel->coinModify($user_id,$credit_type[$type],$amount);
+            if($modifyCoin>0)
+            {
+                $insertCoinLog = $creditModel->insertCreditLog(['user_id'=>$user_id,"type"=>$type,"credit"=>$amount,"action"=>$action,"content"=>json_encode(['comment'=>$comment])]);
+                if($insertCoinLog)
+                {
+                    DB::commit();
+                    $return = ['result'=>1,"msg"=>'处理成功'];
+                }
+                else
+                {
+                    DB::rollBack();
+                    $return = ['result'=>0,"msg"=>'处理失败'];
+                }
+            }
+            else
+            {
+                DB::rollBack();
+                $return = ['result'=>0,"msg"=>'处理失败'];
+            }
+        }
+        $this->rebuildCreditSummary($user_id);
+        return $return;
+    }
+    public function rebuildCreditSummary($user_id)
+    {
+        $totalSummary = (new CreditLogModel())->getSumAmountByUser($user_id,0,0);
+        $monthSummary = (new CreditLogModel())->getSumAmountByUser($user_id,date("Y-m-01"),date("Y-m-t"));
+        $todaySummary = (new CreditLogModel())->getSumAmountByUser($user_id,date("Y-m-d"),date("Y-m-d"));
+        print_R($totalSummary);
+        print_R($monthSummary);
+        print_R($todaySummary);
+
+        die();
     }
 }
