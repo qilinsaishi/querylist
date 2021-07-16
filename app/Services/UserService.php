@@ -723,6 +723,21 @@ class UserService
         }
         return $return;
     }
+    //获取用户基本信息
+    public function getUserInfo($userInfo)
+    {
+        $unsetParamList = ["password"];
+        $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
+        foreach($userInfo as $key => $value)
+        {
+            if(in_array($key,$unsetParamList))
+            {
+                unset($userInfo[$key]);
+            }
+        }
+        $return = ['result'=>1,"userInfo"=>$userInfo];
+        return $return;
+    }
     //更新用户基本信息（部分）
     public function updateUserInfo($userInfo,$params)
     {

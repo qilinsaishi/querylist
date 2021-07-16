@@ -91,7 +91,7 @@ class UserController extends Controller
             case "loginByUser":
                 break;
             case "userInfo":
-                $return = $userService->getUserFromToken();
+                $return = $userService->getUserInfo($loggedUser);
                 break;
             case "setPassword":
                 $return = $userService->setPassword($loggedUser,$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
