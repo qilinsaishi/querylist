@@ -107,7 +107,6 @@ class UserController extends Controller
                 $return = $userService->rebuildUserCache($loggedUser['userInfo']['user_id']);
                 break;
             case "updateNickName":
-                die("666");
                 $return = $userService->updateNickName($loggedUser,$data['params']['nick_name']??"");
                 break;
             case "actionTest":
