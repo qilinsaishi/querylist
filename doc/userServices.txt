@@ -41,6 +41,9 @@ msg用以显示的文字
 {"type":"updateUserInfo","params":{"birthday":"2020-01-01","gender":"1"}}
 性别0未知 1男 2女
 
+更新用户昵称
+{"type":"updateNickName","params":{"nick_name":"abc"}}
+
 上传
 接口请求为api_url/upload
 上传用户头像

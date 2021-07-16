@@ -726,15 +726,8 @@ class UserService
     //获取用户基本信息
     public function getUserInfo($userInfo)
     {
-        $unsetParamList = ["password"];
         $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
-        foreach($userInfo as $key => $value)
-        {
-            if(in_array($key,$unsetParamList))
-            {
-                unset($userInfo[$key]);
-            }
-        }
+        $userInfo['password'] = $userInfo['password']==""?0:1;
         $return = ['result'=>1,"userInfo"=>$userInfo];
         return $return;
     }
