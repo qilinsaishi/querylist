@@ -44,6 +44,58 @@ class CreditLogModel extends Model
     ];
     protected $keep = [
     ];
+    public function getCreditLog($params)
+    {
+        $fields = $params['fields']??"log_id,type,credit,add_time,content";
+        $fields = explode(",",$fields);
+        if($fields!=["*"] && !in_array("log_id",$fields))
+        {
+            $fields[] = "log_id";
+        }
+        $credit_log =$this->select($fields);
+        //用户ID
+        if(isset($params['user_id']) && intval($params['user_id'])>0)
+        {
+            $credit_log = $credit_log->where("user_id",$params['user_id']);
+        }
+        //积分类型
+        if(isset($params['type']) && intval($params['type'])>0)
+        {
+            $credit_log = $credit_log->where("type",$params['type']);
+        }
+        $pageSizge = $params['page_size']??10;
+        $page = $params['page']??1;
+        $credit_log = $credit_log
+            ->limit($pageSizge)
+            ->offset(($page-1)*$pageSizge)
+            ->orderBy("log_id","desc")
+            ->get()->toArray();
+        foreach ($credit_log as &$val)
+        {
+            if(isset($val['content']))
+            {
+                $val['content']=json_decode($val['content'],true);
+            }
+        }
+        return $credit_log;
+    }
+    public function getCreditCount($params)
+    {
+        $credit_count =$this;
+        //用户ID
+        if(isset($params['user_id']) && intval($params['user_id'])>0)
+        {
+            $credit_count = $credit_count->where("user_id",$params['user_id']);
+        }
+        //积分类型
+        if(isset($params['type']) && intval($params['type'])>0)
+        {
+            $credit_count = $credit_count->where("type",$params['type']);
+        }
+        $credit_count = $credit_count
+            ->count();
+        return $credit_count;
+    }
     //新增积分变更记录
     public function insertCreditLog($data)
     {

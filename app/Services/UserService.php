@@ -936,4 +936,14 @@ class UserService
         }
         return $return;
     }
+    //获取用户的积分记录（消费/获取）
+    public function getCreditLog($userInfo,$type=0,$page=1,$page_size=10)
+    {
+        $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
+        $creditLogModel = new CreditLogModel();
+        $creditLog = $creditLogModel->getCreditLog(["user_id"=>$userInfo['user_id'],"type"=>$type,"page"=>$page,"page_size"=>$page_size]);
+        $creditLogCount = $creditLogModel->getCreditCount(["user_id"=>$userInfo['user_id'],"type"=>$type]);
+        $return = ['result'=>1,"creditLog"=>$creditLog,"totalPage"=>ceil($creditLogCount/$page_size)];
+        return $return;
+    }
 }

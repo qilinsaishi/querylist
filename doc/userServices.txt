@@ -11,6 +11,9 @@ msg用以显示的文字
 获取登陆用户积分汇总信息
 {"type":"creditSummary"}
 
+获取登陆用户积分汇总信息
+{"type":"creditLog","params":{'type':'1'}}
+
 检查手机号是否可用
 注册时
 {"type":"checkMobileAvailable","params":{"mobile":"18621758237","action":"reg"}}
