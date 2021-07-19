@@ -59,7 +59,7 @@ class CreditLogModel extends Model
     //获取用户在指定范围内的消费汇总
     public function getSumAmountByUser($user_id,$start_date,$end_date)
     {
-        $sum = $this->selectRaw("sum(credit) as credit,type")
+        $sum = $this->selectRaw("sum(credit) as credit,count(1) as count,type")
             ->where("user_id",$user_id);
         if(strtotime($start_date)>0)
         {

@@ -120,6 +120,9 @@ class UserController extends Controller
             case "updateUserInfo"://更新用户信息
                 $return = $userService->updateUserInfo($loggedUser,$data['params']??[]);
                 break;
+            case "creditSummary"://用户积分汇总信息
+                $return = $userService->getCreditSummary($loggedUser);
+                break;
             default:
                 $request = new Request();
                 if($request->hasFile('file')&&$request->file('file')->isValid()){
@@ -145,7 +148,7 @@ class UserController extends Controller
     public function  getLoginConfig()
     {
         return  [
-            "setPassword","userInfo","resetPassword","rebuild","actionTest","updateNickName","updateUserImageByBase64","updateUserInfo"
+            "creditSummary","setPassword","userInfo","resetPassword","rebuild","actionTest","updateNickName","updateUserImageByBase64","updateUserInfo"
         ];
     }
 }

@@ -881,21 +881,59 @@ class UserService
                 $return = ['result'=>0,"msg"=>'处理失败'];
             }
         }
-        $this->rebuildCreditSummary($user_id);
+        $rebuild = $this->rebuildCreditSummary($user_id);
         return $return;
     }
+    //重建用户的积分汇总信息（当天/本月/全部）
     public function rebuildCreditSummary($user_id)
     {
         $credit_type = $this->creditType;
-
-        $totalSummary = (new CreditLogModel())->getSumAmountByUser($user_id,0,0);
-        $totalSummary = array_combine(array_column($totalSummary,"type"),array_values($totalSummary));
-        $monthSummary = (new CreditLogModel())->getSumAmountByUser($user_id,date("Y-m-01"),date("Y-m-t"));
-        $todaySummary = (new CreditLogModel())->getSumAmountByUser($user_id,date("Y-m-d"),date("Y-m-d"));
-        print_R($totalSummary);
-        print_R($monthSummary);
-        print_R($todaySummary);
-
-        die();
+        $Summary = [];
+        $Summary['total'] = (new CreditLogModel())->getSumAmountByUser($user_id,0,0);
+        $Summary['total'] = array_combine(array_column($Summary['total'],"type"),array_values($Summary['total']));
+        $Summary['month'] = (new CreditLogModel())->getSumAmountByUser($user_id,date("Y-m-01"),date("Y-m-t"));
+        $Summary['month'] = array_combine(array_column($Summary['month'],"type"),array_values($Summary['month']));
+        $Summary['today'] = (new CreditLogModel())->getSumAmountByUser($user_id,date("Y-m-d"),date("Y-m-d"));
+        $Summary['today'] = array_combine(array_column($Summary['today'],"type"),array_values($Summary['today']));
+        $dateTypeList = ["total","month","today"];
+        $params = ["credit","count"];
+        $return = [];
+        foreach($dateTypeList as $dateType)
+        {
+            foreach($credit_type as $creditType => $typeInfo)
+            {
+                $return[$dateType][$creditType]["count"] = $Summary[$dateType][$creditType]['count']??0;
+                $return[$dateType][$creditType]["credit"] = $Summary[$dateType][$creditType]['credit']??0;
+            }
+        }
+        $key = "CreditSummary_".$user_id;
+        $this->user_redis->set($key,json_encode($return));
+        $this->user_redis->expire($key,86400);
+        return $return;
+    }
+    //获取用户的积分汇总信息（当天/本月/全部）
+    public function getCreditSummary($userInfo)
+    {
+        $userInfo = $this->loadUserInfo($userInfo['userInfo']['user_id']);
+        $key = "CreditSummary_".$userInfo['user_id'];
+        $exists = $this->user_redis->exists($key);
+        if($exists)
+        {
+            $cache = $this->user_redis->get($key);
+            $cache = json_decode($cache,true);
+            if(!is_array($cache))
+            {
+                $return = ['result'=>1,"summary"=>$this->rebuildCreditSummary($userInfo['user_id'])];
+            }
+            else
+            {
+                $return = ['result'=>1,"summary"=>$cache];
+            }
+        }
+        else
+        {
+            $return = ['result'=>1,"summary"=>$this->rebuildCreditSummary($userInfo['user_id'])];
+        }
+        return $return;
     }
 }
