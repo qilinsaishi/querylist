@@ -34,6 +34,9 @@ msg用以显示的文字
 重置密码(通过短信验证码）
 {"type":"resetPasswordByCode","params":{"mobile":"18621758237","code":"123456","new_password":"123456","new_password_repeat":"123456"}}
 
+昵称更新
+{"type":"updateNickName","params":{"nick_name":"123456"}}
+
 上传
 接口请求为api_url/upload
 上传用户头像
