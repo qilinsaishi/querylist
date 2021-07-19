@@ -91,7 +91,7 @@ class UserController extends Controller
             case "loginByUser":
                 break;
             case "userInfo":
-                $return = $userService->getUserFromToken();
+                $return = $userService->getUserInfo($loggedUser);
                 break;
             case "setPassword":
                 $return = $userService->setPassword($loggedUser,$data['params']['new_password']??"",$data['params']['new_password_repeat']??"");
@@ -105,6 +105,9 @@ class UserController extends Controller
             case "rebuild":
                 $return = $userService->rebuildUserCache($loggedUser['userInfo']['user_id']);
                 break;
+            case "rebuildByUser":
+                $return = $userService->rebuildUserCache($data['params']['user_id']??"");
+                break;
             case "updateNickName":
                 $return = $userService->updateNickName($loggedUser,$data['params']['nick_name']??"");
                 break;
@@ -113,6 +116,9 @@ class UserController extends Controller
                 break;
             case "updateUserImageByBase64"://更新用户头像
                 $return = $userService->updateUserImageByBase64($loggedUser,$data['params']['content']??"");
+                break;
+            case "updateUserInfo"://更新用户信息
+                $return = $userService->updateUserInfo($loggedUser,$data['params']??[]);
                 break;
             default:
                 $request = new Request();
@@ -139,7 +145,7 @@ class UserController extends Controller
     public function  getLoginConfig()
     {
         return  [
-            "setPassword","userInfo","resetPassword","rebuild","actionTest","updateNickName","updateUserImageByBase64"
+            "setPassword","userInfo","resetPassword","rebuild","actionTest","updateNickName","updateUserImageByBase64","updateUserInfo"
         ];
     }
 }

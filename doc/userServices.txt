@@ -36,6 +36,12 @@ msg用以显示的文字
 
 昵称更新
 {"type":"updateNickName","params":{"nick_name":"123456"}}
+通过base64编码上传头像
+{"type":"updateUserImageByBase64","params":{"content":"xxx"}}
+
+更新用户部分基本信息
+{"type":"updateUserInfo","params":{"birthday":"2020-01-01","gender":"1"}}
+性别0未知 1男 2女
 
 上传
 接口请求为api_url/upload
