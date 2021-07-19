@@ -34,15 +34,14 @@ msg用以显示的文字
 重置密码(通过短信验证码）
 {"type":"resetPasswordByCode","params":{"mobile":"18621758237","code":"123456","new_password":"123456","new_password_repeat":"123456"}}
 
+昵称更新
+{"type":"updateNickName","params":{"nick_name":"123456"}}
 通过base64编码上传头像
 {"type":"updateUserImageByBase64","params":{"content":"xxx"}}
 
 更新用户部分基本信息
 {"type":"updateUserInfo","params":{"birthday":"2020-01-01","gender":"1"}}
 性别0未知 1男 2女
-
-更新用户昵称
-{"type":"updateNickName","params":{"nick_name":"abc"}}
 
 上传
 接口请求为api_url/upload
